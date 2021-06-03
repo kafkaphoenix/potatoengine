@@ -1,2 +1,2 @@
-# cautious-potato
-A c++ potato project
+# potatocraft
+A c++ potato minecraft clone
