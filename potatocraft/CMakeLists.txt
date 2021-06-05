@@ -19,4 +19,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${glfw_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
-target_link_libraries(${PROJECT_NAME} glfw glm glad)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json)
