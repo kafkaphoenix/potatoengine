@@ -5,8 +5,11 @@ project(potatocraft
     VERSION 1.0
 )
 
+set(BASEPATH "${CMAKE_SOURCE_DIR}")
+include_directories("${BASEPATH}")
+
 # Source files
-FILE(GLOB SOURCE_FILES src/** src/World/** src/Render/**)
+FILE(GLOB SOURCE_FILES src/** src/world/** src/render/** src/shader/** src/texture/**)
 
 add_subdirectory(deps)
 
@@ -15,8 +18,14 @@ add_executable(
     potatocraft
     ${SOURCE_FILES}
 )
+include_directories(deps/stb)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glfw_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json)
+add_custom_target(copy_assets
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy-assets.cmake
+)
+add_dependencies(${PROJECT_NAME} copy_assets)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json ${CMAKE_DL_LIBS})

@@ -1,5 +1,5 @@
 # potatocraft
-A c++ potato minecraft clone
+YAMC 'Yet Another Minecraft Clone'
 
 ## To compile and run
 ```
