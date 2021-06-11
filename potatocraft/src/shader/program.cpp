@@ -44,8 +44,29 @@ void Program::setFloat(const std::string &name, float value) {
 	glUniform1f(glGetUniformLocation(m_program, name.c_str()), value); 
 };
 
-Program::Program() {
+void Program::setVec2(const std::string &name, const glm::vec2 &vec) {
+    glUniform2f(glGetUniformLocation(m_program, name.c_str()), vec.x, vec.y);
+}
+
+void Program::setVec3(const std::string &name, const glm::vec3 &vec) {
+    glUniform3f(glGetUniformLocation(m_program, name.c_str()), vec.x, vec.y, vec.z);
+}
+
+void Program::setVec4(const std::string &name, const glm::vec4 &vec) {
+    glUniform4f(glGetUniformLocation(m_program, name.c_str()), vec.x, vec.y, vec.z, vec.w);
+}
+
+void Program::setMat4(const std::string &name, const glm::mat4 &mat) {
+    glUniformMatrix4fv(glGetUniformLocation(m_program, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+const std::string& Program::getName(){
+	return m_name;
+}
+
+Program::Program(const std::string &name) {
 	m_program = glCreateProgram();
+	m_name = name;
 }
 
 Program::~Program() {

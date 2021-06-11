@@ -5,8 +5,6 @@
 
 #include <GLFW/glfw3.h>
 
-#include <glm/vec3.hpp>
-
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -46,7 +44,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 static void glfw_error_callback(int error, const char *description);
 void teardown(GLFWwindow *window);
 void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
-void load_shaders(Program& program);
+void load_shader(Program& program);
 void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO);
 void load_texture(unsigned int &texture);
 
@@ -55,7 +53,7 @@ const GLuint WIDTH = 1280, HEIGHT = 720;
 
 int main() 
 {
-    fprintf(stdout, "Starting GLFW context, OpenGL 4.6\n");
+    fprintf(stdout, "Starting GLFW context, OpenGL 4.6.\n");
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
         return 1;
@@ -101,8 +99,9 @@ int main()
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(GLDebugMessageCallback, nullptr);
 
-    Program display;
-    load_shaders(display);
+    fprintf(stdout, "Loading render shader program.\n");
+    Program render("render");
+    load_shader(render);
 
     unsigned int VBO, VAO, EBO;
     chunks(VBO, VAO, EBO);
@@ -111,10 +110,10 @@ int main()
     load_texture(texture);
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    display.use(); // don't forget to activate/use the shader before setting uniforms!
-    display.setInt("texSampler", 0);
+    render.use(); // don't forget to activate/use the shader before setting uniforms!
+    render.setInt("texSampler", 0);
 
-    fprintf(stdout, "Starting ImGui context\n");
+    fprintf(stdout, "Starting ImGui context.\n");
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO(); (void)io;
@@ -153,7 +152,7 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
 
-        display.use();
+        render.use();
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -243,37 +242,38 @@ void debugger(IMGUI_STATES states, GLFWwindow* window, ImVec4 clear_color)
         }
 }
 
-void load_shaders(Program& display)
+void load_shader(Program& shader)
 {
-    fprintf(stdout, "Creating display vertex shader.\n");
+    std::string s_name = shader.getName();
+    fprintf(stdout, "Creating vertex shader.\n");
 	Shader shader_vert;
     bool load_status_vert = false;
-    shader_vert.load_file(GL_VERTEX_SHADER, "..\\assets\\shaders\\display.vert", load_status_vert);
+    shader_vert.load_file(GL_VERTEX_SHADER, "..\\assets\\shaders\\" + s_name + ".vert", load_status_vert);
 
-    fprintf(stdout, "Creating display fragment shader.\n");
+    fprintf(stdout, "Creating fragment shader.\n");
 	Shader shader_frag;
     bool load_status_frag = false;
-    shader_frag.load_file(GL_FRAGMENT_SHADER, "..\\assets\\shaders\\display.frag", load_status_frag);
+    shader_frag.load_file(GL_FRAGMENT_SHADER, "..\\assets\\shaders\\" + s_name + ".frag", load_status_frag);
 
     if (load_status_vert && load_status_frag) {
         fprintf(stdout, "Linking shader program.\n");
-        display.attach(shader_vert);
-        display.attach(shader_frag);
+        shader.attach(shader_vert);
+        shader.attach(shader_frag);
         bool link_status = false;
-        display.link(link_status);
+        shader.link(link_status);
         if (link_status) {
-            display.detach(shader_vert);
-            display.detach(shader_frag);
+            shader.detach(shader_vert);
+            shader.detach(shader_frag);
         } else {
             shader_vert.~Shader();
             shader_frag.~Shader();
-            display.~Program();
+            shader.~Program();
         }
     } else {
         fprintf(stdout, "Could not link shader program.\n");
         shader_vert.~Shader();
         shader_frag.~Shader();
-        display.~Program();
+        shader.~Program();
     }
 }
 
