@@ -60,7 +60,7 @@ void Program::setMat4(const std::string &name, const glm::mat4 &mat) {
     glUniformMatrix4fv(glGetUniformLocation(m_program, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-const std::string& Program::getName(){
+const std::string& Program::getName() const noexcept{
 	return m_name;
 }
 
