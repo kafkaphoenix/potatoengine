@@ -79,3 +79,15 @@ if(NOT json_POPULATED)
   FetchContent_Populate(json)
   add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
+
+FetchContent_Declare(
+  assimp
+  GIT_REPOSITORY https://github.com/assimp/assimp.git
+  GIT_TAG v5.0.1
+)
+
+FetchContent_GetProperties(assimp)
+if(NOT assimp_POPULATED)
+	FetchContent_Populate(assimp)
+	add_subdirectory(${assimp_SOURCE_DIR} ${assimp_BINARY_DIR})
+endif()

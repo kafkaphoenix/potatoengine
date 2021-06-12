@@ -26,6 +26,10 @@ namespace fs = std::filesystem;
 
 #include "GLDebugMessageCallback.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 using json = nlohmann::json;
 
 struct IMGUI_STATES 
