@@ -8,48 +8,54 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+enum class CameraMovement {
+    FORWARD,
+    BACKWARD,
+    LEFT,
+    RIGHT,
+	LEAN_LEFT,
+	LEAN_RIGHT,
+	ZOOM_IN,
+	ZOOM_OUT,
+	ROLL_LEFT,
+	ROLL_RIGHT,
+	JUMP,
+	CROUCH
+};
+
+const float SPEED = 2.5f;
+const float SENSITIVITY = 0.1f;
+const float ROLL_POWER = 45.0f;
+const float ZOOM = 45.0f;
+const float JUMP_POWER = 45.0f;
+const float CROUCH_POWER = 45.0f;
+const bool ZOOM_ENABLED = false;
+
 class Camera
 {
+private:
+	glm::vec3 m_position;
+    glm::quat m_orientation;
+	float m_movement_speed;
+	float m_mouse_sensivity;
+	float m_roll_power;
+	float m_zoom;
+	float m_jump_power;
+	float m_crouch_power;
+	bool m_zoom_enabled;
+
 public:
-
-	void rotate(glm::vec3 axis, float angle) {
-		glm::quat rot = glm::angleAxis(angle, axis);
-		glm::quat orientation = rot * m_orientation;
-		m_orientation = normalize(orientation);
-	}
-
-	void strafe(float amount) {
-		move({0.f, amount, 0.f});
-	}
-
-	void climb(float amount) {
-		move({0.f, 0.f, amount});
-	}
-
-	void advance(float amount) {
-		move({amount, 0.f, 0.f});
-	}
-
-	void move(glm::vec3 delta) {
-		auto tmp = glm::mat4_cast(m_orientation);
-		auto x = glm::vec3(tmp[0][2], tmp[1][2], tmp[2][2]);
-		auto y = -glm::vec3(tmp[0][0], tmp[1][0], tmp[2][0]);
-		auto z = -glm::vec3(tmp[0][1], tmp[1][1], tmp[2][1]);
-		m_position += x*delta.x + y*delta.y + z*delta.z;
-		//std::cout << glm::to_string(m_position) << std::endl;
-	}
-
-	glm::mat4 get_view() {
-		auto tmp = glm::mat4_cast(m_orientation);
-		tmp = glm::translate(tmp, m_position);
-		return tmp;
-	}
+	void rotate(glm::vec3 axis, float angle);
+	void strafe(float amount);
+	void climb(float amount);
+	void advance(float amount);
+	void move(glm::vec3 delta);
+	glm::mat4 get_view();
+	void processKeyboard(CameraMovement direction, float dt);
+	void processMouseMovement(double xoffset, double yoffset, bool constrainPitch=true);
+	void processMouseScroll(double yoffset);
 
 	Camera(const glm::vec3 &position, const glm::vec3 &orientation);
-
-private:
-    glm::quat m_orientation;
-	glm::vec3 m_position;
 };
 
 #endif // CAMERA_H_INCLUDED

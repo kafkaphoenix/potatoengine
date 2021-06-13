@@ -45,11 +45,27 @@ const bool DEBUGGER_ENABLED = false;
 bool debugger_enabled = DEBUGGER_ENABLED;
 const bool WIREFRAME_ENABLED = false;
 bool wireframe_enabled = WIREFRAME_ENABLED;
-float fts_float = 0.f;
-Camera cam(glm::vec3(0.f, 0.f, -3.5f), glm::vec3(0.f, 0.f, 0.f));
+
+
+// Window dimensions
+const GLuint WIDTH = 1280, HEIGHT = 720;
+
+// Camera
+const GLfloat render_x = 3840.f, render_y = 2160.f;
+const GLfloat FOV = 90.f;
+Camera cam({0.f, 0.f, -3.5f}, {0.f, 0.f, 0.f});
+float lastX = WIDTH / 2.0f;
+float lastY = HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// Timing
+float dt = 0.f;
+std::chrono::high_resolution_clock::time_point last_frame, current_frame, timetoprint;
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 static void glfw_error_callback(int error, const char *description);
 void teardown(GLFWwindow *window);
 void init_imgui_context(GLFWwindow *window, const char *glsl_version);
@@ -57,11 +73,6 @@ void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
 void load_shader(Program& program);
 void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO);
 void load_texture(unsigned int &texture);
-
-// Window dimensions
-const GLuint WIDTH = 1280, HEIGHT = 720;
-const GLfloat render_x = 3840.f, render_y = 2160.f;
-const GLfloat FOV = 90.f;
 
 int main() 
 {
@@ -81,15 +92,13 @@ int main()
 
     int xpos = 50;
     int ypos = 50;
-    if (monitorCount >= 2)
-    {
+    if (monitorCount >= 2) {
         xpos = 500;
         ypos = 200;
     }
 
     GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "potatocraft", nullptr, nullptr);
-    if (window == nullptr)
-    {
+    if (window == nullptr) {
         teardown(nullptr);
         return 1;
     }
@@ -97,9 +106,12 @@ int main()
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         teardown(window);
         return 1;
@@ -140,25 +152,17 @@ int main()
     init_imgui_context(window, glsl_version);
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    // Set the required callback functions
-    glfwSetKeyCallback(window, key_callback);
-
-    std::chrono::high_resolution_clock::time_point start, end, timetoprint;
-	timetoprint = end = start = std::chrono::high_resolution_clock::now();
-
-	long long cnt=0;
-	long double ft_total=0.f;
+    timetoprint = current_frame = last_frame = std::chrono::high_resolution_clock::now();
 
     while (!glfwWindowShouldClose(window))
     {
-        end = std::chrono::high_resolution_clock::now();
+        current_frame = std::chrono::high_resolution_clock::now();
 		long int ft = std::chrono::duration_cast<std::chrono::microseconds>(
-			end-start
+			current_frame-last_frame
 		).count();
 		double fts = static_cast<double>(ft)/1e6L;
-		fts_float = static_cast<float>(fts);
-		start=end;
+		dt = static_cast<float>(fts);
+		last_frame=current_frame;
 
         render.use();
 		render.setMat4("view", cam.get_view());
@@ -216,40 +220,60 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         wireframe_enabled = !(wireframe_enabled);
     
     if(key == GLFW_KEY_W && action == GLFW_PRESS)
-        cam.rotate({-1.f, 0.f, 0.f}, fts_float*3.f);
+        cam.processKeyboard(CameraMovement::FORWARD, dt);
 
     if(key == GLFW_KEY_S && action == GLFW_PRESS)
-        cam.rotate({ 1.f, 0.f, 0.f}, fts_float*3.f);
+        cam.processKeyboard(CameraMovement::BACKWARD, dt);
 
     if(key == GLFW_KEY_A && action == GLFW_PRESS)
-        cam.rotate({ 0.f,-1.f, 0.f}, fts_float*3.f);
+        cam.processKeyboard(CameraMovement::LEFT, dt);
 
     if(key == GLFW_KEY_D && action == GLFW_PRESS)
-        cam.rotate({ 0.f, 1.f, 0.f}, fts_float*3.f);
+        cam.processKeyboard(CameraMovement::RIGHT, dt);
 
     if(key == GLFW_KEY_Q && action == GLFW_PRESS)
-        cam.rotate({ 0.f, 0.f,-1.f}, fts_float*3.f);
+        cam.processKeyboard(CameraMovement::LEAN_LEFT, dt);
 
     if(key == GLFW_KEY_E && action == GLFW_PRESS)
-        cam.rotate({ 0.f, 0.f, 1.f}, fts_float*3.f);
+        cam.processKeyboard(CameraMovement::LEAN_RIGHT, dt);
 
     if(key == GLFW_KEY_UP && action == GLFW_PRESS)
-        cam.advance(fts_float*100.f);
+        cam.processKeyboard(CameraMovement::ZOOM_IN, dt);
 
     if(key == GLFW_KEY_DOWN && action == GLFW_PRESS)
-        cam.advance(fts_float*-100.f);
-
-    if(key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
-        cam.strafe(fts_float*100.f);
+        cam.processKeyboard(CameraMovement::ZOOM_OUT, dt);
 
     if(key == GLFW_KEY_LEFT && action == GLFW_PRESS)
-        cam.strafe(fts_float*-100.f);
+        cam.processKeyboard(CameraMovement::ROLL_LEFT, dt);
+
+    if(key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+        cam.processKeyboard(CameraMovement::ROLL_RIGHT, dt);
 
     if(key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-        cam.climb(fts_float*100.f);
+        cam.processKeyboard(CameraMovement::JUMP, dt);
 
     if(key == GLFW_KEY_RIGHT_CONTROL && action == GLFW_PRESS)
-        cam.climb(fts_float*-100.f);
+        cam.processKeyboard(CameraMovement::CROUCH, dt);
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    cam.processMouseMovement(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    cam.processMouseScroll(yoffset);
 }
 
 static void glfw_error_callback(int error, const char* description)

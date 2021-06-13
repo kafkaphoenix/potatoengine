@@ -2,8 +2,7 @@
 #include <vector>
 #include <src/shader/shader.hpp>
 
-bool readfile(const char* filename, std::string &contents)
-{
+bool readfile(const char* filename, std::string &contents) {
 	std::ifstream f(filename);
 	if(!f.good()) {
 		fprintf(stdout, "Failed to load file.\n");

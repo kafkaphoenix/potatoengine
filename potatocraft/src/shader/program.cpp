@@ -25,11 +25,11 @@ void Program::link(bool& link_status) {
 			std::vector<GLchar> shaderProgramInfoLog(maxLength);
 			glGetProgramInfoLog(m_program, maxLength, &maxLength, &shaderProgramInfoLog[0]);
 			fprintf(stdout, "\tError info: %s\n", shaderProgramInfoLog.data());
-			link_status = false;
 		}
-		return;
+		link_status = false;
+	} else {
+		link_status = true;
 	}
-	link_status = true;
 }
 
 void Program::use() {
@@ -38,11 +38,11 @@ void Program::use() {
 
 void Program::setInt(const std::string &name, int value) {
 	glUniform1i(glGetUniformLocation(m_program, name.c_str()), value); 
-};
+}
 
 void Program::setFloat(const std::string &name, float value) {
 	glUniform1f(glGetUniformLocation(m_program, name.c_str()), value); 
-};
+}
 
 void Program::setVec2(const std::string &name, const glm::vec2 &vec) {
     glUniform2f(glGetUniformLocation(m_program, name.c_str()), vec.x, vec.y);
@@ -60,7 +60,7 @@ void Program::setMat4(const std::string &name, const glm::mat4 &mat) {
     glUniformMatrix4fv(glGetUniformLocation(m_program, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-const std::string& Program::getName() const noexcept{
+const std::string& Program::getName() const noexcept {
 	return m_name;
 }
 
