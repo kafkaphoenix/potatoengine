@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <glad/glad.h>
 
@@ -30,6 +31,8 @@ namespace fs = std::filesystem;
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <src/camera.hpp>
+
 using json = nlohmann::json;
 
 struct IMGUI_STATES 
@@ -42,11 +45,14 @@ const bool DEBUGGER_ENABLED = false;
 bool debugger_enabled = DEBUGGER_ENABLED;
 const bool WIREFRAME_ENABLED = false;
 bool wireframe_enabled = WIREFRAME_ENABLED;
+float fts_float = 0.f;
+Camera cam(glm::vec3(0.f, 0.f, -3.5f), glm::vec3(0.f, 0.f, 0.f));
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 static void glfw_error_callback(int error, const char *description);
 void teardown(GLFWwindow *window);
+void init_imgui_context(GLFWwindow *window, const char *glsl_version);
 void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
 void load_shader(Program& program);
 void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO);
@@ -54,6 +60,8 @@ void load_texture(unsigned int &texture);
 
 // Window dimensions
 const GLuint WIDTH = 1280, HEIGHT = 720;
+const GLfloat render_x = 3840.f, render_y = 2160.f;
+const GLfloat FOV = 90.f;
 
 int main() 
 {
@@ -107,9 +115,21 @@ int main()
     Program render("render");
     load_shader(render);
 
+    glViewport(0.f, 0.f, WIDTH, HEIGHT);
+
+    render.use();
+    render.setMat4("view", cam.get_view());
+
+    glm::mat4 projection = glm::perspective(
+		glm::radians(FOV), render_x/render_y, 0.01f, 3000.0f
+	);
+    render.setMat4("projection", projection);
+
+    fprintf(stdout, "Loading chunks.\n");
     unsigned int VBO, VAO, EBO;
     chunks(VBO, VAO, EBO);
 
+    fprintf(stdout, "Loading textures.\n");
     unsigned int texture;
     load_texture(texture);
 
@@ -117,25 +137,32 @@ int main()
     render.use(); // don't forget to activate/use the shader before setting uniforms!
     render.setInt("texSampler", 0);
 
-    fprintf(stdout, "Starting ImGui context.\n");
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-    // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\UDDigiKyokashoN-B.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    // IM_ASSERT(font != nullptr);
+    init_imgui_context(window, glsl_version);
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Set the required callback functions
     glfwSetKeyCallback(window, key_callback);
 
+    std::chrono::high_resolution_clock::time_point start, end, timetoprint;
+	timetoprint = end = start = std::chrono::high_resolution_clock::now();
+
+	long long cnt=0;
+	long double ft_total=0.f;
+
     while (!glfwWindowShouldClose(window))
     {
+        end = std::chrono::high_resolution_clock::now();
+		long int ft = std::chrono::duration_cast<std::chrono::microseconds>(
+			end-start
+		).count();
+		double fts = static_cast<double>(ft)/1e6L;
+		fts_float = static_cast<float>(fts);
+		start=end;
+
+        render.use();
+		render.setMat4("view", cam.get_view());
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (debugger_enabled) debugger(imgui_debugger, window, clear_color);
@@ -147,16 +174,20 @@ int main()
         } else {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
+
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
-        glViewport(0, 0, display_w, display_h);
+        glViewport(0.f, 0.f, display_w, display_h);
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        
         if (debugger_enabled) ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
 
         render.use();
+        glm::mat4 transform = glm::mat4(1);
+        render.setMat4("model", transform);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -183,6 +214,42 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (key == GLFW_KEY_F4 && action == GLFW_PRESS)
         wireframe_enabled = !(wireframe_enabled);
+    
+    if(key == GLFW_KEY_W && action == GLFW_PRESS)
+        cam.rotate({-1.f, 0.f, 0.f}, fts_float*3.f);
+
+    if(key == GLFW_KEY_S && action == GLFW_PRESS)
+        cam.rotate({ 1.f, 0.f, 0.f}, fts_float*3.f);
+
+    if(key == GLFW_KEY_A && action == GLFW_PRESS)
+        cam.rotate({ 0.f,-1.f, 0.f}, fts_float*3.f);
+
+    if(key == GLFW_KEY_D && action == GLFW_PRESS)
+        cam.rotate({ 0.f, 1.f, 0.f}, fts_float*3.f);
+
+    if(key == GLFW_KEY_Q && action == GLFW_PRESS)
+        cam.rotate({ 0.f, 0.f,-1.f}, fts_float*3.f);
+
+    if(key == GLFW_KEY_E && action == GLFW_PRESS)
+        cam.rotate({ 0.f, 0.f, 1.f}, fts_float*3.f);
+
+    if(key == GLFW_KEY_UP && action == GLFW_PRESS)
+        cam.advance(fts_float*100.f);
+
+    if(key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+        cam.advance(fts_float*-100.f);
+
+    if(key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+        cam.strafe(fts_float*100.f);
+
+    if(key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+        cam.strafe(fts_float*-100.f);
+
+    if(key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        cam.climb(fts_float*100.f);
+
+    if(key == GLFW_KEY_RIGHT_CONTROL && action == GLFW_PRESS)
+        cam.climb(fts_float*-100.f);
 }
 
 static void glfw_error_callback(int error, const char* description)
@@ -199,6 +266,21 @@ void teardown(GLFWwindow* window)
     if (window != nullptr) 
         glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+void init_imgui_context(GLFWwindow* window, const char* glsl_version)
+{
+    fprintf(stdout, "Starting ImGui context.\n");
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+    // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\UDDigiKyokashoN-B.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+    // IM_ASSERT(font != nullptr);
 }
 
 void debugger(IMGUI_STATES states, GLFWwindow* window, ImVec4 clear_color)
