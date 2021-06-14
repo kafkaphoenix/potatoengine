@@ -46,7 +46,6 @@ bool debugger_enabled = DEBUGGER_ENABLED;
 const bool WIREFRAME_ENABLED = false;
 bool wireframe_enabled = WIREFRAME_ENABLED;
 
-
 // Window dimensions
 const GLuint WIDTH = 1280, HEIGHT = 720;
 
@@ -138,6 +137,19 @@ int main()
     render.setMat4("projection", projection);
 
     fprintf(stdout, "Loading chunks.\n");
+    // world space positions of our cubes
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
     unsigned int VBO, VAO, EBO;
     chunks(VBO, VAO, EBO);
 
@@ -164,9 +176,6 @@ int main()
 		dt = static_cast<float>(fts);
 		last_frame=current_frame;
 
-        render.use();
-		render.setMat4("view", cam.get_view());
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (debugger_enabled) debugger(imgui_debugger, window, clear_color);
@@ -190,10 +199,26 @@ int main()
         glBindTexture(GL_TEXTURE_2D, texture);
 
         render.use();
-        glm::mat4 transform = glm::mat4(1);
-        render.setMat4("model", transform);
+
+        glm::mat4 projection = glm::perspective(
+            glm::radians(cam.getFov()), render_x/render_y, 0.01f, 3000.0f
+        );
+        render.setMat4("projection", projection);
+
+		render.setMat4("view", cam.get_view());
+
+        // render boxes
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        for (unsigned int i = 0; i < 10; i++) {
+            // calculate the model matrix for each object and pass it to shader before drawing
+            glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            render.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -219,40 +244,40 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_F4 && action == GLFW_PRESS)
         wireframe_enabled = !(wireframe_enabled);
     
-    if(key == GLFW_KEY_W && action == GLFW_PRESS)
+    if(key == GLFW_KEY_UP)
         cam.processKeyboard(CameraMovement::FORWARD, dt);
 
-    if(key == GLFW_KEY_S && action == GLFW_PRESS)
+    if(key == GLFW_KEY_DOWN)
         cam.processKeyboard(CameraMovement::BACKWARD, dt);
 
-    if(key == GLFW_KEY_A && action == GLFW_PRESS)
+    if(key == GLFW_KEY_LEFT)
         cam.processKeyboard(CameraMovement::LEFT, dt);
 
-    if(key == GLFW_KEY_D && action == GLFW_PRESS)
+    if(key == GLFW_KEY_RIGHT)
         cam.processKeyboard(CameraMovement::RIGHT, dt);
 
-    if(key == GLFW_KEY_Q && action == GLFW_PRESS)
+    if(key == GLFW_KEY_Q)
         cam.processKeyboard(CameraMovement::LEAN_LEFT, dt);
 
-    if(key == GLFW_KEY_E && action == GLFW_PRESS)
+    if(key == GLFW_KEY_E)
         cam.processKeyboard(CameraMovement::LEAN_RIGHT, dt);
 
-    if(key == GLFW_KEY_UP && action == GLFW_PRESS)
+    if(key == GLFW_KEY_W)
         cam.processKeyboard(CameraMovement::ZOOM_IN, dt);
 
-    if(key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+    if(key == GLFW_KEY_S)
         cam.processKeyboard(CameraMovement::ZOOM_OUT, dt);
 
-    if(key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+    if(key == GLFW_KEY_A)
         cam.processKeyboard(CameraMovement::ROLL_LEFT, dt);
 
-    if(key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+    if(key == GLFW_KEY_D)
         cam.processKeyboard(CameraMovement::ROLL_RIGHT, dt);
 
     if(key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         cam.processKeyboard(CameraMovement::JUMP, dt);
 
-    if(key == GLFW_KEY_RIGHT_CONTROL && action == GLFW_PRESS)
+    if(key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS)
         cam.processKeyboard(CameraMovement::CROUCH, dt);
 }
 
@@ -392,15 +417,47 @@ void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO)
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
-        // positions          // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left 
-    };
-    unsigned int indices[] = {  
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -410,9 +467,6 @@ void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO)
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);

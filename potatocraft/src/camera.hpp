@@ -8,6 +8,11 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+// references
+// http://chanhaeng.blogspot.com/2018/09/quaternion-camera-implementation.html
+// https://stackoverflow.com/questions/49609654/quaternion-based-first-person-view-camera
+
+
 enum class CameraMovement {
     FORWARD,
     BACKWARD,
@@ -23,26 +28,31 @@ enum class CameraMovement {
 	CROUCH
 };
 
+// pitch (rot around x in radians), 
+// yaw (rot around y in radians), 
+// roll (rot around z in radians)
+
 const float SPEED = 2.5f;
 const float SENSITIVITY = 0.1f;
-const float ROLL_POWER = 45.0f;
-const float ZOOM = 45.0f;
-const float JUMP_POWER = 45.0f;
-const float CROUCH_POWER = 45.0f;
-const bool ZOOM_ENABLED = false;
+const float ROLL_POWER = 45.f;
+const float MAX_FOV = 90.f;
+const float MIN_FOV = 1.f;
+const float JUMP_POWER = 45.f;
+const float CROUCH_POWER = 45.f;
 
 class Camera
 {
 private:
 	glm::vec3 m_position;
     glm::quat m_orientation;
+	float m_right_angle;
+	float m_up_angle;
 	float m_movement_speed;
 	float m_mouse_sensivity;
 	float m_roll_power;
-	float m_zoom;
+	float m_fov;
 	float m_jump_power;
 	float m_crouch_power;
-	bool m_zoom_enabled;
 
 public:
 	void rotate(glm::vec3 axis, float angle);
@@ -54,6 +64,7 @@ public:
 	void processKeyboard(CameraMovement direction, float dt);
 	void processMouseMovement(double xoffset, double yoffset, bool constrainPitch=true);
 	void processMouseScroll(double yoffset);
+	const float &getFov() const noexcept;
 
 	Camera(const glm::vec3 &position, const glm::vec3 &orientation);
 };
