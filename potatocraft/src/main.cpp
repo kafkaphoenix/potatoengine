@@ -104,7 +104,6 @@ int main()
     glfwSetWindowMonitor(window, nullptr, xpos, ypos, WIDTH, HEIGHT, 0);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
@@ -243,36 +242,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (key == GLFW_KEY_F4 && action == GLFW_PRESS)
         wireframe_enabled = !(wireframe_enabled);
-    
-    if(key == GLFW_KEY_UP)
+
+    if(key == GLFW_KEY_W && action == GLFW_PRESS)
         cam.processKeyboard(CameraMovement::FORWARD, dt);
 
-    if(key == GLFW_KEY_DOWN)
+    if(key == GLFW_KEY_S && action == GLFW_PRESS)
         cam.processKeyboard(CameraMovement::BACKWARD, dt);
 
-    if(key == GLFW_KEY_LEFT)
+    if(key == GLFW_KEY_A && action == GLFW_PRESS)
         cam.processKeyboard(CameraMovement::LEFT, dt);
 
-    if(key == GLFW_KEY_RIGHT)
+    if(key == GLFW_KEY_D && action == GLFW_PRESS)
         cam.processKeyboard(CameraMovement::RIGHT, dt);
-
-    if(key == GLFW_KEY_Q)
-        cam.processKeyboard(CameraMovement::LEAN_LEFT, dt);
-
-    if(key == GLFW_KEY_E)
-        cam.processKeyboard(CameraMovement::LEAN_RIGHT, dt);
-
-    if(key == GLFW_KEY_W)
-        cam.processKeyboard(CameraMovement::ZOOM_IN, dt);
-
-    if(key == GLFW_KEY_S)
-        cam.processKeyboard(CameraMovement::ZOOM_OUT, dt);
-
-    if(key == GLFW_KEY_A)
-        cam.processKeyboard(CameraMovement::ROLL_LEFT, dt);
-
-    if(key == GLFW_KEY_D)
-        cam.processKeyboard(CameraMovement::ROLL_RIGHT, dt);
 
     if(key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         cam.processKeyboard(CameraMovement::JUMP, dt);
