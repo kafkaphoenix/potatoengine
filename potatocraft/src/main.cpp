@@ -25,13 +25,13 @@ namespace fs = std::filesystem;
 
 #include <src/shader/program.hpp>
 
-#include "GLDebugMessageCallback.h"
+#include <src/debug/GLDebugMessageCallback.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <src/camera.hpp>
+#include <src/camera/camera.hpp>
 
 using json = nlohmann::json;
 
@@ -73,8 +73,7 @@ void load_shader(Program& program);
 void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO);
 void load_texture(unsigned int &texture);
 
-int main() 
-{
+int main() {
     fprintf(stdout, "Starting GLFW context, OpenGL 4.6.\n");
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -83,6 +82,7 @@ int main()
     const char* glsl_version = "#version 460";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
@@ -96,7 +96,7 @@ int main()
         ypos = 200;
     }
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "potatocraft", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "potatocraft!", nullptr, nullptr);
     if (window == nullptr) {
         teardown(nullptr);
         return 1;
@@ -120,12 +120,11 @@ int main()
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(GLDebugMessageCallback, nullptr);
+    glViewport(0.f, 0.f, WIDTH, HEIGHT);
 
     fprintf(stdout, "Loading render shader program.\n");
     Program render("render");
     load_shader(render);
-
-    glViewport(0.f, 0.f, WIDTH, HEIGHT);
 
     render.use();
     render.setMat4("view", cam.get_view());
@@ -164,14 +163,16 @@ int main()
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     timetoprint = current_frame = last_frame = std::chrono::high_resolution_clock::now();
+    long int ft;
+    double fts;
+    int display_w, display_h;
 
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         current_frame = std::chrono::high_resolution_clock::now();
-		long int ft = std::chrono::duration_cast<std::chrono::microseconds>(
+		ft = std::chrono::duration_cast<std::chrono::microseconds>(
 			current_frame-last_frame
 		).count();
-		double fts = static_cast<double>(ft)/1e6L;
+		fts = static_cast<double>(ft)/1e6L;
 		dt = static_cast<float>(fts);
 		last_frame=current_frame;
 
@@ -187,7 +188,6 @@ int main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
-        int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0.f, 0.f, display_w, display_h);
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
@@ -215,7 +215,6 @@ int main()
             float angle = 20.0f * i;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             render.setMat4("model", model);
-
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
@@ -226,14 +225,12 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-
     teardown(window);
 
     return 0;
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 
@@ -282,13 +279,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     cam.processMouseScroll(yoffset);
 }
 
-static void glfw_error_callback(int error, const char* description)
-{
+static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-void teardown(GLFWwindow* window)
-{
+void teardown(GLFWwindow* window) {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -298,8 +293,7 @@ void teardown(GLFWwindow* window)
     glfwTerminate();
 }
 
-void init_imgui_context(GLFWwindow* window, const char* glsl_version)
-{
+void init_imgui_context(GLFWwindow* window, const char* glsl_version) {
     fprintf(stdout, "Starting ImGui context.\n");
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -313,8 +307,7 @@ void init_imgui_context(GLFWwindow* window, const char* glsl_version)
     // IM_ASSERT(font != nullptr);
 }
 
-void debugger(IMGUI_STATES states, GLFWwindow* window, ImVec4 clear_color)
-{
+void debugger(IMGUI_STATES states, GLFWwindow* window, ImVec4 clear_color) {
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -358,8 +351,7 @@ void debugger(IMGUI_STATES states, GLFWwindow* window, ImVec4 clear_color)
         }
 }
 
-void load_shader(Program& shader)
-{
+void load_shader(Program& shader) {
     std::string s_name = shader.getName();
     fprintf(stdout, "Creating vertex shader.\n");
 	Shader shader_vert;
@@ -393,8 +385,7 @@ void load_shader(Program& shader)
     }
 }
 
-void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO)
-{
+void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO) {
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
@@ -457,8 +448,7 @@ void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO)
     glEnableVertexAttribArray(1);
 }
 
-void load_texture(unsigned int& texture)
-{
+void load_texture(unsigned int& texture) {
     // load and create a texture 
     // -------------------------
     glGenTextures(1, &texture);

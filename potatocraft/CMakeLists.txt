@@ -9,7 +9,7 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}")
 include_directories("${BASEPATH}")
 
 # Source files
-FILE(GLOB SOURCE_FILES src/** src/world/** src/render/** src/shader/**)
+FILE(GLOB SOURCE_FILES src/** src/world/** src/debug/** src/shader/** src/input/** src/camera/**)
 
 add_subdirectory(deps)
 

@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <src/camera.hpp>
+#include <src/camera/camera.hpp>
 
 glm::mat4 Camera::get_view() {
     glm::quat reverseOrient = glm::conjugate(m_orientation);
