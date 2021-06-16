@@ -1,11 +1,30 @@
 #include <unordered_map>
 
+enum keyStates
+{
+    RELEASED,
+    PRESSED
+};
+
+enum toggleableKeys
+{
+    ESCAPE = 256,
+    F3 = 292,
+    F4 = 293
+};
+
 class Keyboard
 {
 private:
-    std::unordered_map<int, bool> keyStates; // bool ? pressed : released
+    int m_lastKey;
+    std::unordered_map<int, int> m_keyStates;
 
 public:
     bool isKeyPressed(int key);
-    bool registerKey(int key);
+    void updateKeyState(int key, int action);
+    bool isKeyReleased(int key);
+    bool isToggleableKey(int key);
+    bool isKeyToggled(int key);
+
+    Keyboard();
 };

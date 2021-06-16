@@ -32,6 +32,7 @@ namespace fs = std::filesystem;
 #include <assimp/postprocess.h>
 
 #include <src/camera/camera.hpp>
+#include <src/input/keyboard.hpp>
 
 using json = nlohmann::json;
 
@@ -45,6 +46,7 @@ const bool DEBUGGER_ENABLED = false;
 bool debugger_enabled = DEBUGGER_ENABLED;
 const bool WIREFRAME_ENABLED = false;
 bool wireframe_enabled = WIREFRAME_ENABLED;
+bool options_menu = false;
 
 // Window dimensions
 const GLuint WIDTH = 1280, HEIGHT = 720;
@@ -61,6 +63,9 @@ bool firstMouse = true;
 float dt = 0.f;
 std::chrono::high_resolution_clock::time_point last_frame, current_frame, timetoprint;
 
+// Input
+Keyboard keyStates;
+
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
@@ -72,6 +77,7 @@ void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
 void load_shader(Program& program);
 void chunks(unsigned int& VBO, unsigned int& VAO, unsigned int& EBO);
 void load_texture(unsigned int &texture);
+void movement(GLFWwindow *window);
 
 int main() {
     fprintf(stdout, "Starting GLFW context, OpenGL 4.6.\n");
@@ -178,6 +184,11 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // States
+        debugger_enabled = keyStates.isKeyToggled(GLFW_KEY_F3);
+        wireframe_enabled = keyStates.isKeyToggled(GLFW_KEY_F4);
+        options_menu = keyStates.isKeyToggled(GLFW_KEY_ESCAPE);
+
         if (debugger_enabled) debugger(imgui_debugger, window, clear_color);
 
         // Rendering
@@ -187,6 +198,8 @@ int main() {
         } else {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
+
+        movement(window);
 
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0.f, 0.f, display_w, display_h);
@@ -230,33 +243,19 @@ int main() {
     return 0;
 }
 
+void movement(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_W)) cam.processKeyboard(CameraMovement::FORWARD, dt);
+    if (glfwGetKey(window, GLFW_KEY_S)) cam.processKeyboard(CameraMovement::BACKWARD, dt);
+    if (glfwGetKey(window, GLFW_KEY_A)) cam.processKeyboard(CameraMovement::LEFT, dt);
+    if (glfwGetKey(window, GLFW_KEY_D)) cam.processKeyboard(CameraMovement::RIGHT, dt);
+    if (glfwGetKey(window, GLFW_KEY_SPACE)) cam.processKeyboard(CameraMovement::JUMP, dt);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) cam.processKeyboard(CameraMovement::CROUCH, dt);
+}
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    keyStates.updateKeyState(key, action);
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) // TODO add menu
         glfwSetWindowShouldClose(window, GL_TRUE);
-
-    if (key == GLFW_KEY_F3 && action == GLFW_PRESS)
-        debugger_enabled = !(debugger_enabled);
-
-    if (key == GLFW_KEY_F4 && action == GLFW_PRESS)
-        wireframe_enabled = !(wireframe_enabled);
-
-    if(key == GLFW_KEY_W && action == GLFW_PRESS)
-        cam.processKeyboard(CameraMovement::FORWARD, dt);
-
-    if(key == GLFW_KEY_S && action == GLFW_PRESS)
-        cam.processKeyboard(CameraMovement::BACKWARD, dt);
-
-    if(key == GLFW_KEY_A && action == GLFW_PRESS)
-        cam.processKeyboard(CameraMovement::LEFT, dt);
-
-    if(key == GLFW_KEY_D && action == GLFW_PRESS)
-        cam.processKeyboard(CameraMovement::RIGHT, dt);
-
-    if(key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-        cam.processKeyboard(CameraMovement::JUMP, dt);
-
-    if(key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS)
-        cam.processKeyboard(CameraMovement::CROUCH, dt);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
