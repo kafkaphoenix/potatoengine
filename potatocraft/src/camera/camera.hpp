@@ -8,11 +8,6 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-// references
-// http://chanhaeng.blogspot.com/2018/09/quaternion-camera-implementation.html
-// https://stackoverflow.com/questions/49609654/quaternion-based-first-person-view-camera
-
-
 enum class CameraMovement {
     FORWARD,
     BACKWARD,
