@@ -29,6 +29,15 @@ const float JUMP_POWER = 45.f;
 
 class Camera
 {
+public:
+	Camera(const glm::vec3 &position, const glm::vec3 &orientation);
+
+	glm::mat4 get_view();
+	void processKeyboard(CameraMovement direction, float dt);
+	void processMouseMovement(double xoffset, double yoffset, bool constrainPitch=true);
+	void processMouseScroll(double yoffset);
+	const float &getFov() const noexcept;
+
 private:
 	glm::vec3 m_position;
     glm::quat m_orientation;
@@ -38,15 +47,6 @@ private:
 	float m_mouse_sensivity;
 	float m_fov;
 	float m_jump_power;
-
-public:
-	glm::mat4 get_view();
-	void processKeyboard(CameraMovement direction, float dt);
-	void processMouseMovement(double xoffset, double yoffset, bool constrainPitch=true);
-	void processMouseScroll(double yoffset);
-	const float &getFov() const noexcept;
-
-	Camera(const glm::vec3 &position, const glm::vec3 &orientation);
 };
 
 #endif // CAMERA_H_INCLUDED

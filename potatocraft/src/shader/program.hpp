@@ -8,11 +8,10 @@
 
 class Program
 {
-private:
-    GLuint m_program;
-    std::string m_name;
-
 public:
+    Program(const std::string &name);
+    ~Program();
+
     operator GLuint();
     void attach(Shader &shader);
     void detach(Shader &shader);
@@ -26,8 +25,9 @@ public:
     void setMat4(const std::string &name, const glm::mat4 &mat);
     const std::string &getName() const noexcept;
 
-    Program(const std::string &name);
-    ~Program();
+private:
+    GLuint m_program;
+    std::string m_name;
 };
 
 #endif PROGRAM_H

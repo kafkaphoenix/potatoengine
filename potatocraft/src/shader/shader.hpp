@@ -6,11 +6,11 @@
 
 class Shader
 {
-private:
-    GLuint m_shader;
-	GLuint m_type;
-
 public:
+    Shader();
+    Shader(GLenum type);
+    ~Shader();
+
     operator GLuint();
     operator bool();
     void create(GLenum type);
@@ -20,9 +20,9 @@ public:
 	void set_file(const std::string& src);
 	void compile();
 
-    Shader();
-    Shader(GLenum type);
-    ~Shader();
+private:
+    GLuint m_shader;
+	GLuint m_type;
 };
 
 #endif SHADER_HEADER
