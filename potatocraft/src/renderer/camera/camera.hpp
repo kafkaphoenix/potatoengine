@@ -1,24 +1,10 @@
-#ifndef CAMERA_H_INCLUDED
-#define CAMERA_H_INCLUDED
+#pragma once
 
-#include <iostream>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/string_cast.hpp>
 
-enum class CameraMovement {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT,
-	JUMP,
-	CROUCH
-};
-
-// pitch (rot around x in radians), 
-// yaw (rot around y in radians), 
+// pitch (rot around x in radians)
+// yaw (rot around y in radians)
 // roll (rot around z in radians)
 
 const float SPEED = 10.f;
@@ -32,6 +18,14 @@ class Camera
 public:
 	Camera(const glm::vec3 &position, const glm::vec3 &orientation);
 
+	enum class CameraMovement {
+		FORWARD,
+		BACKWARD,
+		LEFT,
+		RIGHT,
+		JUMP,
+		CROUCH
+	};
 	glm::mat4 get_view();
 	void processKeyboard(CameraMovement direction, float dt);
 	void processMouseMovement(double xoffset, double yoffset, bool constrainPitch=true);
@@ -48,5 +42,3 @@ private:
 	float m_fov;
 	float m_jump_power;
 };
-
-#endif // CAMERA_H_INCLUDED

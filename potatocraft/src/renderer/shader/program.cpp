@@ -1,5 +1,6 @@
 #include <vector>
-#include <src/shader/program.hpp>
+
+#include <src/renderer/shader/program.hpp>
 
 Program::operator GLuint() {
 	return m_program;

@@ -9,7 +9,7 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}")
 include_directories("${BASEPATH}")
 
 # Source files
-FILE(GLOB SOURCE_FILES src/** src/world/** src/debug/** src/shader/** src/input/** src/camera/**)
+FILE(GLOB SOURCE_FILES src/** src/world/** src/debug/** src/renderer/** src/renderer/shader/** src/renderer/camera/** src/core/** src/core/input/**  src/scene/**)
 
 add_subdirectory(deps)
 
@@ -21,6 +21,7 @@ add_executable(
 include_directories(deps/stb)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glfw_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${assimp_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${spdlog_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
@@ -29,4 +30,4 @@ add_custom_target(copy_assets
 )
 add_dependencies(${PROJECT_NAME} copy_assets)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog ${CMAKE_DL_LIBS})

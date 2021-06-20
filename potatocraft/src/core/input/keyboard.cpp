@@ -1,4 +1,4 @@
-#include <src/input/keyboard.hpp>
+#include <src/core/input/keyboard.hpp>
 
 bool Keyboard::isKeyPressed(int key) {
     return m_keyStates[key] == 1;

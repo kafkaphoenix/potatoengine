@@ -1,7 +1,7 @@
-#ifndef SHADER_H
-#define SHADER_H
+#pragma once
 
 #include <glad/glad.h>
+
 #include <string>
 
 class Shader
@@ -24,5 +24,3 @@ private:
     GLuint m_shader;
 	GLuint m_type;
 };
-
-#endif SHADER_HEADER

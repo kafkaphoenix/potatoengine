@@ -1,6 +1,6 @@
-#include <fstream>
 #include <vector>
-#include <src/shader/shader.hpp>
+
+#include <src/renderer/shader/shader.hpp>
 
 bool readfile(const char* filename, std::string &contents) {
 	std::ifstream f(filename);

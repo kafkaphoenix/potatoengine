@@ -1,10 +1,8 @@
-#ifndef PROGRAM_H
-#define PROGRAM_H
+#pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <src/shader/shader.hpp>
+
+#include <src/renderer/shader/shader.hpp>
 
 class Program
 {
@@ -29,5 +27,3 @@ private:
     GLuint m_program;
     std::string m_name;
 };
-
-#endif PROGRAM_H
