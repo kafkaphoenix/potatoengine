@@ -483,5 +483,4 @@ namespace potatocraft {
         stbi_image_free(data);
     }
 
-
 }
