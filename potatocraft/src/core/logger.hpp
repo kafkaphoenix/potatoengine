@@ -19,7 +19,7 @@ namespace potatocraft {
 
     private:
 		static Ref<spdlog::logger> s_coreLogger;
-    }
+    };
 
 }
 

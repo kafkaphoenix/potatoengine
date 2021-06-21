@@ -2,31 +2,35 @@
 
 #include <unordered_map>
 
-enum keyStates
-{
-    RELEASED,
-    PRESSED
-};
+namespace potatocraft {
+    
+    class Keyboard
+    {
+    public:
+        Keyboard();
 
-enum toggleableKeys
-{
-    ESCAPE = 256,
-    F3 = 292,
-    F4 = 293
-};
+        enum keyStates
+        {
+            RELEASED,
+            PRESSED
+        };
 
-class Keyboard
-{
-private:
-    int m_lastKey;
-    std::unordered_map<int, int> m_keyStates;
+        enum toggleableKeys
+        {
+            ESCAPE = 256,
+            F3 = 292,
+            F4 = 293
+        };
 
-public:
-    bool isKeyPressed(int key);
-    void updateKeyState(int key, int action);
-    bool isKeyReleased(int key);
-    bool isToggleableKey(int key);
-    bool isKeyToggled(int key);
+        bool isKeyPressed(int key);
+        void updateKeyState(int key, int action);
+        bool isKeyReleased(int key);
+        bool isToggleableKey(int key);
+        bool isKeyToggled(int key);
 
-    Keyboard();
-};
+    private:
+        int m_lastKey;
+        std::unordered_map<int, int> m_keyStates;
+    };
+
+}

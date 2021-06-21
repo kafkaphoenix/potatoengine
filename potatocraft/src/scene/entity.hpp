@@ -2,9 +2,13 @@
 
 #include <src/scene/scene.hpp>
 
-class Entity
-{
-public:
+namespace potatocraft {
 
-private:
-};
+    class Entity
+    {
+    public:
+
+    private:
+    };
+
+}
