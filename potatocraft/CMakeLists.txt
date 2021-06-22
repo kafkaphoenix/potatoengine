@@ -9,7 +9,8 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}")
 include_directories("${BASEPATH}")
 
 # Source files
-FILE(GLOB SOURCE_FILES src/** src/world/** src/debug/** src/renderer/** src/renderer/shader/** src/renderer/camera/** src/core/** src/core/input/**  src/scene/**)
+FILE(GLOB SOURCE_FILES src/** src/world/** src/debug/** src/renderer/** src/renderer/shader/**
+    src/renderer/camera/** src/core/** src/core/input/**  src/scene/** src/events/**)
 
 add_subdirectory(deps)
 
@@ -24,6 +25,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${assimp_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${spdlog_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_precompile_headers(${PROJECT_NAME} PRIVATE src/pcpch.hpp)
 
 add_custom_target(copy_assets
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy-assets.cmake

@@ -1,8 +1,5 @@
-#include <src/core/application.hpp>
-
-#include <iostream>
-#include <string>
-#include <vector>
+#include "src/pcpch.hpp"
+#include "src/core/application.hpp"
 
 #include <glad/glad.h>
 
@@ -23,16 +20,16 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-#include <src/renderer/shader/program.hpp>
+#include "src/renderer/shader/program.hpp"
 
-#include <src/debug/GLDebugMessageCallback.h>
+#include "src/debug/GLDebugMessageCallback.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <src/renderer/camera/camera.hpp>
-#include <src/core/input/keyboard.hpp>
+#include "src/renderer/camera/camera.hpp"
+#include "src/core/input/keyboard.hpp"
 
 using json = nlohmann::json;
 

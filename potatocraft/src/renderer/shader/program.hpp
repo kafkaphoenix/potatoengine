@@ -1,6 +1,6 @@
 #pragma once
 
-#include <src/renderer/shader/shader.hpp>
+#include "src/renderer/shader/shader.hpp"
 
 #include <glm/glm.hpp>
 

@@ -1,6 +1,5 @@
-#include <src/renderer/camera/camera.hpp>
-
-#include <algorithm>
+#include "src/pcpch.hpp"
+#include "src/renderer/camera/camera.hpp"
 
 namespace potatocraft {
 

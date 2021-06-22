@@ -1,7 +1,5 @@
-#include <src/renderer/shader/shader.hpp>
-
-#include <vector>
-#include <fstream>
+#include "src/pcpch.hpp"
+#include "src/renderer/shader/shader.hpp"
 
 namespace potatocraft {
 

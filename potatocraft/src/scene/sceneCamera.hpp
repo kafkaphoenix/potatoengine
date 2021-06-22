@@ -1,6 +1,6 @@
 #pragma once
 
-#include <src/renderer/camera/camera.hpp>
+#include "src/renderer/camera/camera.hpp"
 
 namespace potatocraft {
 
