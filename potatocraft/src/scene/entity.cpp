@@ -1,5 +1,6 @@
 #include "src/scene/entity.hpp"
 
-namespace potatocraft {
+namespace potatocraft
+{
 
 }

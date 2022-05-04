@@ -3,11 +3,12 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
-namespace potatocraft {
+namespace potatocraft
+{
 
-    Ref<spdlog::logger> Log::s_coreLogger;
+	Ref<spdlog::logger> Log::s_coreLogger;
 
-    void Log::init()
+	void Log::init()
 	{
 		std::vector<spdlog::sink_ptr> logSinks;
 		logSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());

@@ -1,7 +1,8 @@
 #pragma once
 
-namespace potatocraft {
-    
+namespace potatocraft
+{
+
     class Keyboard
     {
     public:

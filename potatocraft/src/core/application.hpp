@@ -2,19 +2,21 @@
 
 #include "src/core/base.hpp"
 
-int main(int argc, char** argv);
+int main(int argc, char **argv);
 
-namespace potatocraft {
+namespace potatocraft
+{
 
     struct ApplicationCommandLineArgs
-	{
-		int count = 0;
-		char** args = nullptr;
+    {
+        int count = 0;
+        char **args = nullptr;
 
-		const char* operator[](int index) const {
-			return args[index];
-		}
-	};
+        const char *operator[](int index) const
+        {
+            return args[index];
+        }
+    };
 
     class Application
     {
@@ -29,6 +31,6 @@ namespace potatocraft {
 
         ApplicationCommandLineArgs m_commandLineArgs;
 
-        friend int ::main(int argc, char** argv);
+        friend int ::main(int argc, char **argv);
     };
 }

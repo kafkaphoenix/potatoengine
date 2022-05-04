@@ -13,14 +13,16 @@ const float MAX_FOV = 90.f;
 const float MIN_FOV = 1.f;
 const float JUMP_POWER = 45.f;
 
-namespace potatocraft {
+namespace potatocraft
+{
 
 	class Camera
 	{
 	public:
 		Camera(const glm::vec3 &position, const glm::vec3 &orientation);
 
-		enum class CameraMovement {
+		enum class CameraMovement
+		{
 			FORWARD,
 			BACKWARD,
 			LEFT,
@@ -31,7 +33,7 @@ namespace potatocraft {
 
 		glm::mat4 get_view();
 		void processKeyboard(CameraMovement direction, float dt);
-		void processMouseMovement(double xoffset, double yoffset, bool constrainPitch=true);
+		void processMouseMovement(double xoffset, double yoffset, bool constrainPitch = true);
 		void processMouseScroll(double yoffset);
 		const float &getFov() const noexcept;
 
