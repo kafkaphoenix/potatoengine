@@ -3,7 +3,8 @@
 #include "src/events/event.hpp"
 #include "src/core/mouseCodes.hpp"
 
-namespace potatocraft {
+namespace potatocraft
+{
 
 	class MouseMovedEvent : public Event
 	{

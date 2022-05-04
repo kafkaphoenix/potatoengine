@@ -2,7 +2,8 @@
 
 #include <glad/glad.h>
 
-namespace potatocraft {
+namespace potatocraft
+{
 
     class Shader
     {
@@ -14,10 +15,10 @@ namespace potatocraft {
         operator GLuint();
         operator bool();
         void create(GLenum type);
-        void load_file(GLenum type, const std::string& file, bool& status);
-        bool load_src(GLenum type, const std::string& src);
-        void set_src(const std::string& src);
-        void set_file(const std::string& src);
+        void load_file(GLenum type, const std::string &file, bool &status);
+        bool load_src(GLenum type, const std::string &src);
+        void set_src(const std::string &src);
+        void set_file(const std::string &src);
         void compile();
 
     private:

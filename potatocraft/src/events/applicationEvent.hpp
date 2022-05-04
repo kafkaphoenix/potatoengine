@@ -2,7 +2,8 @@
 
 #include "src/events/event.hpp"
 
-namespace potatocraft {
+namespace potatocraft
+{
 
 	class WindowResizeEvent : public Event
 	{

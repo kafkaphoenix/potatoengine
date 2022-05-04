@@ -5,7 +5,7 @@ find_package(OpenGL REQUIRED)
 FetchContent_Declare(
 	glad
 	GIT_REPOSITORY https://github.com/Dav1dde/glad.git
-	GIT_TAG		   HEAD
+	GIT_TAG		   v0.1.36
 )
 
 FetchContent_GetProperties(glad)
@@ -26,7 +26,7 @@ if(NOT glfw_POPULATED)
 	set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 	set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 	set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+  set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 	add_subdirectory(${glfw_SOURCE_DIR} ${glfw_BINARY_DIR})
 endif()
 
@@ -89,6 +89,12 @@ FetchContent_Declare(
 FetchContent_GetProperties(assimp)
 if(NOT assimp_POPULATED)
 	FetchContent_Populate(assimp)
+  set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_BUILD_ASSIMP_VIEW OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
 	add_subdirectory(${assimp_SOURCE_DIR} ${assimp_BINARY_DIR})
 endif()
 
@@ -100,5 +106,8 @@ FetchContent_Declare(
 FetchContent_GetProperties(spdlog)
 if(NOT spdlog_POPULATED)
   FetchContent_Populate(spdlog)
+  set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+  set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(SPDLOG_INSTALL OFF CACHE BOOL "" FORCE)
   add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()

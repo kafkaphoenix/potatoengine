@@ -1,13 +1,12 @@
 #pragma once
 
-namespace potatocraft {
+namespace potatocraft
+{
 
     class Player
     {
     public:
-
     private:
-
     };
 
 }

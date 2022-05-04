@@ -1,9 +1,11 @@
 #include "src/pcpch.hpp"
 #include "src/renderer/camera/camera.hpp"
 
-namespace potatocraft {
+namespace potatocraft
+{
 
-    glm::mat4 Camera::get_view() {
+    glm::mat4 Camera::get_view()
+    {
         glm::quat reverseOrient = glm::conjugate(m_orientation);
         glm::mat4 rot = glm::mat4_cast(reverseOrient);
         rot[3][0] = -(rot[0][0] * m_position.x + rot[1][0] * m_position.y + rot[2][0] * m_position.z);
@@ -14,11 +16,12 @@ namespace potatocraft {
         return rot;
     }
 
-    void Camera::processKeyboard(CameraMovement direction, float dt) {
+    void Camera::processKeyboard(CameraMovement direction, float dt)
+    {
         float velocity = dt * m_movement_speed;
 
         glm::quat qF = m_orientation * glm::quat(0, 0, 0, -1) * glm::conjugate(m_orientation);
-        glm::vec3 front = { qF.x, qF.y, qF.z };
+        glm::vec3 front = {qF.x, qF.y, qF.z};
         glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0, 1, 0)));
         glm::vec3 up = {0, dt * m_jump_power, 0};
 
@@ -41,7 +44,8 @@ namespace potatocraft {
             m_position -= up;
     }
 
-    void Camera::processMouseMovement(double xoffset, double yoffset, bool constrainPitch) {
+    void Camera::processMouseMovement(double xoffset, double yoffset, bool constrainPitch)
+    {
         xoffset *= m_mouse_sensivity;
         yoffset *= m_mouse_sensivity;
         m_right_angle += xoffset;
@@ -58,7 +62,8 @@ namespace potatocraft {
         m_orientation = rotY * rotX;
     }
 
-    void Camera::processMouseScroll(double yoffset) {
+    void Camera::processMouseScroll(double yoffset)
+    {
         if (m_fov >= MIN_FOV && m_fov <= MAX_FOV)
             m_fov -= yoffset;
 
@@ -69,14 +74,15 @@ namespace potatocraft {
             m_fov = MAX_FOV;
     }
 
-    const float& Camera::getFov() const noexcept {
+    const float &Camera::getFov() const noexcept
+    {
         return m_fov;
     }
 
-    Camera::Camera(const glm::vec3& position, const glm::vec3& orientation):
-        m_position(position), m_orientation(orientation), m_movement_speed(SPEED),
-        m_mouse_sensivity(SENSITIVITY), m_fov(MAX_FOV), m_jump_power(JUMP_POWER),
-        m_right_angle(0.f), m_up_angle(0.f) {
+    Camera::Camera(const glm::vec3 &position, const glm::vec3 &orientation) : m_position(position), m_orientation(orientation), m_movement_speed(SPEED),
+                                                                              m_mouse_sensivity(SENSITIVITY), m_fov(MAX_FOV), m_jump_power(JUMP_POWER),
+                                                                              m_right_angle(0.f), m_up_angle(0.f)
+    {
     }
 
 }

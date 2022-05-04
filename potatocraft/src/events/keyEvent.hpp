@@ -3,10 +3,11 @@
 #include "src/events/event.hpp"
 #include "src/core/keyCodes.hpp"
 
-namespace potatocraft {
+namespace potatocraft
+{
 
-    class KeyEvent : public Event
-    {
+	class KeyEvent : public Event
+	{
 	public:
 		KeyCode getKeyCode() const { return m_keyCode; }
 

@@ -4,7 +4,8 @@
 
 #include <glm/glm.hpp>
 
-namespace potatocraft {
+namespace potatocraft
+{
 
     class Program
     {
