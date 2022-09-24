@@ -1,17 +1,17 @@
-# Project definition
 cmake_minimum_required(VERSION 3.20)
-project(potatocraft
+project(
+    potatocraft
+    VERSION 0.0.1
+    DESCRIPTION "YAMC - Yet Another Minecraft Clone"
+    HOMEPAGE_URL "https://github.com/kafkaphoenix/potatocraft"
     LANGUAGES CXX
-    VERSION 1.0
 )
 
 set(BASEPATH "${CMAKE_SOURCE_DIR}")
 include_directories("${BASEPATH}")
 
 # Source files
-FILE(GLOB SOURCE_FILES src/** src/world/** src/debug/** src/renderer/** src/renderer/shader/**
-    src/renderer/camera/** src/core/** src/core/input/**  src/scene/** src/events/**)
-
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS *.cpp *.hpp)
 add_subdirectory(deps)
 
 # Executable definition and properties
@@ -26,6 +26,14 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${spdlog_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 target_precompile_headers(${PROJECT_NAME} PRIVATE src/pcpch.hpp)
+
+if (MSVC)
+    # target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+    target_compile_options(${PROJECT_NAME} PRIVATE /experimental:module)
+elseif(GCC OR CLANG)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
+    target_compile_options(${PROJECT_NAME} PRIVATE -fmodules-ts)
+endif()
 
 add_custom_target(copy_assets
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy-assets.cmake

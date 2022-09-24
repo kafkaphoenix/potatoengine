@@ -3,7 +3,7 @@ CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
 build/
-potatocraft/logs/*
+logs/
 *.json
 
 # Prerequisites
