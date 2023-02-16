@@ -31,6 +31,8 @@ namespace fs = std::filesystem;
 #include "src/renderer/camera/camera.hpp"
 #include "src/core/input/keyboard.hpp"
 
+#include "src/core/window.hpp"
+
 using json = nlohmann::json;
 
 namespace potatocraft
@@ -82,9 +84,10 @@ namespace potatocraft
     Application::Application(const std::string &name, ApplicationCommandLineArgs args)
         : m_commandLineArgs(args)
     {
-        // window creation
-        // event attach
-        // renderer init
+        m_window = Window::create(WindowProps(name));
+		// espera m_window->setEventCallback(BIND_EVENT_FN(Application::onEvent));
+
+		//Renderer::Init();
         // imgui init
         // s_instance = *this;
     }
@@ -96,11 +99,11 @@ namespace potatocraft
 
     void Application::run()
     {
-        fprintf(stdout, "Starting GLFW context, OpenGL 4.6.\n");
+        /* + fprintf(stdout, "Starting GLFW context, OpenGL 4.6.\n");
         glfwSetErrorCallback(glfw_error_callback);
-        glfwInit();
+        glfwInit();*/
 
-        const char *glsl_version = "#version 460";
+        const char *glsl_version = "#version 460";/* +
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_DEPTH_BITS, 24);
@@ -118,31 +121,31 @@ namespace potatocraft
             ypos = 200;
         }
 
-        GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "potatocraft!", nullptr, nullptr);
-        if (window == nullptr)
+        GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "potatocraft!", nullptr, nullptr);*/
+        /* + if (window == nullptr)
         {
             teardown(nullptr);
-        }
-        glfwSetWindowMonitor(window, nullptr, xpos, ypos, WIDTH, HEIGHT, 0);
-        glfwMakeContextCurrent(window);
-        glfwSwapInterval(1); // Enable vsync
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }*/
+        // + glfwSetWindowMonitor(window, nullptr, xpos, ypos, WIDTH, HEIGHT, 0);
+        // + glfwMakeContextCurrent(window);
+        // + glfwSwapInterval(1); // Enable vsync
+        /* +glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glfwSetKeyCallback(window, key_callback);
         glfwSetCursorPosCallback(window, mouse_callback);
-        glfwSetScrollCallback(window, scroll_callback);
+        glfwSetScrollCallback(window, scroll_callback);*/
 
-        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        /* + if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
             fprintf(stderr, "Failed to initialize OpenGL loader!\n");
             teardown(window);
-        }
+        }*/
 
         // glEnable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
+        /*+ glEnable(GL_DEPTH_TEST);
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(GLDebugMessageCallback, nullptr);
-        glViewport(0.f, 0.f, WIDTH, HEIGHT);
+        glViewport(0.f, 0.f, WIDTH, HEIGHT);*/
 
         fprintf(stdout, "Loading render shader program.\n");
         Program render("render");
@@ -179,7 +182,7 @@ namespace potatocraft
         render.use(); // don't forget to activate/use the shader before setting uniforms!
         render.setInt("texSampler", 0);
 
-        init_imgui_context(window, glsl_version);
+        // espera init_imgui_context(m_window, glsl_version);
 
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
         timetoprint = current_frame = last_frame = std::chrono::high_resolution_clock::now();
@@ -187,7 +190,7 @@ namespace potatocraft
         double fts;
         int display_w, display_h;
 
-        while (!glfwWindowShouldClose(window))
+        while (true/* espera !glfwWindowShouldClose(m_window)*/)
         {
             current_frame = std::chrono::high_resolution_clock::now();
             ft = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -205,7 +208,7 @@ namespace potatocraft
             options_menu = keyMap.isKeyToggled(GLFW_KEY_ESCAPE);
 
             if (debugger_enabled)
-                debugger(imgui_debugger, window, clear_color);
+                // espera debugger(imgui_debugger, m_window, clear_color);
 
             // Rendering
             if (debugger_enabled)
@@ -219,10 +222,10 @@ namespace potatocraft
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
 
-            movement(window);
+            // espera movement((GLFWwindow*)GetWindow().getNativeWindow());
 
-            glfwGetFramebufferSize(window, &display_w, &display_h);
-            glViewport(0.f, 0.f, display_w, display_h);
+            // espera glfwGetFramebufferSize(m_window, &display_w, &display_h);
+            // espera glViewport(0.f, 0.f, display_w, display_h);
             glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
 
             if (debugger_enabled)
@@ -252,14 +255,13 @@ namespace potatocraft
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
 
-            glfwSwapBuffers(window);
-            glfwPollEvents();
+            m_window->onUpdate();
         }
 
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &EBO);
-        teardown(window);
+        // espera teardown(window);
     }
 
     void movement(GLFWwindow *window)
@@ -278,7 +280,7 @@ namespace potatocraft
             cam.processKeyboard(Camera::CameraMovement::CROUCH, dt);
     }
 
-    void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
+    /* + void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
     {
         keyMap.updateKeyState(key, action);
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) // TODO add menu
@@ -306,12 +308,12 @@ namespace potatocraft
     void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
     {
         cam.processMouseScroll(yoffset);
-    }
+    }*/
 
-    static void glfw_error_callback(int error, const char *description)
+    /* + static void glfw_error_callback(int error, const char *description)
     {
         fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-    }
+    }*/
 
     void teardown(GLFWwindow *window)
     {
@@ -319,9 +321,9 @@ namespace potatocraft
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
 
-        if (window != nullptr)
+        /* + if (window != nullptr)
             glfwDestroyWindow(window);
-        glfwTerminate();
+        glfwTerminate();*/
     }
 
     void init_imgui_context(GLFWwindow *window, const char *glsl_version)
