@@ -22,16 +22,18 @@ namespace fs = std::filesystem;
 
 #include "src/renderer/shader/program.hpp"
 
-#include "src/debug/GLDebugMessageCallback.h"
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 #include "src/renderer/camera/camera.hpp"
-#include "src/core/input/keyboard.hpp"
 
 #include "src/core/window.hpp"
+#include "src/core/timestep.hpp"
+
+#include "src/utils/utils.hpp"
+#include "src/core/input.hpp"
+#include "src/core/keyCodes.hpp"
 
 using json = nlohmann::json;
 
@@ -44,12 +46,6 @@ namespace potatocraft
         bool show_another_window = false;
     } imgui_debugger;
 
-    const bool DEBUGGER_ENABLED = false;
-    bool debugger_enabled = DEBUGGER_ENABLED;
-    const bool WIREFRAME_ENABLED = false;
-    bool wireframe_enabled = WIREFRAME_ENABLED;
-    bool options_menu = false;
-
     // Window dimensions
     const GLuint WIDTH = 1280, HEIGHT = 720;
 
@@ -61,31 +57,24 @@ namespace potatocraft
     float lastY = HEIGHT / 2.0f;
     bool firstMouse = true;
 
-    // Timing
-    float dt = 0.f;
-    std::chrono::high_resolution_clock::time_point last_frame, current_frame, timetoprint;
-
-    // Input
-    Keyboard keyMap;
-
     // Function prototypes
-    void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
-    void mouse_callback(GLFWwindow *window, double xpos, double ypos);
-    void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
-    static void glfw_error_callback(int error, const char *description);
     void teardown(GLFWwindow *window);
     void init_imgui_context(GLFWwindow *window, const char *glsl_version);
     void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
     void load_shader(Program &program);
     void chunks(unsigned int &VBO, unsigned int &VAO, unsigned int &EBO);
     void load_texture(unsigned int &texture);
-    void movement(GLFWwindow *window);
+    //void movement(GLFWwindow *window);
+
+    Application* Application::s_instance = nullptr;
 
     Application::Application(const std::string &name, ApplicationCommandLineArgs args)
         : m_commandLineArgs(args)
     {
+        s_instance = this;
+    
         m_window = Window::create(WindowProps(name));
-		// espera m_window->setEventCallback(BIND_EVENT_FN(Application::onEvent));
+		m_window->setEventCallback(BIND_EVENT_FN(Application::onEvent));
 
 		//Renderer::Init();
         // imgui init
@@ -97,55 +86,73 @@ namespace potatocraft
         // renderer shutdown
     }
 
+	void Application::close()
+	{
+		m_running = false;
+	}
+
+    bool Application::onKeyPressed(KeyPressedEvent& e) {
+        switch (e.getKeyCode())
+		{
+        case Key::Escape:
+		    m_running = false;
+            break;
+        case Key::F3:
+		    m_debugging = !m_debugging;
+            break;
+        case Key::F4:
+		    m_wireframe = !m_wireframe;
+            break;
+        }
+        return true;
+    }
+
+    bool Application::onWindowClose(WindowCloseEvent& e)
+	{
+		m_running = false;
+		return true;
+	}
+
+	bool Application::onWindowResize(WindowResizeEvent& e)
+	{
+		if (e.getWidth() == 0 || e.getHeight() == 0)
+		{
+			m_minimized = true;
+		} else {
+            m_minimized = false;
+		    //Renderer::onWindowResize(e.GetWidth(), e.GetHeight());
+        }
+		return false;
+	}
+
+    void Application::onEvent(Event& e) {
+		EventDispatcher dispatcher(e);
+		dispatcher.dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::onWindowClose));
+		dispatcher.dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::onWindowResize));
+		dispatcher.dispatch<KeyPressedEvent>(BIND_EVENT_FN(Application::onKeyPressed));
+
+		for (auto it = m_stateStack.rbegin(); it != m_stateStack.rend(); ++it)
+		{
+			if (e.m_handled) 
+				break;
+			(*it)->onEvent(e);
+		}
+    }
+
+    void Application::pushState(State* state) {
+        m_stateStack.pushState(state);
+		state->onAttach();
+    }
+
+    void Application::pushOverlay(State* state) {
+        m_stateStack.pushOverlay(state);
+		state->onAttach();
+    }
+
     void Application::run()
     {
-        /* + fprintf(stdout, "Starting GLFW context, OpenGL 4.6.\n");
-        glfwSetErrorCallback(glfw_error_callback);
-        glfwInit();*/
-
-        const char *glsl_version = "#version 460";/* +
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-        glfwWindowHint(GLFW_DEPTH_BITS, 24);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-
-        int monitorCount;
-        GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-
-        int xpos = 50;
-        int ypos = 50;
-        if (monitorCount >= 2)
-        {
-            xpos = 500;
-            ypos = 200;
-        }
-
-        GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "potatocraft!", nullptr, nullptr);*/
-        /* + if (window == nullptr)
-        {
-            teardown(nullptr);
-        }*/
-        // + glfwSetWindowMonitor(window, nullptr, xpos, ypos, WIDTH, HEIGHT, 0);
-        // + glfwMakeContextCurrent(window);
-        // + glfwSwapInterval(1); // Enable vsync
-        /* +glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        glfwSetKeyCallback(window, key_callback);
-        glfwSetCursorPosCallback(window, mouse_callback);
-        glfwSetScrollCallback(window, scroll_callback);*/
-
-        /* + if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-        {
-            fprintf(stderr, "Failed to initialize OpenGL loader!\n");
-            teardown(window);
-        }*/
-
-        // glEnable(GL_CULL_FACE);
-        /*+ glEnable(GL_DEPTH_TEST);
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(GLDebugMessageCallback, nullptr);
-        glViewport(0.f, 0.f, WIDTH, HEIGHT);*/
+        const char *glsl_version = "#version 460";
+        auto* window = static_cast<GLFWwindow*>(getWindow().getNativeWindow());
 
         fprintf(stdout, "Loading render shader program.\n");
         Program render("render");
@@ -182,38 +189,33 @@ namespace potatocraft
         render.use(); // don't forget to activate/use the shader before setting uniforms!
         render.setInt("texSampler", 0);
 
-        // espera init_imgui_context(m_window, glsl_version);
+        init_imgui_context(window, glsl_version);
 
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-        timetoprint = current_frame = last_frame = std::chrono::high_resolution_clock::now();
-        long int ft;
-        double fts;
         int display_w, display_h;
 
-        while (true/* espera !glfwWindowShouldClose(m_window)*/)
+        while (m_running)
         {
-            current_frame = std::chrono::high_resolution_clock::now();
-            ft = std::chrono::duration_cast<std::chrono::microseconds>(
-                     current_frame - last_frame)
-                     .count();
-            fts = static_cast<double>(ft) / 1e6L;
-            dt = static_cast<float>(fts);
-            last_frame = current_frame;
+			Timestep dt = Time::currentTime() - m_lastFrame;
+			m_lastFrame = Time::currentTime();
+            m_accumulator += dt;
+
+            while(m_accumulator > 1.0/61.0) {
+                for (auto state : m_stateStack)
+					state->onUpdate(dt);
+                m_accumulator -= 1.0/59.0;
+                if(m_accumulator < 0) m_accumulator = 0;
+            }
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            // States
-            debugger_enabled = keyMap.isKeyToggled(GLFW_KEY_F3);
-            wireframe_enabled = keyMap.isKeyToggled(GLFW_KEY_F4);
-            options_menu = keyMap.isKeyToggled(GLFW_KEY_ESCAPE);
-
-            if (debugger_enabled)
-                // espera debugger(imgui_debugger, m_window, clear_color);
+            if (m_debugging)
+                debugger(imgui_debugger, window, clear_color);
 
             // Rendering
-            if (debugger_enabled)
+            if (m_debugging)
                 ImGui::Render();
-            if (wireframe_enabled)
+            if (m_wireframe)
             {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             }
@@ -222,13 +224,13 @@ namespace potatocraft
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
 
-            // espera movement((GLFWwindow*)GetWindow().getNativeWindow());
+            // espera - process input - movement((GLFWwindow*)GetWindow().getNativeWindow());
 
-            // espera glfwGetFramebufferSize(m_window, &display_w, &display_h);
+            //  esto va a renderer on resize espera glfwGetFramebufferSize(m_window, &display_w, &display_h);
             // espera glViewport(0.f, 0.f, display_w, display_h);
             glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
 
-            if (debugger_enabled)
+            if (m_debugging)
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             glActiveTexture(GL_TEXTURE0);
@@ -264,7 +266,7 @@ namespace potatocraft
         // espera teardown(window);
     }
 
-    void movement(GLFWwindow *window)
+    /* espera void movement(GLFWwindow *window)
     {
         if (glfwGetKey(window, GLFW_KEY_W))
             cam.processKeyboard(Camera::CameraMovement::FORWARD, dt);
@@ -278,52 +280,14 @@ namespace potatocraft
             cam.processKeyboard(Camera::CameraMovement::JUMP, dt);
         if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
             cam.processKeyboard(Camera::CameraMovement::CROUCH, dt);
-    }
-
-    /* + void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
-    {
-        keyMap.updateKeyState(key, action);
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) // TODO add menu
-            glfwSetWindowShouldClose(window, GL_TRUE);
-    }
-
-    void mouse_callback(GLFWwindow *window, double xpos, double ypos)
-    {
-        if (firstMouse)
-        {
-            lastX = xpos;
-            lastY = ypos;
-            firstMouse = false;
-        }
-
-        float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-        lastX = xpos;
-        lastY = ypos;
-
-        cam.processMouseMovement(xoffset, yoffset);
-    }
-
-    void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
-    {
-        cam.processMouseScroll(yoffset);
-    }*/
-
-    /* + static void glfw_error_callback(int error, const char *description)
-    {
-        fprintf(stderr, "GLFW Error %d: %s\n", error, description);
     }*/
 
     void teardown(GLFWwindow *window)
     {
+        // espera esto se va al renderer para imgui
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
-
-        /* + if (window != nullptr)
-            glfwDestroyWindow(window);
-        glfwTerminate();*/
     }
 
     void init_imgui_context(GLFWwindow *window, const char *glsl_version)

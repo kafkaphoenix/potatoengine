@@ -10,16 +10,17 @@ include_directories("${BASEPATH}")
 
 # Source files
 FILE(GLOB SOURCE_FILES src/** src/world/** src/debug/** src/renderer/** src/renderer/shader/**
-    src/renderer/camera/** src/core/** src/core/input/**  src/scene/** src/events/**)
+    src/renderer/camera/** src/core/** src/scene/** src/event/** src/imGui/**
+    src/utils/**)
 
-add_subdirectory(deps)
+add_subdirectory(vendor)
 
 # Executable definition and properties
 add_executable(
     potatocraft
     ${SOURCE_FILES}
 )
-include_directories(deps/stb)
+include_directories(vendor/stb)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glfw_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 target_include_directories(${PROJECT_NAME} PRIVATE ${assimp_SOURCE_DIR}/include)

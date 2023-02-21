@@ -2,6 +2,10 @@
 
 #include "src/core/base.hpp"
 #include "src/core/window.hpp"
+#include "src/event/applicationEvent.hpp"
+#include "src/event/keyEvent.hpp"
+#include "src/core/stateStack.hpp"
+#include "src/core/state.hpp"
 
 int main(int argc, char **argv);
 
@@ -25,24 +29,36 @@ namespace potatocraft
         Application(const std::string &name, ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
         ~Application();
 
-        //void onEvent(Event& e);
-		//void pushLayer(Layer* layer);
-		//void pushOverlay(Layer* layer);
+        void onEvent(Event& e);
+		void pushState(State* state);
+		void pushOverlay(State* state);
 
-        Window& GetWindow() { return *m_window; }
+        Window& getWindow() { return *m_window; }
+
+        void close();
+
+        static Application& get() { return *s_instance; }
 
         ApplicationCommandLineArgs getCommandLineArgs() const { return m_commandLineArgs; }
 
     private:
-        Scope<Window> m_window;
-
         void run();
+        bool onWindowClose(WindowCloseEvent& e);
+		bool onWindowResize(WindowResizeEvent& e);
+		bool onKeyPressed(KeyPressedEvent& e);
 
-        //bool OnWindowClose(WindowCloseEvent& e);
-		//bool OnWindowResize(WindowResizeEvent& e);
+        Scope<Window> m_window;
+        bool m_running = true;
+		bool m_minimized = false;
+		bool m_debugging = false;
+		bool m_wireframe = false;
+        float m_lastFrame = 0.f;
+        float m_accumulator = 0.f;
+        StateStack m_stateStack;
 
         ApplicationCommandLineArgs m_commandLineArgs;
 
+        static Application* s_instance;
         friend int ::main(int argc, char **argv);
     };
 }

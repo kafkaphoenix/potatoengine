@@ -6,7 +6,7 @@ namespace potatocraft
 {
 	using MouseCode = uint16_t;
 
-	namespace mouse
+	namespace Mouse
 	{
 
 		enum : MouseCode

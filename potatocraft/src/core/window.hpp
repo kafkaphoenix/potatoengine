@@ -1,7 +1,8 @@
 #pragma once
 
 #include "src/core/base.hpp"
-#include "src/events/event.hpp"
+#include "src/event/event.hpp"
+#include "src/renderer/openGLContext.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -9,19 +10,6 @@
 #include <sstream>
 
 namespace potatocraft {
-
-    class OpenGLContext
-    {
-    public:
-		OpenGLContext(GLFWwindow* window);
-
-		void init();
-		void swapBuffers();
-
-		static Scope<OpenGLContext> create(void* window);
-	private:
-		GLFWwindow* m_window;
-    };
 
 	struct WindowProps
 	{
@@ -50,7 +38,7 @@ namespace potatocraft {
 		void onUpdate();
 
 		// Window attributes
-		void setEventCallback(const EventCallbackFn& callback) { m_data; }
+		void setEventCallback(const EventCallbackFn& callback) { m_data.eventCallback = callback; }
 		void setVSync(bool enabled);
 		bool isVSync() const { return m_data.vSync; }
 
@@ -70,7 +58,7 @@ namespace potatocraft {
 			unsigned int width, height;
 			bool vSync;
 
-			EventCallbackFn EventCallback;
+			EventCallbackFn eventCallback;
         };
 
         WindowData m_data;

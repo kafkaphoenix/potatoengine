@@ -1,42 +1,12 @@
 #include "src/pcpch.hpp"
 #include "src/core/window.hpp"
-#include "src/debug/GLDebugMessageCallback.h" // espera REMOVE
+
+#include "src/event/applicationEvent.hpp"
+#include "src/event/mouseEvent.hpp"
+#include "src/event/keyEvent.hpp"
 
 namespace potatocraft
 {
-    OpenGLContext::OpenGLContext(GLFWwindow* window): m_window(window) {
-        if (window == nullptr)
-        {
-            fprintf(stderr, "Window is null!\n");
-        }
-    }
-
-    void OpenGLContext::init() {
-        glfwMakeContextCurrent(m_window);
-
-        int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        if (status == 0)
-        {
-            fprintf(stderr, "Failed to initialize OpenGL loader!\n");
-            // espera m_window->shutdown();
-        }
-
-        // glEnable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(GLDebugMessageCallback, nullptr);
-    }
-
-    void OpenGLContext::swapBuffers() {
-        glfwSwapBuffers(m_window);
-    }
-
-    Scope<OpenGLContext> OpenGLContext::create(void* window)
-	{
-	    return createScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
-	}
-
     static uint8_t s_GLFWWindowCount = 0;
 
     static void glfw_error_callback(int error, const char *description)
@@ -98,12 +68,96 @@ namespace potatocraft
 		glfwSetWindowUserPointer(m_window, &m_data);
 		setVSync(true);
 
-        // Set GLFW callbacks
-        /* espera glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        glfwSetKeyCallback(m_window, key_callback);
-        glfwSetCursorPosCallback(m_window, mouse_callback);
-        glfwSetScrollCallback(m_window, scroll_callback);*/
+        glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
+        {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+            data.width = width;
+            data.height = height;
 
+            WindowResizeEvent event(width, height);
+            data.eventCallback(event);
+        });
+
+        glfwSetWindowCloseCallback(m_window, [](GLFWwindow* window)
+        {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+            WindowCloseEvent event;
+            data.eventCallback(event);
+        });
+
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+        glfwSetKeyCallback(m_window, [](GLFWwindow *window, int key, int scancode, int action, int mode)
+        {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+            switch (action)
+            {
+                case GLFW_PRESS:
+                {
+                    KeyPressedEvent event(key, 0);
+                    data.eventCallback(event);
+                    break;
+                }
+                case GLFW_RELEASE:
+                {
+                    KeyReleasedEvent event(key);
+                    data.eventCallback(event);
+                    break;
+                }
+                case GLFW_REPEAT:
+                {
+                    KeyPressedEvent event(key, true);
+                    data.eventCallback(event);
+                    break;
+                }
+            }
+        });
+
+        glfwSetCharCallback(m_window, [](GLFWwindow *window, unsigned int keycode)
+        {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+            KeyTypedEvent event(keycode);
+            data.eventCallback(event);
+        });
+
+        glfwSetMouseButtonCallback(m_window, [](GLFWwindow *window, int button, int action, int mode)
+        {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+            switch (action)
+            {
+                case GLFW_PRESS:
+                {
+                    MouseButtonPressedEvent event(button);
+                    data.eventCallback(event);
+                    break;
+                }
+                case GLFW_RELEASE:
+                {
+                    MouseButtonReleasedEvent event(button);
+                    data.eventCallback(event);
+                    break;
+                }
+            }
+        });
+
+        glfwSetCursorPosCallback(m_window, [](GLFWwindow *window, double xPos, double yPos)
+        {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+            MouseMovedEvent event((float)xPos, (float)yPos);
+            data.eventCallback(event);
+        });
+
+        glfwSetScrollCallback(m_window, [](GLFWwindow *window, double xOffset, double yOffset)
+        {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+            MouseScrolledEvent event((float)xOffset, (float)yOffset);
+            data.eventCallback(event);
+        });
     }
 
     void Window::shutdown() {
@@ -130,38 +184,6 @@ namespace potatocraft
  
         m_data.vSync = enabled;        
     }
-    
-    /* espera void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
-    {
-        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window)
-
-        keyMap.updateKeyState(key, action);
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) // TODO add menu
-            glfwSetWindowShouldClose(window, GL_TRUE);
-    }
-
-    void mouse_callback(GLFWwindow *window, double xpos, double ypos)
-    {
-        if (firstMouse)
-        {
-            lastX = xpos;
-            lastY = ypos;
-            firstMouse = false;
-        }
-
-        float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-        lastX = xpos;
-        lastY = ypos;
-
-        cam.processMouseMovement(xoffset, yoffset);
-    }
-
-    void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
-    {
-        cam.processMouseScroll(yoffset);
-    }*/
 
 	Scope<Window> Window::create(const WindowProps& props)
 	{

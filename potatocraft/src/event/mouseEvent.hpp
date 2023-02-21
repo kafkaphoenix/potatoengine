@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/events/event.hpp"
+#include "src/event/event.hpp"
 #include "src/core/mouseCodes.hpp"
 
 namespace potatocraft

@@ -6,7 +6,7 @@ namespace potatocraft
 {
 	using KeyCode = uint16_t;
 
-	namespace key
+	namespace Key
 	{
 
 		enum : KeyCode
