@@ -1,14 +1,14 @@
-#include "src/core/log.hpp"
+#include "src/core/log.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
-namespace potatocraft
+namespace potatoengine
 {
 
 	Ref<spdlog::logger> Log::s_coreLogger;
 
-	void Log::init()
+	void Log::Init()
 	{
 		std::vector<spdlog::sink_ptr> logSinks;
 		logSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());

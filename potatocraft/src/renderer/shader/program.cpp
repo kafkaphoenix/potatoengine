@@ -1,10 +1,18 @@
-#include "src/pcpch.hpp"
-#include "src/renderer/shader/program.hpp"
+#include "src/pch.h"
+#include "src/renderer/shader/program.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
-namespace potatocraft
+namespace potatoengine
 {
+	Program::Program(const std::string &name) : m_program(glCreateProgram()), m_name(name)
+	{
+	}
+
+	Program::~Program()
+	{
+		glDeleteProgram(m_program);
+	}
 
 	Program::operator GLuint()
 	{
@@ -24,16 +32,17 @@ namespace potatocraft
 	void Program::link(bool &link_status)
 	{
 		glLinkProgram(m_program);
-		GLint status = GL_FALSE;
+		int status = GL_FALSE;
 		glGetProgramiv(m_program, GL_LINK_STATUS, &status);
-		if (status != GL_TRUE)
+		if (status not_eq GL_TRUE)
 		{
-			GLint maxLength = 0;
+			int maxLength = 0;
 			glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &maxLength);
-			fprintf(stdout, "Shader linking failed.\n");
+			fprintf(stdout, "Shader linking failed\n");
 			if (maxLength > 0)
 			{
-				std::vector<GLchar> shaderProgramInfoLog(maxLength);
+				std::vector<GLchar> shaderProgramInfoLog;
+				shaderProgramInfoLog.reserve(maxLength);
 				glGetProgramInfoLog(m_program, maxLength, &maxLength, &shaderProgramInfoLog[0]);
 				fprintf(stdout, "\tError info: %s\n", shaderProgramInfoLog.data());
 			}
@@ -85,15 +94,9 @@ namespace potatocraft
 		return m_name;
 	}
 
-	Program::Program(const std::string &name)
+	Ref<Program> Program::Create(const std::string &name)
 	{
-		m_program = glCreateProgram();
-		m_name = name;
-	}
-
-	Program::~Program()
-	{
-		glDeleteProgram(m_program);
+		return createRef<Program>(name);
 	}
 
 }

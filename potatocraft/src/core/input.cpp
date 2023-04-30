@@ -1,42 +1,42 @@
-#include "src/pcpch.hpp"
-#include "src/core/input.hpp"
+#include "src/pch.h"
+#include "src/core/input.h"
 
-#include "src/core/application.hpp"
+#include "src/core/application.h"
 #include <GLFW/glfw3.h>
 
-namespace potatocraft {
+namespace potatoengine {
 
-	bool Input::isKeyPressed(const KeyCode key)
+	bool Input::IsKeyPressed(const KeyCode key)
 	{
-		auto* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
+		auto* window = static_cast<GLFWwindow*>(Application::Get().getWindow().getNativeWindow());
 		auto state = glfwGetKey(window, static_cast<int32_t>(key));
 		return state == GLFW_PRESS;
 	}
 
-	bool Input::isMouseButtonPressed(const MouseCode button)
+	bool Input::IsMouseButtonPressed(const MouseCode button)
 	{
-		auto* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
+		auto* window = static_cast<GLFWwindow*>(Application::Get().getWindow().getNativeWindow());
 		auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));
 		return state == GLFW_PRESS;
 	}
 
-	glm::vec2 Input::getMousePosition()
+	glm::vec2 Input::GetMousePosition()
 	{
-		auto* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
+		auto* window = static_cast<GLFWwindow*>(Application::Get().getWindow().getNativeWindow());
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
 		return { (float)xpos, (float)ypos };
 	}
 
-	float Input::getMouseX()
+	float Input::GetMouseX()
 	{
-		return getMousePosition().x;
+		return GetMousePosition().x;
 	}
 
-	float Input::getMouseY()
+	float Input::GetMouseY()
 	{
-		return getMousePosition().y;
+		return GetMousePosition().y;
 	}
 
 }

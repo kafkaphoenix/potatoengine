@@ -1,10 +1,10 @@
-#include "src/pcpch.hpp"
-#include "src/renderer/camera/camera.hpp"
+#include "src/pch.h"
+#include "src/renderer/camera/camera.h"
 
-namespace potatocraft
+namespace potatoengine
 {
 
-    glm::mat4 Camera::get_view()
+    const glm::mat4 Camera::getView() const noexcept // todo rethink
     {
         glm::quat reverseOrient = glm::conjugate(m_orientation);
         glm::mat4 rot = glm::mat4_cast(reverseOrient);
@@ -44,7 +44,7 @@ namespace potatocraft
             m_position -= up;
     }
 
-    void Camera::processMouseMovement(double xoffset, double yoffset, bool constrainPitch)
+    void Camera::processMouseMovement(float xoffset, float yoffset, bool constrainPitch)
     {
         xoffset *= m_mouse_sensivity;
         yoffset *= m_mouse_sensivity;
@@ -62,9 +62,9 @@ namespace potatocraft
         m_orientation = rotY * rotX;
     }
 
-    void Camera::processMouseScroll(double yoffset)
+    void Camera::processMouseScroll(float yoffset)
     {
-        if (m_fov >= MIN_FOV && m_fov <= MAX_FOV)
+        if (m_fov >= MIN_FOV and m_fov <= MAX_FOV)
             m_fov -= yoffset;
 
         if (m_fov <= MIN_FOV)
@@ -79,9 +79,10 @@ namespace potatocraft
         return m_fov;
     }
 
-    Camera::Camera(const glm::vec3 &position, const glm::vec3 &orientation) : m_position(position), m_orientation(orientation), m_movement_speed(SPEED),
-                                                                              m_mouse_sensivity(SENSITIVITY), m_fov(MAX_FOV), m_jump_power(JUMP_POWER),
-                                                                              m_right_angle(0.f), m_up_angle(0.f)
+    Camera::Camera(const glm::vec3 &position, const glm::vec3 &orientation) :
+     m_position(position), m_orientation(orientation),
+     m_movement_speed(SPEED), m_mouse_sensivity(SENSITIVITY),
+     m_fov(MAX_FOV), m_jump_power(JUMP_POWER)
     {
     }
 

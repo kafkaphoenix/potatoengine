@@ -1,35 +1,28 @@
-#include "src/renderer/openGLContext.hpp"
-#include "src/debug/GLDebugMessageCallback.h" // TODO: REMOVE
+#include "src/renderer/openGLContext.h"
+#include <glad/glad.h>
 
-namespace potatocraft {
+namespace potatoengine {
+
     OpenGLContext::OpenGLContext(GLFWwindow* window): m_window(window) {
         if (window == nullptr)
         {
             fprintf(stderr, "Window is null!\n");
+            throw std::runtime_error("Window is null!");
         }
     }
 
     void OpenGLContext::init() {
         glfwMakeContextCurrent(m_window);
 
-        int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        if (status == 0)
-        {
+        if (int status = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)); status == 0)
             fprintf(stderr, "Failed to initialize Glad!\n");
-        }
-
-        // glEnable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(GLDebugMessageCallback, nullptr);
     }
 
     void OpenGLContext::swapBuffers() {
         glfwSwapBuffers(m_window);
     }
 
-    Scope<OpenGLContext> OpenGLContext::create(void* window)
+    Scope<OpenGLContext> OpenGLContext::Create(void* window)
 	{
 	    return createScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
 	}

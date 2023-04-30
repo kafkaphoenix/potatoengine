@@ -1,42 +1,38 @@
-#include "src/pcpch.hpp"
-#include "src/core/window.hpp"
+#include "src/pch.h"
+#include "src/core/window.h"
 
-#include "src/event/applicationEvent.hpp"
-#include "src/event/mouseEvent.hpp"
-#include "src/event/keyEvent.hpp"
+#include "src/event/applicationEvent.h"
+#include "src/event/mouseEvent.h"
+#include "src/event/keyEvent.h"
 
-namespace potatocraft
+namespace potatoengine
 {
-    static uint8_t s_GLFWWindowCount = 0;
 
-    static void glfw_error_callback(int error, const char *description)
-    {
-        fprintf(stderr, "GLFW Error %d: %s\n", error,  description);
-    }
-
-    Window::Window(const WindowProps& props) {
-        init(props);
+    Window::Window(const WindowProperties& properties) {
+        init(properties);
     }
 
     Window::~Window() {
         shutdown();
     }
 
-    void Window::init(const WindowProps& props) {
-        m_data.title = props.title;
-        m_data.width = props.width;
-        m_data.height = props.height;
+    void Window::init(const WindowProperties& properties) {
+        m_data.title = properties.title;
+        m_data.width = properties.width;
+        m_data.height = properties.height;
 
-        fprintf(stdout, "Creating window %s (%u, %u).\n", props.title.c_str(), props.width, props.height);
+        fprintf(stdout, "Creating window for the app %s with resolution (%u, %u)\n", properties.title.c_str(), properties.width, properties.height);
 
         if (s_GLFWWindowCount == 0)
 		{
-            fprintf(stdout, "Starting GLFW context, OpenGL 4.6.\n");
-            int success = glfwInit();
-            if (success == 0) {
+            fprintf(stdout, "Starting GLFW context, OpenGL 4.6\n");
+            if (!glfwInit()) {
                 fprintf(stderr, "Failed to initialize GLFW!\n");
             }
-            glfwSetErrorCallback(glfw_error_callback);
+            glfwSetErrorCallback([](int error, const char *description)
+            {
+                fprintf(stderr, "GLFW Error %d: %s\n", error,  description);
+            });
         }
 
         const char *glsl_version = "#version 460";
@@ -57,13 +53,13 @@ namespace potatocraft
             ypos = 200;
         }
 
-        m_window = glfwCreateWindow(int(props.width), (int)props.height, m_data.title.c_str(), nullptr, nullptr);
+        m_window = glfwCreateWindow(int(properties.width), (int)properties.height, m_data.title.c_str(), nullptr, nullptr);
         ++s_GLFWWindowCount;
 
-        glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, int(props.width), (int)props.height, 0);
-        m_context = OpenGLContext::create(m_window);
+        glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, int(properties.width), (int)properties.height, 0);
+        m_context = OpenGLContext::Create(m_window);
 		m_context->init();
-        glViewport(0.f, 0.f, int(props.width), (int)props.height);
+        glViewport(0.f, 0.f, int(properties.width), (int)properties.height);
 
 		glfwSetWindowUserPointer(m_window, &m_data);
 		setVSync(true);
@@ -114,7 +110,7 @@ namespace potatocraft
             }
         });
 
-        glfwSetCharCallback(m_window, [](GLFWwindow *window, unsigned int keycode)
+        glfwSetCharCallback(m_window, [](GLFWwindow *window, uint32_t keycode)
         {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -176,18 +172,13 @@ namespace potatocraft
     }
 
     void Window::setVSync(bool enabled) {
-        if (enabled) {
-            glfwSwapInterval(1);
-        } else {
-            glfwSwapInterval(0);
-        }
- 
+        glfwSwapInterval(enabled ? 1 : 0);
         m_data.vSync = enabled;        
     }
 
-	Scope<Window> Window::create(const WindowProps& props)
+	Scope<Window> Window::Create(const WindowProperties& properties)
 	{
-	    return createScope<Window>(props);
+	    return createScope<Window>(properties);
 	}
 
 }

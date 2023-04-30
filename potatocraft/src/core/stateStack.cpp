@@ -1,7 +1,7 @@
-#include "src/pcpch.hpp"
-#include "src/core/stateStack.hpp"
+#include "src/pch.h"
+#include "src/core/stateStack.h"
 
-namespace potatocraft {
+namespace potatoengine {
 
 	StateStack::~StateStack()
 	{
@@ -14,8 +14,7 @@ namespace potatocraft {
 
 	void StateStack::pushState(State* state)
 	{
-		m_states.emplace(m_states.begin() + m_stateInsertIndex, state);
-		m_stateInsertIndex++;
+		m_states.emplace(m_states.begin() + m_stateInsertIndex++, state);
 	}
 
 	void StateStack::pushOverlay(State* overlay)
@@ -23,24 +22,26 @@ namespace potatocraft {
 		m_states.emplace_back(overlay);
 	}
 
-	void StateStack::popState(State* state)
+	void StateStack::popState(const std::string& name)
 	{
-		auto it = std::find(m_states.begin(), m_states.begin() + m_stateInsertIndex, state);
-		if (it != m_states.begin() + m_stateInsertIndex)
+		auto it = std::find_if(m_states.begin(), m_states.begin() + m_stateInsertIndex, [&](const State* state){return state->getName() == name;});
+
+		if (it not_eq m_states.begin() + m_stateInsertIndex)
 		{
-			state->onDetach();
+			(*it)->onDetach();
 			m_states.erase(it);
-			m_stateInsertIndex--;
+			--m_stateInsertIndex;
 		}
 	}
 
-	void StateStack::popOverlay(State* overlay)
+	void StateStack::popOverlay(const std::string& name)
 	{
-		auto it = std::find(m_states.begin() + m_stateInsertIndex, m_states.end(), overlay);
-		if (it != m_states.end())
+		auto it = std::find_if(m_states.rbegin(), m_states.rend(), [&](const State* state) {return state->getName() == name;});
+
+		if (it not_eq m_states.rend())
 		{
-			overlay->onDetach();
-			m_states.erase(it);
+			(*it)->onDetach();
+			m_states.erase(std::next(it).base());
 		}
 	}
 

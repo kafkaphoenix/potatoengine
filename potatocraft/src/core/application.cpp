@@ -1,43 +1,22 @@
-#include "src/pcpch.hpp"
-#include "src/core/application.hpp"
-
-#include <glad/glad.h>
+#include "src/pch.h"
+#include "src/core/application.h"
 
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <nlohmann/json.hpp>
+#include "src/core/window.h"
+#include "src/core/timestep.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_FAILURE_USERMSG
-#include <stb_image.h>
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
+#include "src/core/input.h"
+#include "src/core/keyCodes.h"
 
-#include <filesystem>
-namespace fs = std::filesystem;
+#include "src/renderer/renderer.h"
 
-#include "src/renderer/shader/program.hpp"
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
-#include "src/renderer/camera/camera.hpp"
-
-#include "src/core/window.hpp"
-#include "src/core/timestep.hpp"
-
-#include "src/utils/utils.hpp"
-#include "src/core/input.hpp"
-#include "src/core/keyCodes.hpp"
-
-using json = nlohmann::json;
-
-namespace potatocraft
+namespace potatoengine
 {
 
     struct IMGUI_STATES
@@ -46,44 +25,27 @@ namespace potatocraft
         bool show_another_window = false;
     } imgui_debugger;
 
-    // Window dimensions
-    const GLuint WIDTH = 1280, HEIGHT = 720;
-
-    // Camera
-    const GLfloat render_x = 3840.f, render_y = 2160.f;
-    const GLfloat FOV = 90.f;
-    Camera cam({0.f, 0.f, -3.5f}, {0.f, 0.f, 0.f});
-    float lastX = WIDTH / 2.0f;
-    float lastY = HEIGHT / 2.0f;
-    bool firstMouse = true;
-
     // Function prototypes
     void teardown(GLFWwindow *window);
     void init_imgui_context(GLFWwindow *window, const char *glsl_version);
     void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
-    void load_shader(Program &program);
-    void chunks(unsigned int &VBO, unsigned int &VAO, unsigned int &EBO);
-    void load_texture(unsigned int &texture);
     //void movement(GLFWwindow *window);
 
-    Application* Application::s_instance = nullptr;
-
-    Application::Application(const std::string &name, ApplicationCommandLineArgs args)
-        : m_commandLineArgs(args)
+    Application::Application(const std::string &name, CommandLineArgs args)
+        : m_name(name), m_commandLineArgs(args)
     {
         s_instance = this;
     
-        m_window = Window::create(WindowProps(name));
+        m_window = Window::Create(WindowProperties(m_name));
 		m_window->setEventCallback(BIND_EVENT_FN(Application::onEvent));
 
-		//Renderer::Init();
-        // imgui init
-        // s_instance = *this;
+		Renderer::Init();
+        // TODO class imgui init
     }
 
     Application::~Application()
     {
-        // renderer shutdown
+        Renderer::Shutdown();
     }
 
 	void Application::close()
@@ -98,10 +60,10 @@ namespace potatocraft
 		    m_running = false;
             break;
         case Key::F3:
-		    m_debugging = !m_debugging;
+		    m_debugging = not m_debugging;
             break;
         case Key::F4:
-		    m_wireframe = !m_wireframe;
+		    m_wireframe = not m_wireframe;
             break;
         }
         return true;
@@ -115,13 +77,14 @@ namespace potatocraft
 
 	bool Application::onWindowResize(WindowResizeEvent& e)
 	{
-		if (e.getWidth() == 0 || e.getHeight() == 0)
+		if (e.getWidth() == 0 or e.getHeight() == 0)
 		{
 			m_minimized = true;
 		} else {
             m_minimized = false;
-		    //Renderer::onWindowResize(e.GetWidth(), e.GetHeight());
+		    Renderer::OnWindowResize(e.getWidth(), e.getHeight());
         }
+
 		return false;
 	}
 
@@ -131,7 +94,7 @@ namespace potatocraft
 		dispatcher.dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::onWindowResize));
 		dispatcher.dispatch<KeyPressedEvent>(BIND_EVENT_FN(Application::onKeyPressed));
 
-		for (auto it = m_stateStack.rbegin(); it != m_stateStack.rend(); ++it)
+		for (auto it = m_stateStack.rbegin(); it not_eq m_stateStack.rend(); ++it)
 		{
 			if (e.m_handled) 
 				break;
@@ -154,115 +117,39 @@ namespace potatocraft
         const char *glsl_version = "#version 460";
         auto* window = static_cast<GLFWwindow*>(getWindow().getNativeWindow());
 
-        fprintf(stdout, "Loading render shader program.\n");
-        Program render("render");
-        load_shader(render);
-
-        render.use();
-        render.setMat4("view", cam.get_view());
-
-        glm::mat4 projection = glm::perspective(
-            glm::radians(FOV), render_x / render_y, 0.01f, 3000.0f);
-        render.setMat4("projection", projection);
-
-        fprintf(stdout, "Loading chunks.\n");
-        // world space positions of our cubes
-        glm::vec3 cubePositions[] = {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(2.0f, 5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f, -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3(2.4f, -0.4f, -3.5f),
-            glm::vec3(-1.7f, 3.0f, -7.5f),
-            glm::vec3(1.3f, -2.0f, -2.5f),
-            glm::vec3(1.5f, 2.0f, -2.5f),
-            glm::vec3(1.5f, 0.2f, -1.5f),
-            glm::vec3(-1.3f, 1.0f, -1.5f)};
-        unsigned int VBO, VAO, EBO;
-        chunks(VBO, VAO, EBO);
-
-        fprintf(stdout, "Loading textures.\n");
-        unsigned int texture;
-        load_texture(texture);
-
-        // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-        render.use(); // don't forget to activate/use the shader before setting uniforms!
-        render.setInt("texSampler", 0);
-
         init_imgui_context(window, glsl_version);
 
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-        int display_w, display_h;
 
         while (m_running)
         {
-			Timestep dt = Time::currentTime() - m_lastFrame;
-			m_lastFrame = Time::currentTime();
+			Timestep dt = glfwGetTime() - m_lastFrame;
+			m_lastFrame = glfwGetTime();
             m_accumulator += dt;
 
-            while(m_accumulator > 1.0/61.0) {
+            while (m_accumulator > 1.0/61.0) {
                 for (auto state : m_stateStack)
 					state->onUpdate(dt);
                 m_accumulator -= 1.0/59.0;
-                if(m_accumulator < 0) m_accumulator = 0;
+                if (m_accumulator < 0) m_accumulator = 0;
             }
-
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (m_debugging)
                 debugger(imgui_debugger, window, clear_color);
 
-            // Rendering
+            // Rendering ImGui Layer
             if (m_debugging)
                 ImGui::Render();
-            if (m_wireframe)
-            {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            }
-            else
-            {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            }
+
+            RendererAPI::SetWireframe(m_wireframe);
 
             // espera - process input - movement((GLFWwindow*)GetWindow().getNativeWindow());
-
-            //  esto va a renderer on resize espera glfwGetFramebufferSize(m_window, &display_w, &display_h);
-            // espera glViewport(0.f, 0.f, display_w, display_h);
-            glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
 
             if (m_debugging)
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, texture);
-
-            render.use();
-
-            glm::mat4 projection = glm::perspective(
-                glm::radians(cam.getFov()), render_x / render_y, 0.01f, 3000.0f);
-            render.setMat4("projection", projection);
-
-            render.setMat4("view", cam.get_view());
-
-            // render boxes
-            glBindVertexArray(VAO);
-            for (unsigned int i = 0; i < 10; i++)
-            {
-                // calculate the model matrix for each object and pass it to shader before drawing
-                glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-                model = glm::translate(model, cubePositions[i]);
-                float angle = 20.0f * i;
-                model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-                render.setMat4("model", model);
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            }
-
             m_window->onUpdate();
         }
-
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
         // espera teardown(window);
     }
 
@@ -292,7 +179,7 @@ namespace potatocraft
 
     void init_imgui_context(GLFWwindow *window, const char *glsl_version)
     {
-        fprintf(stdout, "Starting ImGui context.\n");
+        fprintf(stdout, "Starting ImGui context\n");
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
@@ -303,7 +190,7 @@ namespace potatocraft
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
         // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\UDDigiKyokashoN-B.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-        // IM_ASSERT(font != nullptr);
+        // IM_ASSERT(font not_eq nullptr);
     }
 
     void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color)
@@ -332,7 +219,7 @@ namespace potatocraft
             ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
 
             if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
+                ++counter;
             ImGui::SameLine();
             ImGui::Text("counter = %d", counter);
 
@@ -349,139 +236,6 @@ namespace potatocraft
                 states.show_another_window = false;
             ImGui::End();
         }
-    }
-
-    void load_shader(Program &shader)
-    {
-        std::string s_name = shader.getName();
-        fprintf(stdout, "Creating vertex shader.\n");
-        Shader shader_vert;
-        bool load_status_vert = false;
-        shader_vert.load_file(GL_VERTEX_SHADER, "..\\assets\\shaders\\" + s_name + ".vert", load_status_vert);
-
-        fprintf(stdout, "Creating fragment shader.\n");
-        Shader shader_frag;
-        bool load_status_frag = false;
-        shader_frag.load_file(GL_FRAGMENT_SHADER, "..\\assets\\shaders\\" + s_name + ".frag", load_status_frag);
-
-        if (load_status_vert && load_status_frag)
-        {
-            fprintf(stdout, "Linking shader program.\n");
-            shader.attach(shader_vert);
-            shader.attach(shader_frag);
-            bool link_status = false;
-            shader.link(link_status);
-            if (link_status)
-            {
-                shader.detach(shader_vert);
-                shader.detach(shader_frag);
-            }
-            else
-            {
-                shader_vert.~Shader();
-                shader_frag.~Shader();
-                shader.~Program();
-            }
-        }
-        else
-        {
-            fprintf(stdout, "Could not link shader program.\n");
-            shader_vert.~Shader();
-            shader_frag.~Shader();
-            shader.~Program();
-        }
-    }
-
-    void chunks(unsigned int &VBO, unsigned int &VAO, unsigned int &EBO)
-    {
-        // set up vertex data (and buffer(s)) and configure vertex attributes
-        // ------------------------------------------------------------------
-        float vertices[] = {
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-            -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-
-            -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
-
-        glBindVertexArray(VAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-        glEnableVertexAttribArray(0);
-        // texture coord attribute
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-    }
-
-    void load_texture(unsigned int &texture)
-    {
-        // load and create a texture
-        // -------------------------
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-        // set the texture wrapping parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        // set texture filtering parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // load image, create texture and generate mipmaps
-        int width, height, nrChannels;
-        stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-        std::string filename_path = "..\\assets\\textures\\wall.jpg";
-        unsigned char *data = stbi_load(filename_path.c_str(), &width, &height, &nrChannels, 0);
-        if (data)
-        {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-        }
-        else
-        {
-            fprintf(stdout, "Failed to load texture: %s\n", stbi_failure_reason());
-        }
-        stbi_image_free(data);
     }
 
 }

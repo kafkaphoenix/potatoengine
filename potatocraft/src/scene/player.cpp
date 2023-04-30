@@ -1,6 +1,6 @@
-#include "src/scene/player.hpp"
+#include "src/scene/player.h"
 
-namespace potatocraft
+namespace potatoengine
 {
 
 }

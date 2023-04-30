@@ -1,10 +1,10 @@
-#include "src/pcpch.hpp"
-#include "src/core/state.hpp"
+#include "src/pch.h"
+#include "src/core/state.h"
 
-namespace potatocraft {
+namespace potatoengine {
 
-	State::State(const std::string& debugName)
-		: m_debugName(debugName)
+	State::State(const std::string& name)
+		: m_name(name)
 	{
 	}
 }
