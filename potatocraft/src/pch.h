@@ -1,9 +1,6 @@
 #pragma once
 
-#ifndef NOMINMAX
-// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
-#define NOMINMAX
-#endif
+#define BIND_EVENT(f) [this](auto &&...args) { return f(std::forward<decltype(args)>(args)...); }
 
 #include <iostream>
 #include <memory>
@@ -15,11 +12,10 @@
 #include <sstream>
 #include <fstream>
 #include <format>
+
 #include <array>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-
-#include "src/core/base.h"
 
 #include "src/core/log.h"

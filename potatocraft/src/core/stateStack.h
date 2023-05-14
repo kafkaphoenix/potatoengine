@@ -1,6 +1,5 @@
 #pragma once
 
-#include "src/core/base.h"
 #include "src/core/state.h"
 
 namespace potatoengine {

@@ -16,20 +16,17 @@ namespace potatoengine {
     }
 
     void Renderer::BeginScene(const Camera& camera) {
-        s_sceneData->viewProjectionMatrix = camera.getView();
+        s_sceneData->viewProjectionMatrix = camera.getViewProjection();
     }
 
     void Renderer::EndScene() {
 
     }
 
-    void Renderer::Submit(const Ref<Program>& shader, const Ref<VAO>& vao, const glm::mat4& transform) {
-        /*shader.use();// todo shader is not const we modify it maybe
-        shader.setMat4("view", s_sceneData->viewProjectionMatrix);
-
-        const GLfloat render_x = 3840.f, render_y = 2160.f; // TODO: REMOVE?
-        glm::mat4 projection = glm::perspective(glm::radians(camera.getFov()), render_x / render_y, 0.01f, 3000.0f);
-        s_sceneData->render.setMat4("projection", projection);*/
+    void Renderer::Submit(const std::shared_ptr<Program>& shader, const std::shared_ptr<VAO>& vao, const glm::mat4& transform) {
+        shader->use();
+        shader->setMat4("viewProjection", s_sceneData->viewProjectionMatrix);
+        shader->setMat4("transform", transform);
 
         RendererAPI::DrawIndexed(vao);
     }

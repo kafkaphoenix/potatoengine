@@ -1,4 +1,3 @@
-#include "src/pch.h"
 #include "src/core/stateStack.h"
 
 namespace potatoengine {

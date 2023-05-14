@@ -1,12 +1,9 @@
 #pragma once
 
-#include "src/core/base.h"
+#include "src/pch.h"
 
-// This ignores all warnings raised inside External headers
-#pragma warning(push, 0)
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
-#pragma warning(pop)
 
 namespace potatoengine
 {
@@ -16,17 +13,17 @@ namespace potatoengine
   public:
     static void Init();
 
-    static Ref<spdlog::logger> &GetCoreLogger() { return s_coreLogger; }
+    static std::shared_ptr<spdlog::logger> &GetLogger() { return s_logger; }
 
   private:
-    static Ref<spdlog::logger> s_coreLogger;
+    inline static std::shared_ptr<spdlog::logger> s_logger;
   };
 
 }
 
 // Core log macros
-#define CORE_TRACE(...) ::potatoengine::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define CORE_INFO(...) ::potatoengine::Log::GetCoreLogger()->info(__VA_ARGS__)
-#define CORE_WARN(...) ::potatoengine::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define CORE_ERROR(...) ::potatoengine::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define CORE_CRITICAL(...) ::potatoengine::Log::GetCoreLogger()->critical(__VA_ARGS__)
+#define CORE_TRACE(...) ::potatoengine::Log::GetLogger()->trace(__VA_ARGS__)
+#define CORE_INFO(...) ::potatoengine::Log::GetLogger()->info(__VA_ARGS__)
+#define CORE_WARN(...) ::potatoengine::Log::GetLogger()->warn(__VA_ARGS__)
+#define CORE_ERROR(...) ::potatoengine::Log::GetLogger()->error(__VA_ARGS__)
+#define CORE_CRITICAL(...) ::potatoengine::Log::GetLogger()->critical(__VA_ARGS__)

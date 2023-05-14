@@ -26,15 +26,15 @@ namespace potatoengine {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
-		return { (float)xpos, (float)ypos };
+		return glm::vec2(xpos, ypos);
 	}
 
-	float Input::GetMouseX()
+	double Input::GetMouseX()
 	{
 		return GetMousePosition().x;
 	}
 
-	float Input::GetMouseY()
+	double Input::GetMouseY()
 	{
 		return GetMousePosition().y;
 	}

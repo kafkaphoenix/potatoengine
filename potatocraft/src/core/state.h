@@ -1,8 +1,7 @@
 #pragma once
 
-#include "src/core/base.h"
-#include "src/core/timestep.h"
-#include "src/event/event.h"
+#include "src/core/time.h"
+#include "src/events/event.h"
 
 namespace potatoengine {
 
@@ -14,7 +13,7 @@ namespace potatoengine {
 
 		virtual void onAttach() {}
 		virtual void onDetach() {}
-		virtual void onUpdate(Timestep ts) {}
+		virtual void onUpdate(Time dt) {}
 		virtual void onImGuiRender() {}
 		virtual void onEvent(Event& event) {}
 

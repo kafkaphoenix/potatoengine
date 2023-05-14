@@ -1,5 +1,7 @@
-#include "src/renderer/openGLContext.h"
 #include <glad/glad.h>
+
+#include "src/renderer/openGLContext.h"
+
 
 namespace potatoengine {
 
@@ -22,8 +24,8 @@ namespace potatoengine {
         glfwSwapBuffers(m_window);
     }
 
-    Scope<OpenGLContext> OpenGLContext::Create(void* window)
+    std::unique_ptr<OpenGLContext> OpenGLContext::Create(void* window)
 	{
-	    return createScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
+	    return std::make_unique<OpenGLContext>(static_cast<GLFWwindow*>(window));
 	}
 }

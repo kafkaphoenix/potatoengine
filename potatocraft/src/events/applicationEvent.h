@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/event/event.h"
+#include "src/events/event.h"
 
 namespace potatoengine
 {
@@ -13,13 +13,6 @@ namespace potatoengine
 
 		uint32_t getWidth() const { return m_width; }
 		uint32_t getHeight() const { return m_height; }
-
-		std::string toString() const override
-		{
-			std::stringstream ss;
-			ss << "WindowResizeEvent: " << m_width << ", " << m_height;
-			return ss.str();
-		}
 
 		EVENT_CLASS_TYPE(WindowResize)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)

@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "src/pch.h"
+
 namespace potatoengine {
 
 	struct Vertex
@@ -21,7 +23,7 @@ namespace potatoengine {
 		uint32_t getId() const { return m_id; }
 		const std::vector<Vertex>& getVertices() const { return m_vertices; }
 
-		static Ref<VBO> Create(const std::vector<Vertex>& vertices);
+		static std::shared_ptr<VBO> Create(const std::vector<Vertex>& vertices);
 
 	private:
 		std::vector<Vertex> m_vertices;
@@ -37,7 +39,7 @@ namespace potatoengine {
 		uint32_t getCount() const { return m_count; }
 		uint32_t getId() const { return m_id; }
 
-		static Ref<IBO> Create(const std::vector<uint32_t>& indices);
+		static std::shared_ptr<IBO> Create(const std::vector<uint32_t>& indices);
 	private:
 		uint32_t m_id;
 		uint32_t m_count;

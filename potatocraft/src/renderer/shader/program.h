@@ -1,8 +1,10 @@
 #pragma once
 
-#include "src/renderer/shader/shader.h"
 
 #include <glm/glm.hpp>
+
+#include "src/pch.h"
+#include "src/renderer/shader/shader.h"
 
 namespace potatoengine
 {
@@ -25,7 +27,7 @@ namespace potatoengine
         void setVec4(const std::string &name, const glm::vec4 &vec);
         void setMat4(const std::string &name, const glm::mat4 &mat);
         const std::string &getName() const noexcept;
-        static Ref<Program> Create(const std::string &name);
+        static std::shared_ptr<Program> Create(const std::string &name);
     private:
         uint32_t m_program;
         std::string m_name;

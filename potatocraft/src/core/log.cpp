@@ -6,8 +6,6 @@
 namespace potatoengine
 {
 
-	Ref<spdlog::logger> Log::s_coreLogger;
-
 	void Log::Init()
 	{
 		std::vector<spdlog::sink_ptr> logSinks;
@@ -17,10 +15,10 @@ namespace potatoengine
 		logSinks[0]->set_pattern("%^[%T] %n: %v%$");
 		logSinks[1]->set_pattern("[%T] [%l] %n: %v");
 
-		s_coreLogger = std::make_shared<spdlog::logger>("CORE", begin(logSinks), end(logSinks));
-		spdlog::register_logger(s_coreLogger);
-		s_coreLogger->set_level(spdlog::level::trace);
-		s_coreLogger->flush_on(spdlog::level::trace);
+		s_logger = std::make_shared<spdlog::logger>("CORE", begin(logSinks), end(logSinks));
+		spdlog::register_logger(s_logger);
+		s_logger->set_level(spdlog::level::trace);
+		s_logger->flush_on(spdlog::level::trace);
 	}
 
 }

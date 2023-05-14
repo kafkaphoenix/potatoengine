@@ -18,7 +18,7 @@ namespace potatoengine {
             static void BeginScene(const Camera& camera);
             static void EndScene();
 
-            static void Submit(const Ref<Program>& shader, const Ref<VAO>& vao, const glm::mat4& transform = glm::mat4(1.f));
+            static void Submit(const std::shared_ptr<Program>& shader, const std::shared_ptr<VAO>& vao, const glm::mat4& transform = glm::mat4(1.f));
 
         private:
             struct SceneData
@@ -26,6 +26,6 @@ namespace potatoengine {
                 glm::mat4 viewProjectionMatrix;
             };
 
-            inline static Scope<SceneData> s_sceneData = createScope<Renderer::SceneData>();
+            inline static std::unique_ptr<SceneData> s_sceneData = std::make_unique<Renderer::SceneData>();
     };
 }

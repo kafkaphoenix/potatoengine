@@ -1,5 +1,4 @@
 #pragma once
-#include "src/core/base.h"
 #include "src/core/application.h"
 
 extern potatoengine::Application* potatoengine::CreateApp(const std::string &name, CommandLineArgs args);

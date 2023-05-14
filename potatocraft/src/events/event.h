@@ -1,7 +1,6 @@
 #pragma once
-#include <functional>
 
-#include "src/core/base.h"
+#include "src/pch.h"
 
 namespace potatoengine
 {
@@ -28,12 +27,13 @@ namespace potatoengine
 
 	enum EventCategory
 	{
+		// Each category is a bit flag
 		None = 0,
-		EventCategoryApplication = BIT(0),
-		EventCategoryInput = BIT(1),
-		EventCategoryKeyboard = BIT(2),
-		EventCategoryMouse = BIT(3),
-		EventCategoryMouseButton = BIT(4)
+		EventCategoryApplication = 1,
+		EventCategoryInput = 2,
+		EventCategoryKeyboard = 4,
+		EventCategoryMouse = 8,
+		EventCategoryMouseButton = 16,
 	};
 
 #define EVENT_CLASS_TYPE(type)                                                  \
@@ -54,7 +54,6 @@ namespace potatoengine
 		virtual EventType getEventType() const = 0;
 		virtual const char *getName() const = 0;
 		virtual int getCategoryFlags() const = 0;
-		virtual std::string toString() const { return getName(); }
 
 		bool isInCategory(EventCategory category)
 		{
@@ -85,10 +84,5 @@ namespace potatoengine
 	private:
 		Event &m_event;
 	};
-
-	inline std::ostream &operator<<(std::ostream &os, const Event &e)
-	{
-		return os << e.toString();
-	}
 
 }

@@ -11,8 +11,10 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}")
 include_directories("${BASEPATH}")
 
 # Source files
-FILE(GLOB SOURCE_FILES src/** src/world/** src/debug/** src/renderer/** src/renderer/shader/**
-    src/renderer/camera/** src/core/** src/scene/** src/event/** src/imGui/** src/sandbox/**)
+file(GLOB_RECURSE SOURCE_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+)
 
 add_subdirectory(vendor)
 

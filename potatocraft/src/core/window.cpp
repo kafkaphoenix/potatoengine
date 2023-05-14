@@ -1,9 +1,8 @@
-#include "src/pch.h"
 #include "src/core/window.h"
 
-#include "src/event/applicationEvent.h"
-#include "src/event/mouseEvent.h"
-#include "src/event/keyEvent.h"
+#include "src/events/applicationEvent.h"
+#include "src/events/mouseEvent.h"
+#include "src/events/keyEvent.h"
 
 namespace potatoengine
 {
@@ -20,8 +19,10 @@ namespace potatoengine
         m_data.title = properties.title;
         m_data.width = properties.width;
         m_data.height = properties.height;
+        m_data.lastX = properties.width / 2.0f;
+        m_data.lastY = properties.height / 2.0f;
 
-        fprintf(stdout, "Creating window for the app %s with resolution (%u, %u)\n", properties.title.c_str(), properties.width, properties.height);
+        fprintf(stdout, "Creating window for the app %s with resolution %ix%i\n", properties.title.c_str(), properties.width, properties.height);
 
         if (s_GLFWWindowCount == 0)
 		{
@@ -45,21 +46,16 @@ namespace potatoengine
         int monitorCount;
         GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
 
-        int xpos = 50;
-        int ypos = 50;
-        if (monitorCount >= 2)
-        {
-            xpos = 500;
-            ypos = 200;
-        }
+        int xpos = (monitorCount >= 2) ? 500 : 50;
+        int ypos = (monitorCount >= 2) ? 200 : 50;
 
-        m_window = glfwCreateWindow(int(properties.width), (int)properties.height, m_data.title.c_str(), nullptr, nullptr);
+        m_window = glfwCreateWindow(properties.width, properties.height, m_data.title.c_str(), nullptr, nullptr);
         ++s_GLFWWindowCount;
 
-        glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, int(properties.width), (int)properties.height, 0);
+        glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, properties.width, properties.height, 0);
         m_context = OpenGLContext::Create(m_window);
 		m_context->init();
-        glViewport(0.f, 0.f, int(properties.width), (int)properties.height);
+        glViewport(0.f, 0.f, properties.width, properties.height);
 
 		glfwSetWindowUserPointer(m_window, &m_data);
 		setVSync(true);
@@ -81,7 +77,7 @@ namespace potatoengine
             data.eventCallback(event);
         });
 
-        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         glfwSetKeyCallback(m_window, [](GLFWwindow *window, int key, int scancode, int action, int mode)
         {
@@ -91,7 +87,7 @@ namespace potatoengine
             {
                 case GLFW_PRESS:
                 {
-                    KeyPressedEvent event(key, 0);
+                    KeyPressedEvent event(key, false);
                     data.eventCallback(event);
                     break;
                 }
@@ -139,19 +135,40 @@ namespace potatoengine
             }
         });
 
-        glfwSetCursorPosCallback(m_window, [](GLFWwindow *window, double xPos, double yPos)
+        glfwSetCursorPosCallback(m_window, [](GLFWwindow *window, double xpos, double ypos)
         {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-            MouseMovedEvent event((float)xPos, (float)yPos);
+            if (not data.updateCameraPosition) {
+                return;
+            }
+
+            if (data.firstMouse)
+            {
+                data.lastX = xpos;
+                data.lastY = ypos;
+                data.firstMouse = false;
+            }
+
+            float xoffset = xpos - data.lastX;
+            float yoffset = data.lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+            data.lastX = xpos;
+            data.lastY = ypos;
+
+            MouseMovedEvent event(xoffset, yoffset);
             data.eventCallback(event);
         });
 
-        glfwSetScrollCallback(m_window, [](GLFWwindow *window, double xOffset, double yOffset)
+        glfwSetScrollCallback(m_window, [](GLFWwindow *window, double xoffset, double yoffset)
         {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-            MouseScrolledEvent event((float)xOffset, (float)yOffset);
+            if (not data.updateCameraPosition) {
+                return;
+            }
+
+            MouseScrolledEvent event(xoffset, yoffset);
             data.eventCallback(event);
         });
     }
@@ -176,9 +193,13 @@ namespace potatoengine
         m_data.vSync = enabled;        
     }
 
-	Scope<Window> Window::Create(const WindowProperties& properties)
+    void Window::setCursorMode(CursorMode mode) {
+        glfwSetInputMode(m_window, GLFW_CURSOR, static_cast<int>(mode));
+    }
+
+	std::unique_ptr<Window> Window::Create(const WindowProperties& properties)
 	{
-	    return createScope<Window>(properties);
+	    return std::make_unique<Window>(properties);
 	}
 
 }

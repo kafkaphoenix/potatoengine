@@ -98,7 +98,7 @@ namespace potatoengine {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void RendererAPI::DrawIndexed(const Ref<VAO>& vao)
+	void RendererAPI::DrawIndexed(const std::shared_ptr<VAO>& vao)
 	{
 		glDrawElements(GL_TRIANGLES, vao->getEBO()->getCount(), GL_UNSIGNED_INT, nullptr);
 	}

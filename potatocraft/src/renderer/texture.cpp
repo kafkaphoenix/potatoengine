@@ -1,7 +1,8 @@
-#include "src/pch.h"
-#include "src/renderer/texture.h"
 
 #include <stb_image.h>
+
+#include "src/renderer/texture.h"
+
 
 namespace potatoengine {
 
@@ -83,13 +84,13 @@ namespace potatoengine {
 		glBindTextureUnit(slot, m_id);
 	}
 
-    Ref<Texture> Texture::Create(uint32_t width, uint32_t height)
+    std::shared_ptr<Texture> Texture::Create(uint32_t width, uint32_t height)
     {
-        return createRef<Texture>(width, height);
+        return std::make_shared<Texture>(width, height);
     }
 
-    Ref<Texture> Texture::Create(const std::string& path)
+    std::shared_ptr<Texture> Texture::Create(const std::string& path)
     {
-        return createRef<Texture>(path);
+        return std::make_shared<Texture>(path);
     }
 }

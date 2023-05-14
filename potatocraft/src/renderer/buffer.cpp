@@ -1,4 +1,3 @@
-#include "src/pch.h"
 #include "src/renderer/buffer.h"
 #include <glad/glad.h>
 
@@ -17,8 +16,8 @@ namespace potatoengine {
         glDeleteBuffers(1, &m_id);
     }
 
-    Ref<VBO> VBO::Create(const std::vector<Vertex>& vertices) {
-        return createRef<VBO>(vertices);
+    std::shared_ptr<VBO> VBO::Create(const std::vector<Vertex>& vertices) {
+        return std::make_shared<VBO>(vertices);
     }
 
     IBO::IBO(const std::vector<uint32_t>& indices) : m_count(indices.size()) {
@@ -30,7 +29,7 @@ namespace potatoengine {
         glDeleteBuffers(1, &m_id);
     }
 
-    Ref<IBO> IBO::Create(const std::vector<uint32_t>& indices) {
-        return createRef<IBO>(indices);
+    std::shared_ptr<IBO> IBO::Create(const std::vector<uint32_t>& indices) {
+        return std::make_shared<IBO>(indices);
     }
 }

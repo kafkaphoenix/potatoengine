@@ -1,28 +1,31 @@
 #pragma once
 
-#include "src/core/base.h"
-#include "src/event/event.h"
+#include "src/pch.h"
+#include "src/events/event.h"
 #include "src/renderer/openGLContext.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
-#include <sstream>
 
 namespace potatoengine {
 
 	struct WindowProperties
 	{
 		std::string title;
-		uint32_t width;
-		uint32_t height;
+		int width;
+		int height;
 
-		WindowProperties(const std::string& title = "Potatocraft",
-			        uint32_t width = 1280,
-			        uint32_t height = 720)
+		WindowProperties(const std::string& title, int width = 1280, int height = 720)
 			: title(title), width(width), height(height)
 		{
 		}
+	};
+
+	enum class CursorMode
+	{
+		Normal = GLFW_CURSOR_NORMAL,
+		Hidden = GLFW_CURSOR_HIDDEN,
+		Disabled = GLFW_CURSOR_DISABLED
 	};
 
 	class Window
@@ -44,19 +47,28 @@ namespace potatoengine {
 
 		void* getNativeWindow() const { return m_window; }
 
-        uint32_t getWidth() const { return m_data.width; }
-		uint32_t getHeight() const { return m_data.height; }
+        int getWidth() const { return m_data.width; }
+		int getHeight() const { return m_data.height; }
 
-		static Scope<Window> Create(const WindowProperties& properties);
+		void setCursorMode(CursorMode mode);
+		void setUpdateCameraPosition(bool update) { m_data.updateCameraPosition = update; }
+		void setLastMousePosition(float x, float y) { m_data.lastX = x; m_data.lastY = y; }
+
+		static std::unique_ptr<Window> Create(const WindowProperties& properties);
 
     private:
         GLFWwindow* m_window;
-		Scope<OpenGLContext> m_context;
+		std::shared_ptr<OpenGLContext> m_context;
 
         struct WindowData {
             std::string title;
-			uint32_t width, height;
+			int width, height;
+			float lastX;
+			float lastY;
+			bool firstMouse = true;
 			bool vSync;
+			CursorMode cursorMode = CursorMode::Disabled;
+			bool updateCameraPosition = true;
 
 			EventCallbackFn eventCallback;
         };

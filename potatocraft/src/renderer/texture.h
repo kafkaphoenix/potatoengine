@@ -2,6 +2,9 @@
 
 #include <glad/glad.h>
 
+#include "src/pch.h"
+
+
 namespace potatoengine {
 
 	class Texture
@@ -27,8 +30,8 @@ namespace potatoengine {
 		{
 			return m_id == other.getId();
 		}
-        static Ref<Texture> Create(uint32_t width, uint32_t height);
-		static Ref<Texture> Create(const std::string& path);
+        static std::shared_ptr<Texture> Create(uint32_t width, uint32_t height);
+		static std::shared_ptr<Texture> Create(const std::string& path);
 	private:
 		std::string m_path;
 		bool m_loaded;

@@ -13,6 +13,6 @@ namespace potatoengine {
 		static void SetClearColor(const glm::vec4& color);
 		static void SetWireframe(bool enabled);
 		static void Clear();
-		static void DrawIndexed(const Ref<VAO>& vao);
+		static void DrawIndexed(const std::shared_ptr<VAO>& vao);
 	};
 }

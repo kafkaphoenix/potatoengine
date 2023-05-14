@@ -2,10 +2,10 @@
 
 namespace potatoengine {
 
-	class Timestep
+	class Time
 	{
 	public:
-		Timestep(float time = 0.0f)
+		Time(float time = 0.f)
 			: m_time(time)
 		{
 		}
@@ -13,7 +13,7 @@ namespace potatoengine {
 		operator float() const { return m_time; }
 
 		float getSeconds() const { return m_time; }
-		float getMilliseconds() const { return m_time * 1000.0f; }
+		float getMilliseconds() const { return m_time * 1000.f; }
 	private:
 		float m_time;
 	};

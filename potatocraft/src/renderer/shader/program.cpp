@@ -1,4 +1,3 @@
-#include "src/pch.h"
 #include "src/renderer/shader/program.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -94,9 +93,9 @@ namespace potatoengine
 		return m_name;
 	}
 
-	Ref<Program> Program::Create(const std::string &name)
+	std::shared_ptr<Program> Program::Create(const std::string &name)
 	{
-		return createRef<Program>(name);
+		return std::make_shared<Program>(name);
 	}
 
 }

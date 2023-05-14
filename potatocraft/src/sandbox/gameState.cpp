@@ -2,23 +2,21 @@
 
 namespace potatocraft {
 
-    // world space positions of our cubes
+    // world space positions of our cubes // todo move to class
     glm::vec3 cubePositions[] = {
-        {0.0f, 0.0f, 0.0f},
-        {2.0f, 5.0f, -15.0f},
+        {0.f, 0.f, 0.f},
+        {2.f, 5.f, -15.f},
         {-1.5f, -2.2f, -2.5f},
-        {-3.8f, -2.0f, -12.3f},
+        {-3.8f, -2.f, -12.3f},
         {2.4f, -0.4f, -3.5f},
-        {-1.7f, 3.0f, -7.5f},
-        {1.3f, -2.0f, -2.5f},
-        {1.5f, 2.0f, -2.5f},
+        {-1.7f, 3.f, -7.5f},
+        {1.3f, -2.f, -2.5f},
+        {1.5f, 2.f, -2.5f},
         {1.5f, 0.2f, -1.5f},
-        {-1.3f, 1.0f, -1.5f}
+        {-1.3f, 1.f, -1.5f}
     };
 
-    const GLfloat render_x = 3840.f, render_y = 2160.f; // TODO: REMOVE?
-
-    void loadShader(potatoengine::Ref<potatoengine::Program> &m_shader) // todo move to class
+    void loadShader(std::shared_ptr<potatoengine::Program> &m_shader) // todo move to class
     {
         fprintf(stdout, "Loading shader program\n");
         std::string s_name = m_shader->getName();
@@ -58,38 +56,38 @@ namespace potatocraft {
         }
     }
 
-    void loadCubes(potatoengine::Ref<potatoengine::VAO> &m_vao) { // todo move to class
+    void loadCubes(std::shared_ptr<potatoengine::VAO> &m_vao) { // todo move to class
         fprintf(stdout, "Loading cubes\n");
         m_vao = potatoengine::VAO::Create();
         m_vao->bind();
 
         std::vector<potatoengine::Vertex> vertices = {
-            {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 0.0f}},  // A 0
-            {{0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 0.0f}},   // B 1
-            {{0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 1.0f}},    // C 2
-            {{-0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 1.0f}},   // D 3
-            {{-0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 0.0f}},   // E 4
-            {{0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 0.0f}},    // F 5
-            {{0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 1.0f}},     // G 6
-            {{-0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 1.0f}},    // H 7
+            {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},  // A 0
+            {{0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},   // B 1
+            {{0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},    // C 2
+            {{-0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},   // D 3
+            {{-0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},   // E 4
+            {{0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},    // F 5
+            {{0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},     // G 6
+            {{-0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},    // H 7
 
-            {{-0.5f,  0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 0.0f}},  // D 8
-            {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 0.0f}},  // A 9
-            {{-0.5f, -0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 1.0f}},  // E 10
-            {{-0.5f,  0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 1.0f}},  // H 11
-            {{ 0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 0.0f}},  // B 12
-            {{ 0.5f,  0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 0.0f}},  // C 13
-            {{ 0.5f,  0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 1.0f}},  // G 14
-            {{ 0.5f, -0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 1.0f}},  // F 15
+            {{-0.5f,  0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},  // D 8
+            {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},  // A 9
+            {{-0.5f, -0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},  // E 10
+            {{-0.5f,  0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},  // H 11
+            {{ 0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},  // B 12
+            {{ 0.5f,  0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},  // C 13
+            {{ 0.5f,  0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},  // G 14
+            {{ 0.5f, -0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},  // F 15
 
-            {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 0.0f}}, // A 16
-            {{ 0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 0.0f}}, // B 17
-            {{ 0.5f, -0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 1.0f}}, // F 18
-            {{-0.5f, -0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 1.0f}}, // E 19
-            {{ 0.5f,  0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 0.0f}}, // C 20
-            {{-0.5f,  0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 0.0f}}, // D 21
-            {{-0.5f,  0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {1.0f, 1.0f}}, // H 22
-            {{ 0.5f,  0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.0f}, {0.0f, 1.0f}}, // G 23
+            {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}}, // A 16
+            {{ 0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}}, // B 17
+            {{ 0.5f, -0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}}, // F 18
+            {{-0.5f, -0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}}, // E 19
+            {{ 0.5f,  0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}}, // C 20
+            {{-0.5f,  0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}}, // D 21
+            {{-0.5f,  0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}}, // H 22
+            {{ 0.5f,  0.5f,  0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}}, // G 23
         };
 
         std::vector<uint32_t> indices = {
@@ -118,15 +116,12 @@ namespace potatocraft {
     }
 
 
-    GameState::GameState() : State("GameState"), m_camera({0.f, 0.f, -3.5f}, {0.f, 0.f, 0.f}) {
+    GameState::GameState() : State("GameState"), m_cameraController() {
         m_shader = potatoengine::Program::Create("shader");
         loadShader(m_shader);
 
         m_shader->use();
-        m_shader->setMat4("view", m_camera.getView());
-
-        glm::mat4 projection = glm::perspective(glm::radians(m_camera.getFov()), render_x / render_y, 1.0f, 3000.0f);
-        m_shader->setMat4("projection", projection);
+        m_shader->setMat4("viewProjection", m_cameraController.getCamera().getViewProjection());
         
         loadCubes(m_vao);
 
@@ -145,36 +140,20 @@ namespace potatocraft {
 
     }
 
-    void GameState::onUpdate(potatoengine::Timestep ts) {
+    void GameState::onUpdate(potatoengine::Time dt) {
+        m_cameraController.onUpdate(dt);
         potatoengine::RendererAPI::SetClearColor({0.45f, 0.55f, 0.60f, 1.00f});
         potatoengine::RendererAPI::Clear();
 
-        potatoengine::Renderer::BeginScene(m_camera);
+        potatoengine::Renderer::BeginScene(m_cameraController.getCamera());
 
         m_texture->bind(0);
-
-        m_shader->use();
-
-        glm::mat4 projection = glm::perspective(
-            glm::radians(m_camera.getFov()),
-            render_x / render_y,
-            1.0f,
-            3000.0f
-        );
-        m_shader->setMat4("projection", projection);
-
-        m_shader->setMat4("view", m_camera.getView());
-
-        // render boxes
         for (uint32_t i = 0; i < 10; i++)
         {
-            // calculate the model matrix for each object and pass it to shader before drawing
-            glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-            model = glm::translate(model, cubePositions[i]);
-            m_shader->setMat4("model", model);
-            potatoengine::Renderer::Submit(m_shader, m_vao);
+            glm::mat4 transform = glm::mat4(1.f);
+            transform = glm::translate(transform, cubePositions[i]);
+            potatoengine::Renderer::Submit(m_shader, m_vao, transform);
         }
-
 
         potatoengine::Renderer::EndScene();
     }
@@ -183,8 +162,56 @@ namespace potatocraft {
 
     }
 
-    void GameState::onEvent(potatoengine::Event& event) {
+    void GameState::onEvent(potatoengine::Event& e) {
+        m_cameraController.onEvent(e);
 
+        potatoengine::EventDispatcher dispatcher(e);
+        dispatcher.dispatch<potatoengine::KeyPressedEvent>(BIND_EVENT(GameState::onKeyPressed));
+        dispatcher.dispatch<potatoengine::KeyReleasedEvent>(BIND_EVENT(GameState::onKeyReleased));
+    }
+
+    bool GameState::onKeyPressed(potatoengine::KeyPressedEvent& e) {
+        if (e.repeating())
+			return false;
+
+        potatoengine::Window &window = potatoengine::Application::Get().getWindow();
+		bool control = potatoengine::Input::IsKeyPressed(potatoengine::Key::LeftControl) || potatoengine::Input::IsKeyPressed(potatoengine::Key::RightControl);
+		bool shift = potatoengine::Input::IsKeyPressed(potatoengine::Key::LeftShift) || potatoengine::Input::IsKeyPressed(potatoengine::Key::RightShift);
+
+        switch (e.getKeyCode())
+		{
+        case potatoengine::Key::Escape:
+		    potatoengine::Application::Get().close();
+            break;
+        case potatoengine::Key::F3:
+		    m_debugging = not m_debugging;
+            break;
+        case potatoengine::Key::F4:
+		    m_wireframe = not m_wireframe;
+            potatoengine::RendererAPI::SetWireframe(m_wireframe);
+            break;
+        case potatoengine::Key::LeftAlt:
+            window.setUpdateCameraPosition(false);
+            window.setCursorMode(potatoengine::CursorMode::Normal);
+            break;
+        }
+
+        return true;
+    }
+
+    bool GameState::onKeyReleased(potatoengine::KeyReleasedEvent& e) {
+        potatoengine::Window &window = potatoengine::Application::Get().getWindow();
+
+        switch (e.getKeyCode())
+        {
+        case potatoengine::Key::LeftAlt:
+            window.setLastMousePosition(potatoengine::Input::GetMouseX(), potatoengine::Input::GetMouseY());
+            window.setUpdateCameraPosition(true);
+            window.setCursorMode(potatoengine::CursorMode::Disabled);
+            break;
+        }
+
+        return true;
     }
 
 }

@@ -16,7 +16,7 @@ namespace potatoengine {
         glBindVertexArray(m_id);
     }
 
-    void VAO::attachVertex(const Ref<VBO>& vbo) {
+    void VAO::attachVertex(const std::shared_ptr<VBO>& vbo) {
         glVertexArrayVertexBuffer(m_id, 0, vbo->getId(), 0, sizeof(Vertex));
         m_vbos.emplace_back(vbo);
     
@@ -35,12 +35,12 @@ namespace potatoengine {
         ++m_vboIndex;
     }
 
-    void VAO::setIndex(const Ref<IBO>& ibo) {
+    void VAO::setIndex(const std::shared_ptr<IBO>& ibo) {
         glVertexArrayElementBuffer(m_id, ibo->getId());
         m_ibo = ibo;
     }
 
-    Ref<VAO> VAO::Create() {
-        return createRef<VAO>();
+    std::shared_ptr<VAO> VAO::Create() {
+        return std::make_shared<VAO>();
     }
 }
