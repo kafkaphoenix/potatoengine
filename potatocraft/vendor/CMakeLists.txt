@@ -3,30 +3,26 @@ include(FetchContent)
 find_package(OpenGL REQUIRED)
 
 FetchContent_Declare(
-	glad
-	GIT_REPOSITORY https://github.com/Dav1dde/glad.git
-	GIT_TAG		   v0.1.36
+  glad
+  GIT_REPOSITORY https://github.com/Dav1dde/glad.git
+  GIT_TAG v0.1.36
 )
 
-FetchContent_GetProperties(glad)
-if(NOT glad_POPULATED)
-	FetchContent_Populate(glad)
-	add_subdirectory(${glad_SOURCE_DIR} ${glad_BINARY_DIR})
-endif()
+FetchContent_MakeAvailable(glad)
 
 FetchContent_Declare(
   glfw
   GIT_REPOSITORY https://github.com/glfw/glfw.git
-  GIT_TAG 3.3.4
+  GIT_TAG 3.3.8
 )
 
 FetchContent_GetProperties(glfw)
 if(NOT glfw_POPULATED)
 	FetchContent_Populate(glfw)
-	set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-	set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-	set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-  set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+  option(GLFW_BUILD_DOCS OFF)
+  option(GLFW_BUILD_TESTS OFF)
+  option(GLFW_BUILD_EXAMPLES OFF)
+  option(GLFW_INSTALL OFF)
 	add_subdirectory(${glfw_SOURCE_DIR} ${glfw_BINARY_DIR})
 endif()
 
@@ -39,14 +35,14 @@ FetchContent_Declare(
 FetchContent_GetProperties(glm)
 if(NOT glm_POPULATED)
 	FetchContent_Populate(glm)
-	set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
+  option(GLM_TEST_ENABLE OFF)
 	add_subdirectory(${glm_SOURCE_DIR} ${glm_BINARY_DIR})
 endif()
 
 FetchContent_Declare(
   imgui
   GIT_REPOSITORY https://github.com/ocornut/imgui.git
-  GIT_TAG v1.83
+  GIT_TAG v1.89.5
 )
 
 FetchContent_GetProperties(imgui)
@@ -62,9 +58,9 @@ if (NOT imgui_POPULATED)
 endif ()
 
 FetchContent_Declare(
-	entt
-	GIT_REPOSITORY https://github.com/skypjack/entt.git
-	GIT_TAG		   v3.7.1
+  entt
+  GIT_REPOSITORY https://github.com/skypjack/entt.git
+  GIT_TAG v3.11.1
 )
 
 FetchContent_MakeAvailable(entt)
@@ -72,13 +68,12 @@ FetchContent_MakeAvailable(entt)
 FetchContent_Declare(
   json
   GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent.git
-  GIT_TAG v3.9.1)
+  GIT_PROGRESS TRUE
+  GIT_SHALLOW TRUE
+  GIT_TAG v3.10.0
+)
 
-FetchContent_GetProperties(json)
-if(NOT json_POPULATED)
-  FetchContent_Populate(json)
-  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailable(json)
 
 FetchContent_Declare(
   assimp
@@ -89,27 +84,24 @@ FetchContent_Declare(
 FetchContent_GetProperties(assimp)
 if(NOT assimp_POPULATED)
 	FetchContent_Populate(assimp)
-  set(ASSIMP_BUILD_ASSIMP_VIEW OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
-  set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT  OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT  OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+  option(BUILD_SHARED_LIBS OFF)
+  option(ASSIMP_BUILD_TESTS OFF)
+  option(ASSIMP_INSTALL OFF)
+  option(ASSIMP_WARNINGS_AS_ERRORS ON)
+  option(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
+  option(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
 	add_subdirectory(${assimp_SOURCE_DIR} ${assimp_BINARY_DIR})
 endif()
 
 FetchContent_Declare(
   spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG v1.8.5)
+  GIT_TAG v1.11.0)
 
 FetchContent_GetProperties(spdlog)
 if(NOT spdlog_POPULATED)
   FetchContent_Populate(spdlog)
-  set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
-  set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-  set(SPDLOG_INSTALL OFF CACHE BOOL "" FORCE)
+  option(SPDLOG_BUILD_EXAMPLE OFF)
+  option(SPDLOG_INSTALL OFF)
   add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
