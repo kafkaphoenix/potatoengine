@@ -67,12 +67,6 @@ Texture::~Texture() {
     glDeleteTextures(1, &m_id);
 }
 
-void Texture::setData(void* data) {
-    fprintf(stdout, "Loading texture\n");
-    m_loaded = true;
-    glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, m_format, GL_UNSIGNED_BYTE, data);
-}
-
 void Texture::bind(uint32_t slot) const {
     glBindTextureUnit(slot, m_id);
 }

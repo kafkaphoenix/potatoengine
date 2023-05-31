@@ -24,6 +24,6 @@ class Renderer {
         glm::mat4 viewProjectionMatrix;
     };
 
-    inline static std::unique_ptr<SceneData> s_sceneData = std::make_unique<Renderer::SceneData>();
+    inline static std::unique_ptr<SceneData> s_sceneData = std::make_unique<SceneData>();
 };
 }

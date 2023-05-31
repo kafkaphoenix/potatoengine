@@ -12,7 +12,7 @@ class Program {
     Program(const std::string &name);
     ~Program();
 
-    operator GLuint();
+    operator GLuint() const;
     void attach(Shader &shader);
     void detach(Shader &shader);
     void link(bool &status);

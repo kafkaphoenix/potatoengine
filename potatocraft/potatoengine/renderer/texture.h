@@ -14,18 +14,16 @@ class Texture {
 
     uint32_t getWidth() const { return m_width; }
     uint32_t getHeight() const { return m_height; }
-    uint32_t getId() const { return m_id; }
+    uint32_t getID() const { return m_id; }
 
     const std::string& getPath() const { return m_path; }
-
-    void setData(void* data);
 
     void bind(uint32_t slot = 0) const;
 
     bool isLoaded() const { return m_loaded; }
 
     bool operator==(const Texture& other) const {
-        return m_id == other.getId();
+        return m_id == other.getID();
     }
     static std::shared_ptr<Texture> Create(uint32_t width, uint32_t height);
     static std::shared_ptr<Texture> Create(const std::string& path);

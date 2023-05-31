@@ -10,13 +10,13 @@
 
 namespace potatoengine {
 
-CameraController::CameraController() : m_camera(glm::perspective(glm::radians(m_fov), m_aspectRatio * m_zoomLevel, m_nearClip, m_farClip), m_position, m_orientation) {
+CameraController::CameraController() : m_camera(glm::perspective(glm::radians(m_fov), m_aspectRatio * m_zoomFactor, m_nearClip, m_farClip), m_position, m_rotation) {
 }
 
 void CameraController::onUpdate(Time dt) {
     float speed = dt * m_translationSpeed;
 
-    glm::quat qF = m_orientation * glm::quat(0, 0, 0, -1) * glm::conjugate(m_orientation);
+    glm::quat qF = m_rotation * glm::quat(0, 0, 0, -1) * glm::conjugate(m_rotation);
     glm::vec3 front = glm::normalize(glm::vec3(qF.x, qF.y, qF.z));
     glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0, 1, 0)));
     glm::vec3 up = {0, dt * m_verticalSpeed, 0};
@@ -50,8 +50,8 @@ void CameraController::onEvent(Event& e) {
 }
 
 bool CameraController::onMouseScrolled(MouseScrolledEvent& e) {
-    m_zoomLevel = std::clamp(m_zoomLevel + float(e.getY()), m_zoomMin, m_zoomMax);
-    m_camera.setProjection(glm::perspective(glm::radians(m_fov * 1.f / m_zoomLevel), m_aspectRatio, m_nearClip, m_farClip));
+    m_zoomFactor = std::clamp(m_zoomFactor + float(e.getY()), m_zoomMin, m_zoomMax);
+    m_camera.setProjection(glm::perspective(glm::radians(m_fov * 1.f / m_zoomFactor), m_aspectRatio, m_nearClip, m_farClip));
 
     return false;
 }
@@ -68,19 +68,19 @@ bool CameraController::onMouseMoved(MouseMovedEvent& e) {
     // pitch mouse movement in y-direction
     glm::quat rotX = glm::angleAxis(glm::radians(m_upAngle), glm::vec3(1, 0, 0));
 
-    m_orientation = rotY * rotX;
+    m_rotation = rotY * rotX;
 
-    // Normalize the orientation quaternion to prevent drift
-    m_orientation = glm::normalize(m_orientation);
+    // Normalize the rotation quaternion to prevent drift
+    m_rotation = glm::normalize(m_rotation);
 
-    m_camera.setOrientation(m_orientation);
+    m_camera.setRotation(m_rotation);
 
     return false;
 }
 
 bool CameraController::onWindowResized(WindowResizeEvent& e) {
     m_aspectRatio = (float)e.getWidth() / (float)e.getHeight();
-    m_camera.setProjection(glm::perspective(glm::radians(m_fov), m_aspectRatio * m_zoomLevel, 1.f, 3000.f));
+    m_camera.setProjection(glm::perspective(glm::radians(m_fov), m_aspectRatio * m_zoomFactor, 1.f, 3000.f));
 
     return false;
 }

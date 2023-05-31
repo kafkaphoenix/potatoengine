@@ -2,21 +2,19 @@
 
 #include <entt/entt.hpp>
 
+namespace potatoengine {
 class Entity;
 
 class Scene {
    public:
-    Scene();
-    ~Scene();
-
-    Entity createEntity(const std::string &name = std::string());
-    void destroyEntity(Entity entity);
+    Entity create(const std::string &name);
+    void destroy(Entity entity);
+    Entity createFromPrefab(const std::string &name);
 
    private:
-    template <typename T>
-    void onComponentAdded(Entity entity, T &component);
-
     entt::registry m_registry;
+    std::unordered_map<uint32_t, entt::entity> m_entities;
 
     friend class Entity;
 };
+}

@@ -9,8 +9,8 @@ class Shader {
     Shader();
     ~Shader();
 
-    operator GLuint();
-    operator bool();
+    operator GLuint() const;
+    operator bool() const;
     void create(GLenum type);
     void load_file(GLenum type, const std::string &file, bool &status);
     bool load_src(GLenum type, const std::string &src);

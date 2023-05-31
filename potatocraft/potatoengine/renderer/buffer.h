@@ -8,7 +8,7 @@ namespace potatoengine {
 
 struct Vertex {
     glm::vec3 pos;
-    glm::vec4 col;
+    glm::vec3 nor;
     glm::vec2 tex;
 };
 
@@ -17,7 +17,7 @@ class VBO {
     VBO(const std::vector<Vertex>& vertices);
     ~VBO();
 
-    uint32_t getId() const { return m_id; }
+    uint32_t getID() const { return m_id; }
     const std::vector<Vertex>& getVertices() const { return m_vertices; }
 
     static std::shared_ptr<VBO> Create(const std::vector<Vertex>& vertices);
@@ -33,7 +33,7 @@ class IBO {
     ~IBO();
 
     uint32_t getCount() const { return m_count; }
-    uint32_t getId() const { return m_id; }
+    uint32_t getID() const { return m_id; }
 
     static std::shared_ptr<IBO> Create(const std::vector<uint32_t>& indices);
 

@@ -26,5 +26,6 @@ class GameState : public potatoengine::State {
     std::shared_ptr<potatoengine::VAO> m_vao;
     std::shared_ptr<potatoengine::Texture> m_texture;
     potatoengine::CameraController m_cameraController;
+    potatoengine::Scene m_scene;
 };
 }

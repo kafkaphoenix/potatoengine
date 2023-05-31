@@ -30,7 +30,10 @@ Application::Application(const std::string& name, CommandLineArgs args)
     // TODO class imgui layer with init and push overlay
 }
 
-Application::~Application() { Renderer::Shutdown(); }
+Application::~Application() {
+    Renderer::Shutdown();
+    // TODO class imgui layer with shutdown and pop overlay
+}
 
 void Application::close() { m_running = false; }
 

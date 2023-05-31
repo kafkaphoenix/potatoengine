@@ -7,7 +7,7 @@ namespace potatoengine {
 
 class Camera {
    public:
-    Camera(const glm::mat4& projection, const glm::vec3& position, const glm::quat& orientation);
+    Camera(const glm::mat4& projection, const glm::vec3& position, const glm::quat& rotation);
     void setProjection(const glm::mat4& projection) {
         m_projection = projection;
         m_viewProjection = m_projection * m_view;
@@ -22,9 +22,9 @@ class Camera {
         m_position = position;
         recalculateView();
     }
-    const glm::quat& getOrientation() const { return m_orientation; }
-    void setOrientation(const glm::quat& orientation) {
-        m_orientation = orientation;
+    const glm::quat& getRotation() const { return m_rotation; }
+    void setRotation(const glm::quat& rotation) {
+        m_rotation = rotation;
         recalculateView();
     }
 
@@ -36,7 +36,7 @@ class Camera {
     glm::mat4 m_viewProjection;
 
     glm::vec3 m_position;
-    glm::quat m_orientation;
+    glm::quat m_rotation;
 };
 
 }

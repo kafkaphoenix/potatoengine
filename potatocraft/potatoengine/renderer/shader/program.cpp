@@ -10,7 +10,7 @@ Program::~Program() {
     glDeleteProgram(m_program);
 }
 
-Program::operator GLuint() {
+Program::operator GLuint() const {
     return m_program;
 }
 

@@ -55,32 +55,32 @@ void loadCubes(std::shared_ptr<potatoengine::VAO> &m_vao) {  // todo move to cla
     m_vao->bind();
 
     std::vector<potatoengine::Vertex> vertices = {
-        {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},  // A 0
-        {{0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},   // B 1
-        {{0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},    // C 2
-        {{-0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},   // D 3
-        {{-0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},   // E 4
-        {{0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},    // F 5
-        {{0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},     // G 6
-        {{-0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},    // H 7
+        {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 0.f}},  // A 0
+        {{0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 0.f}},   // B 1
+        {{0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 1.f}},    // C 2
+        {{-0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 1.f}},   // D 3
+        {{-0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 0.f}},   // E 4
+        {{0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 0.f}},    // F 5
+        {{0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 1.f}},     // G 6
+        {{-0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 1.f}},    // H 7
 
-        {{-0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},   // D 8
-        {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},  // A 9
-        {{-0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},   // E 10
-        {{-0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},    // H 11
-        {{0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},   // B 12
-        {{0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},    // C 13
-        {{0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},     // G 14
-        {{0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},    // F 15
+        {{-0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 0.f}},   // D 8
+        {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 0.f}},  // A 9
+        {{-0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 1.f}},   // E 10
+        {{-0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 1.f}},    // H 11
+        {{0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 0.f}},   // B 12
+        {{0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 0.f}},    // C 13
+        {{0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 1.f}},     // G 14
+        {{0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 1.f}},    // F 15
 
-        {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},  // A 16
-        {{0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},   // B 17
-        {{0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},    // F 18
-        {{-0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},   // E 19
-        {{0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 0.f}},    // C 20
-        {{-0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 0.f}},   // D 21
-        {{-0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {1.f, 1.f}},    // H 22
-        {{0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f, 1.f}, {0.f, 1.f}},     // G 23
+        {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 0.f}},  // A 16
+        {{0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 0.f}},   // B 17
+        {{0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 1.f}},    // F 18
+        {{-0.5f, -0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 1.f}},   // E 19
+        {{0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 0.f}},    // C 20
+        {{-0.5f, 0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 0.f}},   // D 21
+        {{-0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {1.f, 1.f}},    // H 22
+        {{0.5f, 0.5f, 0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 1.f}},     // G 23
     };
 
     std::vector<uint32_t> indices = {
@@ -107,20 +107,20 @@ void loadCubes(std::shared_ptr<potatoengine::VAO> &m_vao) {  // todo move to cla
     m_vao->setIndex(ibo);
 }
 
-GameState::GameState() : State("GameState"), m_cameraController() {
+GameState::GameState() : State("GameState"), m_cameraController(), m_scene() {
     m_shader = potatoengine::Program::Create("shader");
     loadShader(m_shader);
 
     m_shader->use();
     m_shader->setMat4("viewProjection", m_cameraController.getCamera().getViewProjection());
+    m_texture = potatoengine::Texture::Create("..\\assets\\textures\\wall.jpg");
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    m_shader->setInt("mtexture", 0);
+    m_shader->setVec4("colorFactor", {0.8f, 0.6f, 0.4f, 1.f});
+    m_shader->setVec3("lightDir", {0.5f, 0.5f, 1.f});
 
     loadCubes(m_vao);
-
-    m_texture = potatoengine::Texture::Create("..\\assets\\textures\\wall.jpg");
-
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    m_shader->use();  // don't forget to activate/use the shader before setting uniforms!
-    m_shader->setInt("texSampler", 0);
+    auto player = m_scene.create("Player");
 }
 
 void GameState::onAttach() {

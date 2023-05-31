@@ -6,7 +6,6 @@ namespace potatoengine {
 
 class StateStack {
    public:
-    StateStack() = default;
     ~StateStack();
 
     void pushState(State* state);

@@ -11,9 +11,6 @@ class Sandbox : public potatoengine::Application {
     Sandbox(const std::string &name, potatoengine::CommandLineArgs args) : potatoengine::Application(name, args) {
         pushState(new GameState());
     }
-
-    ~Sandbox() {
-    }
 };
 
 }

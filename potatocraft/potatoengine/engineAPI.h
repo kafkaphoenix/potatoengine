@@ -9,6 +9,10 @@
 #include "potatoengine/core/input.h"
 #include "potatoengine/core/state.h"
 
+// scene
+#include "potatoengine/scene/entity.h"
+#include "potatoengine/scene/scene.h"
+
 // renderer
 #include "potatoengine/renderer/camera/cameraController.h"
 #include "potatoengine/renderer/renderer.h"

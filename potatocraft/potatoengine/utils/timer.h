@@ -9,9 +9,7 @@ class Timer {
     Timer() { reset(); }
 
     void reset() { m_start = std::chrono::high_resolution_clock::now(); }
-
     float elapsed() { return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_start).count() * 0.001f * 0.001f * 0.001f; }
-
     float elapsedMillis() { return elapsed() * 1000.f; }
 
    private:

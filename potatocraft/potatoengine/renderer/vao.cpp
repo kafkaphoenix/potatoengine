@@ -17,7 +17,7 @@ void VAO::bind() const {
 }
 
 void VAO::attachVertex(const std::shared_ptr<VBO>& vbo) {
-    glVertexArrayVertexBuffer(m_id, 0, vbo->getId(), 0, sizeof(Vertex));
+    glVertexArrayVertexBuffer(m_id, 0, vbo->getID(), 0, sizeof(Vertex));
     m_vbos.emplace_back(vbo);
 
     glEnableVertexArrayAttrib(m_id, 0);
@@ -25,7 +25,7 @@ void VAO::attachVertex(const std::shared_ptr<VBO>& vbo) {
     glVertexArrayAttribBinding(m_id, 0, m_vboIndex);
 
     glEnableVertexArrayAttrib(m_id, 1);
-    glVertexArrayAttribFormat(m_id, 1, 4, GL_FLOAT, GL_FALSE, offsetof(Vertex, col));
+    glVertexArrayAttribFormat(m_id, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, nor));
     glVertexArrayAttribBinding(m_id, 1, m_vboIndex);
 
     glEnableVertexArrayAttrib(m_id, 2);
@@ -36,7 +36,7 @@ void VAO::attachVertex(const std::shared_ptr<VBO>& vbo) {
 }
 
 void VAO::setIndex(const std::shared_ptr<IBO>& ibo) {
-    glVertexArrayElementBuffer(m_id, ibo->getId());
+    glVertexArrayElementBuffer(m_id, ibo->getID());
     m_ibo = ibo;
 }
 

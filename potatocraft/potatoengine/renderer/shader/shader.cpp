@@ -6,8 +6,9 @@ namespace potatoengine {
 Shader::Shader() : m_id(-1) {}
 
 Shader::~Shader() {
-    if (*this)
+    if (*this) {
         glDeleteShader(m_id);
+    }
 }
 
 bool readfile(const char *filenamePath, std::string &contents) {
@@ -73,11 +74,11 @@ void Shader::compile() {
     glCompileShader(m_id);
 }
 
-Shader::operator GLuint() {
+Shader::operator GLuint() const {
     return m_id;
 }
 
-Shader::operator bool() {
+Shader::operator bool() const {
     return m_id not_eq static_cast<int32_t>(-1);
 }
 

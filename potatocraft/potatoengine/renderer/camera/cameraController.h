@@ -18,8 +18,8 @@ class CameraController {
     void setAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
     float getFov() const { return m_fov; }
     void setFov(float fov) { m_fov = fov; }
-    float getZoomLevel() const { return m_zoomLevel; }
-    void setZoomLevel(float level) { m_zoomLevel = level; }
+    float getZoomFactor() const { return m_zoomFactor; }
+    void setZoomFactor(float level) { m_zoomFactor = level; }
     float getMouseSensitivity() const { return m_mouseSensitivity; }
     void setMouseSensitivity(float sensitivity) { m_mouseSensitivity = sensitivity; }
 
@@ -40,7 +40,7 @@ class CameraController {
 
     float m_aspectRatio = 3840.f / 2160.f;
     float m_fov = 90.f;
-    float m_zoomLevel = 1.f;
+    float m_zoomFactor = 1.f;
     float m_zoomMin = 1.f;
     float m_zoomMax = 4.f;
     float m_mouseSensitivity = 0.1f;
@@ -48,7 +48,7 @@ class CameraController {
     float m_farClip = 3000.f;
 
     glm::vec3 m_position = {0.f, 0.f, 0.f};
-    glm::quat m_orientation = {1.f, 0.f, 0.f, 0.f};
+    glm::quat m_rotation = {1.f, 0.f, 0.f, 0.f};
     float m_rightAngle = 0.f;
     float m_upAngle = 0.f;
 

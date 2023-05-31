@@ -10,7 +10,6 @@ namespace potatoengine {
 class Log {
    public:
     static void Init();
-
     static std::shared_ptr<spdlog::logger> &GetLogger() { return s_logger; }
 
    private:
@@ -19,7 +18,6 @@ class Log {
 
 }
 
-// Core log macros
 #define CORE_TRACE(...) ::potatoengine::Log::GetLogger()->trace(__VA_ARGS__)
 #define CORE_INFO(...) ::potatoengine::Log::GetLogger()->info(__VA_ARGS__)
 #define CORE_WARN(...) ::potatoengine::Log::GetLogger()->warn(__VA_ARGS__)
