@@ -6,20 +6,20 @@ namespace potatoengine {
 
 class Shader {
    public:
-    Shader();
+    Shader(const std::string& filepath);
     ~Shader();
 
-    operator GLuint() const;
-    operator bool() const;
-    void create(GLenum type);
-    void load_file(GLenum type, const std::string &file, bool &status);
-    bool load_src(GLenum type, const std::string &src);
-    void set_src(const std::string &src);
-    void set_file(const std::string &src);
-    void compile();
+    uint32_t getID() const { return m_id; }
+    const std::string& getFilepath() const { return m_filepath; }
+
+    bool operator==(const Shader& other) const {
+        return m_id == other.getID() && m_type == other.m_type;
+    }
+    operator GLuint() const { return m_id; }
 
    private:
-    int32_t m_id;
+    std::string m_filepath;
+    uint32_t m_id;
     GLenum m_type;
 };
 

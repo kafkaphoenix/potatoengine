@@ -6,6 +6,7 @@
 
 // core
 #include "potatoengine/core/application.h"
+#include "potatoengine/core/assetsManager.h"
 #include "potatoengine/core/input.h"
 #include "potatoengine/core/state.h"
 

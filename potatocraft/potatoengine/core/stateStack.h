@@ -1,6 +1,7 @@
 #pragma once
 
 #include "potatoengine/core/state.h"
+#include "potatoengine/pch.h"
 
 namespace potatoengine {
 
@@ -8,8 +9,8 @@ class StateStack {
    public:
     ~StateStack();
 
-    void pushState(State* state);
-    void pushOverlay(State* overlay);
+    void pushState(std::unique_ptr<State> state);
+    void pushOverlay(std::unique_ptr<State> overlay);
     void popState(const std::string& name);
     void popOverlay(const std::string& name);
 
@@ -23,9 +24,10 @@ class StateStack {
     auto rbegin() const { return m_states.rbegin(); }
     auto rend() const { return m_states.rend(); }
 
+    static std::unique_ptr<StateStack> Create();
    private:
-    std::vector<State*> m_states;
-    uint32_t m_stateInsertIndex{};
+    std::vector<std::unique_ptr<State>> m_states;
+    uint32_t m_index{};
 };
 
 }

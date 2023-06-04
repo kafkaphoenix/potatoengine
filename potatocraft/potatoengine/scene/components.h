@@ -24,7 +24,7 @@ struct Transform {
 };
 
 struct Mesh {
-    std::shared_ptr<Texture> texture;
+    std::unique_ptr<Texture> texture;
     std::string filepath;
 
     Mesh(const std::string& filepath) : filepath(filepath) {}

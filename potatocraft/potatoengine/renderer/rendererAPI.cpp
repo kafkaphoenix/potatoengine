@@ -67,7 +67,6 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum s
         severity_str,
         id,
         message);
-    fprintf(stderr, info.c_str());
 
     switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:

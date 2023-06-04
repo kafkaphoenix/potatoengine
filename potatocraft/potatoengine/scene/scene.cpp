@@ -12,7 +12,7 @@ Entity Scene::create(const std::string &name) {
     entity.add<ID>(id);
     entity.add<Name>(name);
 
-    m_entities[id] = entity;
+    m_entities[id] = entity; // TODO ARREGLAR NO HCER COPIAS
     CORE_INFO("Created entity {0} id: {1}", name, id);
 
     return entity;

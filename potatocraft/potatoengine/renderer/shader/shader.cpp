@@ -3,83 +3,39 @@
 #include "potatoengine/pch.h"
 
 namespace potatoengine {
-Shader::Shader() : m_id(-1) {}
-
-Shader::~Shader() {
-    if (*this) {
-        glDeleteShader(m_id);
+Shader::Shader(const std::string& filepath) : m_filepath(filepath) {
+    std::ifstream file(filepath);
+    if (not file.is_open()) {
+        file.close();
+        throw std::runtime_error("Failed to load file: " + filepath);
     }
-}
-
-bool readfile(const char *filenamePath, std::string &contents) {
-    std::ifstream file(filenamePath);
-    if (!file.is_open()) {
-        fprintf(stdout, "Failed to load file from path %s\n", filenamePath);
-        return false;
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    contents = buffer.str();
-
+    std::string data(std::istreambuf_iterator<char>(file), {});
     file.close();
-    return true;
-}
 
-void Shader::create(GLenum type) {
-    m_type = type;
-    m_id = glCreateShader(type);
-}
+    std::string extension = filepath.substr(filepath.find_last_of(".") + 1);
+    m_type = (extension == "vert") ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
+    m_id = glCreateShader(m_type);
 
-bool Shader::load_src(GLenum type, const std::string &src) {
-    this->create(type);
-    this->set_src(src);
-    this->compile();
+    const GLchar* source = data.c_str();
+    glShaderSource(m_id, 1, &source, 0);
+    glCompileShader(m_id);
+
     int32_t status = GL_FALSE;
     glGetShaderiv(m_id, GL_COMPILE_STATUS, &status);
     if (status not_eq GL_TRUE) {
-        int32_t maxLength = 0;
-        glGetShaderiv(m_id, GL_INFO_LOG_LENGTH, &maxLength);
-        fprintf(stdout, "Shader compilation failed\n");
-        if (maxLength > 0) {
-            std::vector<GLchar> shaderInfoLog;
-            shaderInfoLog.reserve(maxLength);
-            glGetShaderInfoLog(m_id, maxLength, &maxLength, shaderInfoLog.data());
-            fprintf(stdout, "\tError info: %s\n", shaderInfoLog.data());
+        glDeleteShader(m_id);
+        GLint infoLogLength = 0;
+        glGetShaderiv(m_id, GL_INFO_LOG_LENGTH, &infoLogLength);
+        if (infoLogLength == 0) {
+            throw std::runtime_error("Shader compilation failed");
         }
-        return false;
-    }
-    return true;
-}
-
-void Shader::load_file(GLenum type, const std::string &file, bool &status) {
-    std::string src;
-    if (readfile(file.c_str(), src)) {
-        status = this->load_src(type, src);
+        std::vector<GLchar> shaderInfoLog(infoLogLength);
+        glGetShaderInfoLog(m_id, infoLogLength, &infoLogLength, shaderInfoLog.data());
+        throw std::runtime_error("Shader compilation failed: " + std::string(shaderInfoLog.data()));
     }
 }
 
-void Shader::set_src(const std::string &src) {
-    const GLchar *src_cstr = reinterpret_cast<const GLchar *>(src.c_str());
-    glShaderSource(m_id, 1, &src_cstr, 0);
+Shader::~Shader() {
+    glDeleteShader(m_id);
 }
-
-void Shader::set_file(const std::string &file) {
-    std::string src;
-    readfile(file.c_str(), src);
-    this->set_src(src);
-}
-
-void Shader::compile() {
-    glCompileShader(m_id);
-}
-
-Shader::operator GLuint() const {
-    return m_id;
-}
-
-Shader::operator bool() const {
-    return m_id not_eq static_cast<int32_t>(-1);
-}
-
 }

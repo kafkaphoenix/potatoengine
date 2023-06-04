@@ -41,7 +41,7 @@ class Window {
     void setVSync(bool enabled);
     bool isVSync() const { return m_data.vSync; }
 
-    void* getNativeWindow() const { return m_window; }
+    GLFWwindow* getNativeWindow() const { return m_window; }
 
     int getWidth() const { return m_data.width; }
     int getHeight() const { return m_data.height; }
@@ -56,7 +56,7 @@ class Window {
     static std::unique_ptr<Window> Create(const WindowProperties& properties);
 
    private:
-    GLFWwindow* m_window;
+    GLFWwindow* m_window; // TODO: this class should be a window manager, and this should be a vector of windows
     std::shared_ptr<OpenGLContext> m_context;
 
     struct WindowData {

@@ -21,15 +21,15 @@ void Window::init(const WindowProperties& properties) {
     m_data.lastX = properties.width / 2.f;
     m_data.lastY = properties.height / 2.f;
 
-    fprintf(stdout, "Creating window for the app %s with resolution %ix%i\n", properties.title.c_str(), properties.width, properties.height);
+    std::print("Creating window for the app {} with resolution {}x{}\n", properties.title, properties.width, properties.height);
 
     if (s_GLFWWindowCount == 0) {
-        fprintf(stdout, "Starting GLFW context, OpenGL 4.6\n");
+        std::print("Starting GLFW context, OpenGL 4.6\n");
         if (!glfwInit()) {
-            fprintf(stderr, "Failed to initialize GLFW!\n");
+            throw std::runtime_error("Failed to initialize GLFW!");
         }
         glfwSetErrorCallback([](int error, const char* description) {
-            fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+            throw std::runtime_error("GLFW Error! " + std::to_string(error) + ": " + description);
         });
     }
 

@@ -18,6 +18,8 @@ class State {
 
     const std::string& getName() const { return m_name; }
 
+    static std::unique_ptr<State> Create();
+
    protected:
     std::string m_name;
 };

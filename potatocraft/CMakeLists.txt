@@ -1,5 +1,5 @@
 # Project definition
-cmake_minimum_required(VERSION 3.13...3.21)
+cmake_minimum_required(VERSION 3.20...3.25)
 
 project(potatocraft
 LANGUAGES CXX
@@ -8,6 +8,10 @@ VERSION 1.0
 
 # Generate the compilation database
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Set C++ standard to C++23
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(BASEPATH "${CMAKE_SOURCE_DIR}")
 include_directories("${BASEPATH}")
@@ -37,13 +41,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${assimp_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${spdlog_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
 option(ENTT_INCLUDE_NATVIS ON)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 target_precompile_headers(${PROJECT_NAME} PRIVATE potatoengine/pch.h)
 
 if (MSVC)
-target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX /EHs)
+# https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=msvc-170
+target_compile_options(${PROJECT_NAME} PRIVATE /EHs /nologo /W4 /std:c++latest /Od /utf-8 /WX)
 target_compile_options(${PROJECT_NAME} PRIVATE /external:I ${CMAKE_SOURCE_DIR}/build /W0) # Exclude from warnings
-target_compile_options(${PROJECT_NAME} PRIVATE /experimental:module)
 elseif(GCC OR CLANG)
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror)
 target_compile_options(-isystem ${CMAKE_SOURCE_DIR}/build)  # Exclude from warnings
@@ -57,7 +61,8 @@ add_dependencies(${PROJECT_NAME} copy_assets)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog ${CMAKE_DL_LIBS})
 
-# Linters
+# Linters (Needs compilation database sadly no MSVC support yet, change to GCC to use)
+# https://stackoverflow.com/questions/65544093/no-compile-commands-json-file-using-cmake-with-vs-code-on-windows
 # find_program(CLANG_TIDY NAMES "clang-tidy")
 
 # if(CLANG_TIDY)
@@ -84,7 +89,7 @@ find_program(CPPCHECK NAMES "cppcheck")
 if(CPPCHECK)
     set(CPPCHECK_OPTIONS
         "--enable=all"
-        "--std=c++20"
+        "--std=c++23"
         #"--check-config"
         "--platform=win64"
         "--suppress=missingIncludeSystem"

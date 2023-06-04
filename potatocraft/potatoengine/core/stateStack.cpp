@@ -3,37 +3,40 @@
 namespace potatoengine {
 
 StateStack::~StateStack() {
-    for (auto state : m_states) {
+    for (auto& state : m_states) {
         state->onDetach();
-        delete state;
     }
 }
 
-void StateStack::pushState(State* state) {
-    m_states.emplace(m_states.begin() + m_stateInsertIndex++, state);
+void StateStack::pushState(std::unique_ptr<State> state) {
+    m_states.emplace(m_states.begin() + m_index++, std::move(state));
 }
 
-void StateStack::pushOverlay(State* overlay) {
-    m_states.emplace_back(overlay);
+void StateStack::pushOverlay(std::unique_ptr<State> overlay) {
+    m_states.emplace_back(std::move(overlay));
 }
 
 void StateStack::popState(const std::string& name) {
-    auto it = std::find_if(m_states.begin(), m_states.begin() + m_stateInsertIndex, [&](const State* state) { return state->getName() == name; });
+    auto it = std::find_if(m_states.begin(), m_states.begin() + m_index, [&](const std::unique_ptr<State>& state) { return state->getName() == name; });
 
-    if (it not_eq m_states.begin() + m_stateInsertIndex) {
+    if (it != m_states.begin() + m_index) {
         (*it)->onDetach();
         m_states.erase(it);
-        --m_stateInsertIndex;
+        --m_index;
     }
 }
 
 void StateStack::popOverlay(const std::string& name) {
-    auto it = std::find_if(m_states.rbegin(), m_states.rend(), [&](const State* state) { return state->getName() == name; });
+    auto it = std::find_if(m_states.rbegin(), m_states.rend(), [&](const std::unique_ptr<State>& state) { return state->getName() == name; });
 
-    if (it not_eq m_states.rend()) {
+    if (it != m_states.rend()) {
         (*it)->onDetach();
         m_states.erase(std::next(it).base());
     }
+}
+
+std::unique_ptr<StateStack> StateStack::Create() {
+    return std::make_unique<StateStack>();
 }
 
 }

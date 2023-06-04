@@ -14,31 +14,28 @@ Program::operator GLuint() const {
     return m_program;
 }
 
-void Program::attach(Shader &shader) {
+void Program::attach(const Shader &shader) {
     glAttachShader(m_program, shader);
 }
 
-void Program::detach(Shader &shader) {
+void Program::detach(const Shader &shader) {
     glDetachShader(m_program, shader);
 }
 
-void Program::link(bool &link_status) {
+void Program::link() {
     glLinkProgram(m_program);
+
     int status = GL_FALSE;
     glGetProgramiv(m_program, GL_LINK_STATUS, &status);
     if (status not_eq GL_TRUE) {
-        int maxLength = 0;
-        glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &maxLength);
-        fprintf(stdout, "Shader linking failed\n");
-        if (maxLength > 0) {
-            std::vector<GLchar> shaderProgramInfoLog;
-            shaderProgramInfoLog.reserve(maxLength);
-            glGetProgramInfoLog(m_program, maxLength, &maxLength, shaderProgramInfoLog.data());
-            fprintf(stdout, "\tError info: %s\n", shaderProgramInfoLog.data());
+        int infoLogLength = 0;
+        glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &infoLogLength);
+        if (infoLogLength == 0) {
+            throw std::runtime_error("Could not link shader program " + m_name);
         }
-        link_status = false;
-    } else {
-        link_status = true;
+        std::vector<GLchar> shaderProgramInfoLog(infoLogLength);
+        glGetProgramInfoLog(m_program, infoLogLength, &infoLogLength, shaderProgramInfoLog.data());
+        throw std::runtime_error("Could not link shader program " + m_name + ": " + shaderProgramInfoLog.data());
     }
 }
 

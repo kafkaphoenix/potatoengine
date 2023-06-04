@@ -15,42 +15,21 @@ glm::vec3 cubePositions[] = {
     {1.5f, 0.2f, -1.5f},
     {-1.3f, 1.f, -1.5f}};
 
-void loadShader(std::shared_ptr<potatoengine::Program> &m_shader)  // todo move to class
-{
-    fprintf(stdout, "Loading shader program\n");
-    std::string s_name = m_shader->getName();
-    fprintf(stdout, "Creating vertex shader\n");
-    potatoengine::Shader shader_vert;
-    bool load_status_vert = false;
-    shader_vert.load_file(GL_VERTEX_SHADER, "..\\assets\\shaders\\" + s_name + ".vert", load_status_vert);
+void GameState::computeShaders() {
+    std::print("Computing shaders...\n");
+    const auto &vert = m_assetsManager->get<potatoengine::Shader>(potatoengine::asset::shader::ID::VBasic);
+    const auto &frag = m_assetsManager->get<potatoengine::Shader>(potatoengine::asset::shader::ID::FBasic);
+    m_basic->attach(vert);
+    m_basic->attach(frag);
 
-    fprintf(stdout, "Creating fragment shader\n");
-    potatoengine::Shader shader_frag;
-    bool load_status_frag = false;
-    shader_frag.load_file(GL_FRAGMENT_SHADER, "..\\assets\\shaders\\" + s_name + ".frag", load_status_frag);
-
-    if (load_status_vert and load_status_frag) {
-        fprintf(stdout, "Attaching shaders\n");
-        m_shader->attach(shader_vert);
-        m_shader->attach(shader_frag);
-        bool link_status = false;
-        fprintf(stdout, "Linking shader program\n");
-        m_shader->link(link_status);
-        if (link_status) {
-            m_shader->detach(shader_vert);
-            m_shader->detach(shader_frag);
-        } else {
-            fprintf(stdout, "Could not link shader program\n");
-            throw(std::runtime_error("Could not link shader program"));
-        }
-    } else {
-        fprintf(stdout, "Could not load shader files\n");
-        throw std::runtime_error("Failed to load file\n");  // todo move to assert
-    }
+    m_basic->link();
+    m_basic->detach(vert);
+    m_basic->detach(frag);
+    std::print("Shaders computed!\n");
 }
 
-void loadCubes(std::shared_ptr<potatoengine::VAO> &m_vao) {  // todo move to class
-    fprintf(stdout, "Loading cubes\n");
+void GameState::loadCubes() { // todo replace with mesh
+    std::print("Loading cubes\n");
     m_vao = potatoengine::VAO::Create();
     m_vao->bind();
 
@@ -100,26 +79,22 @@ void loadCubes(std::shared_ptr<potatoengine::VAO> &m_vao) {  // todo move to cla
         20, 21, 22,
         22, 23, 20};
 
-    auto vbo = potatoengine::VBO::Create(vertices);
-    auto ibo = potatoengine::IBO::Create(indices);
-
-    m_vao->attachVertex(vbo);
-    m_vao->setIndex(ibo);
+    m_vao->attachVertex(potatoengine::VBO::Create(vertices));
+    m_vao->setIndex(potatoengine::IBO::Create(indices));
 }
 
-GameState::GameState() : State("GameState"), m_cameraController(), m_scene() {
-    m_shader = potatoengine::Program::Create("shader");
-    loadShader(m_shader);
+GameState::GameState(const std::shared_ptr<potatoengine::AssetsManager> &assetsManager) : State("GameState"), m_cameraController(), m_scene(), m_assetsManager(assetsManager) {
+    m_basic = potatoengine::Program::Create("basic");
+    computeShaders();
 
-    m_shader->use();
-    m_shader->setMat4("viewProjection", m_cameraController.getCamera().getViewProjection());
-    m_texture = potatoengine::Texture::Create("..\\assets\\textures\\wall.jpg");
+    m_basic->use();
+    m_basic->setMat4("viewProjection", m_cameraController.getCamera().getViewProjection());
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    m_shader->setInt("mtexture", 0);
-    m_shader->setVec4("colorFactor", {0.8f, 0.6f, 0.4f, 1.f});
-    m_shader->setVec3("lightDir", {0.5f, 0.5f, 1.f});
+    m_basic->setInt("mtexture", 0);
+    m_basic->setVec4("colorFactor", {0.8f, 0.6f, 0.4f, 1.f});
+    m_basic->setVec3("lightDir", {0.5f, 0.5f, 1.f});
 
-    loadCubes(m_vao);
+    loadCubes();
     auto player = m_scene.create("Player");
 }
 
@@ -136,11 +111,11 @@ void GameState::onUpdate(potatoengine::Time dt) {
 
     potatoengine::Renderer::BeginScene(m_cameraController.getCamera());
 
-    m_texture->bind(0);
+    m_assetsManager->get<potatoengine::Texture>(potatoengine::asset::texture::ID::Cube).bind(0);
     for (uint32_t i = 0; i < 10; i++) {
         glm::mat4 transform = glm::mat4(1.f);
         transform = glm::translate(transform, cubePositions[i]);
-        potatoengine::Renderer::Submit(m_shader, m_vao, transform);
+        potatoengine::Renderer::Submit(m_basic, m_vao, transform);
     }
 
     potatoengine::Renderer::EndScene();
@@ -161,7 +136,7 @@ bool GameState::onKeyPressed(potatoengine::KeyPressedEvent &e) {
     if (e.repeating())
         return false;
 
-    potatoengine::Window &window = potatoengine::Application::Get().getWindow();
+    auto &window = potatoengine::Application::Get().getWindow();
     // bool control = potatoengine::Input::IsKeyPressed(potatoengine::Key::LeftControl) || potatoengine::Input::IsKeyPressed(potatoengine::Key::RightControl);
     // bool shift = potatoengine::Input::IsKeyPressed(potatoengine::Key::LeftShift) || potatoengine::Input::IsKeyPressed(potatoengine::Key::RightShift);
 
@@ -199,4 +174,7 @@ bool GameState::onKeyReleased(potatoengine::KeyReleasedEvent &e) {
     return true;
 }
 
+std::unique_ptr<potatoengine::State> GameState::Create(const std::shared_ptr<potatoengine::AssetsManager> &assetsManager) {
+    return std::make_unique<GameState>(assetsManager);
+}
 }

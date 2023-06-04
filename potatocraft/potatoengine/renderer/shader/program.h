@@ -13,9 +13,9 @@ class Program {
     ~Program();
 
     operator GLuint() const;
-    void attach(Shader &shader);
-    void detach(Shader &shader);
-    void link(bool &status);
+    void attach(const Shader &shader);
+    void detach(const Shader &shader);
+    void link();
     void use();
     void setInt(const std::string &name, int value);
     void setFloat(const std::string &name, float value);

@@ -20,7 +20,7 @@ class VBO {
     uint32_t getID() const { return m_id; }
     const std::vector<Vertex>& getVertices() const { return m_vertices; }
 
-    static std::shared_ptr<VBO> Create(const std::vector<Vertex>& vertices);
+    static std::unique_ptr<VBO> Create(const std::vector<Vertex>& vertices);
 
    private:
     std::vector<Vertex> m_vertices;
@@ -35,10 +35,10 @@ class IBO {
     uint32_t getCount() const { return m_count; }
     uint32_t getID() const { return m_id; }
 
-    static std::shared_ptr<IBO> Create(const std::vector<uint32_t>& indices);
+    static std::unique_ptr<IBO> Create(const std::vector<uint32_t>& indices);
 
    private:
     uint32_t m_id;
     uint32_t m_count;
 };
-}  // namespace potatoengine
+}

@@ -1,15 +1,18 @@
 #pragma once
 #include "potatoengine/core/application.h"
 
-extern potatoengine::Application *potatoengine::CreateApp(
-    const std::string &name, CommandLineArgs args);
+extern potatoengine::Application *potatoengine::CreateApp(const std::string &name, CommandLineArgs args);
 
 int main(int argc, char **argv) {
-    potatoengine::Log::Init();
+    try {
+        potatoengine::Log::Init();
 
-    auto app = potatoengine::CreateApp("potatocraft", {argc, argv});
+        auto app = potatoengine::CreateApp("potatocraft", {argc, argv});
 
-    app->run();
+        app->run();
 
-    delete app;
+        delete app;
+    } catch (const std::runtime_error& ex) {
+        std::cout << "Exception caught: " << ex.what() << std::endl;
+    }
 }

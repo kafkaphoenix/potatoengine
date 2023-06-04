@@ -1,5 +1,6 @@
 #pragma once
 
+#include "potatoengine/core/assetsManager.h"
 #include "potatoengine/core/state.h"
 #include "potatoengine/core/stateStack.h"
 #include "potatoengine/core/window.h"
@@ -23,14 +24,17 @@ class Application {
     virtual ~Application();
 
     void onEvent(Event& e);
-    void pushState(State* state);
-    void pushOverlay(State* state);
+    void pushState(std::unique_ptr<State> state);
+    void pushOverlay(std::unique_ptr<State> state);
 
-    Window& getWindow() { return *m_window; }
+    Window& getWindow() const { return *m_window; }
 
     void close();
 
     static Application& Get() { return *s_instance; }
+
+   protected:
+    std::shared_ptr<AssetsManager> m_assetsManager;
 
    private:
     void run();
@@ -38,13 +42,14 @@ class Application {
     bool onWindowResize(WindowResizeEvent& e);
 
     std::unique_ptr<Window> m_window;
+    std::unique_ptr<StateStack> m_states;
+
+    std::string m_name;
     bool m_running = true;
     bool m_minimized = false;
     float m_lastFrame{};
     float m_accumulator{};
-    StateStack m_stateStack;
 
-    std::string m_name;
     CommandLineArgs m_commandLineArgs;
 
     inline static Application* s_instance = nullptr;

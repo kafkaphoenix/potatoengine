@@ -1,5 +1,6 @@
 #include "potatoengine/core/application.h"
 
+#include "potatoengine/core/assetsManager.h"
 #include "potatoengine/core/time.h"
 #include "potatoengine/renderer/renderer.h"
 // #include <imgui.h>
@@ -23,6 +24,8 @@ Application::Application(const std::string& name, CommandLineArgs args)
     : m_name(name), m_commandLineArgs(args) {
     s_instance = this;
 
+    m_states = StateStack::Create();
+    m_assetsManager = AssetsManager::Create();
     m_window = Window::Create(WindowProperties(m_name));
     m_window->setEventCallback(BIND_EVENT(Application::onEvent));
 
@@ -51,7 +54,7 @@ bool Application::onWindowResize(WindowResizeEvent& e) {
         Renderer::OnWindowResize(e.getWidth(), e.getHeight());
     }
 
-    return false;
+    return true;
 }
 
 void Application::onEvent(Event& e) {
@@ -60,25 +63,25 @@ void Application::onEvent(Event& e) {
     dispatcher.dispatch<WindowResizeEvent>(
         BIND_EVENT(Application::onWindowResize));
 
-    for (auto it = m_stateStack.rbegin(); it not_eq m_stateStack.rend(); ++it) {
+    for (auto it = m_states->rbegin(); it not_eq m_states->rend(); ++it) {
         if (e.m_handled) break;
         (*it)->onEvent(e);
     }
 }
 
-void Application::pushState(State* state) {
-    m_stateStack.pushState(state);
+void Application::pushState(std::unique_ptr<State> state) {
     state->onAttach();
+    m_states->pushState(std::move(state));
 }
 
-void Application::pushOverlay(State* state) {
-    m_stateStack.pushOverlay(state);
+void Application::pushOverlay(std::unique_ptr<State> state) {
     state->onAttach();
+    m_states->pushOverlay(std::move(state));
 }
 
 void Application::run() {
     // const char *glsl_version = "#version 460";
-    // auto* window = static_cast<GLFWwindow*>(getWindow().getNativeWindow());
+    // auto* window = static_cast<GLFWwindow*>(getWindow().getNativeWindow()); try const auto&
 
     // init_imgui_context(window, glsl_version);
 
@@ -91,9 +94,13 @@ void Application::run() {
 
         if (!m_minimized) {
             while (m_accumulator > 1.f / 61.f) {
-                for (auto state : m_stateStack) state->onUpdate(dt);
+                for (auto& state : *m_states) {
+                    state->onUpdate(dt);
+                }
                 m_accumulator -= 1.f / 59.f;
-                if (m_accumulator < 0) m_accumulator = 0;
+                if (m_accumulator < 0) {
+                    m_accumulator = 0;
+                }
             }
 
             /*if (m_debugging) {
@@ -102,7 +109,7 @@ void Application::run() {
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             }*/
         }
-
+        // TODO: open menu pause
         m_window->onUpdate();
     }
     // espera teardown(window);
@@ -118,7 +125,7 @@ void Application::run() {
 
 void init_imgui_context(GLFWwindow *window, const char *glsl_version)
 {
-    fprintf(stdout, "Starting ImGui context\n");
+    std::print("Starting ImGui context\n");
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
