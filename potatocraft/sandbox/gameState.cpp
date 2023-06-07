@@ -15,23 +15,122 @@ glm::vec3 cubePositions[] = {
     {1.5f, 0.2f, -1.5f},
     {-1.3f, 1.f, -1.5f}};
 
-void GameState::computeShaders() {
-    std::print("Computing shaders...\n");
-    const auto &vert = m_assetsManager->get<potatoengine::Shader>(potatoengine::asset::shader::ID::VBasic);
-    const auto &frag = m_assetsManager->get<potatoengine::Shader>(potatoengine::asset::shader::ID::FBasic);
-    m_basic->attach(vert);
-    m_basic->attach(frag);
-
-    m_basic->link();
-    m_basic->detach(vert);
-    m_basic->detach(frag);
-    std::print("Shaders computed!\n");
+GameState::GameState(const std::shared_ptr<potatoengine::AssetsManager> &assetsManager) : State("GameState"), m_cameraController(), m_scene(assetsManager), m_assetsManager(assetsManager) {
+    computeShaders();
+    loadCubes();
+    m_scene.create(potatoengine::asset::prefab::ID::Player);
+#ifdef DEBUG
+    m_scene.print();
+#endif
 }
 
-void GameState::loadCubes() { // todo replace with mesh
-    std::print("Loading cubes\n");
+void GameState::onAttach() {
+}
+
+void GameState::onDetach() {
+}
+
+void GameState::onUpdate(potatoengine::Time ts) {
+    m_cameraController.onUpdate(ts);
+    potatoengine::RendererAPI::SetClearColor({0.45f, 0.55f, 0.60f, 1.00f});
+    potatoengine::RendererAPI::Clear();
+
+    potatoengine::Renderer::BeginScene(m_cameraController.getCamera());
+
+    for (const auto &cubePosition : cubePositions) {
+        glm::mat4 transform = glm::mat4(1.f);
+        transform = glm::translate(transform, cubePosition);
+        potatoengine::Renderer::Submit(m_basic, m_vao, transform);
+    }
+
+    m_scene.onUpdate(ts);
+
+    potatoengine::Renderer::EndScene();
+}
+
+void GameState::onImGuiRender() {
+}
+
+void GameState::onEvent(potatoengine::Event &e) {
+    m_cameraController.onEvent(e);
+
+    potatoengine::EventDispatcher dispatcher(e);
+    dispatcher.dispatch<potatoengine::KeyPressedEvent>(BIND_EVENT(GameState::onKeyPressed));
+    dispatcher.dispatch<potatoengine::KeyReleasedEvent>(BIND_EVENT(GameState::onKeyReleased));
+}
+
+bool GameState::onKeyPressed(potatoengine::KeyPressedEvent &e) {
+    if (e.repeating())
+        return false;
+
+    auto &window = potatoengine::Application::Get().getWindow();
+    // bool control = potatoengine::Input::IsKeyPressed(potatoengine::Key::LeftControl) or potatoengine::Input::IsKeyPressed(potatoengine::Key::RightControl);
+    // bool shift = potatoengine::Input::IsKeyPressed(potatoengine::Key::LeftShift) or potatoengine::Input::IsKeyPressed(potatoengine::Key::RightShift);
+
+    switch (e.getKeyCode()) {
+        case potatoengine::Key::Escape:
+            potatoengine::Application::Get().close();
+            break;
+        case potatoengine::Key::F3:
+            m_debugging = not m_debugging;
+            break;
+        case potatoengine::Key::F4:
+            m_wireframe = not m_wireframe;
+            potatoengine::RendererAPI::SetWireframe(m_wireframe);
+            break;
+        case potatoengine::Key::LeftAlt:
+            window.setUpdateCameraPosition(false);
+            window.setCursorMode(potatoengine::CursorMode::Normal);
+            break;
+    }
+
+    return true;
+}
+
+bool GameState::onKeyReleased(potatoengine::KeyReleasedEvent &e) {
+    potatoengine::Window &window = potatoengine::Application::Get().getWindow();
+
+    switch (e.getKeyCode()) {
+        case potatoengine::Key::LeftAlt:
+            window.setLastMousePosition(potatoengine::Input::GetMouseX(), potatoengine::Input::GetMouseY());
+            window.setUpdateCameraPosition(true);
+            window.setCursorMode(potatoengine::CursorMode::Disabled);
+            break;
+    }
+
+    return true;
+}
+
+void GameState::computeShaders() {
+#ifdef DEBUG
+    CORE_INFO("\tComputing shaders...");
+#endif
+    m_basic = potatoengine::Program::Create("basic");
+
+    const auto &vert = (m_assetsManager->get<potatoengine::Shader>(potatoengine::asset::shader::ID::VBasic)).get();
+    const auto &frag = (m_assetsManager->get<potatoengine::Shader>(potatoengine::asset::shader::ID::FBasic)).get();
+    potatoengine::Renderer::Link(m_basic, vert, frag);
+
+    m_basic->use();
+    m_basic->setMat4("viewProjection", m_cameraController.getCamera().getViewProjection());
+    const auto& initialTexture = (m_assetsManager->get<potatoengine::Texture>(potatoengine::asset::texture::ID::Cube)).get();
+    initialTexture.bindSlot(0);
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    m_basic->setInt("mtexture", 0);
+    m_basic->setVec4("colorFactor", {0.8f, 0.6f, 0.4f, 1.f});
+    m_basic->setVec3("lightDir", {0.5f, 0.5f, 1.f});
+    m_basic->unuse();
+
+#ifdef DEBUG
+    CORE_INFO("\tShaders computed!");
+#endif
+}
+
+void GameState::loadCubes() {  // todo replace with mesh
+#ifdef DEBUG
+    CORE_INFO("\tCreating cubes...");
+#endif
     m_vao = potatoengine::VAO::Create();
-    m_vao->bind();
 
     std::vector<potatoengine::Vertex> vertices = {
         {{-0.5f, -0.5f, -0.5f}, {0.3f, 0.15f, 0.06f}, {0.f, 0.f}},  // A 0
@@ -81,100 +180,12 @@ void GameState::loadCubes() { // todo replace with mesh
 
     m_vao->attachVertex(potatoengine::VBO::Create(vertices));
     m_vao->setIndex(potatoengine::IBO::Create(indices));
+#ifdef DEBUG
+    CORE_INFO("\tCubes created!");
+#endif
 }
 
-GameState::GameState(const std::shared_ptr<potatoengine::AssetsManager> &assetsManager) : State("GameState"), m_cameraController(), m_scene(), m_assetsManager(assetsManager) {
-    m_basic = potatoengine::Program::Create("basic");
-    computeShaders();
-
-    m_basic->use();
-    m_basic->setMat4("viewProjection", m_cameraController.getCamera().getViewProjection());
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    m_basic->setInt("mtexture", 0);
-    m_basic->setVec4("colorFactor", {0.8f, 0.6f, 0.4f, 1.f});
-    m_basic->setVec3("lightDir", {0.5f, 0.5f, 1.f});
-
-    loadCubes();
-    auto player = m_scene.create("Player");
-}
-
-void GameState::onAttach() {
-}
-
-void GameState::onDetach() {
-}
-
-void GameState::onUpdate(potatoengine::Time dt) {
-    m_cameraController.onUpdate(dt);
-    potatoengine::RendererAPI::SetClearColor({0.45f, 0.55f, 0.60f, 1.00f});
-    potatoengine::RendererAPI::Clear();
-
-    potatoengine::Renderer::BeginScene(m_cameraController.getCamera());
-
-    m_assetsManager->get<potatoengine::Texture>(potatoengine::asset::texture::ID::Cube).bind(0);
-    for (uint32_t i = 0; i < 10; i++) {
-        glm::mat4 transform = glm::mat4(1.f);
-        transform = glm::translate(transform, cubePositions[i]);
-        potatoengine::Renderer::Submit(m_basic, m_vao, transform);
-    }
-
-    potatoengine::Renderer::EndScene();
-}
-
-void GameState::onImGuiRender() {
-}
-
-void GameState::onEvent(potatoengine::Event &e) {
-    m_cameraController.onEvent(e);
-
-    potatoengine::EventDispatcher dispatcher(e);
-    dispatcher.dispatch<potatoengine::KeyPressedEvent>(BIND_EVENT(GameState::onKeyPressed));
-    dispatcher.dispatch<potatoengine::KeyReleasedEvent>(BIND_EVENT(GameState::onKeyReleased));
-}
-
-bool GameState::onKeyPressed(potatoengine::KeyPressedEvent &e) {
-    if (e.repeating())
-        return false;
-
-    auto &window = potatoengine::Application::Get().getWindow();
-    // bool control = potatoengine::Input::IsKeyPressed(potatoengine::Key::LeftControl) || potatoengine::Input::IsKeyPressed(potatoengine::Key::RightControl);
-    // bool shift = potatoengine::Input::IsKeyPressed(potatoengine::Key::LeftShift) || potatoengine::Input::IsKeyPressed(potatoengine::Key::RightShift);
-
-    switch (e.getKeyCode()) {
-        case potatoengine::Key::Escape:
-            potatoengine::Application::Get().close();
-            break;
-        case potatoengine::Key::F3:
-            m_debugging = not m_debugging;
-            break;
-        case potatoengine::Key::F4:
-            m_wireframe = not m_wireframe;
-            potatoengine::RendererAPI::SetWireframe(m_wireframe);
-            break;
-        case potatoengine::Key::LeftAlt:
-            window.setUpdateCameraPosition(false);
-            window.setCursorMode(potatoengine::CursorMode::Normal);
-            break;
-    }
-
-    return true;
-}
-
-bool GameState::onKeyReleased(potatoengine::KeyReleasedEvent &e) {
-    potatoengine::Window &window = potatoengine::Application::Get().getWindow();
-
-    switch (e.getKeyCode()) {
-        case potatoengine::Key::LeftAlt:
-            window.setLastMousePosition(potatoengine::Input::GetMouseX(), potatoengine::Input::GetMouseY());
-            window.setUpdateCameraPosition(true);
-            window.setCursorMode(potatoengine::CursorMode::Disabled);
-            break;
-    }
-
-    return true;
-}
-
-std::unique_ptr<potatoengine::State> GameState::Create(const std::shared_ptr<potatoengine::AssetsManager> &assetsManager) {
-    return std::make_unique<GameState>(assetsManager);
+std::unique_ptr<potatoengine::State> GameState::Create(const std::shared_ptr<potatoengine::AssetsManager> &am) {
+    return std::make_unique<GameState>(am);
 }
 }

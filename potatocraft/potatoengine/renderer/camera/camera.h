@@ -7,6 +7,7 @@ namespace potatoengine {
 
 class Camera {
    public:
+    Camera() = default;
     Camera(const glm::mat4& projection, const glm::vec3& position, const glm::quat& rotation);
     void setProjection(const glm::mat4& projection) {
         m_projection = projection;

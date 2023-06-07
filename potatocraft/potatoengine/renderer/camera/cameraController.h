@@ -11,7 +11,7 @@ class CameraController {
    public:
     CameraController();
 
-    void onUpdate(Time dt);
+    void onUpdate(Time ts);
     void onEvent(Event& e);
 
     float getAspectRatio() const { return m_aspectRatio; }
@@ -47,8 +47,8 @@ class CameraController {
     float m_nearClip = 1.f;
     float m_farClip = 3000.f;
 
-    glm::vec3 m_position = {0.f, 0.f, 0.f};
-    glm::quat m_rotation = {1.f, 0.f, 0.f, 0.f};
+    glm::vec3 m_position = glm::vec3(0.f);
+    glm::quat m_rotation = glm::identity<glm::quat>();  // No rotation
     float m_rightAngle = 0.f;
     float m_upAngle = 0.f;
 

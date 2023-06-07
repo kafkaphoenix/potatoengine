@@ -20,13 +20,14 @@ namespace potatoengine {
 // void init_imgui_context(GLFWwindow *window, const char *glsl_version);
 // void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
 
-Application::Application(const std::string& name, CommandLineArgs args)
-    : m_name(name), m_commandLineArgs(args) {
+Application::Application(const Config& config, CLArgs args)
+    : m_name(config.name), m_clargs(args) {
     s_instance = this;
 
+    std::filesystem::current_path(config.root);
     m_states = StateStack::Create();
     m_assetsManager = AssetsManager::Create();
-    m_window = Window::Create(WindowProperties(m_name));
+    m_window = Window::Create(WindowProperties{.title = config.name, .width = config.width, .height = config.height});
     m_window->setEventCallback(BIND_EVENT(Application::onEvent));
 
     Renderer::Init();
@@ -41,7 +42,7 @@ Application::~Application() {
 void Application::close() { m_running = false; }
 
 bool Application::onWindowClose(WindowCloseEvent&) {
-    m_running = false;
+    close();
 
     return true;
 }
@@ -63,8 +64,7 @@ void Application::onEvent(Event& e) {
     dispatcher.dispatch<WindowResizeEvent>(
         BIND_EVENT(Application::onWindowResize));
 
-    for (auto it = m_states->rbegin(); it not_eq m_states->rend(); ++it) {
-        if (e.m_handled) break;
+    for (auto it = m_states->rbegin(); it not_eq m_states->rend() and not e.m_handled; ++it) {
         (*it)->onEvent(e);
     }
 }
@@ -88,16 +88,17 @@ void Application::run() {
     // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.f);
 
     while (m_running) {
-        Time dt = (float)glfwGetTime() - m_lastFrame;
-        m_lastFrame = (float)glfwGetTime();
-        m_accumulator += dt;
+        float currentFrame = (float)glfwGetTime();
+        Time ts = currentFrame - m_lastFrame;
+        m_lastFrame = currentFrame;
+        m_accumulator += ts;
 
-        if (!m_minimized) {
-            while (m_accumulator > 1.f / 61.f) {
+        if (not m_minimized) [[likely]] {
+            while (m_accumulator > ts) {
                 for (auto& state : *m_states) {
-                    state->onUpdate(dt);
+                    state->onUpdate(ts);
                 }
-                m_accumulator -= 1.f / 59.f;
+                m_accumulator -= ts;
                 if (m_accumulator < 0) {
                     m_accumulator = 0;
                 }
@@ -110,6 +111,10 @@ void Application::run() {
             }*/
         }
         // TODO: open menu pause
+#ifdef DEBUG
+        //CORE_INFO("FPS: {0}", 1.f / ts); 
+        // TODO move to imgui debug panel
+#endif
         m_window->onUpdate();
     }
     // espera teardown(window);

@@ -11,7 +11,7 @@ Program::~Program() {
 }
 
 Program::operator GLuint() const {
-    return m_program;
+    return static_cast<GLuint>(m_program);
 }
 
 void Program::attach(const Shader &shader) {
@@ -27,7 +27,7 @@ void Program::link() {
 
     int status = GL_FALSE;
     glGetProgramiv(m_program, GL_LINK_STATUS, &status);
-    if (status not_eq GL_TRUE) {
+    if (status not_eq GL_TRUE) [[unlikely]] {
         int infoLogLength = 0;
         glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &infoLogLength);
         if (infoLogLength == 0) {
@@ -41,6 +41,10 @@ void Program::link() {
 
 void Program::use() {
     glUseProgram(m_program);
+}
+
+void Program::unuse() {
+    glUseProgram(0);
 }
 
 void Program::setInt(const std::string &name, int value) {
@@ -65,10 +69,6 @@ void Program::setVec4(const std::string &name, const glm::vec4 &vec) {
 
 void Program::setMat4(const std::string &name, const glm::mat4 &mat) {
     glUniformMatrix4fv(glGetUniformLocation(m_program, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
-}
-
-const std::string &Program::getName() const noexcept {
-    return m_name;
 }
 
 std::shared_ptr<Program> Program::Create(const std::string &name) {

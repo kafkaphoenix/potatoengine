@@ -12,6 +12,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+option(ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" OFF)
+option(ENABLE_CPPCHECK "Enable static analysis with cppcheck" ON)
+option(ENABLE_DEBUG "Enable debugging info" OFF)
 
 set(BASEPATH "${CMAKE_SOURCE_DIR}")
 include_directories("${BASEPATH}")
@@ -25,6 +28,8 @@ file(GLOB_RECURSE SOURCE_FILES
 )
 
 add_subdirectory(vendor)
+
+configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/potatoengine/config.h @ONLY)
 
 # Executable definition and properties
 add_executable(
@@ -40,62 +45,57 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 target_include_directories(${PROJECT_NAME} PRIVATE ${assimp_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${spdlog_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
-option(ENTT_INCLUDE_NATVIS ON)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 target_precompile_headers(${PROJECT_NAME} PRIVATE potatoengine/pch.h)
 
 if (MSVC)
-# https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=msvc-170
-target_compile_options(${PROJECT_NAME} PRIVATE /EHs /nologo /W4 /std:c++latest /Od /utf-8 /WX)
-target_compile_options(${PROJECT_NAME} PRIVATE /external:I ${CMAKE_SOURCE_DIR}/build /W0) # Exclude from warnings
+    # https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=msvc-170
+    target_compile_options(${PROJECT_NAME} PRIVATE /EHs /nologo /W4 /std:c++latest /Od /utf-8 /WX)
+    target_compile_options(${PROJECT_NAME} PRIVATE /external:I ${CMAKE_SOURCE_DIR}/build /W0) # Exclude from warnings
 elseif(GCC OR CLANG)
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror)
-target_compile_options(-isystem ${CMAKE_SOURCE_DIR}/build)  # Exclude from warnings
-target_compile_options(${PROJECT_NAME} PRIVATE -fmodules-ts)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror)
+    target_compile_options(-isystem ${CMAKE_SOURCE_DIR}/build)  # Exclude from warnings
+    target_compile_options(${PROJECT_NAME} PRIVATE -fmodules-ts)
 endif()
 
-add_custom_target(copy_assets
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy-assets.cmake
-)
-add_dependencies(${PROJECT_NAME} copy_assets)
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog ${CMAKE_DL_LIBS})
 
 # Linters (Needs compilation database sadly no MSVC support yet, change to GCC to use)
 # https://stackoverflow.com/questions/65544093/no-compile-commands-json-file-using-cmake-with-vs-code-on-windows
-# find_program(CLANG_TIDY NAMES "clang-tidy")
+find_program(CLANG_TIDY NAMES "clang-tidy")
 
-# if(CLANG_TIDY)
-#     set(CLANG_TIDY_OPTIONS
-#         "-checks=*"
-#         "-header-filter=."
-#         "-warnings-as-errors=*"
-#         "-p=${CMAKE_SOURCE_DIR}"
-#     )
+if(CLANG_TIDY AND ENABLE_CLANG_TIDY)
+    set(CLANG_TIDY_OPTIONS
+        "-checks=*"
+        "-header-filter=."
+        "-warnings-as-errors=*"
+        "-p=${CMAKE_SOURCE_DIR}"
+    )
 
-#     add_custom_target(
-#         run_clang_tidy
-#         COMMAND ${CLANG_TIDY} ${CLANG_TIDY_OPTIONS} ${CMAKE_SOURCE_DIR}/potatoengine ${CMAKE_SOURCE_DIR}/sandbox
-#         COMMENT "running clang-tidy static analysis"
-#     )
+    add_custom_target(
+        run_clang_tidy
+        COMMAND ${CLANG_TIDY} ${CLANG_TIDY_OPTIONS} ${CMAKE_SOURCE_DIR}/potatoengine ${CMAKE_SOURCE_DIR}/sandbox
+        COMMENT "running clang-tidy static analysis"
+    )
 
-#     add_dependencies(${PROJECT_NAME} run_clang_tidy)
-# else()
-#     message(WARNING "clang-tidy not found. Static analysis target will not be available")
-# endif()
+    add_dependencies(${PROJECT_NAME} run_clang_tidy)
+endif()
 
 find_program(CPPCHECK NAMES "cppcheck")
 
-if(CPPCHECK)
+if(CPPCHECK AND ENABLE_CPPCHECK)
     set(CPPCHECK_OPTIONS
         "--enable=all"
         "--std=c++23"
         #"--check-config"
         "--platform=win64"
-        "--suppress=missingIncludeSystem"
+        #"--suppress=missingIncludeSystem"
         "--suppress=missingInclude"
         "--template=gcc"
         #"--project=compile_commands.json"
+        "--inline-suppr"
         "-I${CMAKE_SOURCE_DIR}/build"
     )
 
@@ -105,6 +105,10 @@ if(CPPCHECK)
         COMMENT "running cppcheck static analysis"
     )
     add_dependencies(${PROJECT_NAME} run_cppcheck)
+endif()
+
+if (ENABLE_DEBUG)
+    set(DEBUG ON)
 else()
-    message(WARNING "cppcheck not found. Static analysis target will not be available")
+    set(DEBUG OFF)
 endif()

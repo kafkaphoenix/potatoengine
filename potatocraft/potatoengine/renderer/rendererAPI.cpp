@@ -5,7 +5,7 @@
 namespace potatoengine {
 
 void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum severity, GLsizei, GLchar const* message, void const*) {
-    auto const src_str = [source]() {
+    std::string_view _source = [source]() {
         switch (source) {
             case GL_DEBUG_SOURCE_API:
                 return "API";
@@ -24,7 +24,7 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum s
         }
     }();
 
-    auto const type_str = [type]() {
+    std::string_view _type = [type]() {
         switch (type) {
             case GL_DEBUG_TYPE_ERROR:
                 return "ERROR";
@@ -45,7 +45,7 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum s
         }
     }();
 
-    auto const severity_str = [severity]() {
+    std::string_view _severity = [severity]() {
         switch (severity) {
             case GL_DEBUG_SEVERITY_NOTIFICATION:
                 return "NOTIFICATION";
@@ -62,9 +62,9 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum s
 
     std::string info = std::format(
         "Source[{}]| Type [{}]| Severity [{}]| ID [{}]| Message: {}\n",
-        src_str,
-        type_str,
-        severity_str,
+        _source,
+        _type,
+        _severity,
         id,
         message);
 
@@ -89,9 +89,9 @@ void RendererAPI::Init() {
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(message_callback, nullptr);
 
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-    glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);  // BACK FACE CULLING CCW
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -116,7 +116,9 @@ void RendererAPI::Clear() {
 }
 
 void RendererAPI::DrawIndexed(const std::shared_ptr<VAO>& vao) {
+    vao->bind();
     glDrawElements(GL_TRIANGLES, vao->getEBO()->getCount(), GL_UNSIGNED_INT, nullptr);
+    vao->unbind();
 }
 
 }

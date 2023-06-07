@@ -5,7 +5,7 @@
 namespace potatoengine {
 
 OpenGLContext::OpenGLContext(GLFWwindow* window) : m_window(window) {
-    if (window == nullptr) {
+    if (window == nullptr) [[unlikely]] {
         throw std::runtime_error("Window is null!");
     }
 }

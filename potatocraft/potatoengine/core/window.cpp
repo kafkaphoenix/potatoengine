@@ -7,25 +7,17 @@
 namespace potatoengine {
 
 Window::Window(const WindowProperties& properties) {
-    init(properties);
-}
-
-Window::~Window() {
-    shutdown();
-}
-
-void Window::init(const WindowProperties& properties) {
     m_data.title = properties.title;
     m_data.width = properties.width;
     m_data.height = properties.height;
     m_data.lastX = properties.width / 2.f;
     m_data.lastY = properties.height / 2.f;
 
-    std::print("Creating window for the app {} with resolution {}x{}\n", properties.title, properties.width, properties.height);
-
-    if (s_GLFWWindowCount == 0) {
-        std::print("Starting GLFW context, OpenGL 4.6\n");
-        if (!glfwInit()) {
+#ifdef DEBUG
+    CORE_INFO("Creating window for {} app with resolution {}x{}...", properties.title, properties.width, properties.height);
+#endif
+    if (s_GLFWWindowCount == 0) [[unlikely]] {
+        if (not glfwInit()) {
             throw std::runtime_error("Failed to initialize GLFW!");
         }
         glfwSetErrorCallback([](int error, const char* description) {
@@ -56,7 +48,7 @@ void Window::init(const WindowProperties& properties) {
     glfwSetWindowUserPointer(m_window, &m_data);
     setVSync(true);
 
-    glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
+    glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
         WindowData& data = *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
         data.width = width;
         data.height = height;
@@ -152,6 +144,10 @@ void Window::init(const WindowProperties& properties) {
         MouseScrolledEvent event((float)xoffset, (float)yoffset);
         data.eventCallback(event);
     });
+}
+
+Window::~Window() {
+    shutdown();
 }
 
 void Window::shutdown() {

@@ -16,23 +16,27 @@ void VAO::bind() const {
     glBindVertexArray(m_id);
 }
 
+void VAO::unbind() const {
+    glBindVertexArray(0);
+}
+
 void VAO::attachVertex(std::unique_ptr<VBO> vbo) {
     glVertexArrayVertexBuffer(m_id, 0, vbo->getID(), 0, sizeof(Vertex));
     m_vbos.emplace_back(std::move(vbo));
 
     glEnableVertexArrayAttrib(m_id, 0);
-    glVertexArrayAttribFormat(m_id, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, pos));
-    glVertexArrayAttribBinding(m_id, 0, m_vboIndex);
+    glVertexArrayAttribFormat(m_id, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
+    glVertexArrayAttribBinding(m_id, 0, m_vboIdx);
 
     glEnableVertexArrayAttrib(m_id, 1);
-    glVertexArrayAttribFormat(m_id, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, nor));
-    glVertexArrayAttribBinding(m_id, 1, m_vboIndex);
+    glVertexArrayAttribFormat(m_id, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
+    glVertexArrayAttribBinding(m_id, 1, m_vboIdx);
 
     glEnableVertexArrayAttrib(m_id, 2);
-    glVertexArrayAttribFormat(m_id, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, tex));
-    glVertexArrayAttribBinding(m_id, 2, m_vboIndex);
+    glVertexArrayAttribFormat(m_id, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, texture));
+    glVertexArrayAttribBinding(m_id, 2, m_vboIdx);
 
-    ++m_vboIndex;
+    ++m_vboIdx;
 }
 
 void VAO::setIndex(std::unique_ptr<IBO> ibo) {
