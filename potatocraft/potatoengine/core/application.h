@@ -11,16 +11,21 @@ int main(int argc, char** argv);
 
 namespace potatoengine {
 
-struct CommandLineArgs {
-    int count = 0;
-    char** args = nullptr;
+struct Config {
+    std::string name;
+    std::string root;
+    int width;
+    int height;
+};
+struct CLArgs {
+    std::span<const char*> args;
 
-    const char* operator[](int index) const { return args[index]; }
+    const char* operator[](int idx) const { return args[idx]; }
 };
 
 class Application {
    public:
-    Application(const std::string& name, CommandLineArgs args);
+    Application(const Config& config, CLArgs args);
     virtual ~Application();
 
     void onEvent(Event& e);
@@ -47,15 +52,15 @@ class Application {
     std::string m_name;
     bool m_running = true;
     bool m_minimized = false;
-    float m_lastFrame{};
-    float m_accumulator{};
+    float m_lastFrame;
+    float m_accumulator;
 
-    CommandLineArgs m_commandLineArgs;
+    CLArgs m_clargs;
 
-    inline static Application* s_instance = nullptr;
+    inline static Application* s_instance;
     friend int ::main(int argc, char** argv);
 };
 
 // To be defined in CLIENT
-Application* CreateApp(const std::string& name, CommandLineArgs args);
+Application* CreateApp(CLArgs args);
 }

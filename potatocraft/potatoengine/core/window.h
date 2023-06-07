@@ -13,10 +13,6 @@ struct WindowProperties {
     std::string title;
     int width;
     int height;
-
-    WindowProperties(const std::string& title, int width = 1280, int height = 720)
-        : title(title), width(width), height(height) {
-    }
 };
 
 enum class CursorMode {
@@ -25,6 +21,8 @@ enum class CursorMode {
     Disabled = GLFW_CURSOR_DISABLED
 };
 
+static uint8_t s_GLFWWindowCount = 0;
+
 class Window {
    public:
     using EventCallbackFn = std::function<void(Event&)>;
@@ -32,7 +30,6 @@ class Window {
     Window(const WindowProperties& properties);
     ~Window();
 
-    void init(const WindowProperties& properties);
     void shutdown();
     void onUpdate();
 
@@ -57,7 +54,7 @@ class Window {
 
    private:
     GLFWwindow* m_window; // TODO: this class should be a window manager, and this should be a vector of windows
-    std::shared_ptr<OpenGLContext> m_context;
+    std::unique_ptr<OpenGLContext> m_context;
 
     struct WindowData {
         std::string title;
@@ -74,7 +71,6 @@ class Window {
 
     WindowData m_data;
 
-    inline static uint8_t s_GLFWWindowCount{};
 };
 
 }

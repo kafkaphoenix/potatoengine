@@ -1,0 +1,60 @@
+{
+    "creature": {
+        "inherit": [],
+        "ctags": ["transform", "mesh", "renderer"],
+        "components": {
+            "health": {
+                "base": 100,
+                "current": 100
+            },
+            "mana": {
+                "base": 100,
+                "current": 100
+            },
+            "stamina": {
+                "base": 100,
+                "current": 100
+            },
+            "experience": {
+                "current": 0
+            }
+        }
+    },
+    "player": {
+        "inherit": ["creature"],
+        "ctags": ["camera", "equipment", "inventory"],
+        "components": {
+            "name": "player",
+            "tag": "player",
+            "material": {
+                "filepath": "player.png"
+            }
+        }
+    },
+    "chicken": {
+        "inherit": ["creature"],
+        "ctags": [],
+        "components": {
+            "tag": "animal",
+            "material": {
+                "filepath": "chicken.png"
+            }
+        }
+    },
+    "block": {
+        "inherit": [],
+        "ctags": ["transform", "mesh"],
+        "components": {
+        }
+    },
+    "brick_block": {
+        "inherit": ["block"],
+        "ctags": [],
+        "components": {
+            "tag": "brick_block",
+            "material": {
+                "filepath": "brick_block.jpg"
+            }
+        }
+    }
+}

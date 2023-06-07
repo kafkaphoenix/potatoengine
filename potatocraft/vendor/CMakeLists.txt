@@ -19,10 +19,10 @@ FetchContent_Declare(
 FetchContent_GetProperties(glfw)
 if(NOT glfw_POPULATED)
 	FetchContent_Populate(glfw)
-  option(GLFW_BUILD_DOCS OFF)
-  option(GLFW_BUILD_TESTS OFF)
-  option(GLFW_BUILD_EXAMPLES OFF)
-  option(GLFW_INSTALL OFF)
+  set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "" FORCE)
+  set(GLFW_BUILD_TESTS OFF CACHE INTERNAL "" FORCE)
+  set(GLFW_BUILD_EXAMPLES OFF CACHE INTERNAL "" FORCE)
+  set(GLFW_INSTALL OFF CACHE INTERNAL "" FORCE)
 	add_subdirectory(${glfw_SOURCE_DIR} ${glfw_BINARY_DIR})
 endif()
 
@@ -35,7 +35,7 @@ FetchContent_Declare(
 FetchContent_GetProperties(glm)
 if(NOT glm_POPULATED)
 	FetchContent_Populate(glm)
-  option(GLM_TEST_ENABLE OFF)
+  set(GLM_TEST_ENABLE OFF CACHE INTERNAL "" FORCE)
 	add_subdirectory(${glm_SOURCE_DIR} ${glm_BINARY_DIR})
 endif()
 
@@ -63,14 +63,19 @@ FetchContent_Declare(
   GIT_TAG v3.11.1
 )
 
-FetchContent_MakeAvailable(entt)
+FetchContent_GetProperties(entt)
+if(NOT entt_POPULATED)
+  FetchContent_Populate(entt)
+  set(ENTT_INCLUDE_NATVIS ON CACHE INTERNAL "" FORCE)
+  add_subdirectory(${entt_SOURCE_DIR} ${entt_BINARY_DIR})
+endif()
 
 FetchContent_Declare(
   json
-  GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent.git
+  GIT_REPOSITORY https://github.com/fabio-polystream/nlohmann_json_cmake_fetchcontent.git
   GIT_PROGRESS TRUE
   GIT_SHALLOW TRUE
-  GIT_TAG v3.10.0
+  GIT_TAG v3.11.2
 )
 
 FetchContent_MakeAvailable(json)
@@ -84,24 +89,25 @@ FetchContent_Declare(
 FetchContent_GetProperties(assimp)
 if(NOT assimp_POPULATED)
 	FetchContent_Populate(assimp)
-  option(BUILD_SHARED_LIBS OFF)
-  option(ASSIMP_BUILD_TESTS OFF)
-  option(ASSIMP_INSTALL OFF)
-  option(ASSIMP_WARNINGS_AS_ERRORS ON)
-  option(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
-  option(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+  set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
+  set(ASSIMP_BUILD_TESTS OFF CACHE INTERNAL "" FORCE)
+  set(ASSIMP_INSTALL OFF CACHE INTERNAL "" FORCE)
+  set(ASSIMP_WARNINGS_AS_ERRORS ON CACHE INTERNAL "" FORCE)
+  set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE INTERNAL "" FORCE)
+  set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE INTERNAL "" FORCE)
 	add_subdirectory(${assimp_SOURCE_DIR} ${assimp_BINARY_DIR})
 endif()
 
 FetchContent_Declare(
   spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG v1.11.0)
+  GIT_TAG v1.11.0
+)
 
 FetchContent_GetProperties(spdlog)
 if(NOT spdlog_POPULATED)
   FetchContent_Populate(spdlog)
-  option(SPDLOG_BUILD_EXAMPLE OFF)
-  option(SPDLOG_INSTALL OFF)
+  set(SPDLOG_BUILD_EXAMPLE OFF CACHE INTERNAL "" FORCE)
+  set(SPDLOG_INSTALL OFF CACHE INTERNAL "" FORCE)
   add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()

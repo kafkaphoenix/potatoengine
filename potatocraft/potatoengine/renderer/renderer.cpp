@@ -9,24 +9,33 @@ void Renderer::Init() {
 }
 
 void Renderer::Shutdown() {
+    // TODO something to add?
 }
 
-void Renderer::OnWindowResize(uint32_t width, uint32_t height) {
-    RendererAPI::SetViewport(0, 0, width, height);
+void Renderer::OnWindowResize(uint32_t w, uint32_t h) {
+    RendererAPI::SetViewport(0, 0, w, h);
 }
 
-void Renderer::BeginScene(const Camera& camera) {
-    s_sceneData->viewProjectionMatrix = camera.getViewProjection();
+void Renderer::BeginScene(const Camera& c) {
+    s_sceneData->viewProjectionMatrix = c.getViewProjection();
 }
 
 void Renderer::EndScene() {
 }
 
-void Renderer::Submit(const std::shared_ptr<Program>& shader, const std::shared_ptr<VAO>& vao, const glm::mat4& transform) {
-    shader->use();
-    shader->setMat4("viewProjection", s_sceneData->viewProjectionMatrix);
-    shader->setMat4("transform", transform);
+void Renderer::Submit(const std::shared_ptr<Program>& sp, const std::shared_ptr<VAO>& vao, const glm::mat4& t) {
+    sp->use();
+    sp->setMat4("viewProjection", s_sceneData->viewProjectionMatrix);
+    sp->setMat4("transform", t);
 
     RendererAPI::DrawIndexed(vao);
+}
+
+void Renderer::Link(const std::shared_ptr<Program>& sp, const Shader& vs, const Shader& fs) {
+    sp->attach(vs);
+    sp->attach(fs);
+    sp->link();
+    sp->detach(vs);
+    sp->detach(fs);
 }
 }

@@ -4,9 +4,9 @@
 
 namespace potatoengine {
 Camera::Camera(const glm::mat4& projection, const glm::vec3& position, const glm::quat& rotation) : m_projection(projection),
-                                                                                                       m_position(position),
-                                                                                                       m_rotation(rotation) {
-    recalculateView();
+                                                                                                    m_position(position),
+                                                                                                    m_rotation(rotation) {
+    recalculateView(); // TODO move to on attach on component?
 }
 
 void Camera::recalculateView() {

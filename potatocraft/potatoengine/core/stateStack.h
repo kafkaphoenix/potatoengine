@@ -11,8 +11,8 @@ class StateStack {
 
     void pushState(std::unique_ptr<State> state);
     void pushOverlay(std::unique_ptr<State> overlay);
-    void popState(const std::string& name);
-    void popOverlay(const std::string& name);
+    void popState(std::string_view name);
+    void popOverlay(std::string_view name);
 
     auto begin() { return m_states.begin(); }
     auto end() { return m_states.end(); }
@@ -27,7 +27,7 @@ class StateStack {
     static std::unique_ptr<StateStack> Create();
    private:
     std::vector<std::unique_ptr<State>> m_states;
-    uint32_t m_index{};
+    uint32_t m_idx;
 };
 
 }

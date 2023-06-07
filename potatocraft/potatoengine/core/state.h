@@ -16,7 +16,7 @@ class State {
     virtual void onImGuiRender() {}
     virtual void onEvent(Event&) {}
 
-    const std::string& getName() const { return m_name; }
+    std::string_view getName() const noexcept { return m_name; }
 
     static std::unique_ptr<State> Create();
 

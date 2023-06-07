@@ -22,17 +22,17 @@ void VAO::attachVertex(std::unique_ptr<VBO> vbo) {
 
     glEnableVertexArrayAttrib(m_id, 0);
     glVertexArrayAttribFormat(m_id, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, pos));
-    glVertexArrayAttribBinding(m_id, 0, m_vboIndex);
+    glVertexArrayAttribBinding(m_id, 0, m_vboIdx);
 
     glEnableVertexArrayAttrib(m_id, 1);
     glVertexArrayAttribFormat(m_id, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, nor));
-    glVertexArrayAttribBinding(m_id, 1, m_vboIndex);
+    glVertexArrayAttribBinding(m_id, 1, m_vboIdx);
 
     glEnableVertexArrayAttrib(m_id, 2);
     glVertexArrayAttribFormat(m_id, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, tex));
-    glVertexArrayAttribBinding(m_id, 2, m_vboIndex);
+    glVertexArrayAttribBinding(m_id, 2, m_vboIdx);
 
-    ++m_vboIndex;
+    ++m_vboIdx;
 }
 
 void VAO::setIndex(std::unique_ptr<IBO> ibo) {

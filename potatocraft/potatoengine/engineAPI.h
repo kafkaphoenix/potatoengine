@@ -11,7 +11,9 @@
 #include "potatoengine/core/state.h"
 
 // scene
+#include "potatoengine/scene/components.h"
 #include "potatoengine/scene/entity.h"
+#include "potatoengine/scene/prefab.h"
 #include "potatoengine/scene/scene.h"
 
 // renderer

@@ -23,7 +23,7 @@ class VAO {
     uint32_t m_id;
     std::vector<std::unique_ptr<VBO>> m_vbos;
     std::unique_ptr<IBO> m_ibo;
-    uint32_t m_vboIndex = 0;
+    uint32_t m_vboIdx = 0;
 };
 
 }

@@ -53,7 +53,7 @@ bool CameraController::onMouseScrolled(MouseScrolledEvent& e) {
     m_zoomFactor = std::clamp(m_zoomFactor + float(e.getY()), m_zoomMin, m_zoomMax);
     m_camera.setProjection(glm::perspective(glm::radians(m_fov * 1.f / m_zoomFactor), m_aspectRatio, m_nearClip, m_farClip));
 
-    return false;
+    return true;
 }
 
 bool CameraController::onMouseMoved(MouseMovedEvent& e) {
@@ -75,14 +75,14 @@ bool CameraController::onMouseMoved(MouseMovedEvent& e) {
 
     m_camera.setRotation(m_rotation);
 
-    return false;
+    return true;
 }
 
 bool CameraController::onWindowResized(WindowResizeEvent& e) {
     m_aspectRatio = (float)e.getWidth() / (float)e.getHeight();
     m_camera.setProjection(glm::perspective(glm::radians(m_fov), m_aspectRatio * m_zoomFactor, 1.f, 3000.f));
 
-    return false;
+    return true;
 }
 
 }

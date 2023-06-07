@@ -23,7 +23,8 @@ class Program {
     void setVec3(const std::string &name, const glm::vec3 &vec);
     void setVec4(const std::string &name, const glm::vec4 &vec);
     void setMat4(const std::string &name, const glm::mat4 &mat);
-    const std::string &getName() const noexcept;
+    std::string_view getName() const noexcept { return m_name; }
+
     static std::shared_ptr<Program> Create(const std::string &name);
 
    private:

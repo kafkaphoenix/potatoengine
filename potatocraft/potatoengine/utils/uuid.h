@@ -10,6 +10,7 @@ static std::uniform_int_distribution<uint64_t> dis;
 class UUID {
    public:
     UUID() : m_uuid(dis(gen)) {}
+    UUID(uint64_t uuid) : m_uuid(uuid) {}
 
     operator uint64_t() const { return m_uuid; }
    private:

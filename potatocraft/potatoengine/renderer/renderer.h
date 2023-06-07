@@ -12,12 +12,13 @@ class Renderer {
     static void Init();
     static void Shutdown();
 
-    static void OnWindowResize(uint32_t width, uint32_t height);
+    static void OnWindowResize(uint32_t w, uint32_t h);
 
-    static void BeginScene(const Camera& camera);
+    static void BeginScene(const Camera& c);
     static void EndScene();
 
-    static void Submit(const std::shared_ptr<Program>& shader, const std::shared_ptr<VAO>& vao, const glm::mat4& transform = glm::mat4(1.f));
+    static void Submit(const std::shared_ptr<Program>& sp, const std::shared_ptr<VAO>& vao, const glm::mat4& t = glm::mat4(1.f));
+    static void Link(const std::shared_ptr<Program>& sp, const Shader &vs, const Shader &fs);
 
    private:
     struct SceneData {

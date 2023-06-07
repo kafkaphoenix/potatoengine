@@ -6,16 +6,16 @@ namespace potatocraft {
 
 class GameState : public potatoengine::State {
    public:
-    GameState(const std::shared_ptr<potatoengine::AssetsManager> &assetsManager);
+    GameState(const std::shared_ptr<potatoengine::AssetsManager> &am);
     virtual ~GameState() = default;
 
-    virtual void onAttach() override;
-    virtual void onDetach() override;
-    virtual void onUpdate(potatoengine::Time dt) override;
-    virtual void onImGuiRender() override;
-    virtual void onEvent(potatoengine::Event& event) override;
+    virtual void onAttach() override final;
+    virtual void onDetach() override final;
+    virtual void onUpdate(potatoengine::Time dt) override final;
+    virtual void onImGuiRender() override final;
+    virtual void onEvent(potatoengine::Event& e) override final;
 
-    static std::unique_ptr<State> Create(const std::shared_ptr<potatoengine::AssetsManager> &assetsManager);
+    static std::unique_ptr<State> Create(const std::shared_ptr<potatoengine::AssetsManager> &am);
 
    private:
     bool onKeyPressed(potatoengine::KeyPressedEvent& e);
