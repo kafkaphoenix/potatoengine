@@ -2,22 +2,24 @@
 
 #include <entt/entt.hpp>
 
-#include "potatoengine/core/assetsManager.h"
-#include "potatoengine/scene/prefab.h"
+#include "potatoengine/assets/assetsManager.h"
+#include "potatoengine/assets/prefab.h"
 
 namespace potatoengine {
 class Entity;
 
 class Efactory {
    public:
-    Efactory(const std::shared_ptr<AssetsManager>& am);
-    void create(const asset::prefab::ID p, Entity e);
-    void destroy(const asset::prefab::ID p, entt::registry& r);
-    void update(const asset::prefab::ID p, Entity e, entt::registry& r);
-    entt::entity get(const asset::prefab::ID p);
+    Efactory(std::weak_ptr<AssetsManager> am);
+    void create(assets::PrefabID id, Entity e);
+    void destroy(assets::PrefabID id, entt::registry& r);
+    void update(assets::PrefabID id, Entity e, entt::registry& r);
+    entt::entity get(assets::PrefabID id);
 
    private:
-    std::unordered_map<asset::prefab::ID, entt::entity> m_protos;
-    std::shared_ptr<AssetsManager> m_assetsManager;
+    std::unordered_map<assets::PrefabID, entt::entity> m_protos;
+    std::weak_ptr<AssetsManager> m_assetsManager;
+
+    void loadModel(const std::string& filepath, entt::meta_any& ec);
 };
 }

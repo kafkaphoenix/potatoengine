@@ -1,11 +1,12 @@
 #pragma once
 
-#include "potatoengine/core/assetsManager.h"
+#include "potatoengine/assets/assetsManager.h"
 #include "potatoengine/core/state.h"
 #include "potatoengine/core/stateStack.h"
 #include "potatoengine/core/window.h"
 #include "potatoengine/events/applicationEvent.h"
 #include "potatoengine/pch.h"
+#include "potatoengine/renderer/renderer.h"
 
 int main(int argc, char** argv);
 
@@ -14,32 +15,33 @@ namespace potatoengine {
 struct Config {
     std::string name{};
     std::string root{};
-    int width;
-    int height;
+    int width{};
+    int height{};
 };
 struct CLArgs {
-    std::span<const char*> args;
+    std::span<const char*> args{};
 
     const char* operator[](int idx) const { return args[idx]; }
 };
 
 class Application {
    public:
-    Application(const Config& config, CLArgs args);
+    Application(const Config& c, CLArgs args);
     virtual ~Application();
 
     void onEvent(Event& e);
-    void pushState(std::unique_ptr<State> state);
-    void pushOverlay(std::unique_ptr<State> state);
+    void pushState(std::unique_ptr<State> s);
+    void pushOverlay(std::unique_ptr<State> s);
 
-    Window& getWindow() const { return *m_window; }
+    Window& getWindow() noexcept { return *m_window; }
 
-    void close();
+    void terminate () noexcept { m_running = false; }
 
-    static Application& Get() { return *s_instance; }
+    static Application& Get() noexcept { return *s_instance; }
 
    protected:
     std::shared_ptr<AssetsManager> m_assetsManager;
+    std::shared_ptr<Renderer> m_renderer;
 
    private:
     void run();
@@ -51,11 +53,11 @@ class Application {
 
     std::string m_name{};
     bool m_running = true;
-    bool m_minimized = false;
-    float m_lastFrame;
-    float m_accumulator;
+    bool m_minimized{};
+    float m_lastFrame{};
+    float m_accumulator{};
 
-    CLArgs m_clargs;
+    CLArgs m_clargs{};
 
     inline static Application* s_instance;
     friend int ::main(int argc, char** argv);

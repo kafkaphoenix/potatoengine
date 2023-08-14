@@ -1,42 +1,70 @@
 #include "potatoengine/renderer/renderer.h"
 
+#include "potatoengine/assets/texture.h"
 #include "potatoengine/renderer/rendererAPI.h"
 
 namespace potatoengine {
 
-void Renderer::Init() {
+Renderer::Renderer(std::weak_ptr<AssetsManager> am) : m_assetsManager(am) {}
+
+void Renderer::init() const noexcept {
     RendererAPI::Init();
 }
 
-void Renderer::Shutdown() {
-    // TODO something to add?
+void Renderer::shutdown() noexcept {
+    // TODO something to add? reset statistics maybe?
 }
 
-void Renderer::OnWindowResize(uint32_t w, uint32_t h) {
+void Renderer::onWindowResize(uint32_t w, uint32_t h) const noexcept {
     RendererAPI::SetViewport(0, 0, w, h);
 }
 
-void Renderer::BeginScene(const Camera& c) {
-    s_sceneData->viewProjectionMatrix = c.getViewProjection();
+void Renderer::beginScene(const Camera& c) noexcept {
+    m_viewProjectionMatrix = c.getViewProjection();
 }
 
-void Renderer::EndScene() {
+void Renderer::endScene() noexcept {
 }
 
-void Renderer::Submit(const std::shared_ptr<Program>& sp, const std::shared_ptr<VAO>& vao, const glm::mat4& t) {
+void Renderer::addShaderProgram(const std::string& name) {
+#ifdef DEBUG
+    CORE_INFO("\tComputing shader program...");
+#endif
+    const auto& manager = m_assetsManager.lock();
+    if (!manager) {
+        throw std::runtime_error("AssetsManager is null!");
+    }
+    auto newShaderProgram = ShaderProgram::Create(name);
+    const auto& vs = manager->get<Shader>("v" + name);
+    const auto& fs = manager->get<Shader>("f" + name);
+    newShaderProgram->attach(*vs);
+    newShaderProgram->attach(*fs);
+    newShaderProgram->link();
+    newShaderProgram->detach(*vs);
+    newShaderProgram->detach(*fs);
+
+    newShaderProgram->use();
+    newShaderProgram->setVec3("light_dir", {0.5f, 0.5f, 1.f});
+    newShaderProgram->unuse();
+    m_shaderPrograms.emplace(name, std::move(newShaderProgram));
+#ifdef DEBUG
+    CORE_INFO("\tShaders computed!");
+#endif
+}
+
+void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, const std::string& shaderProgram) const noexcept {
+    auto& sp = m_shaderPrograms.at(shaderProgram);
+
     sp->use();
-    sp->setMat4("viewProjection", s_sceneData->viewProjectionMatrix);
-    sp->setMat4("transform", t);
+    sp->setMat4("viewProjection", m_viewProjectionMatrix);
+    sp->setMat4("transform", transform);
 
     RendererAPI::DrawIndexed(vao);
     sp->unuse();
 }
 
-void Renderer::Link(const std::shared_ptr<Program>& sp, const Shader& vs, const Shader& fs) {
-    sp->attach(vs);
-    sp->attach(fs);
-    sp->link();
-    sp->detach(vs);
-    sp->detach(fs);
+std::unique_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) noexcept {
+    return std::make_unique<Renderer>(am);
 }
+
 }

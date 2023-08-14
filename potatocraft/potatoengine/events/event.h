@@ -33,37 +33,36 @@ enum EventCategory {
     EventCategoryMouseButton = 16,
 };
 
-#define EVENT_CLASS_TYPE(type)                                                  \
-    static EventType GetStaticType() { return EventType::type; }                \
-    virtual EventType getEventType() const override { return GetStaticType(); } \
-    virtual const char *getName() const override { return #type; }
+#define EVENT_CLASS_TYPE(type)                                                           \
+    static EventType GetStaticType() noexcept { return EventType::type; }                \
+    virtual EventType getEventType() const noexcept override { return GetStaticType(); } \
+    virtual const char *getName() const noexcept override { return #type; }
 
 #define EVENT_CLASS_CATEGORY(category) \
-    virtual int getCategoryFlags() const override { return category; }
+    virtual int getCategoryFlags() const noexcept override { return category; }
 
 class Event {
    public:
     virtual ~Event() = default;
+    bool m_handled{};
 
-    bool m_handled = false;
+    virtual EventType getEventType() const noexcept = 0;
+    virtual const char *getName() const noexcept = 0;
+    virtual int getCategoryFlags() const noexcept = 0;
 
-    virtual EventType getEventType() const = 0;
-    virtual const char *getName() const = 0;
-    virtual int getCategoryFlags() const = 0;
-
-    bool isInCategory(EventCategory category) {
+    bool isInCategory(EventCategory category) const noexcept {
         return getCategoryFlags() & category;
     }
 };
 
 class EventDispatcher {
    public:
-    EventDispatcher(Event &event)
-        : m_event(event) {
+    EventDispatcher(Event &e)
+        : m_event(e) {
     }
 
     template <typename Type, typename Func>
-    bool dispatch(const Func &func) {
+    bool dispatch(const Func &func) noexcept {
         if (m_event.getEventType() == Type::GetStaticType()) {
             m_event.m_handled |= func(static_cast<Type &>(m_event));
             return true;

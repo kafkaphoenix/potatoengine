@@ -6,7 +6,7 @@ namespace potatoengine {
 
 constexpr GLbitfield
     mapping_flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT,
-    storage_flags = GL_DYNAMIC_STORAGE_BIT | mapping_flags; // allow modification of the buffer but not resizing
+    storage_flags = GL_DYNAMIC_STORAGE_BIT | mapping_flags;  // allow modification of the buffer but not resizing
 
 VBO::VBO(const std::vector<Vertex>& vertices, bool immutable) : m_vertices(vertices), m_immutable(immutable) {
     if (m_immutable) {
@@ -18,7 +18,7 @@ VBO::VBO(const std::vector<Vertex>& vertices, bool immutable) : m_vertices(verti
     }
 }
 
-void VBO::reload(const std::vector<Vertex>& vertices) {
+void VBO::reload(const std::vector<Vertex>& vertices) noexcept {
     if (m_immutable) {
         glNamedBufferSubData(m_id, 0, sizeof(Vertex) * vertices.size(), vertices.data());
     } else {
@@ -31,7 +31,7 @@ VBO::~VBO() {
     glDeleteBuffers(1, &m_id);
 }
 
-std::unique_ptr<VBO> VBO::Create(const std::vector<Vertex>& vertices, bool immutable) {
+std::unique_ptr<VBO> VBO::Create(const std::vector<Vertex>& vertices, bool immutable) noexcept {
     return std::make_unique<VBO>(vertices, immutable);
 }
 
@@ -45,7 +45,7 @@ IBO::IBO(const std::vector<uint32_t>& indices, bool immutable) : m_count(indices
     }
 }
 
-void IBO::reload(const std::vector<uint32_t>& indices) {
+void IBO::reload(const std::vector<uint32_t>& indices) noexcept {
     if (m_immutable) {
         glNamedBufferSubData(m_id, 0, sizeof(uint32_t) * indices.size(), indices.data());
     } else {
@@ -58,7 +58,7 @@ IBO::~IBO() {
     glDeleteBuffers(1, &m_id);
 }
 
-std::unique_ptr<IBO> IBO::Create(const std::vector<uint32_t>& indices, bool immutable) {
+std::unique_ptr<IBO> IBO::Create(const std::vector<uint32_t>& indices, bool immutable) noexcept {
     return std::make_unique<IBO>(indices, immutable);
 }
 }

@@ -7,8 +7,8 @@
 
 namespace potatoengine {
 
-Entity Scene::create(const asset::prefab::ID p, const std::optional<uint64_t>& uuid) {
-    Entity e = clone({m_efactory.get(p), this});
+Entity Scene::create(assets::PrefabID id, const std::optional<uint64_t>& uuid) {
+    Entity e = clone({m_efactory.get(id), this});
     UUID _uuid = uuid.has_value() ? UUID(uuid.value()) : UUID();
     e.add<UUIDComponent>(_uuid);
 
@@ -29,8 +29,32 @@ void Scene::destroy(Entity e) {
     e.add<Deleted>();
 }
 
-void Scene::print() {
+void Scene::print() noexcept {
     printScene(std::ref(m_registry));
+}
+
+Entity Scene::getEntity(std::string_view name) {
+    for (auto&& [e, c] : m_registry.view<Name>().each()) {
+        if (c.name == name) {
+            return Entity(e, this);
+        }
+     }
+     throw std::runtime_error("Entity not found");
+}
+
+Entity Scene::getEntity(UUID uuid) {
+    for (auto&& [e, c] : m_registry.view<UUIDComponent>().each()) {
+        if (c.uuid == uuid) {
+            return Entity(e, this);
+        }
+    }
+    throw std::runtime_error("Entity not found");
+}
+
+void Scene::registerPrefabs() {
+    for (const auto p : assets::enum_range(assets::PrefabID::Player, assets::PrefabID::StoneBlock)) {
+        m_efactory.create(p, {m_registry.create(), this});
+    }
 }
 
 template <typename T>
@@ -40,13 +64,7 @@ template <>
 void Scene::onComponentAdded(Entity e, CameraComponent& c) {
 }
 
-void Scene::registerPrefabs() {
-    for (const auto p : asset::enum_range(asset::prefab::ID::Player, asset::prefab::ID::BrickBlock)) {
-        m_efactory.create(p, {m_registry.create(), this});
-    }
-}
-
-Scene::Scene(const std::shared_ptr<AssetsManager>& am) : m_assetsManager(am), m_efactory(am) {
+Scene::Scene(std::weak_ptr<AssetsManager> am) : m_efactory(am) {
 #ifdef DEBUG
     CORE_INFO("Creating scene...");
     CORE_INFO("Registering components...");
@@ -61,7 +79,7 @@ Scene::Scene(const std::shared_ptr<AssetsManager>& am) : m_assetsManager(am), m_
 #endif
 }
 
-void Scene::onUpdate(Time ts) {
-    updateSystems(std::ref(m_registry), ts);
+void Scene::onUpdate(Time ts, std::weak_ptr<Renderer> r) {
+    updateSystems(std::ref(m_registry), r, ts);
 }
 }

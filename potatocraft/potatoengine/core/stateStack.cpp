@@ -3,17 +3,17 @@
 namespace potatoengine {
 
 StateStack::~StateStack() {
-    for (auto& state : m_states) {
-        state->onDetach();
+    for (auto& s : m_states) {
+        s->onDetach();
     }
 }
 
-void StateStack::pushState(std::unique_ptr<State> state) {
-    m_states.emplace(m_states.begin() + m_idx++, std::move(state));
+void StateStack::pushState(std::unique_ptr<State> s) {
+    m_states.emplace(m_states.begin() + m_idx++, std::move(s));
 }
 
-void StateStack::pushOverlay(std::unique_ptr<State> overlay) {
-    m_states.emplace_back(std::move(overlay));
+void StateStack::pushOverlay(std::unique_ptr<State> o) {
+    m_states.emplace_back(std::move(o));
 }
 
 void StateStack::popState(std::string_view name) {
@@ -33,7 +33,7 @@ void StateStack::popOverlay(std::string_view name) {
     }), m_states.end());
 }
 
-std::unique_ptr<StateStack> StateStack::Create() {
+std::unique_ptr<StateStack> StateStack::Create() noexcept {
     return std::make_unique<StateStack>();
 }
 

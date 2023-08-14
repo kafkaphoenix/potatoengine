@@ -12,15 +12,16 @@ VAO::~VAO() {
     glDeleteVertexArrays(1, &m_id);
 }
 
-void VAO::bind() const {
+void VAO::bind() const noexcept {
     glBindVertexArray(m_id);
 }
 
-void VAO::unbind() const {
+void VAO::unbind() const noexcept {
     glBindVertexArray(0);
 }
 
-void VAO::attachVertex(std::unique_ptr<VBO> vbo) {
+// cppcheck-suppress unusedFunction
+void VAO::attachVertex(std::unique_ptr<VBO> vbo) noexcept {
     glVertexArrayVertexBuffer(m_id, 0, vbo->getID(), 0, sizeof(Vertex));
     m_vbos.emplace_back(std::move(vbo));
 
@@ -33,18 +34,39 @@ void VAO::attachVertex(std::unique_ptr<VBO> vbo) {
     glVertexArrayAttribBinding(m_id, 1, m_vboIdx);
 
     glEnableVertexArrayAttrib(m_id, 2);
-    glVertexArrayAttribFormat(m_id, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, texture));
+    glVertexArrayAttribFormat(m_id, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, textureCoords));
     glVertexArrayAttribBinding(m_id, 2, m_vboIdx);
+
+    glEnableVertexArrayAttrib(m_id, 3);
+    glVertexArrayAttribFormat(m_id, 3, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, tangent));
+    glVertexArrayAttribBinding(m_id, 3, m_vboIdx);
+
+    glEnableVertexArrayAttrib(m_id, 4);
+    glVertexArrayAttribFormat(m_id, 4, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, bitangent));
+    glVertexArrayAttribBinding(m_id, 4, m_vboIdx);
+
+    glEnableVertexArrayAttrib(m_id, 5);
+    glVertexArrayAttribFormat(m_id, 5, 4, GL_INT, GL_FALSE, offsetof(Vertex, boneIDs));
+    glVertexArrayAttribBinding(m_id, 5, m_vboIdx);
+
+    glEnableVertexArrayAttrib(m_id, 6);
+    glVertexArrayAttribFormat(m_id, 6, 4, GL_FLOAT, GL_FALSE, offsetof(Vertex, boneWeights));
+    glVertexArrayAttribBinding(m_id, 6, m_vboIdx);
+
+    glEnableVertexArrayAttrib(m_id, 7);
+    glVertexArrayAttribFormat(m_id, 7, 4, GL_FLOAT, GL_FALSE, offsetof(Vertex, color));
+    glVertexArrayAttribBinding(m_id, 7, m_vboIdx);
 
     ++m_vboIdx;
 }
 
-void VAO::setIndex(std::unique_ptr<IBO> ibo) {
+// cppcheck-suppress unusedFunction
+void VAO::setIndex(std::unique_ptr<IBO> ibo) noexcept{
     glVertexArrayElementBuffer(m_id, ibo->getID());
     m_ibo = std::move(ibo);
 }
 
-std::shared_ptr<VAO> VAO::Create() {
+std::shared_ptr<VAO> VAO::Create() noexcept {
     return std::make_shared<VAO>();
 }
 }

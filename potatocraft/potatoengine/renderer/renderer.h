@@ -1,30 +1,35 @@
 #pragma once
 
+#include "potatoengine/assets/assetsManager.h"
 #include "potatoengine/pch.h"
 #include "potatoengine/renderer/camera/camera.h"
 #include "potatoengine/renderer/rendererAPI.h"
-#include "potatoengine/renderer/shader/program.h"
+#include "potatoengine/renderer/shaderProgram.h"
 
 namespace potatoengine {
 
 class Renderer {
    public:
-    static void Init();
-    static void Shutdown();
+    Renderer(std::weak_ptr<AssetsManager> am);
 
-    static void OnWindowResize(uint32_t w, uint32_t h);
+    void init() const noexcept;
+    void shutdown() noexcept;
 
-    static void BeginScene(const Camera& c);
-    static void EndScene();
+    void onWindowResize(uint32_t w, uint32_t h) const noexcept;
 
-    static void Submit(const std::shared_ptr<Program>& sp, const std::shared_ptr<VAO>& vao, const glm::mat4& t = glm::mat4(1.f));
-    static void Link(const std::shared_ptr<Program>& sp, const Shader &vs, const Shader &fs);
+    void beginScene(const Camera& c) noexcept;
+    void endScene() noexcept;
+
+    void addShaderProgram(const std::string& name);
+    void render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform = glm::mat4(1.f), const std::string& shaderProgram = "basic") const noexcept;
+
+    const std::unique_ptr<ShaderProgram>& getShaderProgram(const std::string& name) const noexcept { return m_shaderPrograms.at(name); }
+
+    static std::unique_ptr<Renderer> Create(std::weak_ptr<AssetsManager> am) noexcept;
 
    private:
-    struct SceneData {
-        glm::mat4 viewProjectionMatrix;
-    };
-
-    inline static std::unique_ptr<SceneData> s_sceneData = std::make_unique<SceneData>();
+    glm::mat4 m_viewProjectionMatrix = glm::mat4(1.f);
+    std::unordered_map<std::string, std::unique_ptr<ShaderProgram>> m_shaderPrograms;
+    std::weak_ptr<AssetsManager> m_assetsManager;
 };
 }

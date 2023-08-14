@@ -1,6 +1,6 @@
 #include "potatoengine/core/application.h"
 
-#include "potatoengine/core/assetsManager.h"
+#include "potatoengine/assets/assetsManager.h"
 #include "potatoengine/core/time.h"
 #include "potatoengine/renderer/renderer.h"
 // #include <imgui.h>
@@ -12,7 +12,7 @@ namespace potatoengine {
 // struct IMGUI_STATES
 // {
 //     bool show_demo_window = true;
-//     bool show_another_window = false;
+//     bool show_another_window{};
 // } imgui_debugger;
 
 // Function prototypes
@@ -20,29 +20,28 @@ namespace potatoengine {
 // void init_imgui_context(GLFWwindow *window, const char *glsl_version);
 // void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
 
-Application::Application(const Config& config, CLArgs args)
-    : m_name(config.name), m_clargs(args) {
+Application::Application(const Config& c, CLArgs args)
+    : m_name(c.name), m_clargs(args) {
     s_instance = this;
 
-    std::filesystem::current_path(config.root);
+    std::filesystem::current_path(c.root);
     m_states = StateStack::Create();
     m_assetsManager = AssetsManager::Create();
-    m_window = Window::Create(WindowProperties{.title = config.name, .width = config.width, .height = config.height});
+    m_window = Window::Create(WindowProperties{.title = c.name, .width = c.width, .height = c.height});
     m_window->setEventCallback(BIND_EVENT(Application::onEvent));
 
-    Renderer::Init();
+    m_renderer = Renderer::Create(m_assetsManager);
+    m_renderer->init();
     // TODO class imgui layer with init and push overlay
 }
 
 Application::~Application() {
-    Renderer::Shutdown();
+    m_renderer->shutdown();
     // TODO class imgui layer with shutdown and pop overlay
 }
 
-void Application::close() { m_running = false; }
-
 bool Application::onWindowClose(WindowCloseEvent&) {
-    close();
+    terminate();
 
     return true;
 }
@@ -52,7 +51,7 @@ bool Application::onWindowResize(WindowResizeEvent& e) {
         m_minimized = true;
     } else {
         m_minimized = false;
-        Renderer::OnWindowResize(e.getWidth(), e.getHeight());
+        m_renderer->onWindowResize(e.getWidth(), e.getHeight());
     }
 
     return true;
@@ -61,22 +60,21 @@ bool Application::onWindowResize(WindowResizeEvent& e) {
 void Application::onEvent(Event& e) {
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<WindowCloseEvent>(BIND_EVENT(Application::onWindowClose));
-    dispatcher.dispatch<WindowResizeEvent>(
-        BIND_EVENT(Application::onWindowResize));
+    dispatcher.dispatch<WindowResizeEvent>(BIND_EVENT(Application::onWindowResize));
 
     for (auto it = m_states->rbegin(); it not_eq m_states->rend() and not e.m_handled; ++it) {
         (*it)->onEvent(e);
     }
 }
 
-void Application::pushState(std::unique_ptr<State> state) {
-    state->onAttach();
-    m_states->pushState(std::move(state));
+void Application::pushState(std::unique_ptr<State> s) {
+    s->onAttach();
+    m_states->pushState(std::move(s));
 }
 
-void Application::pushOverlay(std::unique_ptr<State> state) {
-    state->onAttach();
-    m_states->pushOverlay(std::move(state));
+void Application::pushOverlay(std::unique_ptr<State> s) {
+    s->onAttach();
+    m_states->pushOverlay(std::move(s));
 }
 
 void Application::run() {
@@ -112,8 +110,8 @@ void Application::run() {
         }
         // TODO: open menu pause
 #ifdef DEBUG
-        //CORE_INFO("FPS: {0}", 1.f / ts); 
-        // TODO move to imgui debug panel
+        // CORE_INFO("FPS: {0}", 1.f / ts);
+        //  TODO move to imgui debug panel
 #endif
         m_window->onUpdate();
     }

@@ -2,30 +2,31 @@
 
 #include <entt/entt.hpp>
 
-#include "potatoengine/core/assetsManager.h"
+#include "potatoengine/assets/assetsManager.h"
+#include "potatoengine/core/time.h"
+#include "potatoengine/renderer/renderer.h"
 #include "potatoengine/scene/efactory.h"
 #include "potatoengine/utils/uuid.h"
-#include "potatoengine/core/time.h"
-
 
 namespace potatoengine {
 class Entity;
 
 class Scene {
    public:
-    Scene(const std::shared_ptr<AssetsManager>& am);
-    Entity create(const asset::prefab::ID p, const std::optional<uint64_t>& uuid = std::nullopt);
+    Scene(std::weak_ptr<AssetsManager> am);
+    Entity create(assets::PrefabID id, const std::optional<uint64_t>& uuid = std::nullopt);
     Entity clone(Entity e);
     void destroy(Entity e);
+    void print() noexcept;
+    void onUpdate(Time ts, std::weak_ptr<Renderer> r);
+    Entity getEntity(std::string_view name);
+    Entity getEntity(UUID uuid);
     void registerPrefabs();
-    void print();
-    void onUpdate(Time ts);
 
     template <typename T>
-    void onComponentAdded(Entity e, T& component);
+    void onComponentAdded(Entity e, T& c);
 
    private:
-    std::shared_ptr<AssetsManager> m_assetsManager;
     Efactory m_efactory;
     entt::registry m_registry;
 

@@ -8,14 +8,14 @@ namespace potatoengine {
 
 class OpenGLContext {
    public:
-    OpenGLContext(GLFWwindow* window);
+    OpenGLContext(GLFWwindow* w);
 
-    void init();
-    void swapBuffers();
+    void init() const;
+    void swapBuffers() const noexcept;
 
-    static std::unique_ptr<OpenGLContext> Create(GLFWwindow* window);
+    static std::unique_ptr<OpenGLContext> Create(GLFWwindow* w);
 
    private:
-    GLFWwindow* m_window;
+    GLFWwindow* m_window{};
 };
 }

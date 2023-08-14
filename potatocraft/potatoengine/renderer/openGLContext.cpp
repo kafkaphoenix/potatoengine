@@ -4,13 +4,13 @@
 
 namespace potatoengine {
 
-OpenGLContext::OpenGLContext(GLFWwindow* window) : m_window(window) {
-    if (window == nullptr) [[unlikely]] {
+OpenGLContext::OpenGLContext(GLFWwindow* w) : m_window(w) {
+    if (not w) [[unlikely]] {
         throw std::runtime_error("Window is null!");
     }
 }
 
-void OpenGLContext::init() {
+void OpenGLContext::init() const {
     glfwMakeContextCurrent(m_window);
 
     if (int status = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)); status == 0) {
@@ -18,11 +18,11 @@ void OpenGLContext::init() {
     }
 }
 
-void OpenGLContext::swapBuffers() {
+void OpenGLContext::swapBuffers() const noexcept {
     glfwSwapBuffers(m_window);
 }
 
-std::unique_ptr<OpenGLContext> OpenGLContext::Create(GLFWwindow* window) {
-    return std::make_unique<OpenGLContext>(window);
+std::unique_ptr<OpenGLContext> OpenGLContext::Create(GLFWwindow* w) {
+    return std::make_unique<OpenGLContext>(w);
 }
 }

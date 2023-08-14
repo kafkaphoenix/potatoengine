@@ -10,7 +10,7 @@ namespace potatoengine {
 class Log {
    public:
     static void Init();
-    static std::shared_ptr<spdlog::logger> &GetLogger() { return s_logger; }
+    static std::shared_ptr<spdlog::logger> &GetLogger() noexcept { return s_logger; }
 
    private:
     inline static std::shared_ptr<spdlog::logger> s_logger;
@@ -18,8 +18,10 @@ class Log {
 
 }
 
-#define CORE_TRACE(...) ::potatoengine::Log::GetLogger()->trace(__VA_ARGS__)
-#define CORE_INFO(...) ::potatoengine::Log::GetLogger()->info(__VA_ARGS__)
-#define CORE_WARN(...) ::potatoengine::Log::GetLogger()->warn(__VA_ARGS__)
-#define CORE_ERROR(...) ::potatoengine::Log::GetLogger()->error(__VA_ARGS__)
-#define CORE_CRITICAL(...) ::potatoengine::Log::GetLogger()->critical(__VA_ARGS__)
+namespace engine = potatoengine;
+
+#define CORE_TRACE(...) ::engine::Log::GetLogger()->trace(__VA_ARGS__)
+#define CORE_INFO(...) ::engine::Log::GetLogger()->info(__VA_ARGS__)
+#define CORE_WARN(...) ::engine::Log::GetLogger()->warn(__VA_ARGS__)
+#define CORE_ERROR(...) ::engine::Log::GetLogger()->error(__VA_ARGS__)
+#define CORE_CRITICAL(...) ::engine::Log::GetLogger()->critical(__VA_ARGS__)
