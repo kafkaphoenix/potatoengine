@@ -39,11 +39,22 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
     }
     auto entities = reg.view<Transform, Body, UUIDComponent>();
     for (auto entity : entities) {
-        auto [transform, body] = entities.get<Transform, Body>(entity);
+        auto [transform, body] = reg.get<Transform, Body>(entity);
+        auto textureOpts = reg.try_get<TextureOpts>(entity);
 
         for (auto& mesh : body.meshes) {
+            if (textureOpts) {
+                if (textureOpts->hasTransparency) {
+                    RendererAPI::EnableCulling(false);
+                }
+            }
             mesh.bindTextures(renderer->getShaderProgram(mesh.getShaderProgram()));
             renderer->render(mesh.getVAO(), transform.get());
+            if (textureOpts) {
+                if (textureOpts->hasTransparency) {
+                    RendererAPI::EnableCulling(true);
+                }
+            }
         }
     }
     // auto group = registry.group<TransformComponent>(entt::get<AsteroidComponent>);

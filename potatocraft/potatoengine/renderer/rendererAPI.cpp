@@ -92,11 +92,16 @@ void RendererAPI::Init() noexcept {
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
 
     glEnable(GL_CULL_FACE);  // BACK FACE CULLING CCW
+    glCullFace(GL_BACK);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LINE_SMOOTH);
+}
+
+void RendererAPI::EnableCulling(bool enabled) noexcept {
+    enabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 }
 
 void RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) noexcept {

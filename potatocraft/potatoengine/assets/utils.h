@@ -31,8 +31,14 @@ inline std::string to_string(assets::ModelID id) noexcept {
             return "Rock";
         case Backpack:
             return "Backpack";
-        case Cube:
-            return "Cube";
+        case BrickBlock:
+            return "BrickBlock";
+        case StoneBlock:
+            return "StoneBlock";
+        case GlassBlock:
+            return "GlassBlock";
+        case WoodBlock:
+            return "WoodBlock";
     }
 }
 
@@ -47,6 +53,10 @@ inline std::string to_string(assets::PrefabID id) noexcept {
             return "BrickBlock";
         case StoneBlock:
             return "StoneBlock";
+        case GlassBlock:
+            return "GlassBlock";
+        case WoodBlock:
+            return "WoodBlock";
     }
 }
 

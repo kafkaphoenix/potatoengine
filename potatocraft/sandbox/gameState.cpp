@@ -15,26 +15,26 @@ void GameState::onAttach() {
         throw std::runtime_error("Assets manager is null");
     }
     renderer->addShaderProgram("basic");
-    auto box1 = m_scene.create(engine::assets::PrefabID::BrickBlock);
-    box1.get<engine::Transform>().pos = {0.0f, 0.0f, 0.0f};
-    auto box2 = m_scene.create(engine::assets::PrefabID::BrickBlock);
-    box2.get<engine::Transform>().pos = {2.f, 5.f, -15.f};
-    auto box3 = m_scene.create(engine::assets::PrefabID::BrickBlock);
-    box3.get<engine::Transform>().pos = {-1.5f, -2.2f, -2.5f};
-    auto box4 = m_scene.create(engine::assets::PrefabID::BrickBlock);
-    box4.get<engine::Transform>().pos = {-3.8f, -2.f, -12.3f};
-    auto box5 = m_scene.create(engine::assets::PrefabID::BrickBlock);
-    box5.get<engine::Transform>().pos = {2.4f, -0.4f, -3.5f};
-    auto box6 = m_scene.create(engine::assets::PrefabID::StoneBlock);
-    box6.get<engine::Transform>().pos = {-1.7f, 3.f, -7.5f};
-    auto box7 = m_scene.create(engine::assets::PrefabID::StoneBlock);
-    box7.get<engine::Transform>().pos = {1.3f, -2.f, -2.5f};
-    auto box8 = m_scene.create(engine::assets::PrefabID::StoneBlock);
-    box8.get<engine::Transform>().pos = {1.5f, 2.f, -2.5f};
-    auto box9 = m_scene.create(engine::assets::PrefabID::StoneBlock);
-    box9.get<engine::Transform>().pos = {1.5f, 0.2f, -1.5f};
-    auto box10 = m_scene.create(engine::assets::PrefabID::StoneBlock);
-    box10.get<engine::Transform>().pos = {-1.3f, 1.f, -1.5f};
+    auto block1 = m_scene.create(engine::assets::PrefabID::GlassBlock);
+    block1.get<engine::Transform>().pos = {0.0f, 0.0f, 0.0f};
+    auto block2 = m_scene.create(engine::assets::PrefabID::GlassBlock);
+    block2.get<engine::Transform>().pos = {2.f, 5.f, -15.f};
+    auto block3 = m_scene.create(engine::assets::PrefabID::StoneBlock);
+    block3.get<engine::Transform>().pos = {-1.5f, -2.2f, -2.5f};
+    auto block4 = m_scene.create(engine::assets::PrefabID::StoneBlock);
+    block4.get<engine::Transform>().pos = {-3.8f, -2.f, -12.3f};
+    auto block5 = m_scene.create(engine::assets::PrefabID::BrickBlock);
+    block5.get<engine::Transform>().pos = {2.4f, -0.4f, -3.5f};
+    auto block6 = m_scene.create(engine::assets::PrefabID::BrickBlock);
+    block6.get<engine::Transform>().pos = {-1.7f, 3.f, -7.5f};
+    auto block7 = m_scene.create(engine::assets::PrefabID::WoodBlock);
+    block7.get<engine::Transform>().pos = {1.3f, -2.f, -2.5f};
+    auto block8 = m_scene.create(engine::assets::PrefabID::WoodBlock);
+    block8.get<engine::Transform>().pos = {1.5f, 2.f, -2.5f};
+    auto block9 = m_scene.create(engine::assets::PrefabID::StoneBlock);
+    block9.get<engine::Transform>().pos = {1.5f, 0.2f, -1.5f};
+    auto block10 = m_scene.create(engine::assets::PrefabID::GlassBlock);
+    block10.get<engine::Transform>().pos = {-1.3f, 1.f, -1.5f};
 #ifdef DEBUG
     m_scene.print();
 #endif

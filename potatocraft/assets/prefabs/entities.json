@@ -79,12 +79,20 @@
         "components": {
         }
     },
+    "wood_block": {
+        "inherit": ["block"],
+        "ctags": [],
+        "components": {
+            "tag": "wood_block",
+            "body": "assets/models/wood_block/cube.obj"
+        }
+    },
     "brick_block": {
         "inherit": ["block"],
         "ctags": [],
         "components": {
             "tag": "brick_block",
-            "body": "assets/models/cube/cube.obj"
+            "body": "assets/models/brick_block/cube.obj"
         }
     },
     "stone_block": {
@@ -92,7 +100,18 @@
         "ctags": [],
         "components": {
             "tag": "stone_block",
-            "body": "assets/models/rock/rock.obj"
+            "body": "assets/models/stone_block/cube.obj"
+        }
+    },
+    "glass_block": {
+        "inherit": ["block"],
+        "ctags": [],
+        "components": {
+            "tag": "glass_block",
+            "body": "assets/models/glass_block/cube.obj",
+            "textureOpts": {
+                "hasTransparency": true
+            }
         }
     }
 }

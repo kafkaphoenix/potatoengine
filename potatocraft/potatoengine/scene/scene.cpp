@@ -52,7 +52,7 @@ Entity Scene::getEntity(UUID uuid) {
 }
 
 void Scene::registerPrefabs() {
-    for (const auto p : assets::enum_range(assets::PrefabID::Player, assets::PrefabID::StoneBlock)) {
+    for (const auto p : assets::enum_range(assets::PrefabID::Player, assets::PrefabID::WoodBlock)) {
         m_efactory.create(p, {m_registry.create(), this});
     }
 }

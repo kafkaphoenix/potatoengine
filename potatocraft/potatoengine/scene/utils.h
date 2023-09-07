@@ -56,6 +56,13 @@ void registerComponents() noexcept {
         .func<&Assign<Material>, entt::as_ref_t>("assign"_hs)
         .func<&AssignValues<Material, glm::vec3, glm::vec3, glm::vec3, float>, entt::as_ref_t>("assignValues"_hs);
     
+    entt::meta<TextureOpts>()
+        .type("textureOpts"_hs)
+        .data<&TextureOpts::hasTransparency>("hasTransparency"_hs)
+        .data<&TextureOpts::useFakeLighting>("useFakeLighting"_hs)
+        .func<&Assign<TextureOpts>, entt::as_ref_t>("assign"_hs)
+        .func<&AssignValues<TextureOpts, bool, bool>, entt::as_ref_t>("assignValues"_hs);
+
     entt::meta<Mesh>()
         .type("mesh"_hs)
         .data<&Mesh::vertices>("vertices"_hs)

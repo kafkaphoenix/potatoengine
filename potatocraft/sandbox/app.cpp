@@ -12,19 +12,27 @@ class Sandbox : public engine::Application {
 #endif
         m_assetsManager->load<engine::Shader>("vbasic", "assets/shaders/basic.vert");
         m_assetsManager->load<engine::Shader>("fbasic", "assets/shaders/basic.frag");
-        m_assetsManager->load<engine::Texture>(engine::assets::TextureID::Cube, "assets/textures/wooden_block.jpg");
         m_assetsManager->load<engine::Texture>(engine::assets::TextureID::Default, "assets/textures/default.jpg");
+#ifdef DEBUG
+        auto m_timer = engine::Timer();
+#endif
         m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::Player, "assets/prefabs/entities.json", "player");
         m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::Chicken, "assets/prefabs/entities.json", "chicken");
         m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::BrickBlock, "assets/prefabs/entities.json", "brick_block");
         m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::StoneBlock, "assets/prefabs/entities.json", "stone_block");
-        auto m_timer = engine::Timer();
-        m_assetsManager->load<engine::Model>("assets/models/rock/rock.obj", "assets/models/rock/rock.obj");
-        CORE_INFO("Loading models TIME: {0}", m_timer.elapsedSeconds());
-        m_timer = engine::Timer();
-        m_assetsManager->load<engine::Model>("assets/models/cube/cube.obj", "assets/models/cube/cube.obj");
-        CORE_INFO("Loading models TIME: {0}", m_timer.elapsedSeconds());
+        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::GlassBlock, "assets/prefabs/entities.json", "glass_block");
+        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::WoodBlock, "assets/prefabs/entities.json", "wood_block");
 #ifdef DEBUG
+        CORE_INFO("Loading prefabs TIME: {0}", m_timer.elapsedSeconds());
+        m_timer = engine::Timer();
+#endif
+        m_assetsManager->load<engine::Model>("assets/models/rock/rock.obj", "assets/models/rock/rock.obj");
+        m_assetsManager->load<engine::Model>("assets/models/brick_block/cube.obj", "assets/models/brick_block/cube.obj");
+        m_assetsManager->load<engine::Model>("assets/models/stone_block/cube.obj", "assets/models/stone_block/cube.obj");
+        m_assetsManager->load<engine::Model>("assets/models/glass_block/cube.obj", "assets/models/glass_block/cube.obj");
+        m_assetsManager->load<engine::Model>("assets/models/wood_block/cube.obj", "assets/models/wood_block/cube.obj");
+#ifdef DEBUG
+        CORE_INFO("Loading models TIME: {0}", m_timer.elapsedSeconds());
         CORE_INFO("Assets loaded!");
         m_assetsManager->print();
         CORE_INFO("Loading game state...");

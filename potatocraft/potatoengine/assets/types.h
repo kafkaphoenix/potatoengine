@@ -21,7 +21,10 @@ enum class ShaderID {
 enum class ModelID {
     Rock,
     Backpack,
-    Cube,
+    BrickBlock,
+    StoneBlock,
+    GlassBlock,
+    WoodBlock,
 };
 
 enum class PrefabID {
@@ -29,6 +32,8 @@ enum class PrefabID {
     Chicken,
     BrickBlock,
     StoneBlock,
+    GlassBlock,
+    WoodBlock,
 };
 
 enum class SoundID {

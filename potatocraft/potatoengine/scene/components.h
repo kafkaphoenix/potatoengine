@@ -54,6 +54,14 @@ struct Material {
         : ambient(std::move(a)), diffuse(std::move(d)), specular(std::move(s)), shininess(sh) {}
 };
 
+struct TextureOpts {
+    bool hasTransparency{};
+    bool useFakeLighting{};
+
+    TextureOpts() = default;
+    explicit TextureOpts(bool ht, bool ufl) : hasTransparency(ht), useFakeLighting(ufl) {}
+};
+
 struct Mesh {
     std::vector<Vertex> vertices{};  // TODO remove in VAO or here?
     std::vector<uint32_t> indices{};
