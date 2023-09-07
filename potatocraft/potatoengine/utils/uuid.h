@@ -12,8 +12,9 @@ class UUID {
     UUID() : m_uuid(dis(gen)) {}
     UUID(uint64_t uuid) : m_uuid(uuid) {}
 
-    operator uint64_t() const { return m_uuid; }
+    operator uint64_t() const noexcept { return m_uuid; }
+
    private:
-    uint64_t m_uuid;
+    uint64_t m_uuid{};
 };
 }

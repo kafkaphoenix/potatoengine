@@ -8,36 +8,26 @@ namespace potatoengine {
 class Camera {
    public:
     Camera() = default;
-    Camera(const glm::mat4& projection, const glm::vec3& position, const glm::quat& rotation);
-    void setProjection(const glm::mat4& projection) {
-        m_projection = projection;
-        m_viewProjection = m_projection * m_view;
-    }
+    Camera(const glm::mat4& proj, const glm::vec3& pos, const glm::quat& rot);
 
-    const glm::mat4& getView() const { return m_view; }
-    const glm::mat4& getProjection() const { return m_projection; }
-    const glm::mat4& getViewProjection() const { return m_viewProjection; }
-
-    const glm::vec3& getPosition() const { return m_position; }
-    void setPosition(const glm::vec3& position) {
-        m_position = position;
-        recalculateView();
-    }
-    const glm::quat& getRotation() const { return m_rotation; }
-    void setRotation(const glm::quat& rotation) {
-        m_rotation = rotation;
-        recalculateView();
-    }
+    const glm::mat4& getView() const noexcept { return m_view; }
+    const glm::mat4& getProjection() const noexcept { return m_projection; }
+    const glm::mat4& getViewProjection() const noexcept { return m_viewProjection; }
+    const glm::vec3& getPosition() const noexcept { return m_position; }
+    const glm::quat& getRotation() const noexcept { return m_rotation; }
+    void setProjection(const glm::mat4& proj) noexcept;
+    void setPosition(const glm::vec3& pos) noexcept;
+    void setRotation(const glm::quat& rot) noexcept;
 
    private:
-    void recalculateView();
+    void recalculateView() noexcept;
 
-    glm::mat4 m_view;
-    glm::mat4 m_projection;
-    glm::mat4 m_viewProjection;
+    glm::mat4 m_view = glm::mat4(1.0f);
+    glm::mat4 m_projection = glm::mat4(1.0f);
+    glm::mat4 m_viewProjection = glm::mat4(1.0f);
 
-    glm::vec3 m_position;
-    glm::quat m_rotation;
+    glm::vec3 m_position = glm::vec3(0.0f);
+    glm::quat m_rotation = glm::identity<glm::quat>();
 };
 
 }

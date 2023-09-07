@@ -1,7 +1,7 @@
 {
     "creature": {
         "inherit": [],
-        "ctags": ["transform", "mesh", "renderer"],
+        "ctags": ["transform"],
         "components": {
             "health": {
                 "base": 100,
@@ -26,9 +26,6 @@
         "components": {
             "name": "Auri",
             "tag": "player",
-            "material": {
-                "filepath": "player.png"
-            },
             "stats": {
                 "strength": 10,
                 "dexterity": 10,
@@ -73,15 +70,12 @@
         "inherit": ["creature"],
         "ctags": [],
         "components": {
-            "tag": "animal",
-            "material": {
-                "filepath": "chicken.png"
-            }
+            "tag": "animal"
         }
     },
     "block": {
         "inherit": [],
-        "ctags": ["transform", "mesh"],
+        "ctags": ["transform"],
         "components": {
         }
     },
@@ -90,9 +84,15 @@
         "ctags": [],
         "components": {
             "tag": "brick_block",
-            "material": {
-                "filepath": "brick_block.jpg"
-            }
+            "body": "assets/models/cube/cube.obj"
+        }
+    },
+    "stone_block": {
+        "inherit": ["block"],
+        "ctags": [],
+        "components": {
+            "tag": "stone_block",
+            "body": "assets/models/rock/rock.obj"
         }
     }
 }

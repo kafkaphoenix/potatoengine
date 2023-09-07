@@ -9,7 +9,7 @@ namespace potatoengine {
 
 class Entity {
    public:
-    Entity(entt::entity entity, Scene* scene);
+    Entity(entt::entity e, Scene* scene);
 
     template <typename Component, typename... Args>
     Component& add(Args&&... args) {
@@ -36,12 +36,12 @@ class Entity {
     }
 
     template <typename... Components>
-    bool has_all() {
+    bool has_all() const {
         return (m_scene->m_registry.all_of<Components>(m_entity) and ...);
     }
 
     template <typename... Components>
-    bool has_any() {
+    bool has_any() const {
         return (m_scene->m_registry.any_of<Components>(m_entity) or ...);
     }
 
@@ -50,16 +50,16 @@ class Entity {
         (m_scene->m_registry.remove<Components>(m_entity), ...);
     }
 
-    operator bool() const;
-    bool operator==(const Entity other) const;
-    bool operator!=(const Entity other) const;
-    operator entt::entity() const;
+    operator bool() const noexcept;
+    bool operator==(const Entity other) const noexcept;
+    bool operator!=(const Entity other) const noexcept;
+    operator entt::entity() const noexcept;
     operator uint32_t() const;
     operator uint64_t() const;
     operator std::string() const;
 
    private:
     entt::entity m_entity{entt::null};
-    Scene* m_scene;  // shared ptr would add a counter we dont need here as we don't own the object
+    Scene* m_scene{};  // shared ptr would add a counter we dont need here as we don't own the object
 };
 }

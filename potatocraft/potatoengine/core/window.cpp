@@ -150,7 +150,7 @@ Window::~Window() {
     shutdown();
 }
 
-void Window::shutdown() {
+void Window::shutdown() noexcept {
     glfwDestroyWindow(m_window);
     --s_GLFWWindowCount;
 
@@ -159,17 +159,17 @@ void Window::shutdown() {
     }
 }
 
-void Window::onUpdate() {
+void Window::onUpdate() noexcept {
     glfwPollEvents();
     m_context->swapBuffers();
 }
 
-void Window::setVSync(bool enabled) {
+void Window::setVSync(bool enabled) noexcept {
     glfwSwapInterval(enabled ? 1 : 0);
     m_data.vSync = enabled;
 }
 
-void Window::setCursorMode(CursorMode mode) {
+void Window::setCursorMode(CursorMode mode) const noexcept {
     glfwSetInputMode(m_window, GLFW_CURSOR, static_cast<int>(mode));
 }
 

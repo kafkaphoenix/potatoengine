@@ -4,32 +4,28 @@
 
 namespace potatocraft {
 
-class GameState : public potatoengine::State {
+class GameState : public engine::State {
    public:
-    GameState(const std::shared_ptr<potatoengine::AssetsManager>& am);
-    virtual ~GameState() = default;
+    GameState(std::weak_ptr<engine::AssetsManager> am, std::weak_ptr<engine::Renderer> r);
 
     virtual void onAttach() override final;
     virtual void onDetach() override final;
-    virtual void onUpdate(potatoengine::Time ts) override final;
+    virtual void onUpdate(engine::Time ts) override final;
     virtual void onImGuiRender() override final;
-    virtual void onEvent(potatoengine::Event& e) override final;
+    virtual void onEvent(engine::Event& e) override final;
 
-    static std::unique_ptr<State> Create(const std::shared_ptr<potatoengine::AssetsManager>& am);
+    static std::unique_ptr<State> Create(std::weak_ptr<engine::AssetsManager> am, std::weak_ptr<engine::Renderer> r) noexcept;
 
    private:
-    bool onKeyPressed(potatoengine::KeyPressedEvent& e);
-    bool onKeyReleased(potatoengine::KeyReleasedEvent& e);
-    void computeShaders();
-    void loadCubes();
+    bool onKeyPressed(engine::KeyPressedEvent& e);
+    bool onKeyReleased(engine::KeyReleasedEvent& e);
 
-    bool m_debugging = false;
-    bool m_wireframe = false;
+    bool m_debugging{};
+    bool m_wireframe{};
 
-    std::shared_ptr<potatoengine::Program> m_basic;
-    std::shared_ptr<potatoengine::VAO> m_vao;
-    potatoengine::CameraController m_cameraController;
-    potatoengine::Scene m_scene;
-    std::shared_ptr<potatoengine::AssetsManager> m_assetsManager;
+    engine::CameraController m_cameraController;
+    engine::Scene m_scene;
+    std::weak_ptr<engine::Renderer> m_renderer;
+    std::weak_ptr<engine::AssetsManager> m_assetsManager;
 };
 }

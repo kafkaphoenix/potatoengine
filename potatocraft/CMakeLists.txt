@@ -29,6 +29,12 @@ file(GLOB_RECURSE SOURCE_FILES
 
 add_subdirectory(vendor)
 
+if (ENABLE_DEBUG)
+    set(DEBUG ON)
+else()
+    set(DEBUG OFF)
+endif()
+
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/potatoengine/config.h @ONLY)
 
 # Executable definition and properties
@@ -58,7 +64,12 @@ elseif(GCC OR CLANG)
     target_compile_options(${PROJECT_NAME} PRIVATE -fmodules-ts)
 endif()
 
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# https://stackoverflow.com/questions/42476765/copying-assets-directory-from-source-to-build-directory-in-cmake
+# only update if something has changed
+add_custom_target(copy_assets
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy-assets.cmake
+)
+add_dependencies(${PROJECT_NAME} copy_assets)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog ${CMAKE_DL_LIBS})
 
@@ -105,10 +116,4 @@ if(CPPCHECK AND ENABLE_CPPCHECK)
         COMMENT "running cppcheck static analysis"
     )
     add_dependencies(${PROJECT_NAME} run_cppcheck)
-endif()
-
-if (ENABLE_DEBUG)
-    set(DEBUG ON)
-else()
-    set(DEBUG OFF)
 endif()

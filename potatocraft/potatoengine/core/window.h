@@ -30,22 +30,21 @@ class Window {
     Window(const WindowProperties& properties);
     ~Window();
 
-    void shutdown();
-    void onUpdate();
+    void shutdown() noexcept;
+    void onUpdate() noexcept;
 
-    // Window attributes
-    void setEventCallback(const EventCallbackFn& callback) { m_data.eventCallback = callback; }
-    void setVSync(bool enabled);
-    bool isVSync() const { return m_data.vSync; }
+    void setEventCallback(const EventCallbackFn& cb) { m_data.eventCallback = cb; }
+    void setVSync(bool enabled) noexcept;
+    bool isVSync() const noexcept { return m_data.vSync; }
 
-    GLFWwindow* getNativeWindow() const { return m_window; }
+    GLFWwindow* getNativeWindow() const noexcept { return m_window; }
 
-    int getWidth() const { return m_data.width; }
-    int getHeight() const { return m_data.height; }
+    int getWidth() const noexcept { return m_data.width; }
+    int getHeight() const noexcept { return m_data.height; }
 
-    void setCursorMode(CursorMode mode);
-    void setUpdateCameraPosition(bool update) { m_data.updateCameraPosition = update; }
-    void setLastMousePosition(float x, float y) {
+    void setCursorMode(CursorMode mode) const noexcept;
+    void setUpdateCameraPosition(bool update) noexcept { m_data.updateCameraPosition = update; }
+    void setLastMousePosition(float x, float y) noexcept {
         m_data.lastX = x;
         m_data.lastY = y;
     }
@@ -53,23 +52,23 @@ class Window {
     static std::unique_ptr<Window> Create(const WindowProperties& properties);
 
    private:
-    GLFWwindow* m_window; // TODO: this class should be a window manager, and this should be a vector of windows
+    GLFWwindow* m_window{}; // TODO: this class should be a window manager, and this should be a vector of windows
     std::unique_ptr<OpenGLContext> m_context;
 
     struct WindowData {
         std::string title{};
-        int width, height;
-        float lastX;
-        float lastY;
+        int width{}, height{};
+        float lastX{};
+        float lastY{};
         bool firstMouse = true;
-        bool vSync;
+        bool vSync{};
         CursorMode cursorMode = CursorMode::Disabled;
         bool updateCameraPosition = true;
 
         EventCallbackFn eventCallback;
     };
 
-    WindowData m_data;
+    WindowData m_data{};
 
 };
 

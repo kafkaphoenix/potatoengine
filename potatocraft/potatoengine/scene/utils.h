@@ -1,11 +1,13 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "potatoengine/scene/components.h"
 #include "potatoengine/scene/entity.h"
 
 namespace potatoengine {
+
 template <typename Component>
 // cppcheck-suppress unusedFunction
 Component& Assign(Entity e) {
@@ -20,7 +22,7 @@ Component& AssignValues(Entity e, Args... args) {
     return e.add<Component>(std::forward<Args>(args)...);
 }
 
-void registerComponents() {
+void registerComponents() noexcept {
     using namespace entt::literals;
 
     entt::meta<UUIDComponent>()
@@ -42,22 +44,36 @@ void registerComponents() {
         .data<&Transform::pos>("pos"_hs)
         .data<&Transform::rot>("rot"_hs)
         .data<&Transform::scale>("scale"_hs)
-        .func<&Transform::getTransform>("getTransform"_hs)
+        .func<&Transform::get>("get"_hs)
         .func<&Assign<Transform>>("assign"_hs);
 
     entt::meta<Material>()
         .type("material"_hs)
-        .data<&Material::filepath>("filepath"_hs)
+        .data<&Material::ambient>("ambient"_hs)
+        .data<&Material::diffuse>("diffuse"_hs)
+        .data<&Material::specular>("specular"_hs)
+        .data<&Material::shininess>("shininess"_hs)
         .func<&Assign<Material>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Material, std::string>, entt::as_ref_t>("assignValues"_hs);
-
+        .func<&AssignValues<Material, glm::vec3, glm::vec3, glm::vec3, float>, entt::as_ref_t>("assignValues"_hs);
+    
     entt::meta<Mesh>()
         .type("mesh"_hs)
         .data<&Mesh::vertices>("vertices"_hs)
         .data<&Mesh::indices>("indices"_hs)
-        .data<&Mesh::normals>("normals"_hs)
-        .func<&Assign<Mesh>>("assign"_hs);
+        .data<&Mesh::textures>("textures"_hs)
+        .data<&Mesh::vao>("vao"_hs)
+        .func<&Mesh::setupMesh>("setupMesh"_hs)
+        .func<&Assign<Mesh>, entt::as_ref_t>("assign"_hs)
+        .func<&AssignValues<Mesh, std::vector<Vertex>, std::vector<uint32_t>, std::vector<std::shared_ptr<Texture>>>, entt::as_ref_t>("assignValues"_hs);
 
+    entt::meta<Body>()
+        .type("body"_hs)
+        .data<&Body::filepath>("filepath"_hs)
+        .data<&Body::meshes>("meshes"_hs)
+        .data<&Body::materials>("materials"_hs) 
+        .func<&Assign<Body>, entt::as_ref_t>("assign"_hs)
+        .func<&AssignValues<Body, std::string, std::vector<Mesh>, std::vector<Material>>, entt::as_ref_t>("assignValues"_hs);
+    
     entt::meta<RGBAColor>()
         .type("rgbacolor"_hs)
         .data<&RGBAColor::color>("color"_hs)
@@ -94,14 +110,14 @@ void registerComponents() {
         .func<&Assign<Light>, entt::as_ref_t>("assign"_hs)
         .func<&AssignValues<Light, Light::Type, glm::vec3, float, float, float, float>, entt::as_ref_t>("assignValues"_hs);
 
-    entt::meta<AudioSource>()
-        .type("audiosource"_hs)
-        .data<&AudioSource::filepath>("filepath"_hs)
-        .data<&AudioSource::volume>("volume"_hs)
-        .data<&AudioSource::pitch>("pitch"_hs)
-        .data<&AudioSource::loop>("loop"_hs)
-        .func<&Assign<AudioSource>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<AudioSource, std::string, float, float, bool>, entt::as_ref_t>("assignValues"_hs);
+    entt::meta<Audio>()
+        .type("audio"_hs)
+        .data<&Audio::filepath>("filepath"_hs)
+        .data<&Audio::volume>("volume"_hs)
+        .data<&Audio::pitch>("pitch"_hs)
+        .data<&Audio::loop>("loop"_hs)
+        .func<&Assign<Audio>, entt::as_ref_t>("assign"_hs)
+        .func<&AssignValues<Audio, std::string, float, float, bool>, entt::as_ref_t>("assignValues"_hs);
 
     entt::meta<ParticleSystem>()
         .type("particlesystem"_hs)
@@ -125,7 +141,7 @@ void registerComponents() {
         .data<&AI::filepath>("filepath"_hs)
         .func<&AssignValues<AI, std::string>>("assignValues"_hs);
 
-    entt::meta<Item>()
+    entt::meta<Item>() // TODO probably this is not a component?
         .type("item"_hs)
         .data<&Item::name>("name"_hs)
         .data<&Item::description>("description"_hs)
@@ -239,7 +255,7 @@ void registerComponents() {
         .func<&AssignValues<Skills, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int>, entt::as_ref_t>("assignValues"_hs);
 }
 
-void printScene(entt::registry& r) {
+void printScene(entt::registry& r) noexcept {
     CORE_INFO("Scene entities:");
     r.view<UUIDComponent>().each([&](auto e, auto& uuid) {
         CORE_INFO("\tEntity UUID: {0}", uuid.uuid);
@@ -276,7 +292,8 @@ void printScene(entt::registry& r) {
 
                 if (cname == "Material") {
                     Material* material = static_cast<Material*>(data);
-                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tfilepath: {0}", material->filepath);
+                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tambient: {0}\n\t\t\t\t\tdiffuse: {1}\n\t\t\t\t\tspecular: {2}\n\t\t\t\t\tshininess: {3}",
+                              glm::to_string(material->ambient), glm::to_string(material->diffuse), glm::to_string(material->specular), material->shininess);
                 }
 
                 if (cname == "Stamina") {
@@ -311,6 +328,11 @@ void printScene(entt::registry& r) {
                     CORE_INFO("\t\t\tData:\n\t\t\t\t\tmining: {0}\n\t\t\t\t\tjewelcrafting: {1}\n\t\t\t\t\tblacksmithing: {2}\n\t\t\t\t\tfishing: {3}\n\t\t\t\t\thunting: {4}\n\t\t\t\t\tskinning: {5}\n\t\t\t\t\tleatherworking: {6}\n\t\t\t\t\therbalism: {7}\n\t\t\t\t\tcooking: {8}\n\t\t\t\t\talchemy: {9}\n\t\t\t\t\tenchanting: {10}\n\t\t\t\t\tharvesting: {11}\n\t\t\t\t\ttailoring: {12}\n\t\t\t\t\twoodworking: {13}\n\t\t\t\t\twoodcutting: {14}\n\t\t\t\t\tfarming: {15}\n\t\t\t\t\tquarrying: {16}\n\t\t\t\t\tmasonry: {17}",
                               skills->mining, skills->jewelcrafting, skills->blacksmithing, skills->fishing, skills->hunting, skills->skinning, skills->leatherworking, skills->herbalism, skills->cooking, skills->alchemy, skills->enchanting, skills->harvesting, skills->tailoring, skills->woodworking, skills->woodcutting, skills->farming, skills->quarrying, skills->masonry);
                 }
+
+                // if (cname == "Mesh") {
+                //     Mesh* mesh = static_cast<Mesh*>(data);
+                //     CORE_INFO("\t\t\tData:\n\t\t\t\t\tvertices: {0}\n\t\t\t\t\tindices: {1}\n\t\t\t\t\ttextures: {2}\n\t\t\t\t\tvao: {3}", mesh->vertices.size(), mesh->indices.size(), mesh->textures.size(), mesh->vao->getID());
+                // }
             }
         }
     });

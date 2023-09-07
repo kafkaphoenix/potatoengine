@@ -7,7 +7,7 @@ namespace potatoengine {
 
 class KeyEvent : public Event {
    public:
-    KeyCode getKeyCode() const { return m_keyCode; }
+    KeyCode getKeyCode() const noexcept { return m_keyCode; }
 
     EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 
@@ -15,7 +15,7 @@ class KeyEvent : public Event {
     KeyEvent(const KeyCode keycode)
         : m_keyCode(keycode) {}
 
-    KeyCode m_keyCode;
+    KeyCode m_keyCode{};
 };
 
 class KeyPressedEvent : public KeyEvent {
@@ -23,12 +23,12 @@ class KeyPressedEvent : public KeyEvent {
     KeyPressedEvent(const KeyCode keycode, bool repeating)
         : KeyEvent(keycode), m_repeating(repeating) {}
 
-    bool repeating() const { return m_repeating; }
+    bool repeating() const noexcept { return m_repeating; }
 
     EVENT_CLASS_TYPE(KeyPressed)
 
    private:
-    bool m_repeating;
+    bool m_repeating{};
 };
 
 class KeyReleasedEvent : public KeyEvent {

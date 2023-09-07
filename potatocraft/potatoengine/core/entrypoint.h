@@ -2,15 +2,17 @@
 
 #include "potatoengine/core/application.h"
 
-extern potatoengine::Application *potatoengine::CreateApp(potatoengine::CLArgs args);
+namespace engine = potatoengine;
+
+extern engine::Application *engine::CreateApp(engine::CLArgs args);
 
 int main(int argc, char **argv) {
     try {
-        potatoengine::Log::Init();
+        engine::Log::Init();
 
         std::vector<const char *> args(argv, argv + argc);
-        potatoengine::CLArgs clargs{.args = std::span<const char *>{args}};
-        auto app = potatoengine::CreateApp(clargs);
+        engine::CLArgs clargs{.args = std::span<const char *>{args}};
+        auto app = engine::CreateApp(clargs);
 
         app->run();
 

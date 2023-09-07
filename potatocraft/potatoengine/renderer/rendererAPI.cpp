@@ -4,7 +4,7 @@
 
 namespace potatoengine {
 
-void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum severity, GLsizei, GLchar const* message, void const*) {
+void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum severity, GLsizei, GLchar const* msg, void const*) {
     std::string_view _source = [source]() {
         switch (source) {
             case GL_DEBUG_SOURCE_API:
@@ -66,7 +66,7 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum s
         _type,
         _severity,
         id,
-        message);
+        msg);
 
     switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
@@ -84,12 +84,12 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum s
     }
 }
 
-void RendererAPI::Init() {
+void RendererAPI::Init() noexcept {
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(message_callback, nullptr);
 
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
 
     glEnable(GL_CULL_FACE);  // BACK FACE CULLING CCW
     glEnable(GL_BLEND);
@@ -99,23 +99,23 @@ void RendererAPI::Init() {
     glEnable(GL_LINE_SMOOTH);
 }
 
-void RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
-    glViewport(x, y, width, height);
+void RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) noexcept {
+    glViewport(x, y, w, h);
 }
 
-void RendererAPI::SetClearColor(const glm::vec4& color) {
+void RendererAPI::SetClearColor(const glm::vec4& color) noexcept {
     glClearColor(color.r, color.g, color.b, color.a);
 }
 
-void RendererAPI::SetWireframe(bool enabled) {
+void RendererAPI::SetWireframe(bool enabled) noexcept {
     enabled ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void RendererAPI::Clear() {
+void RendererAPI::Clear() noexcept {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void RendererAPI::DrawIndexed(const std::shared_ptr<VAO>& vao) {
+void RendererAPI::DrawIndexed(const std::shared_ptr<VAO>& vao) noexcept {
     vao->bind();
     glDrawElements(GL_TRIANGLES, vao->getEBO()->getCount(), GL_UNSIGNED_INT, nullptr);
     vao->unbind();
