@@ -77,14 +77,12 @@
         "inherit": [],
         "ctags": ["transform"],
         "components": {
-        }
-    },
-    "wood_block": {
-        "inherit": ["block"],
-        "ctags": [],
-        "components": {
-            "tag": "wood_block",
-            "body": "assets/models/wood_block/cube.obj"
+            "body": "assets/models/block/cube.obj",
+            "textureAtlas": {
+                "filepath": "assets/textures/block_atlas.jpg",
+                "rows": 2
+            },
+            "textureOpts": {}
         }
     },
     "brick_block": {
@@ -92,7 +90,10 @@
         "ctags": [],
         "components": {
             "tag": "brick_block",
-            "body": "assets/models/brick_block/cube.obj"
+            "textureAtlas": {
+                "index": 0
+            }
+
         }
     },
     "stone_block": {
@@ -100,7 +101,9 @@
         "ctags": [],
         "components": {
             "tag": "stone_block",
-            "body": "assets/models/stone_block/cube.obj"
+            "textureAtlas": {
+                "index": 1
+            }
         }
     },
     "glass_block": {
@@ -108,9 +111,21 @@
         "ctags": [],
         "components": {
             "tag": "glass_block",
-            "body": "assets/models/glass_block/cube.obj",
+            "textureAtlas": {
+                "index": 2
+            },
             "textureOpts": {
                 "hasTransparency": true
+            }
+        }
+    },
+    "wood_block": {
+        "inherit": ["block"],
+        "ctags": [],
+        "components": {
+            "tag": "wood_block",
+            "textureAtlas": {
+                "index": 3
             }
         }
     }

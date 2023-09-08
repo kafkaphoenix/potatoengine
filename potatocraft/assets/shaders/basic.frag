@@ -14,18 +14,26 @@ uniform float use_color;
 uniform float use_texture_mix;
 uniform float texture_mix_factor;
 uniform vec3 light_dir;
+uniform float use_atlas;
+uniform float num_rows;
+uniform vec2 offset;
 
 void main()
 {
+    vec2 offsetTexture = vTextureCoords;
+    if (int(use_atlas) == 1) {
+        offsetTexture = vTextureCoords / num_rows + offset;
+    }
+
     vec4 base = vec4(0.0);
     if (int(use_color) == 1) {
         if (int(use_texture_mix) == 1) {
-            base = vColor * mix(vec4(1.0), texture(texture_diffuse0, vTextureCoords), texture_mix_factor);
+            base = vColor * mix(vec4(1.0), texture(texture_diffuse0, offsetTexture), texture_mix_factor);
         } else {
             base = vColor;
         }
     } else {
-        base = texture(texture_diffuse0, vTextureCoords);
+        base = texture(texture_diffuse0, offsetTexture);
     }
     float nDotL = dot(normalize(surfaceNormal), normalize(light_dir));
     float brightness = max(nDotL, 0.0);

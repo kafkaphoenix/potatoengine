@@ -41,6 +41,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
     for (auto entity : entities) {
         auto [transform, body] = reg.get<Transform, Body>(entity);
         auto textureOpts = reg.try_get<TextureOpts>(entity);
+        auto textureAtlas = reg.try_get<TextureAtlas>(entity);
 
         for (auto& mesh : body.meshes) {
             if (textureOpts) {
@@ -48,7 +49,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
                     RendererAPI::EnableCulling(false);
                 }
             }
-            mesh.bindTextures(renderer->getShaderProgram(mesh.getShaderProgram()));
+            mesh.bindTextures(renderer->getShaderProgram(mesh.getShaderProgram()), textureAtlas);
             renderer->render(mesh.getVAO(), transform.get());
             if (textureOpts) {
                 if (textureOpts->hasTransparency) {

@@ -88,7 +88,11 @@ void Efactory::create(assets::PrefabID id, Entity e) {
                 auto ec = assignFunc.invoke({}, e);
                 for (auto&& [k, _v] : v.items()) {
                     if (_v.is_string()) {
-                        ec.set(entt::hashed_string{k.c_str()}, _v.get<std::string>());
+                        if (c.first == "textureAtlas" and k == "filepath") {
+                            loadAtlas(_v.get<std::string>(), ec);
+                        } else {
+                            ec.set(entt::hashed_string{k.c_str()}, _v.get<std::string>());
+                        }
                     } else if (_v.is_number_integer()) {
                         ec.set(entt::hashed_string{k.c_str()}, _v.get<int>());
                     } else if (_v.is_number_float()) {
@@ -147,5 +151,19 @@ void Efactory::loadModel(const std::string& filepath, entt::meta_any& ec) {
     ec.set(entt::hashed_string{"filepath"_hs}, filepath);
     ec.set(entt::hashed_string{"meshes"_hs}, model->getMeshes());
     ec.set(entt::hashed_string{"materials"_hs}, model->getMaterials());
+}
+
+void Efactory::loadAtlas(const std::string& filepath, entt::meta_any& ec) {
+    using namespace entt::literals;
+
+    const auto& manager = m_assetsManager.lock();
+    if (not manager) {
+        throw std::runtime_error("Assets manager is null!");
+    }
+    if (not manager->exists<Texture>(filepath)) {
+        manager->load<Texture>(filepath, filepath);
+    }
+    const auto& texture = manager->get<Texture>(filepath);
+    ec.set(entt::hashed_string{"texture"_hs}, texture);
 }
 }

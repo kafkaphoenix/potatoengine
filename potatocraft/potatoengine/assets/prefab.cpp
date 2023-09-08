@@ -18,11 +18,11 @@ Prefab::Prefab(const std::filesystem::path& fp, const std::string& name): m_name
     f.close();
 
     auto pfb = data.at(name);
-    read(pfb);
     pfb.at("inherit").get_to(m_inherits);
     for (const auto& i : m_inherits) {
         read(data.at(i));
     }
+    read(pfb);
 #ifdef DEBUG
     print();
 #endif
@@ -34,7 +34,13 @@ void Prefab::read(const json& j) {
     }
 
     for (auto& [k, v] : j.at("components").items()) {
-        m_components[k] = v;
+        if (m_components.contains(k)) {
+            for (auto& [kk, vv] : v.items()) {
+                m_components[k][kk] = vv;
+            }
+        } else {
+            m_components[k] = v;
+        }
     }
 }
 

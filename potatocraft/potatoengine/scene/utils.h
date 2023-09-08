@@ -56,6 +56,14 @@ void registerComponents() noexcept {
         .func<&Assign<Material>, entt::as_ref_t>("assign"_hs)
         .func<&AssignValues<Material, glm::vec3, glm::vec3, glm::vec3, float>, entt::as_ref_t>("assignValues"_hs);
     
+    entt::meta<TextureAtlas>()
+        .type("textureAtlas"_hs)
+        .data<&TextureAtlas::texture>("texture"_hs)
+        .data<&TextureAtlas::rows>("rows"_hs)
+        .data<&TextureAtlas::index>("index"_hs)
+        .func<&Assign<TextureAtlas>, entt::as_ref_t>("assign"_hs)
+        .func<&AssignValues<TextureAtlas, std::shared_ptr<Texture>, int, int>, entt::as_ref_t>("assignValues"_hs);
+
     entt::meta<TextureOpts>()
         .type("textureOpts"_hs)
         .data<&TextureOpts::hasTransparency>("hasTransparency"_hs)
@@ -82,12 +90,12 @@ void registerComponents() noexcept {
         .func<&AssignValues<Body, std::string, std::vector<Mesh>, std::vector<Material>>, entt::as_ref_t>("assignValues"_hs);
     
     entt::meta<RGBAColor>()
-        .type("rgbacolor"_hs)
+        .type("rgbaColor"_hs)
         .data<&RGBAColor::color>("color"_hs)
         .func<&AssignValues<RGBAColor, glm::vec4>>("assignValues"_hs);
 
     entt::meta<RigidBody>()
-        .type("rigidbody"_hs)
+        .type("rigidBody"_hs)
         .data<&RigidBody::mass>("mass"_hs)
         .data<&RigidBody::friction>("friction"_hs)
         .data<&RigidBody::bounciness>("bounciness"_hs)
@@ -127,7 +135,7 @@ void registerComponents() noexcept {
         .func<&AssignValues<Audio, std::string, float, float, bool>, entt::as_ref_t>("assignValues"_hs);
 
     entt::meta<ParticleSystem>()
-        .type("particlesystem"_hs)
+        .type("particleSystem"_hs)
         .data<&ParticleSystem::emitter>("emitter"_hs)
         .func<&AssignValues<ParticleSystem, std::string>>("assignValues"_hs);
 
@@ -273,7 +281,7 @@ void printScene(entt::registry& r) noexcept {
                 entt::id_type cid = curr.first;
                 entt::type_info ctype = storage.type();
                 std::string_view cname = ctype.name().substr(ctype.name().find_last_of(':') + 1);
-                size_t pos = cname.find("Component");
+                uint32_t pos = cname.find("Component");
                 CORE_INFO("\t\tComponent {0} ID: {1}", cname.substr(0, pos), cid);
 
                 void* data = storage.get(e);
@@ -336,10 +344,15 @@ void printScene(entt::registry& r) noexcept {
                               skills->mining, skills->jewelcrafting, skills->blacksmithing, skills->fishing, skills->hunting, skills->skinning, skills->leatherworking, skills->herbalism, skills->cooking, skills->alchemy, skills->enchanting, skills->harvesting, skills->tailoring, skills->woodworking, skills->woodcutting, skills->farming, skills->quarrying, skills->masonry);
                 }
 
-                // if (cname == "Mesh") {
-                //     Mesh* mesh = static_cast<Mesh*>(data);
-                //     CORE_INFO("\t\t\tData:\n\t\t\t\t\tvertices: {0}\n\t\t\t\t\tindices: {1}\n\t\t\t\t\ttextures: {2}\n\t\t\t\t\tvao: {3}", mesh->vertices.size(), mesh->indices.size(), mesh->textures.size(), mesh->vao->getID());
-                // }
+                if (cname == "TextureAtlas") {
+                    TextureAtlas* textureAtlas = static_cast<TextureAtlas*>(data);
+                    CORE_INFO("\t\t\tData:\n\t\t\t\t\ttexture: {0}\n\t\t\t\t\trows: {1}\n\t\t\t\t\tindex: {2}", textureAtlas->texture->getFilepath(), textureAtlas->rows, textureAtlas->index);
+                }
+
+                if (cname == "TextureOpts") {
+                    TextureOpts* textureOpts = static_cast<TextureOpts*>(data);
+                    CORE_INFO("\t\t\tData:\n\t\t\t\t\thasTransparency: {0}\n\t\t\t\t\tuseFakeLighting: {1}", textureOpts->hasTransparency, textureOpts->useFakeLighting);
+                }
             }
         }
     });

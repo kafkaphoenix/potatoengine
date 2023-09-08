@@ -11,6 +11,8 @@ inline std::string to_string(assets::TextureID id) noexcept {
             return "Default";
         case Cube:
             return "Cube";
+        case BlockAtlas:
+            return "BlockAtlas";
     }
 }
 

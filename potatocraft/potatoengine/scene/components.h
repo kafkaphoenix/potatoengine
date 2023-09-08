@@ -8,8 +8,8 @@
 #include "potatoengine/pch.h"
 #include "potatoengine/renderer/buffer.h"
 #include "potatoengine/renderer/camera/camera.h"
-#include "potatoengine/renderer/vao.h"
 #include "potatoengine/renderer/shaderProgram.h"
+#include "potatoengine/renderer/vao.h"
 
 namespace potatoengine {
 
@@ -54,6 +54,15 @@ struct Material {
         : ambient(std::move(a)), diffuse(std::move(d)), specular(std::move(s)), shininess(sh) {}
 };
 
+struct TextureAtlas {
+    std::shared_ptr<Texture> texture;
+    int rows{};
+    int index{};
+
+    TextureAtlas() = default;
+    explicit TextureAtlas(std::shared_ptr<Texture> t, int r, int i) : texture(std::move(t)), rows(r), index(i) {}
+};
+
 struct TextureOpts {
     bool hasTransparency{};
     bool useFakeLighting{};
@@ -88,29 +97,45 @@ struct Mesh {
 
     const std::string& getShaderProgram() const noexcept { return shaderProgram; }
 
-    void bindTextures(const std::unique_ptr<ShaderProgram>& sp) {
-        unsigned int diffuseN = 0;
-        unsigned int specularN = 0;
-        unsigned normalN = 0;
-        unsigned int heightN = 0;
+    void bindTextures(const std::unique_ptr<ShaderProgram>& sp, TextureAtlas* ta = nullptr) {
+        uint32_t diffuseN = 0;
+        uint32_t specularN = 0;
+        uint32_t normalN = 0;
+        uint32_t heightN = 0;
 
         sp->use();
-        size_t i = 0;
-        for (auto& tex : textures) {
-            std::string number;
+        uint32_t i = 0;
+        if (ta) {
+            sp->setFloat("use_atlas", 1.f);
+            int index = ta->index;
+            int rows = ta->rows;
+            sp->setFloat("num_rows", rows);
+            int col = index % rows;
+            float coll = static_cast<float>(col) / static_cast<float>(rows);
+            int row = index / rows;
+            float roww = static_cast<float>(row) / static_cast<float>(rows);
+            sp->setVec2("offset", glm::vec2(coll, roww));
+            const std::shared_ptr<Texture>& tex = ta->texture;
             std::string_view type = tex->getType();
-            if (type == "texture_diffuse") {
-                number = std::to_string(diffuseN++);
-            } else if (type == "texture_specular") {
-                number = std::to_string(specularN++);
-            } else if (type == "texture_normal") {
-                number = std::to_string(normalN++);
-            } else if (type == "texture_height") {
-                number = std::to_string(heightN++);
-            }
-            sp->setInt(type.data() + number, i);
+            sp->setInt(type.data() + i, i);
             tex->bindSlot(i);
-            ++i;
+        } else {
+            for (auto& tex : textures) {
+                std::string number;
+                std::string_view type = tex->getType();
+                if (type == "texture_diffuse") {
+                    number = std::to_string(diffuseN++);
+                } else if (type == "texture_specular") {
+                    number = std::to_string(specularN++);
+                } else if (type == "texture_normal") {
+                    number = std::to_string(normalN++);
+                } else if (type == "texture_height") {
+                    number = std::to_string(heightN++);
+                }
+                sp->setInt(type.data() + number, i);
+                tex->bindSlot(i);
+                ++i;
+            }
         }
         sp->unuse();
     }

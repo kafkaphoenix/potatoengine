@@ -13,6 +13,7 @@ class Sandbox : public engine::Application {
         m_assetsManager->load<engine::Shader>("vbasic", "assets/shaders/basic.vert");
         m_assetsManager->load<engine::Shader>("fbasic", "assets/shaders/basic.frag");
         m_assetsManager->load<engine::Texture>(engine::assets::TextureID::Default, "assets/textures/default.jpg");
+        m_assetsManager->load<engine::Texture>("assets/textures/block_atlas.jpg", "assets/textures/block_atlas.jpg", "texture_diffuse", false);
 #ifdef DEBUG
         auto m_timer = engine::Timer();
 #endif
@@ -27,10 +28,7 @@ class Sandbox : public engine::Application {
         m_timer = engine::Timer();
 #endif
         m_assetsManager->load<engine::Model>("assets/models/rock/rock.obj", "assets/models/rock/rock.obj");
-        m_assetsManager->load<engine::Model>("assets/models/brick_block/cube.obj", "assets/models/brick_block/cube.obj");
-        m_assetsManager->load<engine::Model>("assets/models/stone_block/cube.obj", "assets/models/stone_block/cube.obj");
-        m_assetsManager->load<engine::Model>("assets/models/glass_block/cube.obj", "assets/models/glass_block/cube.obj");
-        m_assetsManager->load<engine::Model>("assets/models/wood_block/cube.obj", "assets/models/wood_block/cube.obj");
+        m_assetsManager->load<engine::Model>("assets/models/block/cube.obj", "assets/models/block/cube.obj");
 #ifdef DEBUG
         CORE_INFO("Loading models TIME: {0}", m_timer.elapsedSeconds());
         CORE_INFO("Assets loaded!");

@@ -152,7 +152,7 @@ void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color)
     ImGui::NewFrame();
 
     // 1. Show the big demo window (Most of the sample code is in
-ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear
+ImGui::ShowDemoWindow()! You can browe its code to learn more about Dear
 ImGui!). if (states.show_demo_window)
         ImGui::ShowDemoWindow(&states.show_demo_window);
 

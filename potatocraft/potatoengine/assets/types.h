@@ -11,6 +11,7 @@ constexpr inline auto enum_range = [](auto front, auto back) {
 enum class TextureID {
     Default,
     Cube,
+    BlockAtlas,
 };
 
 enum class ShaderID {

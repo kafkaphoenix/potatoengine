@@ -6,7 +6,7 @@ namespace potatoengine {
 class Texture {
    public:
     Texture() = default;
-    Texture(const std::filesystem::path& fp, const std::optional<std::string>& type = std::nullopt, std::optional<bool> gammaCorrection = std::nullopt);
+    Texture(const std::filesystem::path& fp, const std::optional<std::string>& type = std::nullopt, std::optional<bool> flipVertically = std::nullopt, std::optional<bool> gammaCorrection = std::nullopt);
     ~Texture();
 
     uint32_t getWidth() const noexcept { return m_width; }
@@ -29,6 +29,6 @@ class Texture {
     GLenum m_GLFormat{}, m_format{};
     int m_slot{};
 
-    void loadTexture();
+    void loadTexture(bool flipVertically);
 };
 }

@@ -21,5 +21,6 @@ class Efactory {
     std::weak_ptr<AssetsManager> m_assetsManager;
 
     void loadModel(const std::string& filepath, entt::meta_any& ec);
+    void loadAtlas(const std::string& filepath, entt::meta_any& ec);
 };
 }

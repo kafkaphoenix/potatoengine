@@ -6,7 +6,7 @@
 
 namespace potatoengine {
 
-Texture::Texture(const std::filesystem::path& fp, const std::optional<std::string>& type, std::optional<bool> gammaCorrection) {
+Texture::Texture(const std::filesystem::path& fp, const std::optional<std::string>& type, std::optional<bool> flipVertically, std::optional<bool> gammaCorrection) {
     if (not std::filesystem::exists(fp)) [[unlikely]] {
         throw std::runtime_error("Texture file does not exist: " + fp.string());
     }
@@ -20,12 +20,12 @@ Texture::Texture(const std::filesystem::path& fp, const std::optional<std::strin
         throw std::runtime_error("Gamma correction is not supported yet");
     }
 
-    loadTexture();
+    loadTexture(flipVertically.value_or(true));
 }
 
-void Texture::loadTexture() {
+void Texture::loadTexture(bool flipVertically) {
     int width, height, channels;
-    stbi_set_flip_vertically_on_load(1);
+    stbi_set_flip_vertically_on_load(flipVertically);
     stbi_uc* data = stbi_load(m_filepath.c_str(), &width, &height, &channels, 0);
     if (not data) [[unlikely]] {
         stbi_image_free(data);
