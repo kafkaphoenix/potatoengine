@@ -44,8 +44,8 @@ class CameraController {
     float m_zoomMin = 1.f;
     float m_zoomMax = 4.f;
     float m_mouseSensitivity = 0.1f;
-    float m_nearClip = 1.f;
-    float m_farClip = 3000.f;
+    float m_nearClip = 0.1f;
+    float m_farClip = 1000.f;
 
     glm::vec3 m_position = glm::vec3(0.f, 0.f, 5.f);
     glm::quat m_rotation = glm::identity<glm::quat>();

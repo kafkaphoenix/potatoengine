@@ -12,6 +12,7 @@ enum class TextureID {
     Default,
     Cube,
     BlockAtlas,
+    Skybox,
 };
 
 enum class ShaderID {
@@ -22,10 +23,7 @@ enum class ShaderID {
 enum class ModelID {
     Rock,
     Backpack,
-    BrickBlock,
-    StoneBlock,
-    GlassBlock,
-    WoodBlock,
+    Cube
 };
 
 enum class PrefabID {
@@ -35,6 +33,8 @@ enum class PrefabID {
     StoneBlock,
     GlassBlock,
     WoodBlock,
+    Skybox,
+    Sun
 };
 
 enum class SoundID {

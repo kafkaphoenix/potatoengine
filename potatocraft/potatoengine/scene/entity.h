@@ -16,8 +16,7 @@ class Entity {
         if (has_all<Component>()) {
             throw std::runtime_error("Entity already has component " + std::string(typeid(Component).name()));
         }
-        auto& c = m_scene->m_registry.emplace<Component>(m_entity, std::forward<Args>(args)...);
-        return c;
+        return m_scene->m_registry.emplace<Component>(m_entity, std::forward<Args>(args)...);
     }
 
     template <typename Component>

@@ -7,9 +7,6 @@
 namespace potatoengine {
 
 Model::Model(const std::filesystem::path& fp, std::optional<bool> gammaCorrection) {
-    if (!std::filesystem::exists(fp)) [[unlikely]] {
-        throw std::runtime_error("Model file does not exist: " + fp.string());
-    }
     m_filepath = fp.string();
 
     if (gammaCorrection.has_value()) {
@@ -84,7 +81,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             vertex.color = glm::vec4(color.r, color.g, color.b, color.a);
         }
 
-        if (mesh->mAABB.mMin != aiVector3D(0.f, 0.f, 0.f) and mesh->mAABB.mMax != aiVector3D(0.f, 0.f, 0.f)) {
+        if (mesh->mAABB.mMin not_eq aiVector3D(0.f, 0.f, 0.f) and mesh->mAABB.mMax not_eq aiVector3D(0.f, 0.f, 0.f)) {
             // TODO aabb
         }
 
@@ -106,22 +103,22 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     m_materials.push_back(loadMaterial(material));
 
     // N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
-    // diffuse: texture_diffuseN
-    // specular: texture_specularN
-    // normal: texture_normalN
-    // height: texture_heightN
+    // diffuse: textureDiffuseN
+    // specular: textureSpecularN
+    // normal: textureNormalN
+    // height: textureHeightN
     auto loadAndInsertTextures = [&](aiTextureType t, std::string type) {
         std::vector<std::shared_ptr<Texture>> loadedTextures = loadMaterialTextures(material, t, type);
         textures.insert(textures.end(), loadedTextures.begin(), loadedTextures.end());
     };
 
-    loadAndInsertTextures(aiTextureType_DIFFUSE, "texture_diffuse");
-    loadAndInsertTextures(aiTextureType_SPECULAR, "texture_specular");
-    loadAndInsertTextures(aiTextureType_HEIGHT, "texture_normal");
-    loadAndInsertTextures(aiTextureType_AMBIENT, "texture_height");
+    loadAndInsertTextures(aiTextureType_DIFFUSE, "textureDiffuse");
+    loadAndInsertTextures(aiTextureType_SPECULAR, "textureSpecular");
+    loadAndInsertTextures(aiTextureType_HEIGHT, "textureNormal");
+    loadAndInsertTextures(aiTextureType_AMBIENT, "textureHeight");
 
     if (textures.empty()) {
-        textures.push_back(std::make_shared<Texture>("assets/textures/default.jpg", "texture_diffuse"));
+        textures.push_back(std::make_shared<Texture>("assets/textures/default.jpg", "textureDiffuse"));  // TODO: add asset manager?
     }
 
     return Mesh(vertices, indices, textures);
@@ -140,7 +137,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
                                               return texture->getFilepath() == filepath;
                                           });
 
-        if (loadedTexture != m_loadedTextures.end()) {
+        if (loadedTexture not_eq m_loadedTextures.end()) {
             textures.push_back(*loadedTexture);
         } else {
             std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(filepath, type);

@@ -1,6 +1,5 @@
 {
     "creature": {
-        "inherit": [],
         "ctags": ["transform"],
         "components": {
             "health": {
@@ -68,65 +67,134 @@
     },
     "chicken": {
         "inherit": ["creature"],
-        "ctags": [],
         "components": {
             "tag": "animal"
         }
     },
     "block": {
-        "inherit": [],
-        "ctags": ["transform"],
+        "ctags": ["material"],
         "components": {
-            "body": "assets/models/block/cube.obj",
+            "transform": {
+                "scale": {"x": 0.5, "y": 0.5, "z": 0.5}
+            },
+            "body": "cube",
+            "rigidBody": {
+                "isKinematic": true
+            },
+            "texture": {
+                "filepaths": ["block_atlas"],
+                "useFakeLighting": true
+            },
             "textureAtlas": {
-                "filepath": "assets/textures/block_atlas.jpg",
                 "rows": 2
             },
-            "textureOpts": {}
+            "shaderProgram": "basic"
         }
     },
     "brick_block": {
         "inherit": ["block"],
-        "ctags": [],
         "components": {
             "tag": "brick_block",
             "textureAtlas": {
                 "index": 0
+            },
+            "material": {
+                "specular": {"r": 0.6, "g": 0.6, "b": 0.6}
             }
-
         }
     },
     "stone_block": {
         "inherit": ["block"],
-        "ctags": [],
         "components": {
             "tag": "stone_block",
             "textureAtlas": {
                 "index": 1
+            },
+            "material": {
+                "specular": {"r": 0.4, "g": 0.4, "b": 0.4}
             }
         }
     },
     "glass_block": {
         "inherit": ["block"],
-        "ctags": [],
         "components": {
             "tag": "glass_block",
+            "texture": {
+                "useColor": true,
+                "useBlending": true,
+                "blendFactor": 0.6,
+                "color": {"r": 0.1, "g": 0.3, "b": 0.2, "a": 0.4},
+                "useFakeLighting": false,
+                "useReflection": true,
+                "useRefraction": true,
+                "refractiveIndex": 1.5,
+                "reflectivity": 0.2
+            },
             "textureAtlas": {
                 "index": 2
             },
-            "textureOpts": {
-                "hasTransparency": true
+            "rigidBody": {
+                "isKinematic": false
             }
         }
     },
     "wood_block": {
         "inherit": ["block"],
-        "ctags": [],
         "components": {
             "tag": "wood_block",
             "textureAtlas": {
                 "index": 3
+            },
+            "material": {
+                "specular": {"r": 0.4, "g": 0.4, "b": 0.4}
             }
+        }
+    },
+    "skybox": {
+        "ctags": ["transform"],
+        "components": {
+            "tag": "skybox",
+            "body": "cube",
+            "rigidBody": {
+                "isKinematic": false
+            },
+            "texture": {
+                "filepaths": ["skybox_night", "skybox_day"],
+                "hasTransparency": true,
+                "useBlending": true
+            },
+            "skybox": {
+                "skyColor": {"r": 0.45, "g": 0.55, "b": 0.6},
+                "useFog": true,
+                "fogColor": {"r": 0.45, "g": 0.55, "b": 0.6},
+                "fogDensity": 0.0035,
+                "fogGradient": 5
+            },
+            "time": {
+                "startingTime": 7,
+                "dayLength": 0.5,
+                "nightStart": 21,
+                "dayTransitionStart" : 5,
+                "dayStart" : 7,
+                "nightTransitionStart" : 19,
+                "acceleration": 1
+            },
+            "shaderProgram": "skybox"
+        }
+    },
+    "sun": {
+        "components": {
+            "tag": "sun",
+            "transform": {
+                "position": {"x": 0, "y": 10, "z": 10}
+            },
+            "body": "cube",
+            "light": {
+                "type": "directional",
+                "color": {"r": 0.95, "g": 0.86, "b": 0.31},
+                "intensity": 1
+            },
+            "shaderProgram": "basic"
         }
     }
 }

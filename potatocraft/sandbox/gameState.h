@@ -14,7 +14,7 @@ class GameState : public engine::State {
     virtual void onImGuiRender() override final;
     virtual void onEvent(engine::Event& e) override final;
 
-    static std::unique_ptr<State> Create(std::weak_ptr<engine::AssetsManager> am, std::weak_ptr<engine::Renderer> r) noexcept;
+    static std::unique_ptr<State> Create(std::weak_ptr<engine::AssetsManager> am, std::weak_ptr<engine::Renderer> r);
 
    private:
     bool onKeyPressed(engine::KeyPressedEvent& e);

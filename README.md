@@ -12,16 +12,17 @@ $ .\Debug\potatocraft.exe
 ## Engine Features
 
 - Self contained engine, everything can be accessed just importing the engine api `potatoengine\engineAPI.h`
-- Game states
 - ECS powered by [Entt](https://github.com/skypjack/entt)
 - Stateful loading from json
+- Application state machine
 - Events
-- Asset manager for caching and hot reloading prefabs, shaders, textures and others
+- Asset manager for caching and hot reloading prefabs, shaders, textures and models
 - Structured logger
-- Supports several windows or overlays
-- Renderer API abstraction over OpenGL 4.6
-- Input API abstraction over GLFW
-- 3d camera
+- Multi window/overlay support
+- OpenGL 4.6 API abstraction
+- GLFW API abstraction
+- Perspective camera
+- Model, Texture, Cubemaps loading
 
 ## How to use the engine in a personal project
 
@@ -32,7 +33,6 @@ an example can be seen in `potatocraft\sandbox\`
 
 - FBO
 - More shaders examples
-- Model loader
 - Expanded sandbox game example
 - Debugging menu
 - Commander

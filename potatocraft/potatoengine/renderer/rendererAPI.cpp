@@ -95,12 +95,13 @@ void RendererAPI::Init() noexcept {
     glCullFace(GL_BACK);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LINE_SMOOTH);
 }
 
-void RendererAPI::EnableCulling(bool enabled) noexcept {
+void RendererAPI::SetCulling(bool enabled) noexcept {
     enabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 }
 
@@ -116,11 +117,23 @@ void RendererAPI::SetWireframe(bool enabled) noexcept {
     enabled ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
+void RendererAPI::SetDepthTest(bool enabled) noexcept {
+    enabled ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+}
+
+void RendererAPI::SetDepthLEqual() noexcept {
+    glDepthFunc(GL_LEQUAL); // depth test passes when values are equal to depth buffer's content [for cubemaps]
+}
+
+void RendererAPI::SetDepthLess() noexcept {
+    glDepthFunc(GL_LESS); // default
+}
+
 void RendererAPI::Clear() noexcept {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void RendererAPI::DrawIndexed(const std::shared_ptr<VAO>& vao) noexcept {
+void RendererAPI::DrawIndexed(const std::shared_ptr<VAO>& vao) {
     vao->bind();
     glDrawElements(GL_TRIANGLES, vao->getEBO()->getCount(), GL_UNSIGNED_INT, nullptr);
     vao->unbind();

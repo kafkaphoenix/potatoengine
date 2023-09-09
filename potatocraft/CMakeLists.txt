@@ -20,7 +20,7 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}")
 include_directories("${BASEPATH}")
 
 # Source files
-file(GLOB_RECURSE SOURCE_FILES
+file(GLOB_RECURSE  SOURCE_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/potatoengine/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/potatoengine/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/sandbox/*.h"

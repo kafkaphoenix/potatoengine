@@ -8,19 +8,17 @@
 namespace potatoengine {
 
 bool Input::IsKeyPressed(uint32_t k) noexcept {
-    auto* w = Application::Get().getWindow().getNativeWindow();
-    auto status = glfwGetKey(w, k);
-    return status == GLFW_PRESS;
+    GLFWwindow* w = Application::Get().getWindow().getNativeWindow();
+    return glfwGetKey(w, k) == GLFW_PRESS;
 }
 
 bool Input::IsMouseButtonPressed(uint32_t b) noexcept {
-    auto* w = Application::Get().getWindow().getNativeWindow();
-    auto status = glfwGetMouseButton(w, b);
-    return status == GLFW_PRESS;
+    GLFWwindow* w = Application::Get().getWindow().getNativeWindow();
+    return glfwGetMouseButton(w, b) == GLFW_PRESS;
 }
 
 glm::vec2 Input::GetMousePos() noexcept {
-    auto* w = Application::Get().getWindow().getNativeWindow();
+    GLFWwindow* w = Application::Get().getWindow().getNativeWindow();
     double xpos, ypos;
     glfwGetCursorPos(w, &xpos, &ypos);
 

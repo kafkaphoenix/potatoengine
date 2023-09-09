@@ -16,18 +16,19 @@ class Scene {
     Scene(std::weak_ptr<AssetsManager> am);
     Entity create(assets::PrefabID id, const std::optional<uint64_t>& uuid = std::nullopt);
     Entity clone(Entity e);
-    void destroy(Entity e);
-    void print() noexcept;
+    void remove(Entity e);
+    void print();
     void onUpdate(Time ts, std::weak_ptr<Renderer> r);
     Entity getEntity(std::string_view name);
     Entity getEntity(UUID uuid);
-    void registerPrefabs();
+    void createPrefabs();
 
     template <typename T>
     void onComponentAdded(Entity e, T& c);
 
    private:
     Efactory m_efactory;
+    std::weak_ptr<AssetsManager> m_assetsManager;
     entt::registry m_registry;
 
     friend class Entity;

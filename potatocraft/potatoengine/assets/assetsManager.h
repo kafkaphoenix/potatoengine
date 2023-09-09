@@ -13,8 +13,17 @@ class AssetsManager {
    public:
     template <typename Type, typename ID, typename... Args>
     void load(ID id, Args&&... args) {
-        std::shared_ptr<Type> asset = std::make_shared<Type>(std::forward<Args>(args)...);
         std::string _id = generateID<Type, ID>(id);
+        if (m_assets.contains(_id)) {
+            if constexpr (std::is_enum_v<ID>) {
+                throw std::runtime_error("Asset " + assets::to_string(id) + " already exists!");
+            } else if constexpr (std::is_same_v<ID, std::string>) {
+                throw std::runtime_error("Asset " + id + " already exists!");
+            } else if constexpr (std::is_same_v<ID, const char*>) {
+                throw std::runtime_error("Asset " + std::string(id) + " already exists!");
+            }
+        }
+        std::shared_ptr<Type> asset = std::make_shared<Type>(std::forward<Args>(args)...);
         m_assets.emplace(_id, std::move(asset));
 #ifdef DEBUG
         CORE_INFO("\tLoaded asset {0}", _id);
@@ -22,47 +31,43 @@ class AssetsManager {
     }
 
     template <typename Type, typename ID>
-    bool exists(ID id) const {
+    bool contains(ID id) const {
         std::string _id = generateID<Type, ID>(id);
-        return m_assets.find(_id) != m_assets.end();
+        return m_assets.contains(_id);
     }
 
     template <typename Type, typename ID>
     std::shared_ptr<Type>& get(ID id) {
-        if (!exists<Type>(id)) {
+        std::string _id = generateID<Type, ID>(id);
+        if (not m_assets.contains(_id)) {
             if constexpr (std::is_enum_v<ID>) {
                 throw std::runtime_error("Asset " + assets::to_string(id) + " not found!");
             } else if constexpr (std::is_same_v<ID, std::string>) {
                 throw std::runtime_error("Asset " + id + " not found!");
             } else if constexpr (std::is_same_v<ID, const char*>) {
-                throw std::runtime_error("Asset " + id + " not found!");
+                throw std::runtime_error("Asset " + std::string(id) + " not found!");
             }
+        } else {
+            AssetTypes& asset = m_assets.at(_id);
+            return *std::get_if<std::shared_ptr<Type>>(&asset);
         }
-
-        std::string _id = generateID<Type, ID>(id);
-        AssetTypes& assetVariant = m_assets.at(_id);
-
-        auto sharedPtr = std::get_if<std::shared_ptr<Type>>(&assetVariant);
-        if (not sharedPtr) {
-            throw std::runtime_error("Asset type mismatch!");
-        }
-
-        return *sharedPtr;
     }
 
     template <typename Type, typename ID>
     const std::shared_ptr<Type>& get(ID id) const {
-        if (!exists<Type>(id)) {
+        std::string _id = generateID<Type, ID>(id);
+        if (not m_assets.contains(_id)) {
             if constexpr (std::is_enum_v<ID>) {
                 throw std::runtime_error("Asset " + assets::to_string(id) + " not found!");
             } else if constexpr (std::is_same_v<ID, std::string>) {
                 throw std::runtime_error("Asset " + id + " not found!");
             } else if constexpr (std::is_same_v<ID, const char*>) {
-                throw std::runtime_error("Asset " + id + " not found!");
+                throw std::runtime_error("Asset " + std::string(id) + " not found!");
             }
+        } else {
+            AssetTypes& asset = m_assets.at(_id);
+            return std::get_if<std::shared_ptr<Type>>(&asset);
         }
-        std::string _id = generateID<Type, ID>(id);
-        return std::static_pointer_cast<Type>(std::get<std::shared_ptr<Type>>(m_assets.at(_id)));
     }
 
     template <typename Type, typename ID, typename... Args>
@@ -70,9 +75,9 @@ class AssetsManager {
         std::shared_ptr<Type> asset = std::make_shared<Type>(std::forward<Args>(args)...);
         std::string _id = generateID<Type, ID>(id);
 
-        auto it = m_assets.find(_id);
-        if (it != m_assets.end() && std::holds_alternative<std::shared_ptr<Type>>(it->second)) {
-            std::get<std::shared_ptr<Type>>(it->second) = asset;
+        auto& maybeAsset = m_assets.find(_id);
+        if (maybeAsset not_eq m_assets.end() && std::holds_alternative<std::shared_ptr<Type>>(maybeAsset->second)) {
+            std::get<std::shared_ptr<Type>>(maybeAsset->second) = asset;
         } else {
             throw std::runtime_error("Asset " + _id + " not found or has an incompatible type. Reload failed!");
         }
@@ -98,7 +103,7 @@ class AssetsManager {
     std::unordered_map<std::string, AssetTypes> m_assets;
 
     template <typename Type, typename ID>
-    std::string generateID(ID id) const {
+    std::string generateID(ID id) const {  // TODO think how to avoid calling this all the time
         std::string type = typeid(Type).name();
         std::string realType = type.substr(type.find_last_of(':') + 1);
         if constexpr (std::is_enum_v<ID>) {
@@ -106,7 +111,7 @@ class AssetsManager {
         } else if constexpr (std::is_same_v<ID, std::string>) {
             return realType + "_" + id;
         } else if constexpr (std::is_same_v<ID, const char*>) {
-            return realType + "_" + id;
+            return realType + "_" + std::string(id);
         } else {
             throw std::runtime_error("Invalid ID type " + realType);
         }

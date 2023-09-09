@@ -37,7 +37,7 @@ Window::Window(const WindowProperties& properties) {
     int xpos = (monitorCount >= 2) ? 500 : 50;
     int ypos = (monitorCount >= 2) ? 200 : 50;
 
-    m_window = glfwCreateWindow(properties.width, properties.height, m_data.title.c_str(), nullptr, nullptr);
+    m_window = glfwCreateWindow(properties.width, properties.height, m_data.title.data(), nullptr, nullptr);
     ++s_GLFWWindowCount;
 
     glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, properties.width, properties.height, 0);
@@ -160,8 +160,8 @@ void Window::shutdown() noexcept {
 }
 
 void Window::onUpdate() noexcept {
-    glfwPollEvents();
     m_context->swapBuffers();
+    glfwPollEvents();
 }
 
 void Window::setVSync(bool enabled) noexcept {

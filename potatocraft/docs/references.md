@@ -64,6 +64,7 @@ Links below to tutorials, projects, blogs, etc has been useful at some point for
 - SimonDev - World generation <https://www.youtube.com/playlist?list=PLRL3Z3lpLmH3PNGZuDNf2WXnLTHpN9hXy>
 - Complete world recration using simulation of plates, rain shadow, erosion, etc <https://github.com/Mindwerks/worldengine>
 - Terrain generation blog explaining things with references and source code <https://www.shamusyoung.com/twentysidedtale/?p=141>
+
 ## Ray tracing
 
 - TheCherno - https://www.youtube.com/watch?v=gfW1Fhd9u9Q

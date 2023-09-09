@@ -33,7 +33,7 @@ class Application {
     void pushState(std::unique_ptr<State> s);
     void pushOverlay(std::unique_ptr<State> s);
 
-    Window& getWindow() noexcept { return *m_window; }
+    Window& getWindow() const noexcept { return *m_window; }
 
     void terminate () noexcept { m_running = false; }
 

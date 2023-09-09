@@ -7,22 +7,30 @@
 
 namespace potatoengine {
 
+struct ActiveUniform {
+    uint32_t type;
+    std::string name;
+};
+
 class ShaderProgram {
    public:
     ShaderProgram(const std::string &name);
     ~ShaderProgram();
 
-    void attach(const Shader &s) const noexcept;
-    void detach(const Shader &s) const noexcept;
-    void link() const;
-    void use() const noexcept;
-    void unuse() const noexcept;
-    void setInt(std::string_view name, int value) const noexcept;
-    void setFloat(std::string_view name, float value) const noexcept;
-    void setVec2(std::string_view name, const glm::vec2 &vec) const noexcept;
-    void setVec3(std::string_view name, const glm::vec3 &vec) const noexcept;
-    void setVec4(std::string_view name, const glm::vec4 &vec) const noexcept;
-    void setMat4(std::string_view name, const glm::mat4 &mat) const noexcept;
+    void attach(const Shader &s);
+    void detach(const Shader &s);
+    void link();
+    void use();
+    void unuse();
+    void setInt(std::string_view name, int value);
+    void setFloat(std::string_view name, float value);
+    void setVec2(std::string_view name, const glm::vec2 &vec);
+    void setVec3(std::string_view name, const glm::vec3 &vec);
+    void setVec4(std::string_view name, const glm::vec4 &vec);
+    void setMat4(std::string_view name, const glm::mat4 &mat);
+    void resetActiveUniforms();
+    void printActiveUniforms();
+
     std::string_view getName() const noexcept { return m_name; }
     uint32_t getID() const noexcept { return m_id; }
     operator GLuint() const;
@@ -32,6 +40,9 @@ class ShaderProgram {
    private:
     uint32_t m_id{};
     std::string m_name{};
+    std::vector<ActiveUniform> m_activeUniforms{};
+
+    std::vector<ActiveUniform> getActiveUniforms();
 };
 
 }

@@ -79,11 +79,11 @@ void Application::pushOverlay(std::unique_ptr<State> s) {
 
 void Application::run() {
     // const char *glsl_version = "#version 460";
-    // auto* window = static_cast<GLFWwindow*>(getWindow().getNativeWindow()); try const auto&
+    // GLFWwindow* window = static_cast<GLFWwindow*>(getWindow().getNativeWindow());
 
     // init_imgui_context(window, glsl_version);
 
-    // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.f);
+    // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.6f, 1.f);
 
     while (m_running) {
         float currentFrame = (float)glfwGetTime();
@@ -141,7 +141,7 @@ void init_imgui_context(GLFWwindow *window, const char *glsl_version)
     // ImFont* font =
 io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\UDDigiKyokashoN-B.ttc", 18.f,
 nullptr, io.Fonts->GetGlyphRangesJapanese());
-    // IM_ASSERT(font not_eq nullptr);
+    // IM_ASSERT(font);
 }
 
 void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color)

@@ -1,11 +1,13 @@
 #include "potatoengine/scene/efactory.h"
 
-#include "potatoengine/pch.h"
 #include <entt/core/hashed_string.hpp>
 #include <entt/meta/meta.hpp>
+#define GLM_FORCE_CTOR_INIT
+
 #include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
 
+#include "potatoengine/pch.h"
 #include "potatoengine/scene/components.h"
 #include "potatoengine/scene/entity.h"
 using json = nlohmann::json;
@@ -13,14 +15,32 @@ using json = nlohmann::json;
 namespace potatoengine {
 
 // cppcheck-suppress unusedFunction
-void to_json(json& j, const glm::vec3& v) {
-    j = json{{"x", v.x}, {"y", v.y}, {"z", v.z}};
+json toJson(const glm::vec3& cFieldValue) {
+    return json{{"x", cFieldValue.x}, {"y", cFieldValue.y}, {"z", cFieldValue.z}};
 }
 
-void from_json(const json& j, glm::vec3& v) {
-    v.x = j.at("x").get<float>();
-    v.y = j.at("y").get<float>();
-    v.z = j.at("z").get<float>();
+glm::vec2 vec2FromJson(const json& data) {
+    glm::vec2 vec{};
+    vec.x = data.at("x").get<float>();
+    vec.y = data.at("y").get<float>();
+    return vec;
+}
+
+glm::vec3 vec3FromJson(const json& data, const std::string& type = "") {
+    glm::vec3 vec{};
+    vec.x = (type == "color") ? data.at("r").get<float>() : data.at("x").get<float>();
+    vec.y = (type == "color") ? data.at("g").get<float>() : data.at("y").get<float>();
+    vec.z = (type == "color") ? data.at("b").get<float>() : data.at("z").get<float>();
+    return vec;
+}
+
+glm::vec4 vec4FromJson(const json& data, const std::string& type = "") {
+    glm::vec4 vec{};
+    vec.x = (type == "color") ? data.at("r").get<float>() : data.at("x").get<float>();
+    vec.y = (type == "color") ? data.at("g").get<float>() : data.at("y").get<float>();
+    vec.z = (type == "color") ? data.at("b").get<float>() : data.at("z").get<float>();
+    vec.w = (type == "color") ? data.at("a").get<float>() : data.at("w").get<float>();
+    return vec;
 }
 
 Efactory::Efactory(std::weak_ptr<AssetsManager> am) : m_assetsManager(am) {}
@@ -32,97 +52,114 @@ void Efactory::create(assets::PrefabID id, Entity e) {
     if (not manager) {
         throw std::runtime_error("Assets manager is null!");
     }
-    const auto& pfb = manager->get<Prefab>(id);
-    for (auto&& t : pfb->getCTags()) {
-        auto ctype = entt::resolve(entt::hashed_string{t.c_str()});
-        if (not ctype) {
-            CORE_ERROR("No component type found for component tag {0}", t);
-            continue;
+
+    const auto& prefab = manager->get<Prefab>(id);
+    for (const std::string& cTag : prefab->getCTags()) {
+        entt::meta_type cType = entt::resolve(entt::hashed_string{cTag.data()});
+        if (not cType) {
+            throw std::runtime_error("No component type found for component tag " + cTag);
         }
-        auto assignFunc = ctype.func("assign"_hs);
+        entt::meta_func assignFunc = cType.func("assign"_hs);
         if (assignFunc) {
             assignFunc.invoke({}, e);
         } else {
-            CORE_ERROR("No assign function found for component tag {0}", t);
+            throw std::runtime_error("No assign function found for component tag " + cTag);
         }
     }
 
-    for (auto&& c : pfb->getComponents()) {
-        auto ctype = entt::resolve(entt::hashed_string{c.first.c_str()});
-        if (not ctype) {
-            CORE_ERROR("No component type found for component {0}", c.first);
-            continue;
+    for (const auto& [cPrefab, cValue] : prefab->getComponents()) {
+        entt::meta_type cType = entt::resolve(entt::hashed_string{cPrefab.data()});
+        if (not cType) {
+            throw std::runtime_error("No component type found for component " + cPrefab);
         }
-        auto assignValuesFunc = ctype.func("assignValues"_hs);
+        entt::meta_func assignValuesFunc = cType.func("assignValues"_hs);
         if (assignValuesFunc) {
-            auto v = c.second;
-            if (v.is_string()) {
-                auto str = v.get<std::string>();
-                if (c.first == "body") {
-                    auto assignFunc = ctype.func("assign"_hs);
+            if (cValue.is_string()) {
+                if (cPrefab == "body") {
+                    entt::meta_func assignFunc = cType.func("assign"_hs);
                     if (not assignFunc) {
-                        CORE_ERROR("No assign function found for component {0}", c.first);
-                        continue;
+                        throw std::runtime_error("No assign function found for component " + cPrefab);
                     }
-                    auto ec = assignFunc.invoke({}, e);
-                    loadModel(str, ec);
+                    entt::meta_any metaComponent = assignFunc.invoke({}, e);
+                    loadModel(cValue.get<std::string>(), metaComponent);
                 } else {
-                    assignValuesFunc.invoke({}, e, str);
+                    assignValuesFunc.invoke({}, e, cValue.get<std::string>());
                 }
-            } else if (v.is_number_integer()) {
-                assignValuesFunc.invoke({}, e, v.get<int>());
-            } else if (v.is_number_float()) {
-                assignValuesFunc.invoke({}, e, v.get<float>());
-            } else if (v.is_boolean()) {
-                assignValuesFunc.invoke({}, e, v.get<bool>());
-            } else if (v.is_object() and v.contains("x") and v.contains("y") and v.contains("z")) {
-                glm::vec3 vec{};
-                from_json(v, vec);
-                assignValuesFunc.invoke({}, e, vec);
-            } else if (v.is_object()) {
-                auto assignFunc = ctype.func("assign"_hs);
+            } else if (cValue.is_number_integer()) {
+                assignValuesFunc.invoke({}, e, cValue.get<int>());
+            } else if (cValue.is_number_float()) {
+                assignValuesFunc.invoke({}, e, cValue.get<float>());
+            } else if (cValue.is_boolean()) {
+                assignValuesFunc.invoke({}, e, cValue.get<bool>());
+            } else if (cValue.is_object() and cValue.contains("x") and cValue.contains("y") and cValue.contains("z")) {
+                assignValuesFunc.invoke({}, e, vec3FromJson(cValue));
+            } else if (cValue.is_object()) {
+                entt::meta_func assignFunc = cType.func("assign"_hs);
                 if (not assignFunc) {
-                    CORE_ERROR("No assign function found for component {0}", c.first);
-                    continue;
+                    throw std::runtime_error("No assign function found for component " + cPrefab);
                 }
-                auto ec = assignFunc.invoke({}, e);
-                for (auto&& [k, _v] : v.items()) {
-                    if (_v.is_string()) {
-                        if (c.first == "textureAtlas" and k == "filepath") {
-                            loadAtlas(_v.get<std::string>(), ec);
+                entt::meta_any metaComponent = assignFunc.invoke({}, e);
+                for (const auto& [cField, cFieldValue] : cValue.items()) {
+                    if (cFieldValue.is_string()) {
+                        if (cPrefab == "body" and cField == "filepath") {
+                            loadModel(cFieldValue.get<std::string>(), metaComponent);
+                        } else if (cPrefab == "light" and cField == "type") {
+                            loadLightType(cFieldValue.get<std::string>(), metaComponent);
                         } else {
-                            ec.set(entt::hashed_string{k.c_str()}, _v.get<std::string>());
+                            metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<std::string>());
                         }
-                    } else if (_v.is_number_integer()) {
-                        ec.set(entt::hashed_string{k.c_str()}, _v.get<int>());
-                    } else if (_v.is_number_float()) {
-                        ec.set(entt::hashed_string{k.c_str()}, _v.get<float>());
-                    } else if (_v.is_boolean()) {
-                        ec.set(entt::hashed_string{k.c_str()}, _v.get<bool>());
-                    } else if (_v.is_object() and _v.contains("x") and _v.contains("y") and _v.contains("z")) {
-                        glm::vec3 vec{};
-                        from_json(_v, vec);
-                        ec.set(entt::hashed_string{k.c_str()}, vec);
+                    } else if (cFieldValue.is_number_integer()) {
+                        int _cFieldValue = cFieldValue.get<int>();
+                        if (cPrefab == "time" and cField == "startingTime") {
+                            metaComponent.set(entt::hashed_string{"seconds"}, _cFieldValue * 3600.f);
+                        }
+                        metaComponent.set(entt::hashed_string{cField.data()}, _cFieldValue);
+                    } else if (cFieldValue.is_number_float()) {
+                        float _cFieldValue = cFieldValue.get<float>();
+                        if (cPrefab == "time" and cField == "startingTime") {
+                            metaComponent.set(entt::hashed_string{"seconds"}, _cFieldValue * 3600.f);
+                        }
+                        metaComponent.set(entt::hashed_string{cField.data()}, _cFieldValue);
+                    } else if (cFieldValue.is_boolean()) {
+                        metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<bool>());
+                    } else if (cFieldValue.is_array()) {
+                        if (cPrefab == "texture" and cField == "filepaths") {
+                            loadTextures(cFieldValue, metaComponent);
+                        } else {
+                            throw std::runtime_error("Unsupported type " + std::string{cFieldValue.type_name()} + " for component " + cPrefab + " field " + cField);
+                        }
+                    } else if (cFieldValue.is_object()) {
+                        if (cFieldValue.contains("x") and cFieldValue.contains("y") and cFieldValue.contains("z")) {
+                            metaComponent.set(entt::hashed_string{cField.data()}, vec3FromJson(cFieldValue));
+                        } else if (cFieldValue.contains("x") and cFieldValue.contains("y")) {
+                            metaComponent.set(entt::hashed_string{cField.data()}, vec2FromJson(cFieldValue));
+                        } else if (cFieldValue.contains("r") and cFieldValue.contains("g") and cFieldValue.contains("b") and cFieldValue.contains("a")) {
+                            metaComponent.set(entt::hashed_string{cField.data()}, vec4FromJson(cFieldValue, "color"));
+                        } else if (cFieldValue.contains("r") and cFieldValue.contains("g") and cFieldValue.contains("b")) {
+                            metaComponent.set(entt::hashed_string{cField.data()}, vec3FromJson(cFieldValue, "color"));
+                        } else {
+                            throw std::runtime_error("Unsupported type " + std::string{cFieldValue.type_name()} + " for component " + cPrefab + " field " + cField);
+                        }
                     } else {
-                        CORE_ERROR("Unsupported type {0} for component {1} field {2}", _v.type_name(), c.first, k);
+                        throw std::runtime_error("Unsupported type " + std::string{cFieldValue.type_name()} + " for component " + cPrefab + " field " + cField);
                     }
                 }
             } else {
-                CORE_ERROR("Unsupported type {0} for component {1}", v.type_name(), c.first);
+                throw std::runtime_error("Unsupported type " + std::string{cValue.type_name()} + " for component " + cPrefab);
             }
         } else {
-            CORE_ERROR("No assign values function found for component {0}", c.first);
+            throw std::runtime_error("No assign values function found for component " + cPrefab);
         }
     }
-    m_protos[id] = e;
+    m_prototypes[id] = e;
 }
 
 void Efactory::destroy(assets::PrefabID id, entt::registry& r) {
-    if (not m_protos.contains(id)) {
+    if (not m_prototypes.contains(id)) {
         throw std::runtime_error("No prototype found for prefab " + assets::to_string(id));
     }
-    r.emplace<Deleted>(m_protos.at(id));
-    m_protos.erase(id);
+    r.emplace<Deleted>(m_prototypes.at(id));
+    m_prototypes.erase(id);
 }
 
 void Efactory::update(assets::PrefabID id, Entity e, entt::registry& r) {
@@ -131,39 +168,56 @@ void Efactory::update(assets::PrefabID id, Entity e, entt::registry& r) {
 }
 
 entt::entity Efactory::get(assets::PrefabID id) {
-    if (not m_protos.contains(id)) {
+    if (not m_prototypes.contains(id)) {
         throw std::runtime_error("No prototype found for prefab " + assets::to_string(id));
     }
-    return m_protos.at(id);
+    return m_prototypes.at(id);
 }
 
-void Efactory::loadModel(const std::string& filepath, entt::meta_any& ec) {
+void Efactory::loadModel(const std::string& filepath, entt::meta_any& metaComponent) {
     using namespace entt::literals;
 
     const auto& manager = m_assetsManager.lock();
     if (not manager) {
         throw std::runtime_error("Assets manager is null!");
     }
-    if (not manager->exists<Model>(filepath)) {
-        manager->load<Model>(filepath, filepath);
-    }
-    const auto& model = manager->get<Model>(filepath);
-    ec.set(entt::hashed_string{"filepath"_hs}, filepath);
-    ec.set(entt::hashed_string{"meshes"_hs}, model->getMeshes());
-    ec.set(entt::hashed_string{"materials"_hs}, model->getMaterials());
+
+    auto& model = manager->get<Model>(filepath);
+    metaComponent.set(entt::hashed_string{"filepath"_hs}, filepath);
+    metaComponent.set(entt::hashed_string{"meshes"_hs}, model->getMeshes());
+    metaComponent.set(entt::hashed_string{"materials"_hs}, model->getMaterials());
 }
 
-void Efactory::loadAtlas(const std::string& filepath, entt::meta_any& ec) {
+void Efactory::loadTextures(const json& data, entt::meta_any& metaComponent) {
     using namespace entt::literals;
 
     const auto& manager = m_assetsManager.lock();
     if (not manager) {
         throw std::runtime_error("Assets manager is null!");
     }
-    if (not manager->exists<Texture>(filepath)) {
-        manager->load<Texture>(filepath, filepath);
+
+    std::vector<std::shared_ptr<Texture>> textures;
+    for (const json& filepath : data) {
+        textures.push_back(manager->get<Texture>(filepath.get<std::string>()));
     }
-    const auto& texture = manager->get<Texture>(filepath);
-    ec.set(entt::hashed_string{"texture"_hs}, texture);
+
+    metaComponent.set(entt::hashed_string{"textures"_hs}, std::move(textures));
 }
+
+void Efactory::loadLightType(const std::string& type, entt::meta_any& metaComponent) {
+    using namespace entt::literals;
+
+    if (type == "directional") {
+        metaComponent.set(entt::hashed_string{"type"_hs}, Light::Type::Directional);
+    } else if (type == "point") {
+        metaComponent.set(entt::hashed_string{"type"_hs}, Light::Type::Point);
+    } else if (type == "spot") {
+        metaComponent.set(entt::hashed_string{"type"_hs}, Light::Type::Spot);
+    } else if (type == "area") {
+        metaComponent.set(entt::hashed_string{"type"_hs}, Light::Type::Area);
+    } else {
+        throw std::runtime_error("Unknown light type " + type);
+    }
+}
+
 }

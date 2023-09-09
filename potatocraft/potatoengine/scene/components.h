@@ -1,7 +1,10 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#define GLM_FORCE_CTOR_INIT
+
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "nlohmann/json.hpp"
 #include "potatoengine/assets/texture.h"
@@ -20,12 +23,14 @@ struct UUIDComponent {
 struct Name {
     std::string name{};
 
+    Name() = default;
     explicit Name(std::string n) : name(std::move(n)) {}
 };
 
 struct Tag {
     std::string tag{};
 
+    Tag() = default;
     explicit Tag(std::string t) : tag(std::move(t)) {}
 };
 
@@ -34,110 +39,235 @@ struct Deleted {
 };
 
 struct Transform {
-    glm::vec3 pos = glm::vec3(0.0f);
-    glm::quat rot = glm::identity<glm::quat>();
-    glm::vec3 scale = glm::vec3(1.0f);
+    glm::vec3 position{};
+    glm::quat rotation{};
+    glm::vec3 scale{glm::vec3{1.f}};
 
-    glm::mat4 get() const noexcept {
-        return glm::translate(glm::mat4(1.0f), pos) * glm::mat4_cast(rot) * glm::scale(glm::mat4(1.0f), scale);
+    Transform() = default;
+    explicit Transform(glm::vec3 p, glm::quat r, glm::vec3 s) : position(std::move(p)), rotation(std::move(r)), scale(std::move(s)) {}
+
+    glm::mat4 calculate() const {
+        // T * R * S
+        return glm::scale(glm::translate(glm::mat4(1.f), position) * glm::mat4_cast(rotation), scale);
+    }
+
+    void rotate(float angle, const glm::vec3& axis) {
+        rotation = glm::angleAxis(glm::radians(angle), axis) * rotation;
+    }
+
+    void rotate(const glm::quat& q) {
+        rotation = q * rotation;
     }
 };
 
 struct Material {
-    glm::vec3 ambient = glm::vec3(1.0f);
-    glm::vec3 diffuse = glm::vec3(1.0f);
-    glm::vec3 specular = glm::vec3(1.0f);
-    float shininess{};
+    glm::vec3 ambient{glm::vec3(1.f)};
+    glm::vec3 diffuse{glm::vec3(1.f)};
+    glm::vec3 specular{glm::vec3(1.f)};
+    float shininess{32.f};
 
     Material() = default;
     explicit Material(glm::vec3 a, glm::vec3 d, glm::vec3 s, float sh)
         : ambient(std::move(a)), diffuse(std::move(d)), specular(std::move(s)), shininess(sh) {}
 };
 
+struct Skybox {
+    bool useFog{};
+    glm::vec3 fogColor{};
+    float fogDensity{};
+    float fogGradient{};
+    glm::vec3 skyColor{};
+    float rotationSpeed{};
+
+    Skybox() = default;
+    explicit Skybox(bool uf, glm::vec3 fc, float fd, float fg, glm::vec3 sc, float rs)
+        : useFog(uf), fogColor(std::move(fc)), fogDensity(fd), fogGradient(fg), skyColor(std::move(sc)), rotationSpeed(rs) {}
+};
+
+struct TimeComponent {
+    float seconds{};
+    int currentHour{};
+    int currentMinute{};
+    int currentSecond{};
+    float startingTime{};
+    float dayLength{};
+    float nightStart{};
+    float dayTransitionStart{};
+    float dayStart{};
+    float nightTransitionStart{};
+    float acceleration{};
+    int fps{60};
+
+    TimeComponent() = default;
+    explicit TimeComponent(float s, int ch, int cm, int cs, float st, float dl, float ns, float dts, float ds, float nts, float a, int f)
+        : seconds(s), currentHour(ch), currentMinute(cm), currentSecond(cs), startingTime(st), dayLength(dl), nightStart(ns), dayTransitionStart(dts), dayStart(ds), nightTransitionStart(nts), acceleration(a), fps(f) {}
+};
+
 struct TextureAtlas {
-    std::shared_ptr<Texture> texture;
     int rows{};
     int index{};
 
     TextureAtlas() = default;
-    explicit TextureAtlas(std::shared_ptr<Texture> t, int r, int i) : texture(std::move(t)), rows(r), index(i) {}
+    explicit TextureAtlas(int r, int i) : rows(r), index(i) {}
 };
 
-struct TextureOpts {
+struct TextureComponent {
+    std::vector<std::shared_ptr<Texture>> textures;
     bool hasTransparency{};
     bool useFakeLighting{};
+    bool useBlending{};
+    float blendFactor{};
+    bool useColor{};
+    glm::vec4 color{};
+    bool useReflection{};
+    float reflectivity{};
+    bool useRefraction{};
+    float refractiveIndex{};
 
-    TextureOpts() = default;
-    explicit TextureOpts(bool ht, bool ufl) : hasTransparency(ht), useFakeLighting(ufl) {}
+    TextureComponent() = default;
+    explicit TextureComponent(std::vector<std::shared_ptr<Texture>> t, bool ht, bool ufl, bool ub, float bf, bool uc, glm::vec4 c, bool ur, float r, bool urf, float ri)
+        : textures(std::move(t)), hasTransparency(ht), useFakeLighting(ufl), useBlending(ub), blendFactor(bf), useColor(uc), color(c), useReflection(ur), reflectivity(r), useRefraction(urf), refractiveIndex(ri) {}
+};
+
+struct ShaderProgramComponent {
+    std::string shaderProgram{};
+
+    ShaderProgramComponent() = default;
+    explicit ShaderProgramComponent(std::string sp) : shaderProgram(std::move(sp)) {}
 };
 
 struct Mesh {
-    std::vector<Vertex> vertices{};  // TODO remove in VAO or here?
+    std::vector<Vertex> vertices{};
     std::vector<uint32_t> indices{};
     std::vector<std::shared_ptr<Texture>> textures;
     std::shared_ptr<VAO> vao;
-    std::string shaderProgram = "basic";
 
     Mesh() = default;
     explicit Mesh(std::vector<Vertex> v, std::vector<uint32_t> i, std::vector<std::shared_ptr<engine::Texture>> t)
         : vertices(std::move(v)), indices(std::move(i)), textures(t) {}
 
-    void setupMesh() noexcept {
+    void setupMesh() {
         vao = VAO::Create();
         vao->attachVertex(VBO::Create(vertices));
         vao->setIndex(IBO::Create(indices));
     }
 
-    const std::shared_ptr<VAO>& getVAO() noexcept {
+    const std::shared_ptr<VAO>& getVAO() {
         if (not vao) {
             setupMesh();
         }
         return vao;
     }
 
-    const std::string& getShaderProgram() const noexcept { return shaderProgram; }
-
-    void bindTextures(const std::unique_ptr<ShaderProgram>& sp, TextureAtlas* ta = nullptr) {
-        uint32_t diffuseN = 0;
-        uint32_t specularN = 0;
-        uint32_t normalN = 0;
-        uint32_t heightN = 0;
-
+    void bindTextures(std::unique_ptr<ShaderProgram>& sp, TextureComponent* cTexture, TextureAtlas* cTextureAtlas, Skybox* cSkybox, Skybox* _cSkybox, TextureComponent* _cSkyboxTexture, const glm::vec3& lightPosition, const glm::vec4& lightColor, const glm::vec3& cameraPosition, Material* cMaterial) {
+        sp->resetActiveUniforms();
         sp->use();
-        uint32_t i = 0;
-        if (ta) {
-            sp->setFloat("use_atlas", 1.f);
-            int index = ta->index;
-            int rows = ta->rows;
-            sp->setFloat("num_rows", rows);
-            int col = index % rows;
-            float coll = static_cast<float>(col) / static_cast<float>(rows);
-            int row = index / rows;
-            float roww = static_cast<float>(row) / static_cast<float>(rows);
-            sp->setVec2("offset", glm::vec2(coll, roww));
-            const std::shared_ptr<Texture>& tex = ta->texture;
-            std::string_view type = tex->getType();
-            sp->setInt(type.data() + i, i);
-            tex->bindSlot(i);
+        uint32_t i = 1;
+        if (sp->getName() == "basic") {
+            if (_cSkybox and _cSkybox->useFog) {
+                sp->setFloat("useFog", 1.f);
+                sp->setFloat("fogDensity", _cSkybox->fogDensity);
+                sp->setFloat("fogGradient", _cSkybox->fogGradient);
+                sp->setVec3("skyColor", _cSkybox->skyColor);
+            }
+        }
+        if (cTexture) {
+            for (auto& texture : cTexture->textures) {
+                if (cTexture->useFakeLighting) {
+                    sp->setFloat("useFakeLighting", 1.f);
+                    sp->setVec3("lightPosition", lightPosition);
+                    sp->setVec4("lightColor", lightColor);
+                }
+                if (cTextureAtlas) {
+                    sp->setFloat("useAtlas", 1.f);
+                    int index = cTextureAtlas->index;
+                    int rows = cTextureAtlas->rows;
+                    sp->setFloat("numRows", rows);
+                    int col = index % rows;
+                    float coll = static_cast<float>(col) / static_cast<float>(rows);
+                    int row = index / rows;
+                    float roww = static_cast<float>(row) / static_cast<float>(rows);
+                    sp->setVec2("offset", glm::vec2(coll, roww));
+                }
+                if (cTexture->useBlending) {
+                    sp->setFloat("useBlending", 1.f);
+                    sp->setFloat("blendFactor", cTexture->blendFactor);
+                }
+                if (cTexture->useColor) {
+                    sp->setFloat("useColor", 1.f);
+                    sp->setVec4("color", cTexture->color);
+                }
+                if (cSkybox) {
+                    sp->setFloat("useFog", cSkybox->useFog);
+                    sp->setVec3("fogColor", cSkybox->fogColor);
+                }
+                if (_cSkybox and _cSkyboxTexture) {
+                    if (_cSkyboxTexture->useBlending) {
+                        sp->setFloat("useSkyBlending", 1.f);
+                        sp->setFloat("skyBlendFactor", _cSkyboxTexture->blendFactor);
+                    }
+                    int ti = 10;
+                    for (auto& t : _cSkyboxTexture->textures) {
+                        sp->setInt(t->getType().data() + std::string("Sky") + std::to_string(ti), ti);
+                        t->bindSlot(ti);
+                        ti++;
+                    }
+                    if (cTexture->useReflection) {
+                        sp->setFloat("useReflection", 1.f);
+                        sp->setFloat("reflectivity", cTexture->reflectivity);
+                        sp->setVec3("cameraPosition", cameraPosition);
+                    }
+                    if (cTexture->useRefraction) {
+                        sp->setFloat("useRefraction", 1.f);
+                        sp->setFloat("refractiveIndex", cTexture->refractiveIndex);
+                    }
+                }
+                if (cMaterial) {
+                    sp->setVec3("ambient", cMaterial->ambient);
+                    sp->setVec3("diffuse", cMaterial->diffuse);
+                    sp->setVec3("specular", cMaterial->specular);
+                    sp->setFloat("shininess", cMaterial->shininess);
+                }
+
+                sp->setInt(texture->getType().data() + std::to_string(i), i);
+                texture->bindSlot(i);
+                ++i;
+            }
         } else {
-            for (auto& tex : textures) {
+            uint32_t diffuseN = 1;
+            uint32_t specularN = 1;
+            uint32_t normalN = 1;
+            uint32_t heightN = 1;
+            for (auto& texture : textures) {
                 std::string number;
-                std::string_view type = tex->getType();
-                if (type == "texture_diffuse") {
+                std::string_view type = texture->getType();
+                if (type == "textureDiffuse") {
                     number = std::to_string(diffuseN++);
-                } else if (type == "texture_specular") {
+                } else if (type == "textureSpecular") {
                     number = std::to_string(specularN++);
-                } else if (type == "texture_normal") {
+                } else if (type == "textureNormal") {
                     number = std::to_string(normalN++);
-                } else if (type == "texture_height") {
+                } else if (type == "textureHeight") {
                     number = std::to_string(heightN++);
+                } else {
+                    throw std::runtime_error("Unknown texture type " + std::string(type));
                 }
                 sp->setInt(type.data() + number, i);
-                tex->bindSlot(i);
+                texture->bindSlot(i);
                 ++i;
+            }
+            if (diffuseN == 1) {
+                sp->setFloat("useNormal", 1.f);
             }
         }
         sp->unuse();
+    }
+
+    void unbindTextures(TextureComponent* cTexture) {
+        auto& texturesToUnbind = (cTexture) ? cTexture->textures : textures;
+        for (auto& texture : texturesToUnbind) {
+            texture->unbindSlot();
+        }
     }
 };
 
@@ -151,19 +281,14 @@ struct Body {
         : filepath(std::move(fp)), meshes(std::move(m)), materials(std::move(ma)) {}
 };
 
-struct RGBAColor {
-    glm::vec4 color = glm::vec4(0.9725f, 0.0f, 0.9725f, 1.0f);
-
-    explicit RGBAColor(glm::vec4 c) : color(c) {}
-};
-
 struct RigidBody {
     float mass{};
     float friction{};
     float bounciness{};
+    bool isKinematic{};
 
     RigidBody() = default;
-    explicit RigidBody(float m, float f, float b) : mass(m), friction(f), bounciness(b) {}
+    explicit RigidBody(float m, float f, float b, bool k) : mass(m), friction(f), bounciness(b), isKinematic(k) {}
 };
 
 struct Collider {
@@ -175,7 +300,7 @@ struct Collider {
     };
 
     Type type;
-    glm::vec3 size = glm::vec3(1.0f);
+    glm::vec3 size = glm::vec3(1.f);
 
     Collider() = default;
     explicit Collider(Type t, glm::vec3 s) : type(t), size(s) {}
@@ -183,6 +308,9 @@ struct Collider {
 
 struct CameraComponent {
     Camera camera;  // TODO maybe remove default constructor
+
+    CameraComponent() = default;
+    explicit CameraComponent(Camera c) : camera(std::move(c)) {}
 };
 
 struct Light {
@@ -194,15 +322,29 @@ struct Light {
     };
 
     Type type;
-    glm::vec3 color = glm::vec3(1.0f);
+    glm::vec4 color = glm::vec4(1.f);
     float intensity{};
     float range{};
     float innerConeAngle{};
     float outerConeAngle{};
 
     Light() = default;
-    explicit Light(Type t, glm::vec3 c, float i, float r, float ica, float oca)
+    explicit Light(Type t, glm::vec4 c, float i, float r, float ica, float oca)
         : type(t), color(c), intensity(i), range(r), innerConeAngle(ica), outerConeAngle(oca) {}
+
+    std::string to_string(Type t) noexcept {
+        using enum Type;
+        switch (t) {
+            case Point:
+                return "Point";
+            case Spot:
+                return "Spot";
+            case Directional:
+                return "Directional";
+            case Area:
+                return "Area";
+        }
+    }
 };
 
 struct Audio {
@@ -216,24 +358,26 @@ struct Audio {
     explicit Audio(std::string fp, float v, float p, bool l) : filepath(std::move(fp)), volume(v), pitch(p), loop(l) {}
 };
 
-struct ParticleSystem {
+struct ParticleComponent {
     // TODO define
     std::string emitter{};
 
-    explicit ParticleSystem(std::string e) : emitter(std::move(e)) {}
+    ParticleComponent() = default;
+    explicit ParticleComponent(std::string e) : emitter(std::move(e)) {}
 };
 
 struct Animation {
     // TODO define
     std::string filepath{};
 
+    Animation() = default;
     explicit Animation(std::string fp) : filepath(std::move(fp)) {}
 };
 
 struct Text {
     // font class or freetype?
     std::string text{};
-    glm::vec4 color = glm::vec4(1.0f);  // white
+    glm::vec4 color = glm::vec4(1.f);  // white
 
     Text() = default;
     explicit Text(std::string t, glm::vec4 c) : text(std::move(t)), color(c) {}
@@ -243,6 +387,7 @@ struct AI {
     // TODO define
     std::string filepath{};
 
+    AI() = default;
     explicit AI(std::string fp) : filepath(std::move(fp)) {}
 };
 
@@ -262,15 +407,16 @@ struct Item {
 struct Inventory {
     // TODO define
     std::vector<Item> items{};
+
+    Inventory() = default;
+    explicit Inventory(std::vector<Item> i) : items(std::move(i)) {}
 };
 
 struct Relationship {
     entt::entity parent{entt::null};
-};
 
-struct RendererComponent {
-    // TODO define
-    std::string filepath{};
+    Relationship() = default;
+    explicit Relationship(entt::entity p) : parent(p) {}
 };
 
 struct Health {
@@ -316,6 +462,10 @@ struct Equipment {
     std::string belt{};
     std::string legs{};
     std::string feet{};
+
+    Equipment() = default;
+    explicit Equipment(std::string h, std::string n, std::string s, std::string c, std::string b, std::string ha, std::string lf, std::string rf, std::string be, std::string l, std::string f)
+        : head(std::move(h)), neck(std::move(n)), shoulders(std::move(s)), chest(std::move(c)), back(std::move(b)), hands(std::move(ha)), lfinger(std::move(lf)), rfinger(std::move(rf)), belt(std::move(be)), legs(std::move(l)), feet(std::move(f)) {}
 };
 
 struct Stats {

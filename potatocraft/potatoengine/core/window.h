@@ -11,8 +11,8 @@ namespace potatoengine {
 
 struct WindowProperties {
     std::string title{};
-    int width;
-    int height;
+    int width{};
+    int height{};
 };
 
 enum class CursorMode {

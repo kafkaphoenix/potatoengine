@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
 
         std::vector<const char *> args(argv, argv + argc);
         engine::CLArgs clargs{.args = std::span<const char *>{args}};
-        auto app = engine::CreateApp(clargs);
+        engine::Application* app = engine::CreateApp(clargs);
 
         app->run();
 
