@@ -27,7 +27,7 @@ class Window {
    public:
     using EventCallbackFn = std::function<void(Event&)>;
 
-    Window(const WindowProperties& properties);
+    Window(WindowProperties&& properties);
     ~Window();
 
     void shutdown() noexcept;
@@ -49,7 +49,7 @@ class Window {
         m_data.lastY = y;
     }
 
-    static std::unique_ptr<Window> Create(const WindowProperties& properties);
+    static std::unique_ptr<Window> Create(WindowProperties&& properties);
 
    private:
     GLFWwindow* m_window{}; // TODO: this class should be a window manager, and this should be a vector of windows

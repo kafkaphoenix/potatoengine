@@ -8,7 +8,6 @@
 #include "potatoengine/renderer/camera/camera.h"
 #include "potatoengine/renderer/rendererAPI.h"
 #include "potatoengine/renderer/shaderProgram.h"
-#include "potatoengine/scene/components.h"
 
 namespace potatoengine {
 
@@ -26,11 +25,11 @@ class Renderer {
 
     glm::vec3 getCameraPosition() const noexcept { return m_cameraPosition; }  // TODO: Remove this
 
-    void add(const std::string& shaderProgram);
-    bool contains(const std::string& shaderProgram) const noexcept { return m_shaderPrograms.contains(shaderProgram); }
-    std::unique_ptr<ShaderProgram>& get(const std::string& shaderProgram);
+    void add(std::string&& shaderProgram);
+    bool contains(std::string_view shaderProgram) const noexcept { return m_shaderPrograms.contains(shaderProgram.data()); }
+    std::unique_ptr<ShaderProgram>& get(std::string_view shaderProgram);
 
-    void render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, const std::string& shaderProgram);
+    void render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, std::string_view shaderProgram);
     static std::unique_ptr<Renderer> Create(std::weak_ptr<AssetsManager> am) noexcept;
 
    private:

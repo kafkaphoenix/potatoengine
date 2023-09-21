@@ -28,16 +28,13 @@ void Renderer::beginScene(const Camera& c) noexcept {
 void Renderer::endScene() noexcept {
 }
 
-void Renderer::add(const std::string& name) {
-#ifdef DEBUG
-    CORE_INFO("\tComputing shader program...");
-#endif
+void Renderer::add(std::string&& name) {
     const auto& manager = m_assetsManager.lock();
-    if (!manager) {
+    if (not manager) {
         throw std::runtime_error("AssetsManager is null!");
     }
     
-    auto newShaderProgram = ShaderProgram::Create(name);
+    auto newShaderProgram = ShaderProgram::Create(std::string(name));
     const auto& vs = manager->get<Shader>("v" + name);
     const auto& fs = manager->get<Shader>("f" + name);
     newShaderProgram->attach(*vs);
@@ -45,15 +42,14 @@ void Renderer::add(const std::string& name) {
     newShaderProgram->link();
     newShaderProgram->detach(*vs);
     newShaderProgram->detach(*fs);
-
-    m_shaderPrograms.emplace(name, std::move(newShaderProgram));
 #ifdef DEBUG
-    CORE_INFO("\tShaders computed!");
+    CORE_INFO("Shader {} linked!", name);
 #endif
+    m_shaderPrograms.emplace(std::move(name), std::move(newShaderProgram));
 }
 
-void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, const std::string& shaderProgram) {
-    auto& sp = m_shaderPrograms.at(shaderProgram);
+void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, std::string_view shaderProgram) {
+    auto& sp = get(shaderProgram);
 
     sp->use();
     sp->setMat4("projection", m_projectionMatrix);
@@ -68,9 +64,9 @@ std::unique_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) noex
     return std::make_unique<Renderer>(am);
 }
 
-std::unique_ptr<ShaderProgram>& Renderer::get(const std::string& name) {
-    if (m_shaderPrograms.contains(name)) {
-        return m_shaderPrograms.at(name);
+std::unique_ptr<ShaderProgram>& Renderer::get(std::string_view name) {
+    if (m_shaderPrograms.contains(name.data())) {
+        return m_shaderPrograms.at(name.data());
     } else {
         throw std::runtime_error("Shader program not found");
     }

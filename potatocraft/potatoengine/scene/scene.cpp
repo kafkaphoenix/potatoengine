@@ -1,32 +1,25 @@
 #include "potatoengine/scene/scene.h"
 
-#include "potatoengine/scene/components.h"
+#include "potatoengine/scene/components/camera/cCamera.h"
+#include "potatoengine/scene/components/common/cName.h"
+#include "potatoengine/scene/components/common/cUUID.h"
+#include "potatoengine/scene/components/utils/cDeleted.h"
 #include "potatoengine/scene/entity.h"
-#include "potatoengine/scene/systems.h"
+#include "potatoengine/scene/systems/sUpdate.h"
 #include "potatoengine/scene/utils.h"
 
 namespace potatoengine {
 
-Entity Scene::create(assets::PrefabID id, const std::optional<uint64_t>& uuid) {
-    Entity e = clone({m_efactory.get(id), this});
+Entity Scene::create(assets::PrefabID id, const std::optional<uint32_t>& uuid) {
     UUID _uuid = uuid.has_value() ? UUID(uuid.value()) : UUID();
-    e.add<UUIDComponent>(_uuid);
+    Entity e = clone({m_entityFactory.get(id), this}, _uuid);
+    e.add<CUUID>(_uuid);
 
     return e;
 }
 
-Entity Scene::clone(Entity e) {
-    Entity dst = {m_registry.create(), this};
-    for (auto&& curr : m_registry.storage()) {
-        if (auto& storage = curr.second; storage.contains(e)) {
-            storage.emplace(dst, storage.get(e));
-        }
-    }
-    return dst;
-}
-
-void Scene::remove(Entity e) {
-    e.add<Deleted>();
+void Scene::remove(Entity& e) {
+    e.add<CDeleted>();
 }
 
 void Scene::print() {
@@ -34,7 +27,7 @@ void Scene::print() {
 }
 
 Entity Scene::getEntity(std::string_view name) {
-    for (const auto& [e, cName, _] : m_registry.view<Name, UUIDComponent>().each()) {
+    for (const auto& [e, cName, _] : m_registry.view<CName, CUUID>().each()) {
         if (cName.name == name) {
             return Entity(e, this);
         }
@@ -42,8 +35,8 @@ Entity Scene::getEntity(std::string_view name) {
     throw std::runtime_error("Entity not found");
 }
 
-Entity Scene::getEntity(UUID uuid) {
-    for (const auto& [e, cUUID] : m_registry.view<UUIDComponent>().each()) {
+Entity Scene::getEntity(UUID& uuid) {
+    for (const auto& [e, cUUID] : m_registry.view<CUUID>().each()) {
         if (cUUID.uuid == uuid) {
             return Entity(e, this);
         }
@@ -51,41 +44,86 @@ Entity Scene::getEntity(UUID uuid) {
     throw std::runtime_error("Entity not found");
 }
 
-void Scene::createPrefabs() { // TODO this should be a gui option
+void Scene::createPrefab(assets::PrefabID id) {
     const auto& manager = m_assetsManager.lock();
     if (not manager) {
         throw std::runtime_error("Assets manager not found!");
     }
 
-    for (const auto p : assets::enum_range(assets::PrefabID::Player, assets::PrefabID::Sun)) {
-        if (manager->contains<Prefab>(p)) {
-            m_efactory.create(p, {m_registry.create(), this});
-        }
+    if (manager->contains<Prefab>(id)) {
+        m_entityFactory.create(id, {m_registry.create(), this});
+    }
+}
+
+void Scene::createPrefabs() {  // TODO this should be a gui option
+    for (const auto& p : assets::enum_range(assets::PrefabID::Player, assets::PrefabID::Sun)) {
+        createPrefab(p);
+    }
+}
+
+void Scene::updatePrefab(assets::PrefabID id) {
+    const auto& manager = m_assetsManager.lock();
+    if (not manager) {
+        throw std::runtime_error("Assets manager not found!");
+    }
+
+    if (manager->contains<Prefab>(id)) {
+        m_entityFactory.update(id, {m_registry.create(), this}, std::ref(m_registry));
+    }
+}
+
+void Scene::updatePrefabs() {  // TODO this should be a gui option
+    for (const auto& p : assets::enum_range(assets::PrefabID::Player, assets::PrefabID::Sun)) {
+        updatePrefab(p);
     }
 }
 
 template <typename T>
-void Scene::onComponentAdded(Entity e, T& c) {}
+void Scene::onComponentAdded(Entity e, T& c) {
+    throw std::runtime_error("Unsupported onComponentAdded method for component type " + std::string{entt::type_id<T>().name()});
+}
 
-template <>
-void Scene::onComponentAdded(Entity e, CameraComponent& c) {}
+template <typename T>
+void Scene::onComponentCloned(Entity e, T& c) {
+    throw std::runtime_error("Unsupported onComponentCloned method for component type " + std::string{entt::type_id<T>().name()});
+}
 
-Scene::Scene(std::weak_ptr<AssetsManager> am) : m_efactory(am), m_assetsManager(am) {
+Entity Scene::clone(Entity e, uint32_t uuid) {
+    using namespace entt::literals;
+    Entity dst = {m_registry.create(entt::entity{uuid}), this};
+    for (auto&& curr : m_registry.storage()) {
+        if (auto& storage = curr.second; storage.contains(e)) {
+            storage.push(dst, storage.value(e));
+            auto cType = entt::resolve(storage.type());
+            auto cData = cType.construct(storage.value(e));
+            auto triggerEventFunc = cType.func("onComponentCloned"_hs);
+            if (triggerEventFunc) {
+                triggerEventFunc.invoke({}, e, cData);
+            }
+        }
+    }
+    return dst;
+}
+
+void Scene::clear(Entity& e) {
+    uint32_t uuid = entt::to_integral(static_cast<entt::entity>(e));
+    m_registry.destroy(e);
+    m_registry.create(entt::entity{uuid});
+    e.add<CUUID>(uuid);
+}
+
+Scene::Scene(std::weak_ptr<AssetsManager> am) : m_entityFactory(am), m_assetsManager(am) {
 #ifdef DEBUG
     CORE_INFO("Creating scene...");
-    CORE_INFO("Registering components...");
+    CORE_INFO("Registering engine components...");
 #endif
     registerComponents();
-#ifdef DEBUG
-    CORE_INFO("Registering prefabs...");
-#endif
-    createPrefabs();
 #ifdef DEBUG
     CORE_INFO("Scene created!");
 #endif
 }
 
 void Scene::onUpdate(Time ts, std::weak_ptr<Renderer> r) {
-    updateSystems(std::ref(m_registry), r, ts);
+    updateSystem(std::ref(m_registry), r, ts);
 }
 }

@@ -5,16 +5,16 @@ namespace potatoengine {
 
 static std::random_device rd;
 static std::mt19937_64 gen(rd());
-static std::uniform_int_distribution<uint64_t> dis;
+static std::uniform_int_distribution<uint32_t> dis;
 
 class UUID {
    public:
     UUID() : m_uuid(dis(gen)) {}
-    UUID(uint64_t uuid) : m_uuid(uuid) {}
+    UUID(uint32_t uuid) : m_uuid(uuid) {}
 
-    operator uint64_t() const noexcept { return m_uuid; }
+    operator uint32_t() const noexcept { return m_uuid; }
 
    private:
-    uint64_t m_uuid{};
+    uint32_t m_uuid{};
 };
 }

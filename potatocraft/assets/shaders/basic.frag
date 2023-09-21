@@ -24,7 +24,7 @@ uniform float useFakeLighting;
 uniform float useAtlas;
 uniform float numRows;
 uniform vec2 offset;
-uniform vec3 skyColor;
+uniform vec3 fogColor;
 uniform float useNormal;
 uniform float useReflection;
 uniform float useSkyBlending;
@@ -35,7 +35,7 @@ uniform float reflectivity;
 uniform vec3 cameraPosition;
 uniform float useRefraction;
 uniform float refractiveIndex;
-uniform vec4 lightColor;
+uniform vec3 lightColor;
 uniform vec3 ambient;
 uniform vec3 diffuse;
 uniform vec3 specular;
@@ -98,21 +98,21 @@ void main()
 
     if (int(useFakeLighting) == 1) {
         // ambient
-        vec3 ambient_ = lightColor.rgb * ambient;
+        vec3 ambient_ = lightColor * ambient;
 
         // diffuse
         float diff = max(dot(normalize(surfaceNormal), normalize(directionToLight)), 0.f);
-        vec3 diffuse_ = lightColor.rgb * (diff * diffuse);
+        vec3 diffuse_ = lightColor * (diff * diffuse);
 
         // specular
         vec3 viewDirection = normalize(cameraPosition - worldPosition.rgb);
         vec3 reflectDirection = reflect(-directionToLight, worldNormal);
         float spec = pow(max(dot(viewDirection, reflectDirection), 0.f), shininess);
-        vec3 specular_ = lightColor.rgb * (spec * specular);
+        vec3 specular_ = lightColor * (spec * specular);
 
-        vec3 result = ambient_ + diffuse_ + specular;
+        vec3 result = ambient_ + diffuse_; //+ specular;
         fragColor = vec4(fragColor.rgb * result, fragColor.a);
     }
 
-    fragColor = mix(vec4(skyColor, 1.f), fragColor, fogVisibility);
+    fragColor = mix(vec4(fogColor, 1.f), fragColor, fogVisibility);
 }

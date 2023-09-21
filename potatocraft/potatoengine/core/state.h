@@ -7,7 +7,7 @@ namespace potatoengine {
 
 class State {
    public:
-    State(const std::string& name = "TemplateState");
+    State(std::string&& name = "TemplateState");
     virtual ~State() = default;
 
     virtual void onAttach() {}

@@ -14,11 +14,11 @@ struct ActiveUniform {
 
 class ShaderProgram {
    public:
-    ShaderProgram(const std::string &name);
+    ShaderProgram(std::string&& name);
     ~ShaderProgram();
 
-    void attach(const Shader &s);
-    void detach(const Shader &s);
+    void attach(const Shader& s);
+    void detach(const Shader& s);
     void link();
     void use();
     void unuse();
@@ -35,7 +35,7 @@ class ShaderProgram {
     uint32_t getID() const noexcept { return m_id; }
     operator GLuint() const;
 
-    static std::unique_ptr<ShaderProgram> Create(const std::string &name) noexcept;
+    static std::unique_ptr<ShaderProgram> Create(std::string&& name) noexcept;
 
    private:
     uint32_t m_id{};

@@ -21,7 +21,7 @@ void VAO::unbind() {
 }
 
 // cppcheck-suppress unusedFunction
-void VAO::attachVertex(std::unique_ptr<VBO> vbo) {
+void VAO::attachVertex(std::unique_ptr<VBO>&& vbo) {
     glVertexArrayVertexBuffer(m_id, 0, vbo->getID(), 0, sizeof(Vertex));
     m_vbos.emplace_back(std::move(vbo));
 
@@ -61,7 +61,7 @@ void VAO::attachVertex(std::unique_ptr<VBO> vbo) {
 }
 
 // cppcheck-suppress unusedFunction
-void VAO::setIndex(std::unique_ptr<IBO> ibo) {
+void VAO::setIndex(std::unique_ptr<IBO>&& ibo) {
     glVertexArrayElementBuffer(m_id, ibo->getID());
     m_ibo = std::move(ibo);
 }

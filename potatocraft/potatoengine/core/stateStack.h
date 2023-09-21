@@ -9,8 +9,8 @@ class StateStack {
    public:
     ~StateStack();
 
-    void pushState(std::unique_ptr<State> s);
-    void pushOverlay(std::unique_ptr<State> o);
+    void pushState(std::unique_ptr<State>&& s);
+    void pushOverlay(std::unique_ptr<State>&& o);
     void popState(std::string_view name);
     void popOverlay(std::string_view name);
 

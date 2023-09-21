@@ -20,8 +20,8 @@ namespace potatoengine {
 // void init_imgui_context(GLFWwindow *window, const char *glsl_version);
 // void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
 
-Application::Application(const Config& c, CLArgs args)
-    : m_name(c.name), m_clargs(args) {
+Application::Application(Config&& c, CLArgs&& args)
+    : m_name(std::move(c.name)), m_clargs(std::move(args)) {
     s_instance = this;
 
     std::filesystem::current_path(c.root);
@@ -67,12 +67,12 @@ void Application::onEvent(Event& e) {
     }
 }
 
-void Application::pushState(std::unique_ptr<State> s) {
+void Application::pushState(std::unique_ptr<State>&& s) {
     s->onAttach();
     m_states->pushState(std::move(s));
 }
 
-void Application::pushOverlay(std::unique_ptr<State> s) {
+void Application::pushOverlay(std::unique_ptr<State>&& s) {
     s->onAttach();
     m_states->pushOverlay(std::move(s));
 }

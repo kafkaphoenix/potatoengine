@@ -6,7 +6,7 @@ namespace potatoengine {
 class Texture {
    public:
     Texture() = default;
-    Texture(const std::filesystem::path& fp, const std::optional<std::string>& type = std::nullopt, std::optional<bool> flipVertically = std::nullopt, std::optional<int> mipmap_level = std::nullopt, std::optional<bool> gammaCorrection = std::nullopt);
+    Texture(std::filesystem::path&& fp, std::optional<std::string>&& type = std::nullopt, std::optional<bool> flipVertically = std::nullopt, std::optional<int> mipmap_level = std::nullopt, std::optional<bool> gammaCorrection = std::nullopt);
     ~Texture();
 
     uint32_t getWidth() const noexcept { return m_width; }

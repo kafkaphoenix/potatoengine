@@ -3,9 +3,7 @@
 #include "potatoengine/utils/timer.h"
 
 namespace potatoengine {
-Prefab::Prefab(const std::filesystem::path& fp, const std::string& name) : m_name(name) {
-    m_filepath = fp.string();
-
+Prefab::Prefab(std::filesystem::path&& fp, std::string&& name) : m_filepath(std::move(fp.string())), m_name(std::move(name)) {
     std::ifstream f(fp);
     if (not f.is_open()) [[unlikely]] {
         f.close();
@@ -14,10 +12,10 @@ Prefab::Prefab(const std::filesystem::path& fp, const std::string& name) : m_nam
     json data = json::parse(f);
     f.close();
 
-    const json& prefabData = data.at(name);
+    const json& prefabData = data.at(m_name);
     if (prefabData.contains("inherit")) {
         prefabData.at("inherit").get_to(m_inherits);
-        for (const std::string& father : m_inherits) {
+        for (std::string_view father : m_inherits) {
             read(data.at(father));
         }
     }

@@ -3,7 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace potatoengine {
-ShaderProgram::ShaderProgram(const std::string &name) : m_id(glCreateProgram()), m_name(name) {
+ShaderProgram::ShaderProgram(std::string&& name) : m_id(glCreateProgram()), m_name(std::move(name)) {
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -14,11 +14,11 @@ ShaderProgram::operator GLuint() const {
     return static_cast<GLuint>(m_id);
 }
 
-void ShaderProgram::attach(const Shader &s) {
+void ShaderProgram::attach(const Shader& s) {
     glAttachShader(m_id, s);
 }
 
-void ShaderProgram::detach(const Shader &s) {
+void ShaderProgram::detach(const Shader& s) {
     glDetachShader(m_id, s);
 }
 
@@ -56,19 +56,19 @@ void ShaderProgram::setFloat(std::string_view name, float value) {
     glUniform1f(glGetUniformLocation(m_id, name.data()), value);
 }
 
-void ShaderProgram::setVec2(std::string_view name, const glm::vec2 &vec) {
+void ShaderProgram::setVec2(std::string_view name, const glm::vec2& vec) {
     glUniform2f(glGetUniformLocation(m_id, name.data()), vec.x, vec.y);
 }
 
-void ShaderProgram::setVec3(std::string_view name, const glm::vec3 &vec) {
+void ShaderProgram::setVec3(std::string_view name, const glm::vec3& vec) {
     glUniform3f(glGetUniformLocation(m_id, name.data()), vec.x, vec.y, vec.z);
 }
 
-void ShaderProgram::setVec4(std::string_view name, const glm::vec4 &vec) {
+void ShaderProgram::setVec4(std::string_view name, const glm::vec4& vec) {
     glUniform4f(glGetUniformLocation(m_id, name.data()), vec.x, vec.y, vec.z, vec.w);
 }
 
-void ShaderProgram::setMat4(std::string_view name, const glm::mat4 &mat) {
+void ShaderProgram::setMat4(std::string_view name, const glm::mat4& mat) {
     glUniformMatrix4fv(glGetUniformLocation(m_id, name.data()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
@@ -79,9 +79,9 @@ std::vector<ActiveUniform> ShaderProgram::getActiveUniforms() {
     std::vector<ActiveUniform> activeUniforms;
 
     std::vector<GLenum> properties;
-    properties.push_back(GL_NAME_LENGTH);
-    properties.push_back(GL_TYPE);
-    properties.push_back(GL_ARRAY_SIZE);
+    properties.emplace_back(GL_NAME_LENGTH);
+    properties.emplace_back(GL_TYPE);
+    properties.emplace_back(GL_ARRAY_SIZE);
     std::vector<GLint> values(properties.size());
 
     std::vector<GLchar> nameData(256);
@@ -97,7 +97,7 @@ std::vector<ActiveUniform> ShaderProgram::getActiveUniforms() {
         uniform.type = values[1];
         uniform.name = name;
 
-        activeUniforms.push_back(uniform);
+        activeUniforms.emplace_back(std::move(uniform));
     }
 
     return activeUniforms;
@@ -154,8 +154,8 @@ void ShaderProgram::printActiveUniforms() {
     }
 }
 
-std::unique_ptr<ShaderProgram> ShaderProgram::Create(const std::string &name) noexcept {
-    return std::make_unique<ShaderProgram>(name);
+std::unique_ptr<ShaderProgram> ShaderProgram::Create(std::string&& name) noexcept {
+    return std::make_unique<ShaderProgram>(std::move(name));
 }
 
 }

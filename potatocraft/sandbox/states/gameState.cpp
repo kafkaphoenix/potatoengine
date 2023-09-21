@@ -1,44 +1,49 @@
-#include "sandbox/gameState.h"
+#include "sandbox/states/gameState.h"
 
 namespace potatocraft {
 
 GameState::GameState(std::weak_ptr<engine::AssetsManager> am, std::weak_ptr<engine::Renderer> r) : State("GameState"), m_cameraController(), m_scene(am), m_assetsManager(am), m_renderer(r) {
-}
+    #ifdef DEBUG
+        CORE_INFO("Creating prefabs...");
+    #endif
+    m_scene.createPrefabs();
 
-void GameState::onAttach() {
     const auto& renderer = m_renderer.lock();
     if (not renderer) {
         throw std::runtime_error("Renderer is null");
     }
 
+    renderer->add("basic"); // TODO this should be a gui option
+    renderer->add("skybox");
+}
+
+void GameState::onAttach() {
     const auto& manager = m_assetsManager.lock();
     if (not manager) {
         throw std::runtime_error("Assets manager is null");
     }
 
-    renderer->add("basic"); // TODO this should be a gui option
-    renderer->add("skybox");
     auto block1 = m_scene.create(engine::assets::PrefabID::GlassBlock); // TODO this should be a gui option
-    block1.get<engine::Transform>().position = {0.f, 0.f, 0.f};
+    block1.get<engine::CTransform>().position = {0.f, 0.f, 0.f};
     auto block2 = m_scene.create(engine::assets::PrefabID::GlassBlock); // transparent objects need to be after sky
-    block2.get<engine::Transform>().position = {2.f, 5.f, -15.f};
+    block2.get<engine::CTransform>().position = {2.f, 5.f, -15.f};
     auto block10 = m_scene.create(engine::assets::PrefabID::GlassBlock);
-    block10.get<engine::Transform>().position = {-1.3f, 1.f, -1.5f};
+    block10.get<engine::CTransform>().position = {-1.3f, 1.f, -1.5f};
     auto skybox = m_scene.create(engine::assets::PrefabID::Skybox); // if depth test false needs to be at the end
     auto block3 = m_scene.create(engine::assets::PrefabID::StoneBlock);
-    block3.get<engine::Transform>().position = {-1.5f, -2.2f, -2.5f};
+    block3.get<engine::CTransform>().position = {-1.5f, -2.2f, -2.5f};
     auto block4 = m_scene.create(engine::assets::PrefabID::StoneBlock);
-    block4.get<engine::Transform>().position = {-3.8f, -2.f, -12.3f};
+    block4.get<engine::CTransform>().position = {-3.8f, -2.f, -12.3f};
     auto block5 = m_scene.create(engine::assets::PrefabID::BrickBlock);
-    block5.get<engine::Transform>().position = {2.4f, -0.4f, -3.5f};
+    block5.get<engine::CTransform>().position = {2.4f, -0.4f, -3.5f};
     auto block6 = m_scene.create(engine::assets::PrefabID::BrickBlock);
-    block6.get<engine::Transform>().position = {-1.7f, 3.f, -7.5f};
+    block6.get<engine::CTransform>().position = {-1.7f, 3.f, -7.5f};
     auto block7 = m_scene.create(engine::assets::PrefabID::WoodBlock);
-    block7.get<engine::Transform>().position = {1.3f, -2.f, -2.5f};
+    block7.get<engine::CTransform>().position = {1.3f, -2.f, -2.5f};
     auto block8 = m_scene.create(engine::assets::PrefabID::WoodBlock);
-    block8.get<engine::Transform>().position = {1.5f, 2.f, -2.5f};
+    block8.get<engine::CTransform>().position = {1.5f, 2.f, -2.5f};
     auto block9 = m_scene.create(engine::assets::PrefabID::StoneBlock);
-    block9.get<engine::Transform>().position = {1.5f, 0.2f, -1.5f};
+    block9.get<engine::CTransform>().position = {1.5f, 0.2f, -1.5f};
     auto sun = m_scene.create(engine::assets::PrefabID::Sun);
 #ifdef DEBUG
     m_scene.print();

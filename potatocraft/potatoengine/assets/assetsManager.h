@@ -23,8 +23,7 @@ class AssetsManager {
                 throw std::runtime_error("Asset " + std::string(id) + " already exists!");
             }
         }
-        std::shared_ptr<Type> asset = std::make_shared<Type>(std::forward<Args>(args)...);
-        m_assets.emplace(_id, std::move(asset));
+        m_assets.emplace(_id, std::make_shared<Type>(std::forward<Args>(args)...));
 #ifdef DEBUG
         CORE_INFO("\tLoaded asset {0}", _id);
 #endif
@@ -76,7 +75,7 @@ class AssetsManager {
         std::string _id = generateID<Type, ID>(id);
 
         auto& maybeAsset = m_assets.find(_id);
-        if (maybeAsset not_eq m_assets.end() && std::holds_alternative<std::shared_ptr<Type>>(maybeAsset->second)) {
+        if (maybeAsset not_eq m_assets.end() and std::holds_alternative<std::shared_ptr<Type>>(maybeAsset->second)) {
             std::get<std::shared_ptr<Type>>(maybeAsset->second) = asset;
         } else {
             throw std::runtime_error("Asset " + _id + " not found or has an incompatible type. Reload failed!");

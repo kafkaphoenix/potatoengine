@@ -6,23 +6,23 @@
 
 namespace potatoengine {
 
-Texture::Texture(const std::filesystem::path& fp, const std::optional<std::string>& type, std::optional<bool> flipVertically, std::optional<int> mipmap_level, std::optional<bool> gammaCorrection)
-    : m_directory(std::filesystem::is_directory(fp) ? fp.string() : ""),
+Texture::Texture(std::filesystem::path&& fp, std::optional<std::string>&& type, std::optional<bool> flipVertically, std::optional<int> mipmap_level, std::optional<bool> gammaCorrection)
+    : m_directory(std::filesystem::is_directory(fp) ? std::move(fp.string()) : ""),
       m_isCubemap(std::filesystem::is_directory(fp)),
-      m_type(type.value_or("")),
+      m_type(std::move(type.value_or(""))),
       m_flipVertically(flipVertically.value_or(true)),
       m_mipmap_level(mipmap_level.value_or(4)),
       m_gammaCorrection(gammaCorrection.value_or(false)) {
     if (m_isCubemap) {
         std::string fileExt = std::filesystem::exists(fp / "front.jpg") ? ".jpg" : ".png";
-        m_filepaths.push_back((fp / ("front" + fileExt)).string());
-        m_filepaths.push_back((fp / ("back" + fileExt)).string());
-        m_filepaths.push_back((fp / ("top" + fileExt)).string());
-        m_filepaths.push_back((fp / ("bottom" + fileExt)).string());
-        m_filepaths.push_back((fp / ("right" + fileExt)).string());
-        m_filepaths.push_back((fp / ("left" + fileExt)).string());
+        m_filepaths.emplace_back(std::move((fp / ("front" + fileExt)).string())); // it needs to be added in this order
+        m_filepaths.emplace_back(std::move((fp / ("back" + fileExt)).string()));
+        m_filepaths.emplace_back(std::move((fp / ("top" + fileExt)).string()));
+        m_filepaths.emplace_back(std::move((fp / ("bottom" + fileExt)).string()));
+        m_filepaths.emplace_back(std::move((fp / ("right" + fileExt)).string()));
+        m_filepaths.emplace_back(std::move((fp / ("left" + fileExt)).string()));
     } else {
-        m_filepaths.push_back(fp.string());
+        m_filepaths.emplace_back(std::move(fp.string()));
     }
 
     loadTexture();
@@ -47,11 +47,11 @@ void Texture::loadTexture() {
         glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTextureParameteri(m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
-    for (const std::string& filepath : m_filepaths) {
+    for (std::string_view filepath : m_filepaths) {
         stbi_uc* data = stbi_load(filepath.data(), &width, &height, &channels, 0);
         if (not data) [[unlikely]] {
             stbi_image_free(data);
-            throw std::runtime_error("Failed to load texture: " + filepath + " " + stbi_failure_reason());
+            throw std::runtime_error("Failed to load texture: " + std::string(filepath) + " " + stbi_failure_reason());
         }
         m_width = width;
         m_height = height;

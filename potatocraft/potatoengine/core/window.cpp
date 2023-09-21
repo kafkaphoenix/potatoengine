@@ -6,13 +6,12 @@
 
 namespace potatoengine {
 
-Window::Window(const WindowProperties& properties) {
-    m_data.title = properties.title;
+Window::Window(WindowProperties&& properties) {
+    m_data.title = std::move(properties.title);
     m_data.width = properties.width;
     m_data.height = properties.height;
     m_data.lastX = properties.width / 2.f;
     m_data.lastY = properties.height / 2.f;
-
 #ifdef DEBUG
     CORE_INFO("Creating window for {} app with resolution {}x{}...", properties.title, properties.width, properties.height);
 #endif
@@ -173,8 +172,8 @@ void Window::setCursorMode(CursorMode mode) const noexcept {
     glfwSetInputMode(m_window, GLFW_CURSOR, static_cast<int>(mode));
 }
 
-std::unique_ptr<Window> Window::Create(const WindowProperties& properties) {
-    return std::make_unique<Window>(properties);
+std::unique_ptr<Window> Window::Create(WindowProperties&& properties) {
+    return std::make_unique<Window>(std::move(properties));
 }
 
 }

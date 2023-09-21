@@ -4,11 +4,11 @@
 
 #include <assimp/Importer.hpp>
 
+#include "potatoengine/renderer/buffer.h"
+
 namespace potatoengine {
 
-Model::Model(const std::filesystem::path& fp, std::optional<bool> gammaCorrection) {
-    m_filepath = fp.string();
-
+Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection): m_filepath(std::move(fp.string())), m_directory(std::move(fp.parent_path().string())) {
     if (gammaCorrection.has_value()) {
         throw std::runtime_error("Gamma correction not yet implemented");
     }
@@ -18,14 +18,11 @@ Model::Model(const std::filesystem::path& fp, std::optional<bool> gammaCorrectio
                                                              aiProcess_CalcTangentSpace | aiProcess_ValidateDataStructure | aiProcess_JoinIdenticalVertices |
                                                              aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph | aiProcess_SplitLargeMeshes | aiProcess_FindInvalidData);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+    if (not scene or scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE or !scene->mRootNode) {
         throw std::runtime_error("Failed to load model " + m_filepath + ": " + importer.GetErrorString());
     }
 
-    m_directory = fp.parent_path().string();
-
     processNode(scene->mRootNode, scene);
-
 #ifdef DEBUG
     CORE_INFO("\t\tmesh count: {0}", m_meshes.size());
     CORE_INFO("\t\ttexture count: {0}", m_loadedTextures.size());
@@ -36,7 +33,7 @@ Model::Model(const std::filesystem::path& fp, std::optional<bool> gammaCorrectio
 void Model::processNode(aiNode* node, const aiScene* scene) {
     for (uint32_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        m_meshes.push_back(processMesh(mesh, scene));
+        m_meshes.emplace_back(std::move(processMesh(mesh, scene)));
     }
 
     for (uint32_t i = 0; i < node->mNumChildren; i++) {
@@ -44,7 +41,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
     }
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices{};
     std::vector<uint32_t> indices{};
     std::vector<std::shared_ptr<Texture>> textures;
@@ -89,18 +86,18 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             // TODO faces
         }
 
-        vertices.push_back(vertex);
+        vertices.emplace_back(std::move(vertex));
     }
 
     for (uint32_t i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
         for (uint32_t j = 0; j < face.mNumIndices; j++) {
-            indices.push_back(face.mIndices[j]);
+            indices.emplace_back(face.mIndices[j]);
         }
     }
 
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-    m_materials.push_back(loadMaterial(material));
+    m_materials.emplace_back(std::move(loadMaterial(material)));
 
     // N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
     // diffuse: textureDiffuseN
@@ -118,10 +115,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     loadAndInsertTextures(aiTextureType_AMBIENT, "textureHeight");
 
     if (textures.empty()) {
-        textures.push_back(std::make_shared<Texture>("assets/textures/default.jpg", "textureDiffuse"));  // TODO: add asset manager?
+        textures.emplace_back(std::make_shared<Texture>("assets/textures/default.jpg", "textureDiffuse"));  // TODO: add asset manager?
     }
 
-    return Mesh(vertices, indices, textures);
+    return CMesh(std::move(vertices), std::move(indices), std::move(textures));
 }
 
 std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType t, std::string type) {
@@ -138,19 +135,19 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
                                           });
 
         if (loadedTexture not_eq m_loadedTextures.end()) {
-            textures.push_back(*loadedTexture);
+            textures.emplace_back(std::move(*loadedTexture));
         } else {
             std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(filepath, type);
-            textures.push_back(newTexture);
-            m_loadedTextures.push_back(newTexture);
+            textures.emplace_back(newTexture);
+            m_loadedTextures.emplace_back(std::move(newTexture));
         }
     }
 
     return textures;
 }
 
-Material Model::loadMaterial(aiMaterial* mat) {
-    Material material{};
+CMaterial Model::loadMaterial(aiMaterial* mat) {
+    CMaterial material{};
     aiColor3D color(0.f, 0.f, 0.f);
     float shininess{};
 

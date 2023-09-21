@@ -1,12 +1,13 @@
 #include "potatoengine/core/entrypoint.h"
 #include "potatoengine/engineAPI.h"
-#include "sandbox/gameState.h"
+#include "sandbox/states/gameState.h"
+#include "sandbox/utils.h"
 
 namespace potatocraft {
 
 class Sandbox : public engine::Application {
    public:
-    Sandbox(const engine::Config& c, engine::CLArgs args) : engine::Application(c, args) {
+    Sandbox(engine::Config&& c, engine::CLArgs&& args) : engine::Application(std::move(c), std::move(args)) {
 #ifdef DEBUG
         CORE_INFO("Loading assets...");  // TODO: Move this to a loading screen state // TODO this should be a gui option
         engine::Timer timer = engine::Timer();
@@ -43,7 +44,8 @@ class Sandbox : public engine::Application {
 #ifdef DEBUG
         CORE_INFO("Loading models TIME: {0}", timer.getSeconds());
         CORE_INFO("Assets loaded!");
-        m_assetsManager->print();
+        CORE_INFO("Registering game components...");
+        registerComponents();
         CORE_INFO("Loading game state...");
 #endif
         pushState(GameState::Create(std::weak_ptr<engine::AssetsManager>(m_assetsManager), std::weak_ptr<engine::Renderer>(m_renderer)));
@@ -55,6 +57,6 @@ class Sandbox : public engine::Application {
 
 }
 
-engine::Application* engine::CreateApp(engine::CLArgs args) {
-    return new potatocraft::Sandbox(Config{.name = "PotatoCraft", .root = "..", .width = 1280, .height = 720}, args);
+engine::Application* engine::CreateApp(engine::CLArgs&& args) {
+    return new potatocraft::Sandbox(Config{.name = "PotatoCraft", .root = "..", .width = 1280, .height = 720}, std::move(args));
 }

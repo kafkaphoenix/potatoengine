@@ -3,9 +3,7 @@
 #include "potatoengine/pch.h"
 
 namespace potatoengine {
-Shader::Shader(const std::filesystem::path& fp) {
-    m_filepath = fp.string();
-
+Shader::Shader(std::filesystem::path&& fp): m_filepath(std::move(fp.string())) {
     std::ifstream f(fp);
     if (not f.is_open()) [[unlikely]] {
         f.close();

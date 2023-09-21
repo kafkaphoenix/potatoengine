@@ -19,9 +19,12 @@ class Entity {
         return m_scene->m_registry.emplace<Component>(m_entity, std::forward<Args>(args)...);
     }
 
-    template <typename Component>
-    void onComponentAdded(Component& c) {
-        m_scene->onComponentAdded(*this, c);
+    template <typename Component, typename... Args>
+    Component& update(Args&&... args) {
+        if (not has_all<Component>()) {
+            throw std::runtime_error("Entity does not have component " + std::string(typeid(Component).name()));
+        }
+        return m_scene->m_registry.replace<Component>(m_entity, std::forward<Args>(args)...);
     }
 
     template <typename Component>
@@ -49,12 +52,13 @@ class Entity {
         (m_scene->m_registry.remove<Components>(m_entity), ...);
     }
 
+    Scene& getScene() const { return *m_scene; }
+
     operator bool() const noexcept;
     bool operator==(const Entity other) const noexcept;
     bool operator!=(const Entity other) const noexcept;
     operator entt::entity() const noexcept;
     operator uint32_t() const;
-    operator uint64_t() const;
     operator std::string() const;
 
    private:
