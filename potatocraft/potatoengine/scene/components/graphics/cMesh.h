@@ -48,59 +48,66 @@ struct CMesh {
         sp->setFloat("fogGradient", static_cast<float>(entt::monostate<"fogGradient"_hs>{}));
         sp->setVec3("fogColor", static_cast<glm::vec3>(entt::monostate<"fogColor"_hs>{}));
         if (cTexture) {
-            for (auto& texture : cTexture->textures) {
-                if (cTexture->useFakeLighting) {
-                    sp->setFloat("useFakeLighting", 1.f);
-                    sp->setVec3("lightPosition",  static_cast<glm::vec3>(entt::monostate<"lightPosition"_hs>{}));
-                    sp->setVec3("lightColor",  static_cast<glm::vec3>(entt::monostate<"lightColor"_hs>{}));
-                }
-                if (cTextureAtlas) {
-                    sp->setFloat("useAtlas", 1.f);
-                    int index = cTextureAtlas->index;
-                    int rows = cTextureAtlas->rows;
-                    sp->setFloat("numRows", rows);
-                    int col = index % rows;
-                    float coll = static_cast<float>(col) / static_cast<float>(rows);
-                    int row = index / rows;
-                    float roww = static_cast<float>(row) / static_cast<float>(rows);
-                    sp->setVec2("offset", glm::vec2(coll, roww));
-                }
-                if (cTexture->useBlending) {
-                    sp->setFloat("useBlending", 1.f);
-                    sp->setFloat("blendFactor", cTexture->blendFactor);
-                }
+            if (cTexture->filepaths.empty()) {
                 if (cTexture->useColor) {
                     sp->setFloat("useColor", 1.f);
                     sp->setVec4("color", cTexture->color);
                 }
-                if (static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}) == 1.f) {
-                    sp->setFloat("useSkyBlending", static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}));
-                    sp->setFloat("skyBlendFactor", static_cast<float>(entt::monostate<"skyBlendFactor"_hs>{}));
-                    int ti = 10;
-                    for (auto& t : cSkyboxTexture->textures) {
-                        sp->setInt(t->getType().data() + std::string("Sky") + std::to_string(ti), ti);
-                        t->bindSlot(ti);
-                        ti++;
+            } else {
+                for (auto& texture : cTexture->textures) {
+                    if (cTexture->useFakeLighting) {
+                        sp->setFloat("useFakeLighting", 1.f);
+                        sp->setVec3("lightPosition",  static_cast<glm::vec3>(entt::monostate<"lightPosition"_hs>{}));
+                        sp->setVec3("lightColor",  static_cast<glm::vec3>(entt::monostate<"lightColor"_hs>{}));
                     }
-                    if (cTexture->useReflection) {
-                        sp->setFloat("useReflection", 1.f);
-                        sp->setFloat("reflectivity", cTexture->reflectivity);
-                        sp->setVec3("cameraPosition", cameraPosition);
+                    if (cTextureAtlas) {
+                        sp->setFloat("useAtlas", 1.f);
+                        int index = cTextureAtlas->index;
+                        int rows = cTextureAtlas->rows;
+                        sp->setFloat("numRows", rows);
+                        int col = index % rows;
+                        float coll = static_cast<float>(col) / static_cast<float>(rows);
+                        int row = index / rows;
+                        float roww = static_cast<float>(row) / static_cast<float>(rows);
+                        sp->setVec2("offset", glm::vec2(coll, roww));
                     }
-                    if (cTexture->useRefraction) {
-                        sp->setFloat("useRefraction", 1.f);
-                        sp->setFloat("refractiveIndex", cTexture->refractiveIndex);
+                    if (cTexture->useBlending) {
+                        sp->setFloat("useBlending", 1.f);
+                        sp->setFloat("blendFactor", cTexture->blendFactor);
                     }
+                    if (cTexture->useColor) {
+                        sp->setFloat("useColor", 1.f);
+                        sp->setVec4("color", cTexture->color);
+                    }
+                    if (static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}) == 1.f) {
+                        sp->setFloat("useSkyBlending", static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}));
+                        sp->setFloat("skyBlendFactor", static_cast<float>(entt::monostate<"skyBlendFactor"_hs>{}));
+                        int ti = 10;
+                        for (auto& t : cSkyboxTexture->textures) {
+                            sp->setInt(t->getType().data() + std::string("Sky") + std::to_string(ti), ti);
+                            t->bindSlot(ti);
+                            ti++;
+                        }
+                        if (cTexture->useReflection) {
+                            sp->setFloat("useReflection", 1.f);
+                            sp->setFloat("reflectivity", cTexture->reflectivity);
+                            sp->setVec3("cameraPosition", cameraPosition);
+                        }
+                        if (cTexture->useRefraction) {
+                            sp->setFloat("useRefraction", 1.f);
+                            sp->setFloat("refractiveIndex", cTexture->refractiveIndex);
+                        }
+                    }
+                    if (cMaterial) {
+                        sp->setVec3("ambient", cMaterial->ambient);
+                        sp->setVec3("diffuse", cMaterial->diffuse);
+                        sp->setVec3("specular", cMaterial->specular);
+                        sp->setFloat("shininess", cMaterial->shininess);
+                    }
+                    sp->setInt(texture->getType().data() + std::to_string(i), i);
+                    texture->bindSlot(i);
+                    ++i;
                 }
-                if (cMaterial) {
-                    sp->setVec3("ambient", cMaterial->ambient);
-                    sp->setVec3("diffuse", cMaterial->diffuse);
-                    sp->setVec3("specular", cMaterial->specular);
-                    sp->setFloat("shininess", cMaterial->shininess);
-                }
-                sp->setInt(texture->getType().data() + std::to_string(i), i);
-                texture->bindSlot(i);
-                ++i;
             }
         } else {
             uint32_t diffuseN = 1;

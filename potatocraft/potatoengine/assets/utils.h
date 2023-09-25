@@ -57,6 +57,8 @@ inline std::string to_string(assets::PrefabID id) noexcept {
             return "WoodBlock";
         case Skybox:
             return "Skybox";
+        case Foco:
+            return "Foco";
         case Sun:
             return "Sun";
     }

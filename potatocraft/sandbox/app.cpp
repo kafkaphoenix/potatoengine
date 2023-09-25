@@ -34,13 +34,15 @@ class Sandbox : public engine::Application {
         m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::GlassBlock, "assets/prefabs/entities.json", "glass_block");
         m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::WoodBlock, "assets/prefabs/entities.json", "wood_block");
         m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::Skybox, "assets/prefabs/entities.json", "skybox");
-        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::Sun, "assets/prefabs/entities.json", "sun");
+        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::Foco, "assets/prefabs/entities.json", "foco");
 #ifdef DEBUG
         CORE_INFO("Loading prefabs TIME: {0}", timer.getSeconds());
         timer.reset();
 #endif
         m_assetsManager->load<engine::Model>("rock", "assets/models/rock/rock.obj");
         m_assetsManager->load<engine::Model>("cube", "assets/models/cube/cube.obj");
+        m_assetsManager->load<engine::Model>("foco", "assets/models/foco/foco.obj");
+        m_assetsManager->load<engine::Model>("camera", "assets/models/camera/camera.obj");
 #ifdef DEBUG
         CORE_INFO("Loading models TIME: {0}", timer.getSeconds());
         CORE_INFO("Assets loaded!");

@@ -44,6 +44,15 @@ glm::vec4 vec4FromJson(const json& data, std::string_view type = "") {
     return vec;
 }
 
+glm::quat quatFromJson(const json& data) {
+    glm::quat quat{};
+    quat.x = data.at("x").get<float>();
+    quat.y = data.at("y").get<float>();
+    quat.z = data.at("z").get<float>();
+    quat.w = data.at("w").get<float>();
+    return quat;
+}
+
 EntityFactory::EntityFactory(std::weak_ptr<AssetsManager> am) : m_assetsManager(am) {}
 
 void EntityFactory::create(assets::PrefabID id, Entity e) {
@@ -120,8 +129,19 @@ void EntityFactory::create(assets::PrefabID id, Entity e) {
                     }
                     metaComponent.set(entt::hashed_string{cField.data()}, std::move(paths));
                 } else if (cFieldValue.is_object()) {
-                    if (cFieldValue.contains("x") and cFieldValue.contains("y") and cFieldValue.contains("z")) {
-                        metaComponent.set(entt::hashed_string{cField.data()}, vec3FromJson(cFieldValue));
+                    if (cFieldValue.contains("x") and cFieldValue.contains("y") and cFieldValue.contains("z") and cFieldValue.contains("w")) {
+                        if (cField == "rotation") {
+                            metaComponent.set(entt::hashed_string{cField.data()}, quatFromJson(cFieldValue));
+                        } else {
+                            metaComponent.set(entt::hashed_string{cField.data()}, vec4FromJson(cFieldValue));
+                        }
+                        metaComponent.set(entt::hashed_string{cField.data()}, vec4FromJson(cFieldValue));
+                    } else if (cFieldValue.contains("x") and cFieldValue.contains("y") and cFieldValue.contains("z")) {
+                        if (cField == "rotation") {
+                            metaComponent.set(entt::hashed_string{cField.data()}, glm::quat(glm::radians(vec3FromJson(cFieldValue))));
+                        } else {
+                            metaComponent.set(entt::hashed_string{cField.data()}, vec3FromJson(cFieldValue));
+                        }
                     } else if (cFieldValue.contains("x") and cFieldValue.contains("y")) {
                         metaComponent.set(entt::hashed_string{cField.data()}, vec2FromJson(cFieldValue));
                     } else if (cFieldValue.contains("r") and cFieldValue.contains("g") and cFieldValue.contains("b") and cFieldValue.contains("a")) {

@@ -44,7 +44,7 @@ void GameState::onAttach() {
     block8.get<engine::CTransform>().position = {1.5f, 2.f, -2.5f};
     auto block9 = m_scene.create(engine::assets::PrefabID::StoneBlock);
     block9.get<engine::CTransform>().position = {1.5f, 0.2f, -1.5f};
-    auto sun = m_scene.create(engine::assets::PrefabID::Sun);
+    auto foco = m_scene.create(engine::assets::PrefabID::Foco);
 #ifdef DEBUG
     m_scene.print();
 #endif

@@ -167,17 +167,22 @@
             "shaderProgram": "skybox"
         }
     },
-    "sun": {
+    "foco": {
         "components": {
-            "tag": "sun",
+            "tag": "light",
             "transform": {
-                "position": {"x": 0, "y": 10, "z": 10}
+                "position": {"x": 0, "y": 10, "z": 10},
+                "rotation": {"x": 0, "y": 90, "z": 0}
             },
-            "body": "cube",
+            "body": "foco",
             "light": {
                 "type": "directional"
             },
-            "shaderProgram": "basic"
+            "shaderProgram": "basic",
+            "texture": {
+                "useColor": true,
+                "color": {"r": 0, "g": 0, "b": 0, "a": 0.7}
+            }
         }
     }
 }

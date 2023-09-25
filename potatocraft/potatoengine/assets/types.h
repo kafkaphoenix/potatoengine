@@ -34,6 +34,7 @@ enum class PrefabID {
     GlassBlock,
     WoodBlock,
     Skybox,
+    Foco,
     Sun
 };
 
