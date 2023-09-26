@@ -29,7 +29,7 @@ struct CCollider {
 }
 
 template <>
-void engine::Scene::onComponentAdded(Entity e, CCollider& c) {
+void engine::SceneManager::onComponentAdded(Entity e, CCollider& c) {
     if (c._type == "box") {
         c.type = CCollider::Type::Box;
     } else if (c._type == "capsule") {

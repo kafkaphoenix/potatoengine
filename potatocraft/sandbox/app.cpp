@@ -8,46 +8,12 @@ namespace potatocraft {
 class Sandbox : public engine::Application {
    public:
     Sandbox(engine::Config&& c, engine::CLArgs&& args) : engine::Application(std::move(c), std::move(args)) {
+        m_assetsManager->load<engine::Scene>("cubes", "assets/scenes/cubes.json");
 #ifdef DEBUG
-        CORE_INFO("Loading assets...");  // TODO: Move this to a loading screen state // TODO this should be a gui option
-        engine::Timer timer = engine::Timer();
-#endif
-        m_assetsManager->load<engine::Shader>("vbasic", "assets/shaders/basic.vert");
-        m_assetsManager->load<engine::Shader>("fbasic", "assets/shaders/basic.frag");
-        m_assetsManager->load<engine::Shader>("vskybox", "assets/shaders/skybox.vert");
-        m_assetsManager->load<engine::Shader>("fskybox", "assets/shaders/skybox.frag");
-#ifdef DEBUG
-        CORE_INFO("Loading shaders TIME: {0}", timer.getSeconds());
-        timer.reset();
-#endif
-        m_assetsManager->load<engine::Texture>("block_atlas", "assets/textures/block_atlas.jpg", "textureDiffuse", engine::Texture::DONT_FLIP_VERTICALLY);
-        m_assetsManager->load<engine::Texture>("skybox_night", "assets/textures/skybox_night1", "textureDiffuse", engine::Texture::DONT_FLIP_VERTICALLY);
-        m_assetsManager->load<engine::Texture>("skybox_day", "assets/textures/skybox_day2", "textureDiffuse", engine::Texture::DONT_FLIP_VERTICALLY);
-#ifdef DEBUG
-        CORE_INFO("Loading textures TIME: {0}", timer.getSeconds());
-        timer.reset();
-#endif
-        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::Player, "assets/prefabs/entities.json", "player");
-        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::Chicken, "assets/prefabs/entities.json", "chicken");
-        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::BrickBlock, "assets/prefabs/entities.json", "brick_block");
-        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::StoneBlock, "assets/prefabs/entities.json", "stone_block");
-        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::GlassBlock, "assets/prefabs/entities.json", "glass_block");
-        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::WoodBlock, "assets/prefabs/entities.json", "wood_block");
-        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::Skybox, "assets/prefabs/entities.json", "skybox");
-        m_assetsManager->load<engine::Prefab>(engine::assets::PrefabID::Foco, "assets/prefabs/entities.json", "foco");
-#ifdef DEBUG
-        CORE_INFO("Loading prefabs TIME: {0}", timer.getSeconds());
-        timer.reset();
-#endif
-        m_assetsManager->load<engine::Model>("rock", "assets/models/rock/rock.obj");
-        m_assetsManager->load<engine::Model>("cube", "assets/models/cube/cube.obj");
-        m_assetsManager->load<engine::Model>("foco", "assets/models/foco/foco.obj");
-        m_assetsManager->load<engine::Model>("camera", "assets/models/camera/camera.obj");
-#ifdef DEBUG
-        CORE_INFO("Loading models TIME: {0}", timer.getSeconds());
-        CORE_INFO("Assets loaded!");
         CORE_INFO("Registering game components...");
+#endif
         registerComponents();
+#ifdef DEBUG
         CORE_INFO("Loading game state...");
 #endif
         pushState(GameState::Create(std::weak_ptr<engine::AssetsManager>(m_assetsManager), std::weak_ptr<engine::Renderer>(m_renderer)));

@@ -18,5 +18,5 @@ struct CCamera {
 }
 
 template <>
-void engine::Scene::onComponentAdded(Entity e, CCamera& c) { // TODO finish
+void engine::SceneManager::onComponentAdded(Entity e, CCamera& c) { // TODO finish
 }

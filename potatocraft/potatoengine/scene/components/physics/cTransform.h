@@ -9,7 +9,7 @@ namespace potatoengine {
 
 struct CTransform {
     glm::vec3 position{};
-    glm::quat rotation{};
+    glm::quat rotation{glm::quat{1.f, 0.f, 0.f, 0.f}};
     glm::vec3 scale{glm::vec3{1.f}};
 
     CTransform() = default;

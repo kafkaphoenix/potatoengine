@@ -106,7 +106,7 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     // height: textureHeightN
     auto loadAndInsertTextures = [&](aiTextureType t, std::string type) {
         std::vector<std::shared_ptr<Texture>> loadedTextures = loadMaterialTextures(material, t, type);
-        textures.insert(textures.end(), loadedTextures.begin(), loadedTextures.end());
+        textures.insert(textures.end(), loadedTextures.begin(), loadedTextures.end()); // Can't be emplace
     };
 
     loadAndInsertTextures(aiTextureType_DIFFUSE, "textureDiffuse");

@@ -5,13 +5,13 @@
 
 namespace potatoengine {
 
-Entity::Entity(entt::entity e, Scene* scene) : m_entity(e), m_scene(scene) {}
+Entity::Entity(entt::entity e, SceneManager* sceneManager) : m_entity(e), m_sceneManager(sceneManager) {}
 
 Entity::operator bool() const noexcept {
     return m_entity not_eq entt::null;
 }
 bool Entity::operator==(const Entity other) const noexcept {
-    return m_entity == other.m_entity and m_scene == other.m_scene;
+    return m_entity == other.m_entity and m_sceneManager->getActiveScene() == other.m_sceneManager->getActiveScene();
 }
 bool Entity::operator!=(const Entity other) const noexcept {
     return *this not_eq other;

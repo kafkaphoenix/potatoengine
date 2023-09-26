@@ -37,7 +37,7 @@ struct CLight {
 }
 
 template <>
-void engine::Scene::onComponentAdded(Entity e, CLight& c) {
+void engine::SceneManager::onComponentAdded(Entity e, CLight& c) {
     if (c._type == "directional") {
         c.type = CLight::Type::Directional;
     } else if (c._type == "point") {

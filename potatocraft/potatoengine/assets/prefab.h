@@ -5,31 +5,33 @@
 #include "potatoengine/pch.h"
 using json = nlohmann::json;
 
+struct PrefabData {
+    std::unordered_set<std::string> inherits;
+    std::unordered_set<std::string> ctags;
+    std::unordered_map<std::string, json> components;
+};
+
 namespace potatoengine {
 class Prefab {
    public:
-    Prefab(std::filesystem::path&& fp, std::string&& name);
+    Prefab(std::filesystem::path&& fp, std::unordered_set<std::string>&& targets);
 
-    std::string_view getName() const noexcept { return m_name; }
     std::string_view getFilepath() const noexcept { return m_filepath; }
-    const std::vector<std::string>& getInherits() const noexcept { return m_inherits; }
-    const std::unordered_map<std::string, nlohmann::json>& getComponents() const noexcept { return m_components; }
-    bool hasComponent(std::string_view name) const noexcept { return m_components.contains(name.data()); }
-    const std::unordered_set<std::string>& getCTags() const noexcept { return m_ctags; }
-    bool hasTag(std::string_view tag) const noexcept { return std::find(m_ctags.begin(), m_ctags.end(), tag) != m_ctags.end(); }
+    const std::unordered_set<std::string>& getInherits(std::string_view id) const noexcept { return m_prefabs.at(id.data()).inherits; }
+    const std::unordered_set<std::string>& getCTags(std::string_view id) const noexcept { return m_prefabs.at(id.data()).ctags; }
+    const std::unordered_map<std::string, json>& getComponents(std::string_view id) const noexcept { return m_prefabs.at(id.data()).components; }
+    const std::unordered_set<std::string>& getTargets() const noexcept { return m_targets; }
     void print() const;
 
     bool operator==(const Prefab& other) const noexcept {
-        return m_name == other.getName();
+        return m_filepath == other.m_filepath;
     }
 
    private:
     std::string m_filepath{};
-    std::string m_name{};
-    std::vector<std::string> m_inherits{};
-    std::unordered_map<std::string, nlohmann::json> m_components{};
-    std::unordered_set<std::string> m_ctags{};
+    std::unordered_set<std::string> m_targets{};
+    std::unordered_map<std::string, PrefabData> m_prefabs{};
 
-    void read(const json& j);
+    void read(const json& j, std::unordered_set<std::string>& inherits, std::unordered_set<std::string>& ctags, std::unordered_map<std::string, json>& components);
 };
 }

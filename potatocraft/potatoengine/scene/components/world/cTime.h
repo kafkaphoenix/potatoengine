@@ -28,7 +28,7 @@ struct CTime {
 }
 
 template <>
-void engine::Scene::onComponentAdded(Entity e, CTime& c) {
+void engine::SceneManager::onComponentAdded(Entity e, CTime& c) {
     if (c.dayLength <= 0.f) {
         throw std::runtime_error("Day length must be positive!");
     }

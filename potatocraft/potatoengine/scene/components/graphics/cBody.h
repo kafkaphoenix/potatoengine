@@ -24,7 +24,7 @@ struct CBody {
 }
 
 template <>
-void engine::Scene::onComponentAdded(Entity e, CBody& c) {
+void engine::SceneManager::onComponentAdded(Entity e, CBody& c) {
     const auto& manager = m_assetsManager.lock();
     if (not manager) {
         throw std::runtime_error("Assets manager is null!");

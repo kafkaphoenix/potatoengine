@@ -341,9 +341,9 @@ void printScene(entt::registry &r) {
         CORE_INFO("Entity UUID: {0}", entt::to_integral(e));
         for (auto&& curr : r.storage()) {
             if (auto& storage = curr.second; storage.contains(e)) {
-                auto cType = entt::resolve(storage.type());
-                auto cData = cType.construct(storage.value(e));
-                auto printFunc = cType.func("print"_hs);
+                entt::meta_type cType = entt::resolve(storage.type());
+                entt::meta_any cData = cType.construct(storage.value(e));
+                entt::meta_func printFunc = cType.func("print"_hs);
                 if (printFunc) {
                     std::string_view cName = storage.type().name();
                     cName = cName.substr(cName.find_last_of(':') + 1);
@@ -359,7 +359,7 @@ void printScene(entt::registry &r) {
 }
 
 template <>
-void engine::Scene::onComponentAdded(Entity e, CTexture &c) {
+void engine::SceneManager::onComponentAdded(Entity e, CTexture &c) {
     const auto &manager = m_assetsManager.lock();
     if (not manager) {
         throw std::runtime_error("Assets manager is null!");

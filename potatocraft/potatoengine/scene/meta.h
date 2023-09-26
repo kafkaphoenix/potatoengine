@@ -15,14 +15,14 @@ Component& assign(Entity e, Args... args) {
 template <typename Component>
 // cppcheck-suppress unusedFunction
 Component& onComponentAdded(Entity e, Component& c) {
-    e.getScene().onComponentAdded<Component>(e, c);
+    e.getSceneManager().onComponentAdded<Component>(e, c);
     return c;
 }
 
 template <typename Component>
 // cppcheck-suppress unusedFunction
 Component& onComponentCloned(Entity e, Component& c) {
-    e.getScene().onComponentCloned<Component>(e, c);
+    e.getSceneManager().onComponentCloned<Component>(e, c);
     return c;
 }
 }

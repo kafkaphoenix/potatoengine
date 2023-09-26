@@ -28,5 +28,5 @@ struct CEquipment {
 }
 
 template <>
-void engine::Scene::onComponentAdded<potatocraft::CEquipment>(engine::Entity e, potatocraft::CEquipment& c) { // TODO finish
+void engine::SceneManager::onComponentAdded<potatocraft::CEquipment>(engine::Entity e, potatocraft::CEquipment& c) { // TODO finish
 }

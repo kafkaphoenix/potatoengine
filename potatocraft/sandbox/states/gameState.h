@@ -23,8 +23,8 @@ class GameState : public engine::State {
     bool m_debugging{};
     bool m_wireframe{};
 
-    engine::CameraController m_cameraController;
-    engine::Scene m_scene;
+    engine::CameraController m_cameraController; //rename to manager if I keep it
+    engine::SceneManager m_sceneManager;
     std::weak_ptr<engine::Renderer> m_renderer;
     std::weak_ptr<engine::AssetsManager> m_assetsManager;
 };
