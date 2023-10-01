@@ -8,13 +8,13 @@
 
 namespace potatoengine {
 
-Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection): m_filepath(std::move(fp.string())), m_directory(std::move(fp.parent_path().string())) {
+Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection) : m_filepath(std::move(fp.string())), m_directory(std::move(fp.parent_path().string())) {
     if (gammaCorrection.has_value()) {
         throw std::runtime_error("Gamma correction not yet implemented");
     }
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(m_filepath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs |
+    const aiScene* scene = importer.ReadFile(m_filepath, aiProcess_Triangulate | aiProcess_GenSmoothNormals |
                                                              aiProcess_CalcTangentSpace | aiProcess_ValidateDataStructure | aiProcess_JoinIdenticalVertices |
                                                              aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph | aiProcess_SplitLargeMeshes | aiProcess_FindInvalidData);
 
@@ -24,9 +24,9 @@ Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection): m
 
     processNode(scene->mRootNode, scene);
 #ifdef DEBUG
-    CORE_INFO("\t\tmesh count: {0}", m_meshes.size());
-    CORE_INFO("\t\ttexture count: {0}", m_loadedTextures.size());
-    CORE_INFO("\t\tmaterial count: {0}", m_materials.size());
+    CORE_INFO("\t\tmesh count: {}", m_meshes.size());
+    CORE_INFO("\t\ttexture count: {}", m_loadedTextures.size());
+    CORE_INFO("\t\tmaterial count: {}", m_materials.size());
 #endif
 }
 
@@ -97,7 +97,7 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-    m_materials.emplace_back(std::move(loadMaterial(material)));
+    CMaterial materialData = loadMaterial(material);
 
     // N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
     // diffuse: textureDiffuseN
@@ -106,7 +106,7 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     // height: textureHeightN
     auto loadAndInsertTextures = [&](aiTextureType t, std::string type) {
         std::vector<std::shared_ptr<Texture>> loadedTextures = loadMaterialTextures(material, t, type);
-        textures.insert(textures.end(), loadedTextures.begin(), loadedTextures.end()); // Can't be emplace
+        textures.insert(textures.end(), loadedTextures.begin(), loadedTextures.end());  // Can't be emplace
     };
 
     loadAndInsertTextures(aiTextureType_DIFFUSE, "textureDiffuse");
@@ -114,9 +114,10 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     loadAndInsertTextures(aiTextureType_HEIGHT, "textureNormal");
     loadAndInsertTextures(aiTextureType_AMBIENT, "textureHeight");
 
-    if (textures.empty()) {
+    if (textures.empty() and materialData.diffuse == glm::vec3(0.f, 0.f, 0.f)) {
         textures.emplace_back(std::make_shared<Texture>("assets/textures/default.jpg", "textureDiffuse"));  // TODO: add asset manager?
-    }
+    } 
+    m_materials.emplace_back(std::move(materialData));
 
     return CMesh(std::move(vertices), std::move(indices), std::move(textures));
 }
@@ -135,7 +136,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
                                           });
 
         if (loadedTexture not_eq m_loadedTextures.end()) {
-            textures.emplace_back(std::move(*loadedTexture));
+            textures.emplace_back(std::make_shared<Texture>(*(*loadedTexture)));
         } else {
             std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(filepath, type);
             textures.emplace_back(newTexture);
@@ -147,6 +148,17 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
 }
 
 CMaterial Model::loadMaterial(aiMaterial* mat) {
+    // map_Ns        SHININESS    roughness
+    // map_Ka        AMBIENT      ambient occlusion
+    // map_Kd        DIFFUSE      albedo diffuse
+    // map_Ks        SPECULAR     metallic specular
+    // map_Ke        EMISSIVE     emissive
+    // map_Ni        REFRACTION   ior
+    // map_d         OPACITY
+    // illum         ILLUMINATION
+    // map_Bump      HEIGHT       height
+    // map_Kn        NORMALS      normal
+    // map_disp      DISPLACEMENT
     CMaterial material{};
     aiColor3D color(0.f, 0.f, 0.f);
     float shininess{};

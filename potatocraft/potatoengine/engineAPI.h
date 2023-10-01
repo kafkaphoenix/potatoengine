@@ -20,6 +20,7 @@ namespace engine = potatoengine;
 #include "potatoengine/renderer/camera/cameraController.h"
 #include "potatoengine/renderer/renderer.h"
 #include "potatoengine/renderer/rendererAPI.h"
+#include "potatoengine/renderer/framebuffer.h"
 
 // assets
 #include "potatoengine/assets/assetsManager.h"

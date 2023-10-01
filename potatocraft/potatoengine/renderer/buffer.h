@@ -8,7 +8,7 @@
 namespace potatoengine {
 #define MAX_BONE_INFLUENCE 4
 
-struct Vertex { // TODO move
+struct Vertex {  // TODO move
     glm::vec3 position{};
     glm::vec3 normal{};
     glm::vec2 textureCoords{};
@@ -19,9 +19,15 @@ struct Vertex { // TODO move
     glm::vec4 color{glm::vec4(0.9725f, 0.f, 0.9725f, 1.f)};
 };
 
+struct ShapeVertex {
+    glm::vec3 position{};
+    glm::vec2 textureCoords{};
+};
+
 class VBO {
    public:
     VBO(const std::vector<Vertex>& vertices, bool immutable);
+    VBO(const std::vector<ShapeVertex>& vertices);
     ~VBO();
 
     void reload(const std::vector<Vertex>& vertices);
@@ -29,6 +35,7 @@ class VBO {
     uint32_t getID() const noexcept { return m_id; }
 
     static std::unique_ptr<VBO> Create(const std::vector<Vertex>& vertices, bool immutable = true);
+    static std::unique_ptr<VBO> CreateShape(const std::vector<ShapeVertex>& vertices);
 
    private:
     uint32_t m_id{};

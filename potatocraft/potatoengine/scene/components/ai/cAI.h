@@ -12,7 +12,7 @@ struct CAI {
     explicit CAI(std::string&& fp) : filepath(std::move(fp)) {}
 
     void print() const {
-        CORE_INFO("\t\tfilepath: {0}", filepath);
+        CORE_INFO("\t\tfilepath: {}", filepath);
     }
 };
 }

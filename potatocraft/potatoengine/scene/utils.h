@@ -6,12 +6,14 @@
 #include "potatoengine/scene/components/ai/cAI.h"
 #include "potatoengine/scene/components/audio/cAudio.h"
 #include "potatoengine/scene/components/camera/cCamera.h"
+#include "potatoengine/scene/components/camera/cDistanceFromCamera.h"
 #include "potatoengine/scene/components/common/cName.h"
 #include "potatoengine/scene/components/common/cTag.h"
 #include "potatoengine/scene/components/common/cUUID.h"
 #include "potatoengine/scene/components/effects/cParticle.h"
 #include "potatoengine/scene/components/graphics/cAnimation.h"
 #include "potatoengine/scene/components/graphics/cBody.h"
+#include "potatoengine/scene/components/graphics/cFBO.h"
 #include "potatoengine/scene/components/graphics/cMaterial.h"
 #include "potatoengine/scene/components/graphics/cMesh.h"
 #include "potatoengine/scene/components/graphics/cShaderProgram.h"
@@ -23,6 +25,7 @@
 #include "potatoengine/scene/components/physics/cTransform.h"
 #include "potatoengine/scene/components/utils/cDeleted.h"
 #include "potatoengine/scene/components/utils/cRelationship.h"
+#include "potatoengine/scene/components/utils/cShape.h"
 #include "potatoengine/scene/components/world/cLight.h"
 #include "potatoengine/scene/components/world/cSkybox.h"
 #include "potatoengine/scene/components/world/cTime.h"
@@ -83,6 +86,10 @@ CCamera &castCCamera(void *other) {
     return *static_cast<CCamera *>(other);
 }
 
+CDistanceFromCamera &castCDistanceFromCamera(void *other) {
+    return *static_cast<CDistanceFromCamera *>(other);
+}
+
 CSkybox &castCSkybox(void *other) {
     return *static_cast<CSkybox *>(other);
 }
@@ -117,6 +124,14 @@ CAI &castCAI(void *other) {
 
 CRelationship &castCRelationship(void *other) {
     return *static_cast<CRelationship *>(other);
+}
+
+CShape &castCShape(void *other) {
+    return *static_cast<CShape *>(other);
+}
+
+CFBO &castCFBO(void *other) {
+    return *static_cast<CFBO *>(other);
 }
 
 void registerComponents() {
@@ -244,6 +259,13 @@ void registerComponents() {
         .func<&onComponentAdded<CCamera>, entt::as_ref_t>("onComponentAdded"_hs)
         .func<&assign<CCamera>, entt::as_ref_t>("assign"_hs);
 
+    entt::meta<CDistanceFromCamera>()
+        .type("distanceFromCamera"_hs)
+        .ctor<&castCDistanceFromCamera, entt::as_ref_t>()
+        .data<&CDistanceFromCamera::distance>("distance"_hs)
+        .func<&CDistanceFromCamera::print>("print"_hs)
+        .func<&assign<CDistanceFromCamera>, entt::as_ref_t>("assign"_hs);
+
     entt::meta<CSkybox>()
         .type("skybox"_hs)
         .ctor<&castCSkybox, entt::as_ref_t>()
@@ -332,22 +354,45 @@ void registerComponents() {
         .data<&CRelationship::parent>("parent"_hs)
         .func<&CRelationship::print>("print"_hs)
         .func<&assign<CRelationship>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CShape>()
+        .type("shape"_hs)
+        .ctor<&castCShape, entt::as_ref_t>()
+        .data<&CShape::_type>("type"_hs)
+        .data<&CShape::dimensions>("size"_hs)
+        .data<&CShape::meshes>("meshes"_hs)
+        .data<&CShape::repeatTexture>("repeatTexture"_hs)
+        .func<&CShape::print>("print"_hs)
+        .func<&onComponentAdded<CShape>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CShape>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CFBO>()
+        .type("fbo"_hs)
+        .ctor<&castCFBO, entt::as_ref_t>()
+        .data<&CFBO::fbo>("fbo"_hs)
+        .data<&CFBO::_mode>("mode"_hs)
+        .data<&CFBO::attachment>("attachment"_hs)
+        .data<&CFBO::width>("width"_hs)
+        .data<&CFBO::height>("height"_hs)
+        .func<&CFBO::print>("print"_hs)
+        .func<&onComponentAdded<CFBO>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CFBO>, entt::as_ref_t>("assign"_hs);
 }
 
 void printScene(entt::registry &r) {
     using namespace entt::literals;
     CORE_INFO("Scene entities:");
     r.view<CUUID>().each([&](entt::entity e, const CUUID &cUUID) {
-        CORE_INFO("Entity UUID: {0}", entt::to_integral(e));
-        for (auto&& curr : r.storage()) {
-            if (auto& storage = curr.second; storage.contains(e)) {
+        CORE_INFO("Entity UUID: {}", entt::to_integral(e));
+        for (auto &&curr : r.storage()) {
+            if (auto &storage = curr.second; storage.contains(e)) {
                 entt::meta_type cType = entt::resolve(storage.type());
                 entt::meta_any cData = cType.construct(storage.value(e));
                 entt::meta_func printFunc = cType.func("print"_hs);
                 if (printFunc) {
                     std::string_view cName = storage.type().name();
                     cName = cName.substr(cName.find_last_of(':') + 1);
-                    CORE_INFO("\t{0}", cName);
+                    CORE_INFO("\t{}", cName);
                     printFunc.invoke(cData);
                 } else {
                     throw std::runtime_error("Component does not have a print function");

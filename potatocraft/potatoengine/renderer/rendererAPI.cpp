@@ -96,9 +96,8 @@ void RendererAPI::Init() noexcept {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-    glEnable(GL_DEPTH_TEST);
     glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void RendererAPI::SetCulling(bool enabled) noexcept {
@@ -109,12 +108,20 @@ void RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) no
     glViewport(x, y, w, h);
 }
 
-void RendererAPI::SetClearColor(const glm::vec4& color) noexcept {
-    glClearColor(color.r, color.g, color.b, color.a);
+void RendererAPI::SetClearColor(const float color[]) noexcept {
+    glClearColor(color[0], color[1], color[2], color[3]);
+}
+
+void RendererAPI::SetClearDepth(const float depth) noexcept {
+    glClearDepth(depth);
 }
 
 void RendererAPI::SetWireframe(bool enabled) noexcept {
     enabled ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void RendererAPI::SetBlend(bool enabled) noexcept {
+    enabled ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
 }
 
 void RendererAPI::SetDepthTest(bool enabled) noexcept {
@@ -122,15 +129,23 @@ void RendererAPI::SetDepthTest(bool enabled) noexcept {
 }
 
 void RendererAPI::SetDepthLEqual() noexcept {
-    glDepthFunc(GL_LEQUAL); // depth test passes when values are equal to depth buffer's content [for cubemaps]
+    glDepthFunc(GL_LEQUAL);  // depth test passes when values are equal to depth buffer's content [for cubemaps]
 }
 
 void RendererAPI::SetDepthLess() noexcept {
-    glDepthFunc(GL_LESS); // default
+    glDepthFunc(GL_LESS);  // default
 }
 
 void RendererAPI::Clear() noexcept {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void RendererAPI::ClearColor() noexcept {
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void RendererAPI::ClearDepth() noexcept {
+    glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void RendererAPI::DrawIndexed(const std::shared_ptr<VAO>& vao) {

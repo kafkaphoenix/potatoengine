@@ -63,6 +63,11 @@ void Scene::read(const json& data) {
             m_systems[key] = value;
         }
     }
+    if (data.contains("fbos")) {
+        for (const auto& [key, value] : data.at("fbos").items()) {
+            m_fbos[key] = value;
+        }
+    }
 }
 
 }

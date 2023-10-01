@@ -13,7 +13,7 @@ struct CRelationship {
     explicit CRelationship(entt::entity p) : parent(p) {}
 
     void print() const {
-        CORE_INFO("\t\tparent UUID: {0}", entt::to_integral(parent));
+        CORE_INFO("\t\tparent UUID: {}", entt::to_integral(parent));
     }
 };
 }

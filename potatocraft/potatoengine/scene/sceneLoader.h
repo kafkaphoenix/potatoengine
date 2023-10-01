@@ -17,6 +17,8 @@ class SceneLoader {
     const std::unordered_map<std::string, json>& getLoadedEntities() const noexcept { return m_loadedEntities; }
     const std::unordered_map<std::string, json>& getLoadedLights() const noexcept { return m_loadedLights; }
     const std::unordered_map<std::string, json>& getLoadedCameras() const noexcept { return m_loadedCameras; }
+    const std::unordered_map<std::string, json>& getLoadedSystems() const noexcept { return m_loadedSystems; }
+    const std::unordered_map<std::string, json>& getLoadedFBOs() const noexcept { return m_loadedFBOs; }
 
    private:
     std::weak_ptr<AssetsManager> m_assetsManager;
@@ -29,6 +31,8 @@ class SceneLoader {
     std::unordered_map<std::string, json> m_loadedEntities;
     std::unordered_map<std::string, json> m_loadedLights;
     std::unordered_map<std::string, json> m_loadedCameras;
+    std::unordered_map<std::string, json> m_loadedSystems;
+    std::unordered_map<std::string, json> m_loadedFBOs;
 
     void loadShaders(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager);
     void loadTextures(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager);
@@ -39,5 +43,7 @@ class SceneLoader {
     void loadEntities(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager);
     void loadLights(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager);
     void loadCameras(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager);
+    void loadSystems(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager);
+    void loadFBOs(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager);
 };
 }

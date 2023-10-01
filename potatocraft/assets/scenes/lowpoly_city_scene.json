@@ -1,0 +1,30 @@
+{
+    "assets": {
+        "shaders": {
+            "basic": {
+                "vbasic": "assets/shaders/basic.vert",
+                "fbasic": "assets/shaders/basic.frag"
+            }
+        },
+        "models": {
+            "building": "assets/models/lowpoly_city/lowpoly_city.obj"
+        },
+        "prefabs": {
+            "entities": {
+                "filepath": "assets/prefabs/entities.json",
+                "targets": [
+                    "building"
+                ]
+            }
+        }
+    },
+    "entities": {
+        "lowpoly_city": {
+            "prefab": "building",
+            "options": {
+                "position": {"x": 0, "y": -40, "z": -50},
+                "scale": {"x": 1,"y": 1,"z": 1}
+            }
+        }
+    }
+}

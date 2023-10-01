@@ -1,9 +1,10 @@
 #include "potatoengine/renderer/camera/cameraController.h"
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "potatoengine/core/input.h"
 #include "potatoengine/core/keyCodes.h"
 #include "potatoengine/pch.h"
-
 // pitch (rotate around x in radians)
 // yaw (rotate around y in radians)
 // roll (rotate around z in radians)
@@ -39,7 +40,7 @@ void CameraController::onUpdate(Time ts) {
     if (Input::IsKeyPressed(Key::LeftControl))
         m_position -= up;
 
-    m_camera.setPosition(m_position);
+    m_camera.setPosition(glm::vec3(m_position));
 }
 
 void CameraController::onEvent(Event& e) {
@@ -73,14 +74,14 @@ bool CameraController::onMouseMoved(MouseMovedEvent& e) {
     // Normalize the rotation quaternion to prevent drift
     m_rotation = glm::normalize(m_rotation);
 
-    m_camera.setRotation(m_rotation);
+    m_camera.setRotation(glm::quat(m_rotation));
 
     return true;
 }
 
 bool CameraController::onWindowResized(WindowResizeEvent& e) {
     m_aspectRatio = (float)e.getWidth() / (float)e.getHeight();
-    m_camera.setProjection(glm::perspective(glm::radians(m_fov), m_aspectRatio * m_zoomFactor, 1.f, 3000.f));
+    m_camera.setProjection(glm::perspective(glm::radians(m_fov), m_aspectRatio * m_zoomFactor, 0.1f, 300.f));
 
     return true;
 }

@@ -1,0 +1,30 @@
+{
+    "assets": {
+        "shaders": {
+            "basic": {
+                "vbasic": "assets/shaders/basic.vert",
+                "fbasic": "assets/shaders/basic.frag"
+            }
+        },
+        "models": {
+            "building": "assets/models/davobric_sponza/sponza.obj"
+        },
+        "prefabs": {
+            "entities": {
+                "filepath": "assets/prefabs/entities.json",
+                "targets": [
+                    "building"
+                ]
+            }
+        }
+    },
+    "entities": {
+        "sponza": {
+            "prefab": "building",
+            "options": {
+                "scale": {"x": 1,"y": 1,"z": 1},
+                "position": {"x": 0, "y": -1, "z": 5}
+            }
+        }
+    }
+}

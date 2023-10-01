@@ -8,6 +8,7 @@
 #include "potatoengine/renderer/camera/camera.h"
 #include "potatoengine/renderer/rendererAPI.h"
 #include "potatoengine/renderer/shaderProgram.h"
+#include "potatoengine/renderer/framebuffer.h"
 
 namespace potatoengine {
 
@@ -25,11 +26,15 @@ class Renderer {
 
     glm::vec3 getCameraPosition() const noexcept { return m_cameraPosition; }  // TODO: Remove this
 
-    void add(std::string&& shaderProgram);
+    void addShader(std::string&& shaderProgram);
+    void addFramebuffer(std::string&& framebuffer, uint32_t width, uint32_t height, uint32_t bufferType);
+    const std::unordered_map<std::string, std::unique_ptr<ShaderProgram>>& getShaderPrograms() const noexcept { return m_shaderPrograms; }
+    const std::unordered_map<std::string, std::unique_ptr<FBO>>& getFramebuffers() const noexcept { return m_framebuffers; }
     bool contains(std::string_view shaderProgram) const noexcept { return m_shaderPrograms.contains(shaderProgram.data()); }
     std::unique_ptr<ShaderProgram>& get(std::string_view shaderProgram);
 
     void render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, std::string_view shaderProgram);
+    void renderFBO(const std::shared_ptr<VAO>& vao, std::string_view fbo);
     static std::unique_ptr<Renderer> Create(std::weak_ptr<AssetsManager> am) noexcept;
 
    private:
@@ -37,6 +42,7 @@ class Renderer {
     glm::mat4 m_projectionMatrix{};
     glm::vec3 m_cameraPosition{};
     std::unordered_map<std::string, std::unique_ptr<ShaderProgram>> m_shaderPrograms;
+    std::unordered_map<std::string, std::unique_ptr<FBO>> m_framebuffers;
     std::weak_ptr<AssetsManager> m_assetsManager;
 };
 }

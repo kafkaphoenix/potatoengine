@@ -15,6 +15,7 @@ namespace potatoengine {
 class Prefab {
    public:
     Prefab(std::filesystem::path&& fp, std::unordered_set<std::string>&& targets);
+    Prefab& operator=(const Prefab&) = delete;
 
     std::string_view getFilepath() const noexcept { return m_filepath; }
     const std::unordered_set<std::string>& getInherits(std::string_view id) const noexcept { return m_prefabs.at(id.data()).inherits; }

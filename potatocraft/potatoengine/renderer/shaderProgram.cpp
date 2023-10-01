@@ -7,6 +7,9 @@ ShaderProgram::ShaderProgram(std::string&& name) : m_id(glCreateProgram()), m_na
 }
 
 ShaderProgram::~ShaderProgram() {
+#ifdef DEBUG
+    CORE_INFO("Deleting shader program {}", m_name);
+#endif
     glDeleteProgram(m_id);
 }
 
@@ -91,7 +94,7 @@ std::vector<ActiveUniform> ShaderProgram::getActiveUniforms() {
 
         nameData.resize(values[0]);
         glGetProgramResourceName(m_id, GL_UNIFORM, i, nameData.size(), nullptr, &nameData[0]);
-        std::string name(reinterpret_cast<char *>(&nameData[0]), values[0] - 1);
+        std::string name(reinterpret_cast<char*>(&nameData[0]), values[0] - 1);
 
         ActiveUniform uniform;
         uniform.type = values[1];
@@ -105,7 +108,7 @@ std::vector<ActiveUniform> ShaderProgram::getActiveUniforms() {
 
 void ShaderProgram::resetActiveUniforms() {
     use();
-    for (const auto &[type, name] : m_activeUniforms) {
+    for (const auto& [type, name] : m_activeUniforms) {
         if (type == GL_INT) {
             setInt(name, 0);
         } else if (type == GL_FLOAT) {
@@ -131,7 +134,7 @@ void ShaderProgram::resetActiveUniforms() {
 
 void ShaderProgram::printActiveUniforms() {
     CORE_INFO("================================");
-    for (const auto &[type, name] : m_activeUniforms) {
+    for (const auto& [type, name] : m_activeUniforms) {
         if (type == GL_INT) {
             CORE_INFO("Active uniform {} type: {}", name, "int");
         } else if (type == GL_FLOAT) {

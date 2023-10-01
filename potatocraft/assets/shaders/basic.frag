@@ -1,4 +1,4 @@
-#version 460 core
+#version 450 core
 
 layout (location = 0) in vec3 surfaceNormal;
 layout (location = 1) in vec2 vTextureCoords;
@@ -40,32 +40,38 @@ uniform vec3 ambient;
 uniform vec3 diffuse;
 uniform vec3 specular;
 uniform float shininess;
+uniform float noTexture;
+uniform vec3 materialColor;
 
 void main()
 {
-    vec2 offsetTexture = vTextureCoords;
-    if (int(useAtlas) == 1) {
-        offsetTexture = vTextureCoords / numRows + offset;
-    }
-    vec4 texture1 = texture(textureDiffuse1, offsetTexture);
-    if (int(useNormal) == 1) {
-        texture1 = texture(textureNormal1, offsetTexture);
-    }
-    vec4 texture2 = texture(textureDiffuse2, offsetTexture);
-
     vec4 base = vec4(0.f);
-    if (int(useColor) == 1) {
-        if (int(useBlending) == 1) {
-            base = mix(texture1, texture2, blendFactor);
-            base = vec4(base.rgb * color.rgb, color.a);
-        } else {
-            base = color;
-        }
+    if (int(noTexture) == 1) {
+        base = vec4(materialColor, 1.f);
     } else {
-        if (int(useBlending) == 1) {
-            base = mix(texture1, texture2, blendFactor);
+        vec2 offsetTexture = vTextureCoords;
+        if (int(useAtlas) == 1) {
+            offsetTexture = vTextureCoords / numRows + offset;
+        }
+        vec4 texture1 = texture(textureDiffuse1, offsetTexture);
+        if (int(useNormal) == 1) {
+            texture1 = texture(textureNormal1, offsetTexture);
+        }
+        vec4 texture2 = texture(textureDiffuse2, offsetTexture);
+
+        if (int(useColor) == 1) {
+            if (int(useBlending) == 1) {
+                base = mix(texture1, texture2, blendFactor);
+                base = vec4(base.rgb * color.rgb, color.a);
+            } else {
+                base = color;
+            }
         } else {
-            base = texture1;
+            if (int(useBlending) == 1) {
+                base = mix(texture1, texture2, blendFactor);
+            } else {
+                base = texture1;
+            }
         }
     }
 

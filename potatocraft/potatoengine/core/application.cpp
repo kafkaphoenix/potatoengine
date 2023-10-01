@@ -36,6 +36,9 @@ Application::Application(Config&& c, CLArgs&& args)
 }
 
 Application::~Application() {
+#ifdef DEBUG
+    CORE_INFO("Deleting Application");
+#endif
     m_renderer->shutdown();
     // TODO class imgui layer with shutdown and pop overlay
 }
@@ -110,7 +113,7 @@ void Application::run() {
         }
         // TODO: open menu pause
 #ifdef DEBUG
-        // CORE_INFO("FPS: {0}", 1.f / ts);
+        // CORE_INFO("FPS: {}", 1.f / ts);
         //  TODO move to imgui debug panel
 #endif
         m_window->onUpdate();

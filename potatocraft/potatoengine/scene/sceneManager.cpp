@@ -3,6 +3,7 @@
 #include "potatoengine/scene/components/camera/cCamera.h"
 #include "potatoengine/scene/components/common/cName.h"
 #include "potatoengine/scene/components/common/cUUID.h"
+#include "potatoengine/scene/components/graphics/cFBO.h"
 #include "potatoengine/scene/components/utils/cDeleted.h"
 #include "potatoengine/scene/entity.h"
 #include "potatoengine/scene/systems/sUpdate.h"
@@ -93,7 +94,7 @@ void SceneManager::createScene(std::string_view id) {
         throw std::runtime_error("Scene " + std::string{id} + " is not loaded!");
     }
 
-    if (m_activeScene != "") {
+    if (not m_activeScene.empty()) {
         clearScene(m_activeScene);
     }
 #ifdef DEBUG
@@ -106,7 +107,7 @@ void SceneManager::createScene(std::string_view id) {
 
     const auto& loadedScene = m_loadedScenes.at(id.data());
     for (std::string id : loadedScene.getLoadedShaders()) {
-       renderer->add(std::move(id));
+        renderer->addShader(std::move(id));
     }
 
 #ifdef DEBUG
@@ -124,8 +125,23 @@ void SceneManager::createScene(std::string_view id) {
         e.add<CName>(std::string(name));
         if (data.contains("options")) {
             json options = data.at("options");
-            json position = options.at("position");
-            e.get<CTransform>().position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
+            if (name == "skybox") {
+                if (options.contains("time")) {
+                    e.get<CTime>().setTime(options.at("time").get<float>());
+                }
+                if (options.contains("acceleration")) {
+                    e.get<CTime>().acceleration = options.at("acceleration").get<float>();
+                }
+                continue;
+            }
+            if (options.contains("position")) {
+                json position = options.at("position");
+                e.get<CTransform>().position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
+            }
+            if (options.contains("scale")) {
+                json scale = options.at("scale");
+                e.get<CTransform>().scale = {scale.at("x").get<float>(), scale.at("y").get<float>(), scale.at("z").get<float>()};
+            }
         }
     }
 
@@ -137,14 +153,26 @@ void SceneManager::createScene(std::string_view id) {
         e.add<CName>(std::string(name));
         if (data.contains("options")) {
             json options = data.at("options");
-            json position = options.at("position");
-            CTransform& transform = e.get<CTransform>();
-            transform.position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
-            json color = options.at("color");
-            e.get<CLight>().color = {color.at("r").get<float>(), color.at("g").get<float>(), color.at("b").get<float>()};
-            json rotation = options.at("rotation");
-            glm::vec3 rot = {rotation.at("x").get<float>(), rotation.at("y").get<float>(), rotation.at("z").get<float>()};
-            transform.rotation = glm::quat(glm::radians(rot));
+            if (options.contains("position")) {
+                json position = options.at("position");
+                e.get<CTransform>().position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
+            }
+            if (options.contains("scale")) {
+                json scale = options.at("scale");
+                e.get<CTransform>().scale = {scale.at("x").get<float>(), scale.at("y").get<float>(), scale.at("z").get<float>()};
+            }
+            if (options.contains("intensity")) {
+                e.get<CLight>().intensity = options.at("intensity").get<float>();
+            }
+            if (options.contains("color")) {
+                json color = options.at("color");
+                e.get<CLight>().color = {color.at("r").get<float>(), color.at("g").get<float>(), color.at("b").get<float>()};
+            }
+            if (options.contains("rotation")) {
+                json rotation = options.at("rotation");
+                glm::vec3 rot = {rotation.at("x").get<float>(), rotation.at("y").get<float>(), rotation.at("z").get<float>()};
+                e.get<CTransform>().rotation = glm::quat(glm::radians(rot));
+            }
         }
     }
 
@@ -156,20 +184,101 @@ void SceneManager::createScene(std::string_view id) {
         e.add<CName>(std::string(name));
         if (data.contains("options")) {
             json options = data.at("options");
-            json position = options.at("position");
-            CTransform& transform = e.get<CTransform>();
-            transform.position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
-            json rotation = options.at("rotation");
-            glm::vec3 rot = {rotation.at("x").get<float>(), rotation.at("y").get<float>(), rotation.at("z").get<float>()};
-            transform.rotation = glm::quat(glm::radians(rot));
+            if (options.contains("position")) {
+                json position = options.at("position");
+                e.get<CTransform>().position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
+            }
+            if (options.contains("rotation")) {
+                json rotation = options.at("rotation");
+                glm::vec3 rot = {rotation.at("x").get<float>(), rotation.at("y").get<float>(), rotation.at("z").get<float>()};
+                e.get<CTransform>().rotation = glm::quat(glm::radians(rot));
+            }
             // e.get<CCamera>().fov = options.at("fov").get<float>();
             // e.get<CCamera>().near = options.at("near").get<float>();
             // e.get<CCamera>().far = options.at("far").get<float>();
         }
     }
+
+#ifdef DEBUG
+    CORE_INFO("Creating scene systems...");
+#endif
+    for (const auto& [name, data] : loadedScene.getLoadedSystems()) {
+        Entity e = createEntity(data.at("prefab").get<std::string_view>());
+        e.add<CName>(std::string(name));
+        if (data.contains("options")) {
+            json options = data.at("options");
+            // TODO: implement
+        }
+    }
+
+#ifdef DEBUG
+    CORE_INFO("Creating scene FBOs...");
+#endif
+    for (const auto& [name, data] : loadedScene.getLoadedFBOs()) {
+        Entity e = createEntity(data.at("prefab").get<std::string_view>());
+        e.add<CName>(std::string(name));
+        CFBO& fbo = e.get<CFBO>();
+        if (data.contains("options")) {
+            json options = data.at("options");
+            if (options.contains("width")) {
+                fbo.width = options.at("width").get<int>();
+            }
+            if (options.contains("height")) {
+                fbo.height = options.at("height").get<int>();
+            }
+            if (options.contains("attachment")) {
+                fbo.attachment = std::move(options.at("attachment").get<std::string>());
+            }
+            if (options.contains("mode")) {
+                fbo._mode = std::move(options.at("mode").get<std::string>());
+            }
+        }
+        uint32_t attachment;
+        if (fbo.attachment == "depth_texture") {
+            attachment = engine::FBO::DEPTH_TEXTURE;
+        } else if (fbo.attachment == "depth_renderbuffer") {
+            attachment = engine::FBO::DEPTH_RENDERBUFFER;
+        } else if (fbo.attachment == "stencil_renderbuffer") {
+            attachment = engine::FBO::STENCIL_RENDERBUFFER;
+        } else if (fbo.attachment == "depth_stencil_renderbuffer") {
+            attachment = engine::FBO::DEPTH_STENCIL_RENDERBUFFER;
+        } else {
+            throw std::runtime_error("Unknown fbo attachment: " + fbo.attachment);
+        }
+        CFBO::Mode mode;
+        if (fbo._mode == "normal") {
+            mode = CFBO::Mode::Normal;
+        } else if (fbo._mode == "inverse") {
+            mode = CFBO::Mode::Inverse;
+        } else if (fbo._mode == "greyscale") {
+            mode = CFBO::Mode::Greyscale;
+        } else if (fbo._mode == "blur") {
+            mode = CFBO::Mode::Blur;
+        } else if (fbo._mode == "edge") {
+            mode = CFBO::Mode::Edge;
+        } else if (fbo._mode == "sharpen") {
+            mode = CFBO::Mode::Sharpen;
+        } else if (fbo._mode == "night_vision") {
+            mode = CFBO::Mode::NightVision;
+        } else if (fbo._mode == "emboss") {
+            mode = CFBO::Mode::Emboss;
+        } else {
+            throw std::runtime_error("Unknown fbo mode " + fbo._mode);
+        }
+        fbo.mode = mode;
+
+        renderer->addFramebuffer(std::string(fbo.fbo), fbo.width, fbo.height, attachment);
+    }
+
+    m_registry.sort<CDistanceFromCamera>([](const CDistanceFromCamera& lhs, const CDistanceFromCamera& rhs) {
+        return lhs.distance < rhs.distance;
+    });
+
+    m_registry.sort<CUUID, CDistanceFromCamera>();
+
     m_activeScene = id;
 #ifdef DEBUG
-    CORE_INFO("Scene creation TIME: {}", timer.getSeconds());     
+    CORE_INFO("Scene creation TIME: {}", timer.getSeconds());
 #endif
 }
 

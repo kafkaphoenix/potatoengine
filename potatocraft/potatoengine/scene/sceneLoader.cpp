@@ -20,43 +20,51 @@ void SceneLoader::load(std::string_view id) {
 #endif
     loadShaders(scene, manager);
 #ifdef DEBUG
-    CORE_INFO("Loading shaders TIME: {0}", timer.getSeconds());
+    CORE_INFO("Loading shaders TIME: {}", timer.getSeconds());
     timer.reset();
 #endif
     loadTextures(scene, manager);
 #ifdef DEBUG
-    CORE_INFO("Loading textures TIME: {0}", timer.getSeconds());
+    CORE_INFO("Loading textures TIME: {}", timer.getSeconds());
     timer.reset();
 #endif
     loadModels(scene, manager);
 #ifdef DEBUG
-    CORE_INFO("Loading models TIME: {0}", timer.getSeconds());
+    CORE_INFO("Loading models TIME: {}", timer.getSeconds());
     timer.reset();
 #endif
     loadPrefabs(scene, manager);
 #ifdef DEBUG
-    CORE_INFO("Loading prefabs TIME: {0}", timer.getSeconds());
+    CORE_INFO("Loading prefabs TIME: {}", timer.getSeconds());
     timer.reset();
 #endif
     loadScenes(scene, manager);  // TODO: implement
 #ifdef DEBUG
-    CORE_INFO("Loading scenes TIME: {0}", timer.getSeconds());
+    CORE_INFO("Loading scenes TIME: {}", timer.getSeconds());
     CORE_INFO("Assets loaded!");
     timer.reset();
 #endif
     loadEntities(scene, manager);
 #ifdef DEBUG
-    CORE_INFO("Loading entities TIME: {0}", timer.getSeconds());
+    CORE_INFO("Loading entities TIME: {}", timer.getSeconds());
     timer.reset();
 #endif
     loadLights(scene, manager);
 #ifdef DEBUG
-    CORE_INFO("Loading lights TIME: {0}", timer.getSeconds());
+    CORE_INFO("Loading lights TIME: {}", timer.getSeconds());
     timer.reset();
 #endif
     loadCameras(scene, manager);
 #ifdef DEBUG
-    CORE_INFO("Loading cameras TIME: {0}", timer.getSeconds());
+    CORE_INFO("Loading cameras TIME: {}", timer.getSeconds());
+#endif
+    loadSystems(scene, manager);
+#ifdef DEBUG
+    CORE_INFO("Loading systems TIME: {}", timer.getSeconds());
+#endif
+    loadFBOs(scene, manager);
+#ifdef DEBUG
+    CORE_INFO("Loading FBOs TIME: {}", timer.getSeconds());
 #endif
 }
 
@@ -111,6 +119,18 @@ void SceneLoader::loadLights(const std::shared_ptr<Scene>& scene, const std::sha
 void SceneLoader::loadCameras(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
     for (const auto& [camera, options] : scene->getCameras()) {
         m_loadedCameras.emplace(camera, options);
+    }
+}
+
+void SceneLoader::loadSystems(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
+    for (const auto& [system, options] : scene->getSystems()) {
+        m_loadedSystems.emplace(system, options);
+    }
+}
+
+void SceneLoader::loadFBOs(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
+    for (const auto& [fbo, options] : scene->getFBOs()) {
+        m_loadedFBOs.emplace(fbo, options);
     }
 }
 

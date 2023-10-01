@@ -8,7 +8,7 @@ struct CUUID {
     uint32_t uuid{};
 
     void print() const {
-        CORE_INFO("\t\tuuid: {0}", uuid);
+        CORE_INFO("\t\tuuid: {}", uuid);
     }
 };
 }

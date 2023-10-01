@@ -12,7 +12,7 @@ struct CShaderProgram {
     explicit CShaderProgram(std::string&& sp) : shaderProgram(std::move(sp)) {}
 
     void print() const {
-        CORE_INFO("\t\tshaderProgram: {0}", shaderProgram);
+        CORE_INFO("\t\tshaderProgram: {}", shaderProgram);
     }
 };
 }

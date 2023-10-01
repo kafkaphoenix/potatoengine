@@ -50,6 +50,8 @@ class Window {
     }
 
     static std::unique_ptr<Window> Create(WindowProperties&& properties);
+    static constexpr uint32_t OPENGL_MAYOR_VERSION = 4;
+    static constexpr uint32_t OPENGL_MINOR_VERSION = 5;
 
    private:
     GLFWwindow* m_window{}; // TODO: this class should be a window manager, and this should be a vector of windows

@@ -15,9 +15,9 @@ class Camera {
     const glm::mat4& getProjection() const noexcept { return m_projection; }
     const glm::vec3& getPosition() const noexcept { return m_position; }
     const glm::quat& getRotation() const noexcept { return m_rotation; }
-    void setProjection(const glm::mat4& p) noexcept;
-    void setPosition(const glm::vec3& p) noexcept;
-    void setRotation(const glm::quat& r) noexcept;
+    void setProjection(glm::mat4&& p) noexcept;
+    void setPosition(glm::vec3&& p) noexcept;
+    void setRotation(glm::quat&& r) noexcept;
 
    private:
     void recalculateView() noexcept;

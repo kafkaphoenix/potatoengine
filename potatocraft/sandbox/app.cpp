@@ -1,5 +1,6 @@
 #include "potatoengine/core/entrypoint.h"
 #include "potatoengine/engineAPI.h"
+#include "sandbox/settings.h"
 #include "sandbox/states/gameState.h"
 #include "sandbox/utils.h"
 
@@ -8,7 +9,7 @@ namespace potatocraft {
 class Sandbox : public engine::Application {
    public:
     Sandbox(engine::Config&& c, engine::CLArgs&& args) : engine::Application(std::move(c), std::move(args)) {
-        m_assetsManager->load<engine::Scene>("cubes", "assets/scenes/cubes.json");
+        m_assetsManager->load<engine::Scene>(DEFAULT_SCENE, DEFAULT_SCENE_PATH);
 #ifdef DEBUG
         CORE_INFO("Registering game components...");
 #endif
@@ -26,5 +27,5 @@ class Sandbox : public engine::Application {
 }
 
 engine::Application* engine::CreateApp(engine::CLArgs&& args) {
-    return new potatocraft::Sandbox(Config{.name = "PotatoCraft", .root = "..", .width = 1280, .height = 720}, std::move(args));
+    return new potatocraft::Sandbox(Config{.name = "PotatoCraft", .root = "..", .width = DISPLAY_WIDTH, .height = DISPLAY_HEIGHT}, std::move(args));
 }

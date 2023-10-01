@@ -11,7 +11,7 @@ struct CTag {
     explicit CTag(std::string&& t) : tag(std::move(t)) {}
 
     void print() const {
-        CORE_INFO("\t\ttag: {0}", tag);
+        CORE_INFO("\t\ttag: {}", tag);
     }
 };
 }

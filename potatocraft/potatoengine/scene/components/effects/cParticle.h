@@ -12,7 +12,7 @@ struct CParticle {
     explicit CParticle(std::string&& e) : emitter(std::move(e)) {}
 
     void print() const {
-        CORE_INFO("\t\temitter: {0}", emitter);
+        CORE_INFO("\t\temitter: {}", emitter);
     }
 };
 }

@@ -15,7 +15,7 @@ struct CCollider {
         Sphere,
     };
 
-    std::string _type{}; //TODO define efactory
+    std::string _type{};
     Type type;
     glm::vec3 size{glm::vec3(1.f)};
 

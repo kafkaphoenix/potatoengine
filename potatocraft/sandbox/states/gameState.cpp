@@ -1,39 +1,41 @@
 #include "sandbox/states/gameState.h"
 
+#include "sandbox/settings.h"
+
 namespace potatocraft {
 
 GameState::GameState(std::weak_ptr<engine::AssetsManager> am, std::weak_ptr<engine::Renderer> r) : State("GameState"), m_cameraController(), m_sceneManager(am, r), m_assetsManager(am), m_renderer(r) {
 #ifdef DEBUG
-    CORE_INFO("Loading scene...");
+    CORE_INFO("Loading scene {}", m_sceneManager.getActiveScene());
 #endif
-    m_sceneManager.loadScene("cubes");
+    m_sceneManager.loadScene(DEFAULT_SCENE);
+    engine::RendererAPI::SetClearColor(CLEAR_COLOR);
+    engine::RendererAPI::SetClearDepth(CLEAR_DEPTH);
 }
 
 void GameState::onAttach() {
-#ifdef DEBUG
-    CORE_INFO("Creating scene...");
-#endif
-    m_sceneManager.createScene("cubes");
+    m_sceneManager.createScene(DEFAULT_SCENE);
 #ifdef DEBUG
     m_sceneManager.print();
 #endif
 }
 
 void GameState::onDetach() {
-    m_sceneManager.clearScene("cubes");
+#ifdef DEBUG
+    CORE_INFO("Detaching GameState");
+#endif
+    m_sceneManager.clearScene(DEFAULT_SCENE);
 }
 
 void GameState::onUpdate(engine::Time ts) {
     m_cameraController.onUpdate(ts);
-    engine::RendererAPI::SetClearColor({0.45f, 0.55f, 0.6f, 1.f});
-    engine::RendererAPI::Clear();
 
     const auto& renderer = m_renderer.lock();
     if (not renderer) {
         throw std::runtime_error("Renderer is null");
     }
 
-    renderer->beginScene(m_cameraController.getCamera());
+    renderer->beginScene(m_cameraController.getCamera()); // TODO: move after camera refactor
 
     m_sceneManager.onUpdate(ts, m_renderer);
 

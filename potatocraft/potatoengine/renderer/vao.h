@@ -13,6 +13,7 @@ class VAO {
     void unbind();
 
     void attachVertex(std::unique_ptr<VBO>&& vbo);
+    void attachShapeVertex(std::unique_ptr<VBO>&& vbo);
     void setIndex(std::unique_ptr<IBO>&& ibo);
 
     const std::vector<std::unique_ptr<VBO>>& getVBOs() const noexcept { return m_vbos; }

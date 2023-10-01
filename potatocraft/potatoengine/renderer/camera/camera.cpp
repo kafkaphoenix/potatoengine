@@ -10,20 +10,20 @@ Camera::Camera(const glm::mat4& projection, const glm::vec3& position, const glm
 void Camera::recalculateView() noexcept {
     glm::mat4 rotated = glm::mat4_cast(glm::conjugate(m_rotation));
     glm::mat4 translated = glm::translate(rotated, -m_position);
-    m_view = translated;
+    m_view = std::move(translated);
 }
 
-void Camera::setProjection(const glm::mat4& p) noexcept {
-    m_projection = p;
+void Camera::setProjection(glm::mat4&& p) noexcept {
+    m_projection = std::move(p);
 }
 
-void Camera::setRotation(const glm::quat& r) noexcept {
-    m_rotation = r;
+void Camera::setRotation(glm::quat&& r) noexcept {
+    m_rotation = std::move(r);
     recalculateView();
 }
 
-void Camera::setPosition(const glm::vec3& p) noexcept {
-    m_position = p;
+void Camera::setPosition(glm::vec3&& p) noexcept {
+    m_position = std::move(p);
     recalculateView();
 }
 

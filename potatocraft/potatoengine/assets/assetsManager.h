@@ -17,7 +17,7 @@ class AssetsManager {
         }
         m_assets.emplace(id, std::make_shared<Type>(std::forward<Args>(args)...));
 #ifdef DEBUG
-        CORE_INFO("\tLoaded asset {0}", id);
+        CORE_INFO("\tLoaded asset {}", id);
 #endif
     }
 
@@ -55,7 +55,7 @@ class AssetsManager {
             throw std::runtime_error("Asset " + std::string(id) + " not found or has an incompatible type. Reload failed!");
         }
 #ifdef DEBUG
-        CORE_INFO("Reloaded asset {0}", id);
+        CORE_INFO("Reloaded asset {}", id);
 #endif
         return std::static_pointer_cast<Type>(std::get<std::shared_ptr<Type>>(m_assets.at(id.data())));
     }

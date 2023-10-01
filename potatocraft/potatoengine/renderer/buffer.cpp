@@ -18,6 +18,11 @@ VBO::VBO(const std::vector<Vertex>& vertices, bool immutable) : m_immutable(immu
     }
 }
 
+VBO::VBO(const std::vector<ShapeVertex>& vertices) {
+    glCreateBuffers(1, &m_id);
+    glNamedBufferStorage(m_id, sizeof(ShapeVertex) * vertices.size(), vertices.data(), storage_flags);
+}
+
 void VBO::reload(const std::vector<Vertex>& vertices) {
     if (m_immutable) {
         glNamedBufferSubData(m_id, 0, sizeof(Vertex) * vertices.size(), vertices.data());
@@ -27,11 +32,18 @@ void VBO::reload(const std::vector<Vertex>& vertices) {
 }
 
 VBO::~VBO() {
+#ifdef DEBUG
+    CORE_INFO("Deleting VBO {}", m_id);
+#endif
     glDeleteBuffers(1, &m_id);
 }
 
 std::unique_ptr<VBO> VBO::Create(const std::vector<Vertex>& vertices, bool immutable) {
     return std::make_unique<VBO>(vertices, immutable);
+}
+
+std::unique_ptr<VBO> VBO::CreateShape(const std::vector<ShapeVertex>& vertices) {
+    return std::make_unique<VBO>(vertices);
 }
 
 IBO::IBO(const std::vector<uint32_t>& indices, bool immutable) : m_count(indices.size()), m_immutable(immutable) {
@@ -54,6 +66,9 @@ void IBO::reload(const std::vector<uint32_t>& indices) {
 }
 
 IBO::~IBO() {
+#ifdef DEBUG
+    CORE_INFO("Deleting IBO {}", m_id);
+#endif
     glDeleteBuffers(1, &m_id);
 }
 

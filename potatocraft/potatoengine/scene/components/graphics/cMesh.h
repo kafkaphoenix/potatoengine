@@ -1,17 +1,17 @@
 #pragma once
 
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
-#include <entt/entt.hpp>
+#include "potatoengine/assets/texture.h"
 #include "potatoengine/pch.h"
 #include "potatoengine/renderer/buffer.h"
-#include "potatoengine/assets/texture.h"
+#include "potatoengine/renderer/shaderProgram.h"
 #include "potatoengine/renderer/vao.h"
 #include "potatoengine/scene/components/graphics/cMaterial.h"
-#include "potatoengine/renderer/shaderProgram.h"
-#include "potatoengine/scene/components/world/cSkybox.h"
 #include "potatoengine/scene/components/graphics/cTexture.h"
 #include "potatoengine/scene/components/graphics/cTextureAtlas.h"
+#include "potatoengine/scene/components/world/cSkybox.h"
 
 namespace potatoengine {
 
@@ -57,8 +57,8 @@ struct CMesh {
                 for (auto& texture : cTexture->textures) {
                     if (cTexture->useFakeLighting) {
                         sp->setFloat("useFakeLighting", 1.f);
-                        sp->setVec3("lightPosition",  static_cast<glm::vec3>(entt::monostate<"lightPosition"_hs>{}));
-                        sp->setVec3("lightColor",  static_cast<glm::vec3>(entt::monostate<"lightColor"_hs>{}));
+                        sp->setVec3("lightPosition", static_cast<glm::vec3>(entt::monostate<"lightPosition"_hs>{}));
+                        sp->setVec3("lightColor", static_cast<glm::vec3>(entt::monostate<"lightColor"_hs>{}));
                     }
                     if (cTextureAtlas) {
                         sp->setFloat("useAtlas", 1.f);
@@ -79,7 +79,7 @@ struct CMesh {
                         sp->setFloat("useColor", 1.f);
                         sp->setVec4("color", cTexture->color);
                     }
-                    if (static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}) == 1.f) {
+                    if (static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}) == 1.f and sp->getName() == "basic") {
                         sp->setFloat("useSkyBlending", static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}));
                         sp->setFloat("skyBlendFactor", static_cast<float>(entt::monostate<"skyBlendFactor"_hs>{}));
                         int ti = 10;
@@ -132,8 +132,13 @@ struct CMesh {
                 texture->bindSlot(i);
                 ++i;
             }
-            if (diffuseN == 1) {
-                sp->setFloat("useNormal", 1.f);
+            if (textures.size() == 0) {
+                sp->setFloat("noTexture", 1.f);
+                sp->setVec3("materialColor", cMaterial->diffuse);
+            } else {
+                if (diffuseN == 1) {
+                    sp->setFloat("useNormal", 1.f);
+                }
             }
         }
         sp->unuse();

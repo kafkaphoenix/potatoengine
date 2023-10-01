@@ -11,7 +11,7 @@ struct CName {
     explicit CName(std::string&& n) : name(std::move(n)) {}
 
     void print() const {
-        CORE_INFO("\t\tname: {0}", name);
+        CORE_INFO("\t\tname: {}", name);
     }
 };
 }

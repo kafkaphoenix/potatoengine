@@ -12,6 +12,7 @@ namespace potatoengine {
 class Model {
    public:
     Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection = std::nullopt);
+    Model& operator=(const Model&) = delete;
 
     std::string_view getFilepath() const noexcept { return m_filepath; }
 

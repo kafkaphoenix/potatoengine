@@ -3,6 +3,9 @@
 namespace potatoengine {
 
 StateStack::~StateStack() {
+    #ifdef DEBUG
+        CORE_INFO("Deleting StateStack");
+    #endif
     for (auto& s : m_states) {
         s->onDetach();
     }

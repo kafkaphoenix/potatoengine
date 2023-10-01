@@ -28,7 +28,7 @@ Prefab::Prefab(std::filesystem::path&& fp, std::unordered_set<std::string>&& tar
         }
         read(prefabData, inherits, ctags, components);  // child overrides parent if common definition exists
 
-        m_prefabs[name] = {.inherits = std::move(inherits), .ctags = std::move(ctags), .components = std::move(components)};
+        m_prefabs.emplace(name, PrefabData{.inherits = std::move(inherits), .ctags = std::move(ctags), .components = std::move(components)});
     }
 
 #ifdef DEBUG
@@ -67,13 +67,13 @@ void Prefab::print() const {
     for (const auto& [name, prefabData] : m_prefabs) {
         CORE_INFO("\tLoaded prefab: {0} with {1} inherits, {2} ctags and {3} components", name, prefabData.inherits.size(), prefabData.ctags.size(), prefabData.components.size());
         for (std::string_view father : prefabData.inherits) {
-            CORE_INFO("\t\tInherit: {0}", father);
+            CORE_INFO("\t\tInherit: {}", father);
         }
         for (std::string_view ctag : prefabData.ctags) {
-            CORE_INFO("\t\tComponent tag: {0}", ctag);
+            CORE_INFO("\t\tComponent tag: {}", ctag);
         }
         for (const auto& [cKey, _] : prefabData.components) {
-            CORE_INFO("\t\tComponent: {0}", cKey);
+            CORE_INFO("\t\tComponent: {}", cKey);
         }
     }
 }

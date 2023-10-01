@@ -12,6 +12,9 @@ void Renderer::init() const noexcept {
 }
 
 void Renderer::shutdown() noexcept {
+#ifdef DEBUG
+    CORE_INFO("Shutting down Renderer");
+#endif
     // TODO something to add? reset statistics maybe?
 }
 
@@ -28,12 +31,12 @@ void Renderer::beginScene(const Camera& c) noexcept {
 void Renderer::endScene() noexcept {
 }
 
-void Renderer::add(std::string&& name) {
+void Renderer::addShader(std::string&& name) {
     const auto& manager = m_assetsManager.lock();
     if (not manager) {
         throw std::runtime_error("AssetsManager is null!");
     }
-    
+
     auto newShaderProgram = ShaderProgram::Create(std::string(name));
     const auto& vs = manager->get<Shader>("v" + name);
     const auto& fs = manager->get<Shader>("f" + name);
@@ -48,6 +51,21 @@ void Renderer::add(std::string&& name) {
     m_shaderPrograms.emplace(std::move(name), std::move(newShaderProgram));
 }
 
+void Renderer::addFramebuffer(std::string&& name, uint32_t w, uint32_t h, uint32_t t) {
+    m_framebuffers.emplace(std::move(name), FBO::Create(w, h, t));
+}
+
+void Renderer::renderFBO(const std::shared_ptr<VAO>& vao, std::string_view fbo) {
+    auto& sp = get("fbo");
+
+    sp->use();
+    sp->setInt("screenTexture", 100);
+    getFramebuffers().at(fbo.data())->getColorTexture()->bindSlot(100);
+
+    RendererAPI::DrawIndexed(vao);
+    sp->unuse();
+}
+
 void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, std::string_view shaderProgram) {
     auto& sp = get(shaderProgram);
 
@@ -57,7 +75,7 @@ void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transfor
     sp->setMat4("model", transform);
 
     RendererAPI::DrawIndexed(vao);
-    sp->unuse(); // DONT unuse before the draw call
+    sp->unuse();  // DONT unuse before the draw call
 }
 
 std::unique_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) noexcept {

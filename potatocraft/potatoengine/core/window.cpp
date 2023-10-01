@@ -13,7 +13,7 @@ Window::Window(WindowProperties&& properties) {
     m_data.lastX = properties.width / 2.f;
     m_data.lastY = properties.height / 2.f;
 #ifdef DEBUG
-    CORE_INFO("Creating window for {} app with resolution {}x{}...", properties.title, properties.width, properties.height);
+    CORE_INFO("Creating window for {} app with resolution {}x{}...", m_data.title, m_data.width, m_data.height);
 #endif
     if (s_GLFWWindowCount == 0) [[unlikely]] {
         if (not glfwInit()) {
@@ -24,11 +24,15 @@ Window::Window(WindowProperties&& properties) {
         });
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_MAYOR_VERSION);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_MINOR_VERSION);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+
+#ifdef DEBUG
+    CORE_INFO("Loading OpengGL version {}.{}", OPENGL_MAYOR_VERSION, OPENGL_MINOR_VERSION);
+#endif
 
     int monitorCount;
     glfwGetMonitors(&monitorCount);
@@ -36,13 +40,13 @@ Window::Window(WindowProperties&& properties) {
     int xpos = (monitorCount >= 2) ? 500 : 50;
     int ypos = (monitorCount >= 2) ? 200 : 50;
 
-    m_window = glfwCreateWindow(properties.width, properties.height, m_data.title.data(), nullptr, nullptr);
+    m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.data(), nullptr, nullptr);
     ++s_GLFWWindowCount;
 
-    glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, properties.width, properties.height, 0);
+    glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, m_data.width, m_data.height, 0);
     m_context = OpenGLContext::Create(m_window);
     m_context->init();
-    glViewport(0, 0, properties.width, properties.height);
+    glViewport(0, 0, m_data.width, m_data.height);
 
     glfwSetWindowUserPointer(m_window, &m_data);
     setVSync(true);
@@ -146,6 +150,9 @@ Window::Window(WindowProperties&& properties) {
 }
 
 Window::~Window() {
+#ifdef DEBUG
+    CORE_INFO("Deleting window");
+#endif
     shutdown();
 }
 
@@ -154,6 +161,9 @@ void Window::shutdown() noexcept {
     --s_GLFWWindowCount;
 
     if (s_GLFWWindowCount == 0) {
+#ifdef DEBUG
+        CORE_INFO("No more windows! Terminating GLFW");
+#endif
         glfwTerminate();
     }
 }
@@ -175,5 +185,4 @@ void Window::setCursorMode(CursorMode mode) const noexcept {
 std::unique_ptr<Window> Window::Create(WindowProperties&& properties) {
     return std::make_unique<Window>(std::move(properties));
 }
-
 }
