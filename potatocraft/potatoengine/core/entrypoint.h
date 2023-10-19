@@ -4,15 +4,15 @@
 
 namespace engine = potatoengine;
 
-extern engine::Application *engine::CreateApp(engine::CLArgs args);
+extern engine::Application *engine::CreateApp(engine::CLArgs&& args);
 
 int main(int argc, char **argv) {
     try {
         engine::Log::Init();
 
-        std::vector<const char *> args(argv, argv + argc);
-        engine::CLArgs clargs{.args = std::span<const char *>{args}};
-        auto app = engine::CreateApp(clargs);
+        std::vector<const char*> args(argv, argv + argc);
+        engine::CLArgs clargs{std::span<const char*>{args}};
+        engine::Application* app = engine::CreateApp(std::move(clargs));
 
         app->run();
 

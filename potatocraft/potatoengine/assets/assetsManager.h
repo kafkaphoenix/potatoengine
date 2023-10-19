@@ -2,84 +2,62 @@
 
 #include "potatoengine/assets/model.h"
 #include "potatoengine/assets/prefab.h"
+#include "potatoengine/assets/scene.h"
 #include "potatoengine/assets/shader.h"
 #include "potatoengine/assets/texture.h"
-#include "potatoengine/assets/types.h"
-#include "potatoengine/assets/utils.h"
 #include "potatoengine/pch.h"
 
 namespace potatoengine {
 class AssetsManager {
    public:
-    template <typename Type, typename ID, typename... Args>
-    void load(ID id, Args&&... args) {
-        std::shared_ptr<Type> asset = std::make_shared<Type>(std::forward<Args>(args)...);
-        std::string _id = generateID<Type, ID>(id);
-        m_assets.emplace(_id, std::move(asset));
+    template <typename Type, typename... Args>
+    void load(std::string_view id, Args&&... args) {
+        if (m_assets.contains(id.data())) {
+            throw std::runtime_error("Asset " + std::string(id) + " already exists!");
+        }
+        m_assets.emplace(id, std::make_shared<Type>(std::forward<Args>(args)...));
 #ifdef DEBUG
-        CORE_INFO("\tLoaded asset {0}", _id);
+        CORE_INFO("\tLoaded asset {}", id);
 #endif
     }
 
-    template <typename Type, typename ID>
-    bool exists(ID id) const {
-        std::string _id = generateID<Type, ID>(id);
-        return m_assets.find(_id) != m_assets.end();
+    template <typename Type>
+    bool contains(std::string_view id) const {
+        return m_assets.contains(id.data()) and std::holds_alternative<std::shared_ptr<Type>>(m_assets.at(id.data()));
     }
 
-    template <typename Type, typename ID>
-    std::shared_ptr<Type>& get(ID id) {
-        if (!exists<Type>(id)) {
-            if constexpr (std::is_enum_v<ID>) {
-                throw std::runtime_error("Asset " + assets::to_string(id) + " not found!");
-            } else if constexpr (std::is_same_v<ID, std::string>) {
-                throw std::runtime_error("Asset " + id + " not found!");
-            } else if constexpr (std::is_same_v<ID, const char*>) {
-                throw std::runtime_error("Asset " + id + " not found!");
-            }
+    template <typename Type>
+    std::shared_ptr<Type>& get(std::string_view id) {
+        if (not contains<Type>(id)) {
+            throw std::runtime_error("Asset " + std::string(id) + " not found!");
         }
-
-        std::string _id = generateID<Type, ID>(id);
-        AssetTypes& assetVariant = m_assets.at(_id);
-
-        auto sharedPtr = std::get_if<std::shared_ptr<Type>>(&assetVariant);
-        if (not sharedPtr) {
-            throw std::runtime_error("Asset type mismatch!");
-        }
-
-        return *sharedPtr;
+        AssetTypes& asset = m_assets.at(id.data());
+        return *std::get_if<std::shared_ptr<Type>>(&asset);
     }
 
-    template <typename Type, typename ID>
-    const std::shared_ptr<Type>& get(ID id) const {
-        if (!exists<Type>(id)) {
-            if constexpr (std::is_enum_v<ID>) {
-                throw std::runtime_error("Asset " + assets::to_string(id) + " not found!");
-            } else if constexpr (std::is_same_v<ID, std::string>) {
-                throw std::runtime_error("Asset " + id + " not found!");
-            } else if constexpr (std::is_same_v<ID, const char*>) {
-                throw std::runtime_error("Asset " + id + " not found!");
-            }
+    template <typename Type>
+    const std::shared_ptr<Type>& get(std::string_view id) const {
+        if (not contains<Type>(id)) {
+            throw std::runtime_error("Asset " + std::string(id) + " not found!");
         }
-        std::string _id = generateID<Type, ID>(id);
-        return std::static_pointer_cast<Type>(std::get<std::shared_ptr<Type>>(m_assets.at(_id)));
+        AssetTypes& asset = m_assets.at(id.data());
+        return std::get_if<std::shared_ptr<Type>>(&asset);
     }
 
-    template <typename Type, typename ID, typename... Args>
-    const std::shared_ptr<Type>& reload(ID id, Args&&... args) {
+    template <typename Type, typename... Args>
+    const std::shared_ptr<Type>& reload(std::string_view id, Args&&... args) {
         std::shared_ptr<Type> asset = std::make_shared<Type>(std::forward<Args>(args)...);
-        std::string _id = generateID<Type, ID>(id);
 
-        auto it = m_assets.find(_id);
-        if (it != m_assets.end() && std::holds_alternative<std::shared_ptr<Type>>(it->second)) {
-            std::get<std::shared_ptr<Type>>(it->second) = asset;
+        auto& maybeAsset = m_assets.find(id);
+        if (maybeAsset not_eq m_assets.end() and std::holds_alternative<std::shared_ptr<Type>>(maybeAsset->second)) {
+            std::get<std::shared_ptr<Type>>(maybeAsset->second) = asset;
         } else {
-            throw std::runtime_error("Asset " + _id + " not found or has an incompatible type. Reload failed!");
+            throw std::runtime_error("Asset " + std::string(id) + " not found or has an incompatible type. Reload failed!");
         }
 #ifdef DEBUG
-        CORE_INFO("Reloaded asset {0}", _id);
+        CORE_INFO("Reloaded asset {}", id);
 #endif
-        return std::static_pointer_cast<Type>(std::get<std::shared_ptr<Type>>(m_assets.at(_id)));
+        return std::static_pointer_cast<Type>(std::get<std::shared_ptr<Type>>(m_assets.at(id.data())));
     }
 
     void print() const noexcept {
@@ -94,22 +72,7 @@ class AssetsManager {
     }
 
    private:
-    using AssetTypes = std::variant<std::shared_ptr<Texture>, std::shared_ptr<Shader>, std::shared_ptr<Prefab>, std::shared_ptr<Model>>;
+    using AssetTypes = std::variant<std::shared_ptr<Texture>, std::shared_ptr<Shader>, std::shared_ptr<Prefab>, std::shared_ptr<Model>, std::shared_ptr<Scene>>;
     std::unordered_map<std::string, AssetTypes> m_assets;
-
-    template <typename Type, typename ID>
-    std::string generateID(ID id) const {
-        std::string type = typeid(Type).name();
-        std::string realType = type.substr(type.find_last_of(':') + 1);
-        if constexpr (std::is_enum_v<ID>) {
-            return realType + "_" + assets::to_string(id);
-        } else if constexpr (std::is_same_v<ID, std::string>) {
-            return realType + "_" + id;
-        } else if constexpr (std::is_same_v<ID, const char*>) {
-            return realType + "_" + id;
-        } else {
-            throw std::runtime_error("Invalid ID type " + realType);
-        }
-    }
 };
 }

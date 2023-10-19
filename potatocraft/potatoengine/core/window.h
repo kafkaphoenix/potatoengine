@@ -11,8 +11,8 @@ namespace potatoengine {
 
 struct WindowProperties {
     std::string title{};
-    int width;
-    int height;
+    int width{};
+    int height{};
 };
 
 enum class CursorMode {
@@ -27,7 +27,7 @@ class Window {
    public:
     using EventCallbackFn = std::function<void(Event&)>;
 
-    Window(const WindowProperties& properties);
+    Window(WindowProperties&& properties);
     ~Window();
 
     void shutdown() noexcept;
@@ -49,7 +49,9 @@ class Window {
         m_data.lastY = y;
     }
 
-    static std::unique_ptr<Window> Create(const WindowProperties& properties);
+    static std::unique_ptr<Window> Create(WindowProperties&& properties);
+    static constexpr uint32_t OPENGL_MAYOR_VERSION = 4;
+    static constexpr uint32_t OPENGL_MINOR_VERSION = 5;
 
    private:
     GLFWwindow* m_window{}; // TODO: this class should be a window manager, and this should be a vector of windows

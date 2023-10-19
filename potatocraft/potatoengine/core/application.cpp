@@ -20,8 +20,8 @@ namespace potatoengine {
 // void init_imgui_context(GLFWwindow *window, const char *glsl_version);
 // void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color);
 
-Application::Application(const Config& c, CLArgs args)
-    : m_name(c.name), m_clargs(args) {
+Application::Application(Config&& c, CLArgs&& args)
+    : m_name(std::move(c.name)), m_clargs(std::move(args)) {
     s_instance = this;
 
     std::filesystem::current_path(c.root);
@@ -36,6 +36,9 @@ Application::Application(const Config& c, CLArgs args)
 }
 
 Application::~Application() {
+#ifdef DEBUG
+    CORE_INFO("Deleting Application");
+#endif
     m_renderer->shutdown();
     // TODO class imgui layer with shutdown and pop overlay
 }
@@ -67,23 +70,23 @@ void Application::onEvent(Event& e) {
     }
 }
 
-void Application::pushState(std::unique_ptr<State> s) {
+void Application::pushState(std::unique_ptr<State>&& s) {
     s->onAttach();
     m_states->pushState(std::move(s));
 }
 
-void Application::pushOverlay(std::unique_ptr<State> s) {
+void Application::pushOverlay(std::unique_ptr<State>&& s) {
     s->onAttach();
     m_states->pushOverlay(std::move(s));
 }
 
 void Application::run() {
     // const char *glsl_version = "#version 460";
-    // auto* window = static_cast<GLFWwindow*>(getWindow().getNativeWindow()); try const auto&
+    // GLFWwindow* window = static_cast<GLFWwindow*>(getWindow().getNativeWindow());
 
     // init_imgui_context(window, glsl_version);
 
-    // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.f);
+    // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.6f, 1.f);
 
     while (m_running) {
         float currentFrame = (float)glfwGetTime();
@@ -110,7 +113,7 @@ void Application::run() {
         }
         // TODO: open menu pause
 #ifdef DEBUG
-        // CORE_INFO("FPS: {0}", 1.f / ts);
+        // CORE_INFO("FPS: {}", 1.f / ts);
         //  TODO move to imgui debug panel
 #endif
         m_window->onUpdate();
@@ -141,7 +144,7 @@ void init_imgui_context(GLFWwindow *window, const char *glsl_version)
     // ImFont* font =
 io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\UDDigiKyokashoN-B.ttc", 18.f,
 nullptr, io.Fonts->GetGlyphRangesJapanese());
-    // IM_ASSERT(font not_eq nullptr);
+    // IM_ASSERT(font);
 }
 
 void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color)
@@ -152,7 +155,7 @@ void debugger(IMGUI_STATES states, GLFWwindow *window, ImVec4 clear_color)
     ImGui::NewFrame();
 
     // 1. Show the big demo window (Most of the sample code is in
-ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear
+ImGui::ShowDemoWindow()! You can browe its code to learn more about Dear
 ImGui!). if (states.show_demo_window)
         ImGui::ShowDemoWindow(&states.show_demo_window);
 

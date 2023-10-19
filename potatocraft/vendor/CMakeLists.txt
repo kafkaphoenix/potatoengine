@@ -60,7 +60,7 @@ endif ()
 FetchContent_Declare(
   entt
   GIT_REPOSITORY https://github.com/skypjack/entt.git
-  GIT_TAG v3.11.1
+  GIT_TAG v3.12.2
 )
 
 FetchContent_GetProperties(entt)

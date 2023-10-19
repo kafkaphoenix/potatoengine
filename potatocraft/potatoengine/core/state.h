@@ -7,7 +7,7 @@ namespace potatoengine {
 
 class State {
    public:
-    State(const std::string& name = "TemplateState");
+    State(std::string&& name = "TemplateState");
     virtual ~State() = default;
 
     virtual void onAttach() {}
@@ -18,7 +18,7 @@ class State {
 
     std::string_view getName() const noexcept { return m_name; }
 
-    static std::unique_ptr<State> Create() noexcept;
+    static std::unique_ptr<State> Create();
 
    protected:
     std::string m_name{};

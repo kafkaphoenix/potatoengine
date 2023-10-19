@@ -6,8 +6,9 @@ namespace potatoengine {
 
 class Shader {
    public:
-    Shader(const std::filesystem::path& fp);
+    Shader(std::filesystem::path&& fp);
     ~Shader();
+    Shader& operator=(const Shader&) = delete;
 
     uint32_t getID() const noexcept { return m_id; }
     std::string_view getFilepath() const noexcept { return m_filepath; }

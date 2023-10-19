@@ -3,16 +3,19 @@
 namespace potatoengine {
 
 StateStack::~StateStack() {
+    #ifdef DEBUG
+        CORE_INFO("Deleting StateStack");
+    #endif
     for (auto& s : m_states) {
         s->onDetach();
     }
 }
 
-void StateStack::pushState(std::unique_ptr<State> s) {
+void StateStack::pushState(std::unique_ptr<State>&& s) {
     m_states.emplace(m_states.begin() + m_idx++, std::move(s));
 }
 
-void StateStack::pushOverlay(std::unique_ptr<State> o) {
+void StateStack::pushOverlay(std::unique_ptr<State>&& o) {
     m_states.emplace_back(std::move(o));
 }
 

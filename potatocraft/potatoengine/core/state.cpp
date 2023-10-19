@@ -4,9 +4,9 @@
 
 namespace potatoengine {
 
-State::State(const std::string& name) : m_name(name) {}
+State::State(std::string&& name) : m_name(std::move(name)) {}
 
-std::unique_ptr<State> State::Create() noexcept {
+std::unique_ptr<State> State::Create() {
     return std::make_unique<State>();
 }
 }

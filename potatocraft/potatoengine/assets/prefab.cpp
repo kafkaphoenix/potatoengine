@@ -3,12 +3,7 @@
 #include "potatoengine/utils/timer.h"
 
 namespace potatoengine {
-Prefab::Prefab(const std::filesystem::path& fp, const std::string& name): m_name(name) {
-    if (not std::filesystem::exists(fp)) [[unlikely]] {
-        throw std::runtime_error("Prefab file does not exist: " + m_filepath);
-    }
-    m_filepath = fp.string();
-
+Prefab::Prefab(std::filesystem::path&& fp, std::unordered_set<std::string>&& targets) : m_filepath(std::move(fp.string())), m_targets(std::move(targets)) {
     std::ifstream f(fp);
     if (not f.is_open()) [[unlikely]] {
         f.close();
@@ -17,38 +12,69 @@ Prefab::Prefab(const std::filesystem::path& fp, const std::string& name): m_name
     json data = json::parse(f);
     f.close();
 
-    auto pfb = data.at(name);
-    read(pfb);
-    pfb.at("inherit").get_to(m_inherits);
-    for (const auto& i : m_inherits) {
-        read(data.at(i));
+    for (const auto& [name, prefabData] : data.items()) {
+        if (not m_targets.contains(name)) {
+            continue;
+        }
+        std::unordered_set<std::string> inherits;
+        std::unordered_set<std::string> ctags;
+        std::unordered_map<std::string, json> components;
+
+        if (prefabData.contains("inherit")) {
+            prefabData.at("inherit").get_to(inherits);
+            for (std::string_view father : inherits) {
+                read(data.at(father), inherits, ctags, components);
+            }
+        }
+        read(prefabData, inherits, ctags, components);  // child overrides parent if common definition exists
+
+        m_prefabs.emplace(name, PrefabData{.inherits = std::move(inherits), .ctags = std::move(ctags), .components = std::move(components)});
     }
+
 #ifdef DEBUG
     print();
 #endif
 }
 
-void Prefab::read(const json& j) {
-    for (auto& c : j.at("ctags")) {
-        m_ctags.emplace_back(c);
+void Prefab::read(const json& data, std::unordered_set<std::string>& inherits, std::unordered_set<std::string>& ctags, std::unordered_map<std::string, json>& components) {
+    if (data.contains("ctags")) {
+        for (const json& c : data.at("ctags")) {
+            ctags.emplace(c);
+        }
     }
 
-    for (auto& [k, v] : j.at("components").items()) {
-        m_components[k] = v;
+    if (data.contains("components")) {
+        for (const auto& [cKey, cValue] : data.at("components").items()) {
+            if (inherits.size() > 0 and ctags.contains(cKey)) {
+                ctags.erase(cKey);
+            }
+            if (components.contains(cKey)) {
+                for (const auto& [cFieldKey, cFieldValue] : cValue.items()) {
+                    if (not cFieldKey.empty()) {
+                        components[cKey][cFieldKey] = cFieldValue;
+                    } else {
+                        components[cKey] = cFieldValue;
+                    }
+                }
+            } else {
+                components[cKey] = cValue;
+            }
+        }
     }
 }
 
 void Prefab::print() const {
-    CORE_INFO("\tLoaded prefab: {0} with {1} components, {2} ctags, and {3} inherit", m_name, m_components.size(), m_ctags.size(), m_inherits.size());
-    for (const auto& i : m_inherits) {
-        CORE_INFO("\t\tInherit: {0}", i);
-    }
-    for (const auto& c : std::ranges::reverse_view(m_ctags)) {
-        CORE_INFO("\t\tComponent tag: {0}", c);
-    }
-    for (const auto& [k, v] : m_components) {
-        CORE_INFO("\t\tComponent: {0}", k);
+    for (const auto& [name, prefabData] : m_prefabs) {
+        CORE_INFO("\tLoaded prefab: {0} with {1} inherits, {2} ctags and {3} components", name, prefabData.inherits.size(), prefabData.ctags.size(), prefabData.components.size());
+        for (std::string_view father : prefabData.inherits) {
+            CORE_INFO("\t\tInherit: {}", father);
+        }
+        for (std::string_view ctag : prefabData.ctags) {
+            CORE_INFO("\t\tComponent tag: {}", ctag);
+        }
+        for (const auto& [cKey, _] : prefabData.components) {
+            CORE_INFO("\t\tComponent: {}", cKey);
+        }
     }
 }
-
 }

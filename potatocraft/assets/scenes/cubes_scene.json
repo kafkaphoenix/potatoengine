@@ -1,0 +1,175 @@
+{
+    "assets": {
+        "shaders": {
+            "basic": {
+                "vbasic": "assets/shaders/basic.vert",
+                "fbasic": "assets/shaders/basic.frag"
+            },
+            "skybox": {
+                "vskybox": "assets/shaders/skybox.vert",
+                "fskybox": "assets/shaders/skybox.frag"
+            },
+            "fbo": {
+                "vfbo": "assets/shaders/fbo.vert",
+                "ffbo": "assets/shaders/fbo.frag"
+            }
+        },
+        "textures": {
+            "block_atlas": {
+                "filepath": "assets/textures/block_atlas.jpg",
+                "type": "textureDiffuse",
+                "flip_vertically": false
+            },
+            "skybox_day": {
+                "filepath": "assets/textures/skybox_day2",
+                "type": "textureDiffuse",
+                "flip_vertically": false
+            },
+            "skybox_night": {
+                "filepath": "assets/textures/skybox_night1",
+                "type": "textureDiffuse",
+                "flip_vertically": false
+            },
+            "default": {
+                "filepath": "assets/textures/default.jpg",
+                "type": "textureDiffuse"
+            }
+        },
+        "models": {
+            "cube": "assets/models/cube/cube.obj",
+            "foco": "assets/models/foco/foco.obj",
+            "camera": "assets/models/camera/camera.obj"
+        },
+        "prefabs": {
+            "entities": {
+                "filepath": "assets/prefabs/entities.json",
+                "targets": [
+                    "player",
+                    "chicken",
+                    "glass_block",
+                    "brick_block",
+                    "stone_block",
+                    "wood_block",
+                    "skybox",
+                    "foco",
+                    "camera",
+                    "fbo"
+                ]
+            }
+        }
+    },
+    "entities": {
+        "auri": {
+            "prefab": "player",
+            "options": {
+                "position": {"x": 0, "y": 0, "z": 5}
+            }
+        },
+        "block1": {
+            "prefab": "glass_block",
+            "options": {
+                "position": {"x": 0, "y": 0, "z": 0}
+            }
+        },
+        "block2": {
+            "prefab": "glass_block",
+            "options": {
+                "position": {"x": 2, "y": 5, "z": -15}
+            }
+        },
+        "block3": {
+            "prefab": "stone_block",
+            "options": {
+                "position": {"x": -1.5, "y": -2.2, "z": -2.5}
+            }
+        },
+        "block4": {
+            "prefab": "stone_block",
+            "options": {
+                "position": {"x": -3.8, "y": -2, "z": -12.3}
+            }
+        },
+        "block5": {
+            "prefab": "brick_block",
+            "options": {
+                "position": {"x": 2.4, "y": -0.4, "z": -3.5}
+            }
+        },
+        "block6": {
+            "prefab": "brick_block",
+            "options": {
+                "position": {"x": -1.7, "y": 3, "z": -7.5}
+            }
+        },
+        "block7": {
+            "prefab": "wood_block",
+            "options": {
+                "position": {"x": 1.3, "y": -2, "z": -2.5}
+            }
+        },
+        "block8": {
+            "prefab": "wood_block",
+            "options": {
+                "position": {"x": 1.5, "y": 2, "z": -2.5}
+            }
+        },
+        "block9": {
+            "prefab": "stone_block",
+            "options": {
+                "position": {"x": 1.5, "y": 0.2, "z": -1.5}
+            }
+        },
+        "block10": {
+            "prefab": "glass_block",
+            "options": {
+                "position": {"x": -1.3, "y": 1, "z": -1.5}
+            }
+        },
+        "skybox": {
+            "prefab": "skybox",
+            "options": {
+                "time": 7,
+                "acceleration": 1
+            }
+        }
+    },
+    "lights": {
+        "foco": {
+            "prefab": "foco",
+            "options": {
+                "position": {"x": 0, "y": 10, "z": 5},
+                "rotation": {"x": 0, "y": 90, "z": 0},
+                "color": {"r": 1, "g": 1, "b": 1}
+            }
+        },
+        "foco2": {
+            "prefab": "foco",
+            "options": {
+                "position": {"x": 0, "y": 10, "z": -20},
+                "rotation": {"x": 0, "y": 270, "z": 0},
+                "color": {"r": 0.5, "g": 0.3, "b": 0.2}
+            }
+        } 
+    },
+    "cameras": {
+        "scene_camera": {
+            "prefab": "camera",
+            "options": {
+                "position": {"x": 0, "y": 0, "z": -20},
+                "rotation": {"x": 0, "y": 90, "z": 0},
+                "fov": 90,
+                "near": 0.1,
+                "far": 300
+            }
+        }
+    },
+    "fbos": {
+        "postprocess_fbo": {
+            "prefab": "fbo",
+            "options": {
+                "attachment": "depth_texture",
+                "mode": "normal"
+            }
+        }
+    }
+}

@@ -9,11 +9,12 @@ class VAO {
     VAO();
     ~VAO();
 
-    void bind() const noexcept;
-    void unbind() const noexcept;
+    void bind();
+    void unbind();
 
-    void attachVertex(std::unique_ptr<VBO> vbo) noexcept;
-    void setIndex(std::unique_ptr<IBO> ibo) noexcept;
+    void attachVertex(std::unique_ptr<VBO>&& vbo);
+    void attachShapeVertex(std::unique_ptr<VBO>&& vbo);
+    void setIndex(std::unique_ptr<IBO>&& ibo);
 
     const std::vector<std::unique_ptr<VBO>>& getVBOs() const noexcept { return m_vbos; }
     const std::unique_ptr<IBO>& getEBO() const noexcept { return m_ibo; }

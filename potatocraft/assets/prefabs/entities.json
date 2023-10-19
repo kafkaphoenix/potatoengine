@@ -1,6 +1,5 @@
 {
     "creature": {
-        "inherit": [],
         "ctags": ["transform"],
         "components": {
             "health": {
@@ -15,16 +14,13 @@
                 "base": 100,
                 "current": 100
             },
-            "experience": {
-                "current": 0
-            }
+            "experience": 0
         }
     },
     "player": {
         "inherit": ["creature"],
         "ctags": ["camera", "equipment", "inventory"],
         "components": {
-            "name": "Auri",
             "tag": "player",
             "stats": {
                 "strength": 10,
@@ -68,31 +64,173 @@
     },
     "chicken": {
         "inherit": ["creature"],
-        "ctags": [],
         "components": {
             "tag": "animal"
         }
     },
     "block": {
-        "inherit": [],
-        "ctags": ["transform"],
+        "ctags": ["distanceFromCamera"],
         "components": {
+            "transform": {
+                "scale": {"x": 0.5, "y": 0.5, "z": 0.5}
+            },
+            "body": "cube",
+            "rigidBody": {
+                "isKinematic": true
+            },
+            "texture": {
+                "filepaths": ["block_atlas"],
+                "useFakeLighting": true
+            },
+            "textureAtlas": {
+                "rows": 2
+            },
+            "shaderProgram": "basic",
+            "material": {
+                "ambient": {"r": 0.4, "g": 0.4, "b": 0.4},
+                "diffuse": {"r": 0.9, "g": 0.9, "b": 0.9}
+            }
         }
     },
     "brick_block": {
         "inherit": ["block"],
-        "ctags": [],
         "components": {
             "tag": "brick_block",
-            "body": "assets/models/cube/cube.obj"
+            "textureAtlas": {
+                "index": 0
+            }
         }
     },
     "stone_block": {
         "inherit": ["block"],
-        "ctags": [],
         "components": {
             "tag": "stone_block",
-            "body": "assets/models/rock/rock.obj"
+            "textureAtlas": {
+                "index": 1
+            }
+        }
+    },
+    "glass_block": {
+        "inherit": ["block"],
+        "components": {
+            "tag": "glass_block",
+            "texture": {
+                "useColor": true,
+                "useBlending": true,
+                "blendFactor": 0.6,
+                "color": {"r": 0.1, "g": 0.3, "b": 0.2, "a": 0.4},
+                "useReflection": true,
+                "useRefraction": true,
+                "refractiveIndex": 1.5,
+                "reflectivity": 0.2
+            },
+            "textureAtlas": {
+                "index": 2
+            },
+            "rigidBody": {
+                "isKinematic": false
+            },
+            "material": {
+                "ambient": {"r": 0.7, "g": 0.7, "b": 0.7},
+                "diffuse": {"r": 0.9, "g": 0.9, "b": 0.9}
+            },
+            "distanceFromCamera": { "distance": 1 } 
+        }
+    },
+    "wood_block": {
+        "inherit": ["block"],
+        "components": {
+            "tag": "wood_block",
+            "textureAtlas": {
+                "index": 3
+            }
+        }
+    },
+    "skybox": {
+        "ctags": ["transform", "time"],
+        "components": {
+            "tag": "skybox",
+            "shape": {
+                "type": "cube",
+                "size": {"x": 1, "y": 1, "z": 1}
+            },
+            "rigidBody": {
+                "isKinematic": false
+            },
+            "texture": {
+                "filepaths": ["skybox_night", "skybox_day"],
+                "hasTransparency": true,
+                "useBlending": true
+            },
+            "skybox": {
+                "useFog": true,
+                "fogColor": {"r": 0.45, "g": 0.55, "b": 0.6},
+                "fogDensity": 0.0035,
+                "fogGradient": 5
+            },
+            "shaderProgram": "skybox",
+            "distanceFromCamera": { "distance": 2 }
+        }
+    },
+    "foco": {
+        "ctags": ["transform", "distanceFromCamera"],
+        "components": {
+            "tag": "light",
+            "body": "foco",
+            "light": {
+                "type": "directional"
+            },
+            "texture": {
+                "useColor": true,
+                "color": {"r": 0, "g": 0, "b": 0, "a": 0.7}
+            },
+            "shaderProgram": "basic"
+        }
+    },
+    "camera": {
+        "ctags": ["transform", "camera"],
+        "components": {
+            "tag": "camera"
+        }
+    },
+    "terrain": {
+        "ctags": ["distanceFromCamera"],
+        "components": {
+            "tag": "terrain",
+            "texture": {
+                "filepaths": ["grass"]
+            },
+            "shaderProgram": "shape",
+            "shape": {
+                "type": "rectangle",
+                "size": {"x": 20, "y": 20, "z": 0},
+                "repeatTexture": true
+            },
+            "transform": {
+                "position": {"x": 0, "y": -5, "z": 0},
+                "rotation": {"x": -90, "y": 0, "z": 0}
+            }
+        }
+    },
+    "fbo": {
+        "components": {
+            "tag": "fbo",
+            "fbo": {
+                "fbo": "postprocess",
+                "mode": "normal"
+            },
+            "shaderProgram": "fbo",
+            "shape": {
+                "type": "rectangle"
+            }
+        }
+    },
+    "building": {
+        "ctags": ["transform", "distanceFromCamera"],
+        "components": {
+            "tag": "building",
+            "shaderProgram": "basic",
+            "body": "building"
         }
     }
 }

@@ -20,7 +20,7 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}")
 include_directories("${BASEPATH}")
 
 # Source files
-file(GLOB_RECURSE SOURCE_FILES
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/potatoengine/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/potatoengine/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/sandbox/*.h"
@@ -56,7 +56,7 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE potatoengine/pch.h)
 
 if (MSVC)
     # https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=msvc-170
-    target_compile_options(${PROJECT_NAME} PRIVATE /EHs /nologo /W4 /std:c++latest /Od /utf-8 /WX)
+    target_compile_options(${PROJECT_NAME} PRIVATE /EHs /nologo /std:c++latest /Od /utf-8 /WX /Wall)
     target_compile_options(${PROJECT_NAME} PRIVATE /external:I ${CMAKE_SOURCE_DIR}/build /W0) # Exclude from warnings
 elseif(GCC OR CLANG)
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror)

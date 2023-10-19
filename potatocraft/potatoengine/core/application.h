@@ -26,14 +26,14 @@ struct CLArgs {
 
 class Application {
    public:
-    Application(const Config& c, CLArgs args);
+    Application(Config&& c, CLArgs&& args);
     virtual ~Application();
 
     void onEvent(Event& e);
-    void pushState(std::unique_ptr<State> s);
-    void pushOverlay(std::unique_ptr<State> s);
+    void pushState(std::unique_ptr<State>&& s);
+    void pushOverlay(std::unique_ptr<State>&& s);
 
-    Window& getWindow() noexcept { return *m_window; }
+    Window& getWindow() const noexcept { return *m_window; }
 
     void terminate () noexcept { m_running = false; }
 
@@ -64,5 +64,5 @@ class Application {
 };
 
 // To be defined in CLIENT
-Application* CreateApp(CLArgs args);
+Application* CreateApp(CLArgs&& args);
 }

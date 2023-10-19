@@ -12,6 +12,9 @@ void Renderer::init() const noexcept {
 }
 
 void Renderer::shutdown() noexcept {
+#ifdef DEBUG
+    CORE_INFO("Shutting down Renderer");
+#endif
     // TODO something to add? reset statistics maybe?
 }
 
@@ -20,21 +23,21 @@ void Renderer::onWindowResize(uint32_t w, uint32_t h) const noexcept {
 }
 
 void Renderer::beginScene(const Camera& c) noexcept {
-    m_viewProjectionMatrix = c.getViewProjection();
+    m_viewMatrix = c.getView();
+    m_projectionMatrix = c.getProjection();
+    m_cameraPosition = c.getPosition();
 }
 
 void Renderer::endScene() noexcept {
 }
 
-void Renderer::addShaderProgram(const std::string& name) {
-#ifdef DEBUG
-    CORE_INFO("\tComputing shader program...");
-#endif
+void Renderer::addShader(std::string&& name) {
     const auto& manager = m_assetsManager.lock();
-    if (!manager) {
+    if (not manager) {
         throw std::runtime_error("AssetsManager is null!");
     }
-    auto newShaderProgram = ShaderProgram::Create(name);
+
+    auto newShaderProgram = ShaderProgram::Create(std::string(name));
     const auto& vs = manager->get<Shader>("v" + name);
     const auto& fs = manager->get<Shader>("f" + name);
     newShaderProgram->attach(*vs);
@@ -42,29 +45,48 @@ void Renderer::addShaderProgram(const std::string& name) {
     newShaderProgram->link();
     newShaderProgram->detach(*vs);
     newShaderProgram->detach(*fs);
-
-    newShaderProgram->use();
-    newShaderProgram->setVec3("light_dir", {0.5f, 0.5f, 1.f});
-    newShaderProgram->unuse();
-    m_shaderPrograms.emplace(name, std::move(newShaderProgram));
 #ifdef DEBUG
-    CORE_INFO("\tShaders computed!");
+    CORE_INFO("Shader {} linked!", name);
 #endif
+    m_shaderPrograms.emplace(std::move(name), std::move(newShaderProgram));
 }
 
-void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, const std::string& shaderProgram) const noexcept {
-    auto& sp = m_shaderPrograms.at(shaderProgram);
+void Renderer::addFramebuffer(std::string&& name, uint32_t w, uint32_t h, uint32_t t) {
+    m_framebuffers.emplace(std::move(name), FBO::Create(w, h, t));
+}
+
+void Renderer::renderFBO(const std::shared_ptr<VAO>& vao, std::string_view fbo) {
+    auto& sp = get("fbo");
 
     sp->use();
-    sp->setMat4("viewProjection", m_viewProjectionMatrix);
-    sp->setMat4("transform", transform);
+    sp->setInt("screenTexture", 100);
+    getFramebuffers().at(fbo.data())->getColorTexture()->bindSlot(100);
 
     RendererAPI::DrawIndexed(vao);
     sp->unuse();
+}
+
+void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, std::string_view shaderProgram) {
+    auto& sp = get(shaderProgram);
+
+    sp->use();
+    sp->setMat4("projection", m_projectionMatrix);
+    sp->setMat4("view", m_viewMatrix);
+    sp->setMat4("model", transform);
+
+    RendererAPI::DrawIndexed(vao);
+    sp->unuse();  // DONT unuse before the draw call
 }
 
 std::unique_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) noexcept {
     return std::make_unique<Renderer>(am);
 }
 
+std::unique_ptr<ShaderProgram>& Renderer::get(std::string_view name) {
+    if (m_shaderPrograms.contains(name.data())) {
+        return m_shaderPrograms.at(name.data());
+    } else {
+        throw std::runtime_error("Shader program not found");
+    }
+}
 }

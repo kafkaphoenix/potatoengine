@@ -4,55 +4,49 @@
 
 #include <assimp/Importer.hpp>
 
+#include "potatoengine/renderer/buffer.h"
+
 namespace potatoengine {
 
-Model::Model(const std::filesystem::path& fp, std::optional<bool> gammaCorrection) {
-    if (!std::filesystem::exists(fp)) [[unlikely]] {
-        throw std::runtime_error("Model file does not exist: " + fp.string());
-    }
-    m_filepath = fp.string();
-
+Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection) : m_filepath(std::move(fp.string())), m_directory(std::move(fp.parent_path().string())) {
     if (gammaCorrection.has_value()) {
         throw std::runtime_error("Gamma correction not yet implemented");
     }
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(m_filepath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs |
+    const aiScene* scene = importer.ReadFile(m_filepath, aiProcess_Triangulate | aiProcess_GenSmoothNormals |
                                                              aiProcess_CalcTangentSpace | aiProcess_ValidateDataStructure | aiProcess_JoinIdenticalVertices |
                                                              aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph | aiProcess_SplitLargeMeshes | aiProcess_FindInvalidData);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+    if (not scene or scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE or !scene->mRootNode) {
         throw std::runtime_error("Failed to load model " + m_filepath + ": " + importer.GetErrorString());
     }
 
-    m_directory = fp.parent_path().string();
-
     processNode(scene->mRootNode, scene);
-
 #ifdef DEBUG
-    CORE_INFO("\t\tmesh count: {0}", m_meshes.size());
-    CORE_INFO("\t\ttexture count: {0}", m_loadedTextures.size());
-    CORE_INFO("\t\tmaterial count: {0}", m_materials.size());
+    CORE_INFO("\t\tmesh count: {}", m_meshes.size());
+    CORE_INFO("\t\ttexture count: {}", m_loadedTextures.size());
+    CORE_INFO("\t\tmaterial count: {}", m_materials.size());
 #endif
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene) {
-    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+    for (uint32_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        m_meshes.push_back(processMesh(mesh, scene));
+        m_meshes.emplace_back(std::move(processMesh(mesh, scene)));
     }
 
-    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+    for (uint32_t i = 0; i < node->mNumChildren; i++) {
         processNode(node->mChildren[i], scene);
     }
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices{};
     std::vector<uint32_t> indices{};
     std::vector<std::shared_ptr<Texture>> textures;
 
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+    for (uint32_t i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex{};
         const auto& position = mesh->mVertices[i];  // assimp's vector doesn't directly convert to glm's vec3
         vertex.position = glm::vec3(position.x, position.y, position.z);
@@ -84,7 +78,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             vertex.color = glm::vec4(color.r, color.g, color.b, color.a);
         }
 
-        if (mesh->mAABB.mMin != aiVector3D(0.f, 0.f, 0.f) and mesh->mAABB.mMax != aiVector3D(0.f, 0.f, 0.f)) {
+        if (mesh->mAABB.mMin not_eq aiVector3D(0.f, 0.f, 0.f) and mesh->mAABB.mMax not_eq aiVector3D(0.f, 0.f, 0.f)) {
             // TODO aabb
         }
 
@@ -92,39 +86,40 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             // TODO faces
         }
 
-        vertices.push_back(vertex);
+        vertices.emplace_back(std::move(vertex));
     }
 
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
+    for (uint32_t i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++) {
-            indices.push_back(face.mIndices[j]);
+        for (uint32_t j = 0; j < face.mNumIndices; j++) {
+            indices.emplace_back(face.mIndices[j]);
         }
     }
 
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-    m_materials.push_back(loadMaterial(material));
+    CMaterial materialData = loadMaterial(material);
 
     // N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
-    // diffuse: texture_diffuseN
-    // specular: texture_specularN
-    // normal: texture_normalN
-    // height: texture_heightN
+    // diffuse: textureDiffuseN
+    // specular: textureSpecularN
+    // normal: textureNormalN
+    // height: textureHeightN
     auto loadAndInsertTextures = [&](aiTextureType t, std::string type) {
         std::vector<std::shared_ptr<Texture>> loadedTextures = loadMaterialTextures(material, t, type);
-        textures.insert(textures.end(), loadedTextures.begin(), loadedTextures.end());
+        textures.insert(textures.end(), loadedTextures.begin(), loadedTextures.end());  // Can't be emplace
     };
 
-    loadAndInsertTextures(aiTextureType_DIFFUSE, "texture_diffuse");
-    loadAndInsertTextures(aiTextureType_SPECULAR, "texture_specular");
-    loadAndInsertTextures(aiTextureType_HEIGHT, "texture_normal");
-    loadAndInsertTextures(aiTextureType_AMBIENT, "texture_height");
+    loadAndInsertTextures(aiTextureType_DIFFUSE, "textureDiffuse");
+    loadAndInsertTextures(aiTextureType_SPECULAR, "textureSpecular");
+    loadAndInsertTextures(aiTextureType_HEIGHT, "textureNormal");
+    loadAndInsertTextures(aiTextureType_AMBIENT, "textureHeight");
 
-    if (textures.empty()) {
-        textures.push_back(std::make_shared<Texture>("assets/textures/default.jpg", "texture_diffuse"));
-    }
+    if (textures.empty() and materialData.diffuse == glm::vec3(0.f, 0.f, 0.f)) {
+        textures.emplace_back(std::make_shared<Texture>("assets/textures/default.jpg", "textureDiffuse"));  // TODO: add asset manager?
+    } 
+    m_materials.emplace_back(std::move(materialData));
 
-    return Mesh(vertices, indices, textures);
+    return CMesh(std::move(vertices), std::move(indices), std::move(textures));
 }
 
 std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType t, std::string type) {
@@ -140,20 +135,31 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
                                               return texture->getFilepath() == filepath;
                                           });
 
-        if (loadedTexture != m_loadedTextures.end()) {
-            textures.push_back(*loadedTexture);
+        if (loadedTexture not_eq m_loadedTextures.end()) {
+            textures.emplace_back(std::make_shared<Texture>(*(*loadedTexture)));
         } else {
             std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(filepath, type);
-            textures.push_back(newTexture);
-            m_loadedTextures.push_back(newTexture);
+            textures.emplace_back(newTexture);
+            m_loadedTextures.emplace_back(std::move(newTexture));
         }
     }
 
     return textures;
 }
 
-Material Model::loadMaterial(aiMaterial* mat) {
-    Material material{};
+CMaterial Model::loadMaterial(aiMaterial* mat) {
+    // map_Ns        SHININESS    roughness
+    // map_Ka        AMBIENT      ambient occlusion
+    // map_Kd        DIFFUSE      albedo diffuse
+    // map_Ks        SPECULAR     metallic specular
+    // map_Ke        EMISSIVE     emissive
+    // map_Ni        REFRACTION   ior
+    // map_d         OPACITY
+    // illum         ILLUMINATION
+    // map_Bump      HEIGHT       height
+    // map_Kn        NORMALS      normal
+    // map_disp      DISPLACEMENT
+    CMaterial material{};
     aiColor3D color(0.f, 0.f, 0.f);
     float shininess{};
 

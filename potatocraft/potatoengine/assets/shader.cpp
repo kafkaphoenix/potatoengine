@@ -3,12 +3,7 @@
 #include "potatoengine/pch.h"
 
 namespace potatoengine {
-Shader::Shader(const std::filesystem::path& fp) {
-    if (not std::filesystem::exists(fp)) [[unlikely]] {
-        throw std::runtime_error("Shader file does not exist: " + m_filepath);
-    }
-    m_filepath = fp.string();
-
+Shader::Shader(std::filesystem::path&& fp) : m_filepath(std::move(fp.string())) {
     std::ifstream f(fp);
     if (not f.is_open()) [[unlikely]] {
         f.close();
@@ -20,26 +15,29 @@ Shader::Shader(const std::filesystem::path& fp) {
     m_type = fp.extension() == ".vert" ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
     m_id = glCreateShader(m_type);
 
-    const GLchar* source = data.c_str();
+    const GLchar* source = data.data();
     glShaderSource(m_id, 1, &source, 0);
     glCompileShader(m_id);
 
     int32_t status = GL_FALSE;
     glGetShaderiv(m_id, GL_COMPILE_STATUS, &status);
     if (status not_eq GL_TRUE) [[unlikely]] {
-        glDeleteShader(m_id);
-        GLint infoLogLength = 0;
+        int infoLogLength = 0;
         glGetShaderiv(m_id, GL_INFO_LOG_LENGTH, &infoLogLength);
         if (infoLogLength == 0) {
-            throw std::runtime_error("Shader compilation failed!");
+            throw std::runtime_error("Shader " + m_filepath + " compilation failed!");
         }
         std::vector<GLchar> shaderInfoLog(infoLogLength);
         glGetShaderInfoLog(m_id, infoLogLength, &infoLogLength, shaderInfoLog.data());
-        throw std::runtime_error("Shader compilation failed: " + std::string(shaderInfoLog.data()));
+        glDeleteShader(m_id);
+        throw std::runtime_error("Shader " + m_filepath + " compilation failed: \n" + std::string(shaderInfoLog.data()));
     }
 }
 
 Shader::~Shader() {
+#ifdef DEBUG
+    CORE_INFO("Deleting shader {}", m_filepath);
+#endif
     glDeleteShader(m_id);
 }
 }

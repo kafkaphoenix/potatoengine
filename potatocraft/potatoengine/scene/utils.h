@@ -3,338 +3,418 @@
 #include <entt/entt.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "potatoengine/scene/components.h"
+#include "potatoengine/scene/components/ai/cAI.h"
+#include "potatoengine/scene/components/audio/cAudio.h"
+#include "potatoengine/scene/components/camera/cCamera.h"
+#include "potatoengine/scene/components/camera/cDistanceFromCamera.h"
+#include "potatoengine/scene/components/common/cName.h"
+#include "potatoengine/scene/components/common/cTag.h"
+#include "potatoengine/scene/components/common/cUUID.h"
+#include "potatoengine/scene/components/effects/cParticle.h"
+#include "potatoengine/scene/components/graphics/cAnimation.h"
+#include "potatoengine/scene/components/graphics/cBody.h"
+#include "potatoengine/scene/components/graphics/cFBO.h"
+#include "potatoengine/scene/components/graphics/cMaterial.h"
+#include "potatoengine/scene/components/graphics/cMesh.h"
+#include "potatoengine/scene/components/graphics/cShaderProgram.h"
+#include "potatoengine/scene/components/graphics/cText.h"
+#include "potatoengine/scene/components/graphics/cTexture.h"
+#include "potatoengine/scene/components/graphics/cTextureAtlas.h"
+#include "potatoengine/scene/components/physics/cCollider.h"
+#include "potatoengine/scene/components/physics/cRigidBody.h"
+#include "potatoengine/scene/components/physics/cTransform.h"
+#include "potatoengine/scene/components/utils/cDeleted.h"
+#include "potatoengine/scene/components/utils/cRelationship.h"
+#include "potatoengine/scene/components/utils/cShape.h"
+#include "potatoengine/scene/components/world/cLight.h"
+#include "potatoengine/scene/components/world/cSkybox.h"
+#include "potatoengine/scene/components/world/cTime.h"
 #include "potatoengine/scene/entity.h"
+#include "potatoengine/scene/meta.h"
 
 namespace potatoengine {
 
-template <typename Component>
-// cppcheck-suppress unusedFunction
-Component& Assign(Entity e) {
-    Component& c = e.add<Component>();
-    e.onComponentAdded<Component>(c);
-    return c;
+CUUID &castCUUID(void *other) {
+    return *static_cast<CUUID *>(other);
 }
 
-template <typename Component, typename... Args>
-// cppcheck-suppress unusedFunction
-Component& AssignValues(Entity e, Args... args) {
-    return e.add<Component>(std::forward<Args>(args)...);
+CName &castCName(void *other) {
+    return *static_cast<CName *>(other);
 }
 
-void registerComponents() noexcept {
+CTag &castCTag(void *other) {
+    return *static_cast<CTag *>(other);
+}
+
+CShaderProgram &castCShaderProgram(void *other) {
+    return *static_cast<CShaderProgram *>(other);
+}
+
+CTransform &castCTransform(void *other) {
+    return *static_cast<CTransform *>(other);
+}
+
+CMaterial &castCMaterial(void *other) {
+    return *static_cast<CMaterial *>(other);
+}
+
+CTextureAtlas &castCTextureAtlas(void *other) {
+    return *static_cast<CTextureAtlas *>(other);
+}
+
+CTexture &castCTexture(void *other) {
+    return *static_cast<CTexture *>(other);
+}
+
+CMesh &castCMesh(void *other) {
+    return *static_cast<CMesh *>(other);
+}
+
+CBody &castCBody(void *other) {
+    return *static_cast<CBody *>(other);
+}
+
+CRigidBody &castCRigidBody(void *other) {
+    return *static_cast<CRigidBody *>(other);
+}
+
+CCollider &castCCollider(void *other) {
+    return *static_cast<CCollider *>(other);
+}
+
+CCamera &castCCamera(void *other) {
+    return *static_cast<CCamera *>(other);
+}
+
+CDistanceFromCamera &castCDistanceFromCamera(void *other) {
+    return *static_cast<CDistanceFromCamera *>(other);
+}
+
+CSkybox &castCSkybox(void *other) {
+    return *static_cast<CSkybox *>(other);
+}
+
+CTime &castCTime(void *other) {
+    return *static_cast<CTime *>(other);
+}
+
+CLight &castCLight(void *other) {
+    return *static_cast<CLight *>(other);
+}
+
+CAudio &castCAudio(void *other) {
+    return *static_cast<CAudio *>(other);
+}
+
+CParticle &castCParticle(void *other) {
+    return *static_cast<CParticle *>(other);
+}
+
+CAnimation &castCAnimation(void *other) {
+    return *static_cast<CAnimation *>(other);
+}
+
+CText &castCText(void *other) {
+    return *static_cast<CText *>(other);
+}
+
+CAI &castCAI(void *other) {
+    return *static_cast<CAI *>(other);
+}
+
+CRelationship &castCRelationship(void *other) {
+    return *static_cast<CRelationship *>(other);
+}
+
+CShape &castCShape(void *other) {
+    return *static_cast<CShape *>(other);
+}
+
+CFBO &castCFBO(void *other) {
+    return *static_cast<CFBO *>(other);
+}
+
+void registerComponents() {
     using namespace entt::literals;
 
-    entt::meta<UUIDComponent>()
+    entt::meta<CUUID>()
         .type("uuid"_hs)
-        .data<&UUIDComponent::uuid>("uuid"_hs);
+        .ctor<&castCUUID, entt::as_ref_t>()
+        .data<&CUUID::uuid>("uuid"_hs)
+        .func<&CUUID::print>("print"_hs);
 
-    entt::meta<Name>()
+    entt::meta<CName>()
         .type("name"_hs)
-        .data<&Name::name>("name"_hs)
-        .func<&AssignValues<Name, std::string>>("assignValues"_hs);
+        .ctor<&castCName, entt::as_ref_t>()
+        .data<&CName::name>("name"_hs)
+        .func<&CName::print>("print"_hs)
+        .func<&assign<CName, std::string>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Tag>()
+    entt::meta<CTag>()
         .type("tag"_hs)
-        .data<&Tag::tag>("tag"_hs)
-        .func<&AssignValues<Tag, std::string>>("assignValues"_hs);
+        .ctor<&castCTag, entt::as_ref_t>()
+        .data<&CTag::tag>("tag"_hs)
+        .func<&CTag::print>("print"_hs)
+        .func<&assign<CTag, std::string>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Transform>()
+    entt::meta<CShaderProgram>()
+        .type("shaderProgram"_hs)
+        .ctor<&castCShaderProgram, entt::as_ref_t>()
+        .data<&CShaderProgram::shaderProgram>("shaderProgram"_hs)
+        .func<&CShaderProgram::print>("print"_hs)
+        .func<&assign<CShaderProgram, std::string>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CTransform>()
         .type("transform"_hs)
-        .data<&Transform::pos>("pos"_hs)
-        .data<&Transform::rot>("rot"_hs)
-        .data<&Transform::scale>("scale"_hs)
-        .func<&Transform::get>("get"_hs)
-        .func<&Assign<Transform>>("assign"_hs);
+        .ctor<&castCTransform, entt::as_ref_t>()
+        .data<&CTransform::position>("position"_hs)
+        .data<&CTransform::rotation>("rotation"_hs)
+        .data<&CTransform::scale>("scale"_hs)
+        .func<&CTransform::calculate>("calculate"_hs)
+        .func<&CTransform::print>("print"_hs)
+        .func<&assign<CTransform>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Material>()
+    entt::meta<CMaterial>()
         .type("material"_hs)
-        .data<&Material::ambient>("ambient"_hs)
-        .data<&Material::diffuse>("diffuse"_hs)
-        .data<&Material::specular>("specular"_hs)
-        .data<&Material::shininess>("shininess"_hs)
-        .func<&Assign<Material>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Material, glm::vec3, glm::vec3, glm::vec3, float>, entt::as_ref_t>("assignValues"_hs);
-    
-    entt::meta<Mesh>()
+        .ctor<&castCMaterial, entt::as_ref_t>()
+        .data<&CMaterial::ambient>("ambient"_hs)
+        .data<&CMaterial::diffuse>("diffuse"_hs)
+        .data<&CMaterial::specular>("specular"_hs)
+        .data<&CMaterial::shininess>("shininess"_hs)
+        .func<&CMaterial::print>("print"_hs)
+        .func<&assign<CMaterial>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CTextureAtlas>()
+        .type("textureAtlas"_hs)
+        .ctor<&castCTextureAtlas, entt::as_ref_t>()
+        .data<&CTextureAtlas::rows>("rows"_hs)
+        .data<&CTextureAtlas::index>("index"_hs)
+        .func<&CTextureAtlas::print>("print"_hs)
+        .func<&assign<CTextureAtlas>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CTexture>()
+        .type("texture"_hs)
+        .ctor<&castCTexture, entt::as_ref_t>()
+        .data<&CTexture::filepaths>("filepaths"_hs)
+        .data<&CTexture::textures>("textures"_hs)
+        .data<&CTexture::hasTransparency>("hasTransparency"_hs)
+        .data<&CTexture::useFakeLighting>("useFakeLighting"_hs)
+        .data<&CTexture::useBlending>("useBlending"_hs)
+        .data<&CTexture::blendFactor>("blendFactor"_hs)
+        .data<&CTexture::useColor>("useColor"_hs)
+        .data<&CTexture::color>("color"_hs)
+        .data<&CTexture::useReflection>("useReflection"_hs)
+        .data<&CTexture::reflectivity>("reflectivity"_hs)
+        .data<&CTexture::useRefraction>("useRefraction"_hs)
+        .data<&CTexture::refractiveIndex>("refractiveIndex"_hs)
+        .func<&CTexture::print>("print"_hs)
+        .func<&onComponentAdded<CTexture>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CTexture>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CMesh>()
         .type("mesh"_hs)
-        .data<&Mesh::vertices>("vertices"_hs)
-        .data<&Mesh::indices>("indices"_hs)
-        .data<&Mesh::textures>("textures"_hs)
-        .data<&Mesh::vao>("vao"_hs)
-        .func<&Mesh::setupMesh>("setupMesh"_hs)
-        .func<&Assign<Mesh>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Mesh, std::vector<Vertex>, std::vector<uint32_t>, std::vector<std::shared_ptr<Texture>>>, entt::as_ref_t>("assignValues"_hs);
+        .ctor<&castCMesh, entt::as_ref_t>()
+        .data<&CMesh::vertices>("vertices"_hs)
+        .data<&CMesh::indices>("indices"_hs)
+        .data<&CMesh::textures>("textures"_hs)
+        .data<&CMesh::vao>("vao"_hs)
+        .func<&CMesh::setupMesh>("setupMesh"_hs)
+        .func<&CMesh::print>("print"_hs)
+        .func<&assign<CMesh>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Body>()
+    entt::meta<CBody>()
         .type("body"_hs)
-        .data<&Body::filepath>("filepath"_hs)
-        .data<&Body::meshes>("meshes"_hs)
-        .data<&Body::materials>("materials"_hs) 
-        .func<&Assign<Body>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Body, std::string, std::vector<Mesh>, std::vector<Material>>, entt::as_ref_t>("assignValues"_hs);
-    
-    entt::meta<RGBAColor>()
-        .type("rgbacolor"_hs)
-        .data<&RGBAColor::color>("color"_hs)
-        .func<&AssignValues<RGBAColor, glm::vec4>>("assignValues"_hs);
+        .ctor<&castCBody, entt::as_ref_t>()
+        .data<&CBody::filepath>("filepath"_hs)
+        .data<&CBody::meshes>("meshes"_hs)
+        .data<&CBody::materials>("materials"_hs)
+        .func<&CBody::print>("print"_hs)
+        .func<&onComponentAdded<CBody>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CBody, std::string>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<RigidBody>()
-        .type("rigidbody"_hs)
-        .data<&RigidBody::mass>("mass"_hs)
-        .data<&RigidBody::friction>("friction"_hs)
-        .data<&RigidBody::bounciness>("bounciness"_hs)
-        .func<&Assign<RigidBody>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<RigidBody, float, float, float>, entt::as_ref_t>("assignValues"_hs);
+    entt::meta<CRigidBody>()
+        .type("rigidBody"_hs)
+        .ctor<&castCRigidBody, entt::as_ref_t>()
+        .data<&CRigidBody::mass>("mass"_hs)
+        .data<&CRigidBody::friction>("friction"_hs)
+        .data<&CRigidBody::bounciness>("bounciness"_hs)
+        .data<&CRigidBody::isKinematic>("isKinematic"_hs)
+        .func<&CRigidBody::print>("print"_hs)
+        .func<&assign<CRigidBody>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Collider>()
+    entt::meta<CCollider>()
         .type("collider"_hs)
-        .data<&Collider::type>("type"_hs)
-        .data<&Collider::size>("size"_hs)
-        .func<&Assign<Collider>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Collider, Collider::Type, glm::vec3>, entt::as_ref_t>("assignValues"_hs);
+        .ctor<&castCCollider, entt::as_ref_t>()
+        .data<&CCollider::_type>("type"_hs)
+        .data<&CCollider::size>("size"_hs)
+        .func<&CCollider::print>("print"_hs)
+        .func<&onComponentAdded<CCollider>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CCollider>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<CameraComponent>()
+    entt::meta<CCamera>()
         .type("camera"_hs)
-        .data<&CameraComponent::camera>("camera"_hs)
-        .func<&Assign<CameraComponent>>("assign"_hs);
+        .ctor<&castCCamera, entt::as_ref_t>()
+        .data<&CCamera::camera>("camera"_hs)
+        .func<&CCamera::print>("print"_hs)
+        .func<&onComponentAdded<CCamera>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CCamera>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Light>()
+    entt::meta<CDistanceFromCamera>()
+        .type("distanceFromCamera"_hs)
+        .ctor<&castCDistanceFromCamera, entt::as_ref_t>()
+        .data<&CDistanceFromCamera::distance>("distance"_hs)
+        .func<&CDistanceFromCamera::print>("print"_hs)
+        .func<&assign<CDistanceFromCamera>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CSkybox>()
+        .type("skybox"_hs)
+        .ctor<&castCSkybox, entt::as_ref_t>()
+        .data<&CSkybox::useFog>("useFog"_hs)
+        .data<&CSkybox::fogColor>("fogColor"_hs)
+        .data<&CSkybox::fogDensity>("fogDensity"_hs)
+        .data<&CSkybox::fogGradient>("fogGradient"_hs)
+        .data<&CSkybox::rotationSpeed>("rotationSpeed"_hs)
+        .func<&CSkybox::print>("print"_hs)
+        .func<&assign<CSkybox>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CTime>()
+        .type("time"_hs)
+        .ctor<&castCTime, entt::as_ref_t>()
+        .data<&CTime::seconds>("seconds"_hs)
+        .data<&CTime::currentHour>("currentHour"_hs)
+        .data<&CTime::currentMinute>("currentMinute"_hs)
+        .data<&CTime::currentSecond>("currentSecond"_hs)
+        .data<&CTime::dayLength>("dayLength"_hs)
+        .data<&CTime::startingTime>("startingTime"_hs)
+        .data<&CTime::nightStart>("nightStart"_hs)
+        .data<&CTime::dayTransitionStart>("dayTransitionStart"_hs)
+        .data<&CTime::dayStart>("dayStart"_hs)
+        .data<&CTime::nightTransitionStart>("nightTransitionStart"_hs)
+        .data<&CTime::acceleration>("acceleration"_hs)
+        .data<&CTime::fps>("fps"_hs)
+        .func<&CTime::print>("print"_hs)
+        .func<&onComponentAdded<CTime>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CTime>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CLight>()
         .type("light"_hs)
-        .data<&Light::type>("type"_hs)
-        .data<&Light::color>("color"_hs)
-        .data<&Light::intensity>("intensity"_hs)
-        .data<&Light::range>("range"_hs)
-        .data<&Light::innerConeAngle>("innerConeAngle"_hs)
-        .data<&Light::outerConeAngle>("outerConeAngle"_hs)
-        .func<&Assign<Light>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Light, Light::Type, glm::vec3, float, float, float, float>, entt::as_ref_t>("assignValues"_hs);
+        .ctor<&castCLight, entt::as_ref_t>()
+        .data<&CLight::_type>("type"_hs)
+        .data<&CLight::color>("color"_hs)
+        .data<&CLight::intensity>("intensity"_hs)
+        .data<&CLight::range>("range"_hs)
+        .data<&CLight::innerConeAngle>("innerConeAngle"_hs)
+        .data<&CLight::outerConeAngle>("outerConeAngle"_hs)
+        .func<&CLight::print>("print"_hs)
+        .func<&onComponentAdded<CLight>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CLight>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Audio>()
+    entt::meta<CAudio>()
         .type("audio"_hs)
-        .data<&Audio::filepath>("filepath"_hs)
-        .data<&Audio::volume>("volume"_hs)
-        .data<&Audio::pitch>("pitch"_hs)
-        .data<&Audio::loop>("loop"_hs)
-        .func<&Assign<Audio>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Audio, std::string, float, float, bool>, entt::as_ref_t>("assignValues"_hs);
+        .ctor<&castCAudio, entt::as_ref_t>()
+        .data<&CAudio::filepath>("filepath"_hs)
+        .data<&CAudio::volume>("volume"_hs)
+        .data<&CAudio::pitch>("pitch"_hs)
+        .data<&CAudio::loop>("loop"_hs)
+        .func<&CAudio::print>("print"_hs)
+        .func<&assign<CAudio>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<ParticleSystem>()
-        .type("particlesystem"_hs)
-        .data<&ParticleSystem::emitter>("emitter"_hs)
-        .func<&AssignValues<ParticleSystem, std::string>>("assignValues"_hs);
+    entt::meta<CParticle>()
+        .type("particle"_hs)
+        .ctor<&castCParticle, entt::as_ref_t>()
+        .data<&CParticle::emitter>("emitter"_hs)
+        .func<&CParticle::print>("print"_hs)
+        .func<&assign<CParticle>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Animation>()
+    entt::meta<CAnimation>()
         .type("animation"_hs)
-        .data<&Animation::filepath>("filepath"_hs)
-        .func<&AssignValues<Animation, std::string>>("assignValues"_hs);
+        .ctor<&castCAnimation, entt::as_ref_t>()
+        .data<&CAnimation::filepath>("filepath"_hs)
+        .func<&CAnimation::print>("print"_hs)
+        .func<&assign<CAnimation>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Text>()
+    entt::meta<CText>()
         .type("text"_hs)
-        .data<&Text::text>("text"_hs)
-        .data<&Text::color>("color"_hs)
-        .func<&Assign<Text>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Text, std::string, glm::vec4>, entt::as_ref_t>("assignValues"_hs);
+        .ctor<&castCText, entt::as_ref_t>()
+        .data<&CText::text>("text"_hs)
+        .data<&CText::color>("color"_hs)
+        .func<&CText::print>("print"_hs)
+        .func<&assign<CText>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<AI>()
+    entt::meta<CAI>()
         .type("ai"_hs)
-        .data<&AI::filepath>("filepath"_hs)
-        .func<&AssignValues<AI, std::string>>("assignValues"_hs);
+        .ctor<&castCAI, entt::as_ref_t>()
+        .data<&CAI::filepath>("filepath"_hs)
+        .func<&CAI::print>("print"_hs)
+        .func<&assign<CAI>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Item>() // TODO probably this is not a component?
-        .type("item"_hs)
-        .data<&Item::name>("name"_hs)
-        .data<&Item::description>("description"_hs)
-        .data<&Item::icon>("icon"_hs)
-        .data<&Item::model>("model"_hs)
-        .data<&Item::value>("value"_hs)
-        .func<&AssignValues<Item, std::string, std::string, std::string, std::string, int>, entt::as_ref_t>("assignValues"_hs);
-
-    entt::meta<Inventory>()
-        .type("inventory"_hs)
-        .data<&Inventory::items>("items"_hs)
-        .func<&Assign<Inventory>>("assign"_hs);
-
-    entt::meta<Relationship>()
+    entt::meta<CRelationship>()
         .type("relationship"_hs)
-        .data<&Relationship::parent>("parent"_hs)
-        .func<&Assign<Relationship>>("assign"_hs);
+        .ctor<&castCRelationship, entt::as_ref_t>()
+        .data<&CRelationship::parent>("parent"_hs)
+        .func<&CRelationship::print>("print"_hs)
+        .func<&assign<CRelationship>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<RendererComponent>()
-        .type("renderer"_hs)
-        .data<&RendererComponent::filepath>("filepath"_hs)
-        .func<&Assign<RendererComponent>>("assign"_hs);
+    entt::meta<CShape>()
+        .type("shape"_hs)
+        .ctor<&castCShape, entt::as_ref_t>()
+        .data<&CShape::_type>("type"_hs)
+        .data<&CShape::dimensions>("size"_hs)
+        .data<&CShape::meshes>("meshes"_hs)
+        .data<&CShape::repeatTexture>("repeatTexture"_hs)
+        .func<&CShape::print>("print"_hs)
+        .func<&onComponentAdded<CShape>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CShape>, entt::as_ref_t>("assign"_hs);
 
-    entt::meta<Health>()
-        .type("health"_hs)
-        .data<&Health::base>("base"_hs)
-        .data<&Health::current>("current"_hs)
-        .func<&Assign<Health>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Health, int>, entt::as_ref_t>("assignValues"_hs);
-
-    entt::meta<Mana>()
-        .type("mana"_hs)
-        .data<&Mana::base>("base"_hs)
-        .data<&Mana::current>("current"_hs)
-        .func<&Assign<Mana>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Mana, int>, entt::as_ref_t>("assignValues"_hs);
-
-    entt::meta<Stamina>()
-        .type("stamina"_hs)
-        .data<&Stamina::base>("base"_hs)
-        .data<&Stamina::current>("current"_hs)
-        .func<&Assign<Stamina>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Stamina, int>, entt::as_ref_t>("assignValues"_hs);
-
-    entt::meta<Experience>()
-        .type("experience"_hs)
-        .data<&Experience::current>("current"_hs)
-        .func<&Assign<Experience>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Experience, int>, entt::as_ref_t>("assignValues"_hs);
-
-    entt::meta<Equipment>()
-        .type("equipment"_hs)
-        .data<&Equipment::head>("head"_hs)
-        .data<&Equipment::neck>("neck"_hs)
-        .data<&Equipment::shoulders>("shoulders"_hs)
-        .data<&Equipment::chest>("chest"_hs)
-        .data<&Equipment::back>("back"_hs)
-        .data<&Equipment::hands>("hands"_hs)
-        .data<&Equipment::lfinger>("lfinger"_hs)
-        .data<&Equipment::rfinger>("rfinger"_hs)
-        .data<&Equipment::belt>("belt"_hs)
-        .data<&Equipment::legs>("legs"_hs)
-        .data<&Equipment::feet>("feet"_hs)
-        .func<&Assign<Equipment>>("assign"_hs);
-
-    entt::meta<Stats>()
-        .type("stats"_hs)
-        .data<&Stats::strength>("strength"_hs)
-        .data<&Stats::dexterity>("dexterity"_hs)
-        .data<&Stats::constitution>("constitution"_hs)
-        .data<&Stats::intelligence>("intelligence"_hs)
-        .data<&Stats::wisdom>("wisdom"_hs)
-        .data<&Stats::charisma>("charisma"_hs)
-        .func<&Assign<Stats>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Stats, int, int, int, int, int, int>, entt::as_ref_t>("assignValues"_hs);
-
-    entt::meta<Talents>()
-        .type("talents"_hs)
-        .data<&Talents::acrobatics>("acrobatics"_hs)
-        .data<&Talents::arcana>("arcana"_hs)
-        .data<&Talents::athletics>("athletics"_hs)
-        .data<&Talents::perception>("perception"_hs)
-        .data<&Talents::persuasion>("persuasion"_hs)
-        .data<&Talents::stealth>("stealth"_hs)
-        .data<&Talents::survival>("survival"_hs)
-        .data<&Talents::luck>("luck"_hs)
-        .func<&Assign<Talents>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Talents, int, int, int, int, int, int, int, int>, entt::as_ref_t>("assignValues"_hs);
-
-    entt::meta<Skills>()
-        .type("skills"_hs)
-        .data<&Skills::mining>("mining"_hs)
-        .data<&Skills::jewelcrafting>("jewelcrafting"_hs)
-        .data<&Skills::blacksmithing>("blacksmithing"_hs)
-        .data<&Skills::fishing>("fishing"_hs)
-        .data<&Skills::hunting>("hunting"_hs)
-        .data<&Skills::skinning>("skinning"_hs)
-        .data<&Skills::leatherworking>("leatherworking"_hs)
-        .data<&Skills::herbalism>("herbalism"_hs)
-        .data<&Skills::cooking>("cooking"_hs)
-        .data<&Skills::alchemy>("alchemy"_hs)
-        .data<&Skills::enchanting>("enchanting"_hs)
-        .data<&Skills::harvesting>("harvesting"_hs)
-        .data<&Skills::tailoring>("tailoring"_hs)
-        .data<&Skills::woodworking>("woodworking"_hs)
-        .data<&Skills::woodcutting>("woodcutting"_hs)
-        .data<&Skills::farming>("farming"_hs)
-        .data<&Skills::quarrying>("quarrying"_hs)
-        .data<&Skills::masonry>("masonry"_hs)
-        .func<&Assign<Skills>, entt::as_ref_t>("assign"_hs)
-        .func<&AssignValues<Skills, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int>, entt::as_ref_t>("assignValues"_hs);
+    entt::meta<CFBO>()
+        .type("fbo"_hs)
+        .ctor<&castCFBO, entt::as_ref_t>()
+        .data<&CFBO::fbo>("fbo"_hs)
+        .data<&CFBO::_mode>("mode"_hs)
+        .data<&CFBO::attachment>("attachment"_hs)
+        .data<&CFBO::width>("width"_hs)
+        .data<&CFBO::height>("height"_hs)
+        .func<&CFBO::print>("print"_hs)
+        .func<&onComponentAdded<CFBO>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CFBO>, entt::as_ref_t>("assign"_hs);
 }
 
-void printScene(entt::registry& r) noexcept {
+void printScene(entt::registry &r) {
+    using namespace entt::literals;
     CORE_INFO("Scene entities:");
-    r.view<UUIDComponent>().each([&](auto e, auto& uuid) {
-        CORE_INFO("\tEntity UUID: {0}", uuid.uuid);
-
-        for (auto&& curr : r.storage()) {
-            auto& storage = curr.second;
-            if (storage.contains(e)) {
-                entt::id_type cid = curr.first;
-                entt::type_info ctype = storage.type();
-                std::string_view cname = ctype.name().substr(ctype.name().find_last_of(':') + 1);
-                size_t pos = cname.find("Component");
-                CORE_INFO("\t\tComponent {0} ID: {1}", cname.substr(0, pos), cid);
-
-                void* data = storage.get(e);
-                if (cname == "Name") {
-                    Name* name = static_cast<Name*>(data);
-                    CORE_INFO("\t\t\tData: {0}", name->name);
+    r.view<CUUID>().each([&](entt::entity e, const CUUID &cUUID) {
+        CORE_INFO("Entity UUID: {}", entt::to_integral(e));
+        for (auto &&curr : r.storage()) {
+            if (auto &storage = curr.second; storage.contains(e)) {
+                entt::meta_type cType = entt::resolve(storage.type());
+                entt::meta_any cData = cType.construct(storage.value(e));
+                entt::meta_func printFunc = cType.func("print"_hs);
+                if (printFunc) {
+                    std::string_view cName = storage.type().name();
+                    cName = cName.substr(cName.find_last_of(':') + 1);
+                    CORE_INFO("\t{}", cName);
+                    printFunc.invoke(cData);
+                } else {
+                    throw std::runtime_error("Component does not have a print function");
                 }
-
-                if (cname == "UUIDComponent") {
-                    UUIDComponent* uuid = static_cast<UUIDComponent*>(data);
-                    CORE_INFO("\t\t\tData: {0}", uuid->uuid);
-                }
-
-                if (cname == "Tag") {
-                    Tag* tag = static_cast<Tag*>(data);
-                    CORE_INFO("\t\t\tData: {0}", tag->tag);
-                }
-
-                if (cname == "Health") {
-                    Health* health = static_cast<Health*>(data);
-                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tbase: {0}\n\t\t\t\t\tcurrent: {1}", health->base, health->current);
-                }
-
-                if (cname == "Material") {
-                    Material* material = static_cast<Material*>(data);
-                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tambient: {0}\n\t\t\t\t\tdiffuse: {1}\n\t\t\t\t\tspecular: {2}\n\t\t\t\t\tshininess: {3}",
-                              glm::to_string(material->ambient), glm::to_string(material->diffuse), glm::to_string(material->specular), material->shininess);
-                }
-
-                if (cname == "Stamina") {
-                    Stamina* stamina = static_cast<Stamina*>(data);
-                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tbase: {0}\n\t\t\t\t\tcurrent: {1}", stamina->base, stamina->current);
-                }
-
-                if (cname == "Experience") {
-                    Experience* experience = static_cast<Experience*>(data);
-                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tcurrent: {0}", experience->current);
-                }
-
-                if (cname == "Mana") {
-                    Mana* mana = static_cast<Mana*>(data);
-                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tbase: {0}\n\t\t\t\t\tcurrent: {1}", mana->base, mana->current);
-                }
-
-                if (cname == "Stats") {
-                    Stats* stats = static_cast<Stats*>(data);
-                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tstrength: {0}\n\t\t\t\t\tdexterity: {1}\n\t\t\t\t\tintelligence: {2}\n\t\t\t\t\tconstitution: {3}\n\t\t\t\t\twisdom: {4}\n\t\t\t\t\tcharisma: {5}",
-                              stats->strength, stats->dexterity, stats->intelligence, stats->constitution, stats->wisdom, stats->charisma);
-                }
-
-                if (cname == "Talents") {
-                    Talents* talents = static_cast<Talents*>(data);
-                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tacrobatics: {0}\n\t\t\t\t\tarcana: {1}\n\t\t\t\t\tathletics: {2}\n\t\t\t\t\tperception: {3}\n\t\t\t\t\tpersuasion: {4}\n\t\t\t\t\tstealth: {5}\n\t\t\t\t\tsurvival: {6}\n\t\t\t\t\tluck: {7}",
-                              talents->acrobatics, talents->arcana, talents->athletics, talents->perception, talents->persuasion, talents->stealth, talents->survival, talents->luck);
-                }
-
-                if (cname == "Skills") {
-                    Skills* skills = static_cast<Skills*>(data);
-                    CORE_INFO("\t\t\tData:\n\t\t\t\t\tmining: {0}\n\t\t\t\t\tjewelcrafting: {1}\n\t\t\t\t\tblacksmithing: {2}\n\t\t\t\t\tfishing: {3}\n\t\t\t\t\thunting: {4}\n\t\t\t\t\tskinning: {5}\n\t\t\t\t\tleatherworking: {6}\n\t\t\t\t\therbalism: {7}\n\t\t\t\t\tcooking: {8}\n\t\t\t\t\talchemy: {9}\n\t\t\t\t\tenchanting: {10}\n\t\t\t\t\tharvesting: {11}\n\t\t\t\t\ttailoring: {12}\n\t\t\t\t\twoodworking: {13}\n\t\t\t\t\twoodcutting: {14}\n\t\t\t\t\tfarming: {15}\n\t\t\t\t\tquarrying: {16}\n\t\t\t\t\tmasonry: {17}",
-                              skills->mining, skills->jewelcrafting, skills->blacksmithing, skills->fishing, skills->hunting, skills->skinning, skills->leatherworking, skills->herbalism, skills->cooking, skills->alchemy, skills->enchanting, skills->harvesting, skills->tailoring, skills->woodworking, skills->woodcutting, skills->farming, skills->quarrying, skills->masonry);
-                }
-
-                // if (cname == "Mesh") {
-                //     Mesh* mesh = static_cast<Mesh*>(data);
-                //     CORE_INFO("\t\t\tData:\n\t\t\t\t\tvertices: {0}\n\t\t\t\t\tindices: {1}\n\t\t\t\t\ttextures: {2}\n\t\t\t\t\tvao: {3}", mesh->vertices.size(), mesh->indices.size(), mesh->textures.size(), mesh->vao->getID());
-                // }
             }
         }
     });
 }
+}
+
+template <>
+void engine::SceneManager::onComponentAdded(Entity e, CTexture &c) {
+    const auto &manager = m_assetsManager.lock();
+    if (not manager) {
+        throw std::runtime_error("Assets manager is null!");
+    }
+
+    std::vector<std::shared_ptr<Texture>> textures;
+    for (std::string_view filepath : c.filepaths) {
+        textures.emplace_back(manager->get<Texture>(filepath.data()));
+    }
+
+    c.textures = std::move(textures);
+    e.update<CTexture>(c);
 }
