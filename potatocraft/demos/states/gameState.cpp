@@ -1,6 +1,6 @@
-#include "sandbox/states/gameState.h"
+#include "demos/states/gameState.h"
 
-#include "sandbox/settings.h"
+#include "demos/settings.h"
 
 namespace potatocraft {
 

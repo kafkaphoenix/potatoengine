@@ -7,8 +7,9 @@ namespace potatoengine {
 
 void Log::Init() {
     std::vector<spdlog::sink_ptr> logSinks;
+    logSinks.reserve(2);
     logSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-    logSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("../../logs/potatocraft.log", true));
+    logSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("../../logs/potatoengine.log", true));
 
     logSinks[0]->set_pattern("%^[%T] %n: %v%$");
     logSinks[1]->set_pattern("[%T] [%l] %n: %v");

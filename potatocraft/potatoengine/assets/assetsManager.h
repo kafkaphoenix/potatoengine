@@ -73,6 +73,6 @@ class AssetsManager {
 
    private:
     using AssetTypes = std::variant<std::shared_ptr<Texture>, std::shared_ptr<Shader>, std::shared_ptr<Prefab>, std::shared_ptr<Model>, std::shared_ptr<Scene>>;
-    std::unordered_map<std::string, AssetTypes> m_assets;
+    std::unordered_map<std::string, AssetTypes> m_assets{};
 };
 }

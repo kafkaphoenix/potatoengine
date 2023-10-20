@@ -31,12 +31,13 @@ Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection) : 
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene) {
-    for (uint32_t i = 0; i < node->mNumMeshes; i++) {
+    m_meshes.reserve(node->mNumMeshes);
+    for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         m_meshes.emplace_back(std::move(processMesh(mesh, scene)));
     }
 
-    for (uint32_t i = 0; i < node->mNumChildren; i++) {
+    for (uint32_t i = 0; i < node->mNumChildren; ++i) {
         processNode(node->mChildren[i], scene);
     }
 }
@@ -46,7 +47,7 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<uint32_t> indices{};
     std::vector<std::shared_ptr<Texture>> textures;
 
-    for (uint32_t i = 0; i < mesh->mNumVertices; i++) {
+    for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
         Vertex vertex{};
         const auto& position = mesh->mVertices[i];  // assimp's vector doesn't directly convert to glm's vec3
         vertex.position = glm::vec3(position.x, position.y, position.z);
@@ -89,9 +90,10 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         vertices.emplace_back(std::move(vertex));
     }
 
-    for (uint32_t i = 0; i < mesh->mNumFaces; i++) {
+    for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
         aiFace face = mesh->mFaces[i];
-        for (uint32_t j = 0; j < face.mNumIndices; j++) {
+        indices.reserve(face.mNumIndices);
+        for (uint32_t j = 0; j < face.mNumIndices; ++j) {
             indices.emplace_back(face.mIndices[j]);
         }
     }
@@ -124,7 +126,8 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType t, std::string type) {
     std::vector<std::shared_ptr<Texture>> textures;
-    for (uint32_t i = 0; i < mat->GetTextureCount(t); i++) {
+    textures.reserve(mat->GetTextureCount(t));
+    for (uint32_t i = 0; i < mat->GetTextureCount(t); ++i) {
         aiString source;
         mat->GetTexture(t, i, &source);
         std::string filename = source.C_Str();

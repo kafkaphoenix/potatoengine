@@ -55,9 +55,115 @@ glm::quat quatFromJson(const json& data) {
 
 EntityFactory::EntityFactory(std::weak_ptr<AssetsManager> am) : m_assetsManager(am) {}
 
-void EntityFactory::create(std::string_view id, Entity e) {
+void processCTag(const std::shared_ptr<Prefab>& prefab, Entity e, std::string_view target) {
     using namespace entt::literals;
 
+    for (std::string_view cTag : prefab->getCTags(target)) {
+        entt::meta_type cType = entt::resolve(entt::hashed_string{cTag.data()});
+        if (not cType) {
+            throw std::runtime_error("No component type found for component tag " + std::string(cTag));
+        }
+
+        entt::meta_func assignFunc = cType.func("assign"_hs);
+        if (not assignFunc) {
+            throw std::runtime_error("No assign function found for component tag " + std::string(cTag));
+        }
+        
+        entt::meta_any metaComponent = assignFunc.invoke({}, e);
+        entt::meta_func triggerEventFunc = cType.func("onComponentAdded"_hs);
+        if (triggerEventFunc) {
+            triggerEventFunc.invoke({}, e, metaComponent);
+        }
+    }
+}
+
+void processComponent(Entity& e, const std::string& cPrefab, const json& cValue) {
+    using namespace entt::literals;
+
+    entt::meta_type cType = entt::resolve(entt::hashed_string{cPrefab.data()});
+    if (not cType) {
+        throw std::runtime_error("No component type found for component " + cPrefab);
+    }
+
+    entt::meta_func assignFunc = cType.func("assign"_hs);
+    if (not assignFunc) {
+        throw std::runtime_error("No assign function found for component " + cPrefab);
+    }
+
+    entt::meta_any metaComponent;
+    if (cValue.is_string()) {
+        metaComponent = assignFunc.invoke({}, e, cValue.get<std::string>());
+    } else if (cValue.is_number_integer()) {
+        metaComponent = assignFunc.invoke({}, e, cValue.get<int>());
+    } else if (cValue.is_number_float()) {
+        metaComponent = assignFunc.invoke({}, e, cValue.get<float>());
+    } else if (cValue.is_boolean()) {
+        metaComponent = assignFunc.invoke({}, e, cValue.get<bool>());
+    } else if (cValue.is_object() and cValue.contains("x") and cValue.contains("y") and cValue.contains("z")) {
+        metaComponent = assignFunc.invoke({}, e, vec3FromJson(cValue));
+    } else if (cValue.is_object()) {
+        metaComponent = assignFunc.invoke({}, e);
+        if (not metaComponent) {
+            throw std::runtime_error("No meta component found for component " + cPrefab);
+        }
+
+        for (const auto& [cField, cFieldValue] : cValue.items()) {
+            if (cFieldValue.is_string()) {
+                metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<std::string>());
+            } else if (cFieldValue.is_number_integer()) {
+                metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<int>());
+            } else if (cFieldValue.is_number_float()) {
+                metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<float>());
+            } else if (cFieldValue.is_boolean()) {
+                metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<bool>());
+            } else if (cFieldValue.is_array()) {
+                std::vector<std::string> paths;
+                paths.reserve(cFieldValue.size());
+                for (const auto& value : cFieldValue) {
+                    if (not value.is_string()) {
+                        throw std::runtime_error("Unsupported type " + std::string{value.type_name()} + " for component " + cPrefab + " field " + cField);
+                    }
+                    paths.emplace_back(value.get<std::string>());
+                }
+                metaComponent.set(entt::hashed_string{cField.data()}, std::move(paths));
+            } else if (cFieldValue.is_object()) {
+                if (cFieldValue.contains("x") and cFieldValue.contains("y") and cFieldValue.contains("z") and cFieldValue.contains("w")) {
+                    if (cField == "rotation") {
+                        metaComponent.set(entt::hashed_string{cField.data()}, quatFromJson(cFieldValue));
+                    } else {
+                        metaComponent.set(entt::hashed_string{cField.data()}, vec4FromJson(cFieldValue));
+                    }
+                } else if (cFieldValue.contains("x") and cFieldValue.contains("y") and cFieldValue.contains("z")) {
+                    if (cField == "rotation") {
+                        metaComponent.set(entt::hashed_string{cField.data()}, glm::quat(glm::radians(vec3FromJson(cFieldValue))));
+                    } else {
+                        metaComponent.set(entt::hashed_string{cField.data()}, vec3FromJson(cFieldValue));
+                    }
+                } else if (cFieldValue.contains("x") and cFieldValue.contains("y")) {
+                    metaComponent.set(entt::hashed_string{cField.data()}, vec2FromJson(cFieldValue));
+                } else if (cFieldValue.contains("r") and cFieldValue.contains("g") and cFieldValue.contains("b") and cFieldValue.contains("a")) {
+                    metaComponent.set(entt::hashed_string{cField.data()}, vec4FromJson(cFieldValue, "color"));
+                } else if (cFieldValue.contains("r") and cFieldValue.contains("g") and cFieldValue.contains("b")) {
+                    metaComponent.set(entt::hashed_string{cField.data()}, vec3FromJson(cFieldValue, "color"));
+                } else if (cField == "json") { // TODO unused
+                    metaComponent.set(entt::hashed_string{cField.data()}, std::move(cFieldValue));
+                } else {
+                    throw std::runtime_error("Unsupported type " + std::string{cFieldValue.type_name()} + " for component " + cPrefab + " field " + cField);
+                }
+            } else {
+                throw std::runtime_error("Unsupported type " + std::string{cFieldValue.type_name()} + " for component " + cPrefab + " field " + cField);
+            }
+        }
+    } else {
+        throw std::runtime_error("Unsupported type " + std::string{cValue.type_name()} + " for component " + cPrefab);
+    }
+    entt::meta_func triggerEventFunc = cType.func("onComponentAdded"_hs);
+    if (triggerEventFunc) {
+        triggerEventFunc.invoke({}, e, metaComponent);
+    }
+}
+
+void EntityFactory::create(std::string_view id, Entity e) {
     if (m_prototypes.contains(id.data())) {
         throw std::runtime_error("Prototype already exists for prefab " + std::string(id));
     }
@@ -70,102 +176,16 @@ void EntityFactory::create(std::string_view id, Entity e) {
     const auto& prefab = manager->get<Prefab>(id);
     auto& sceneManager = e.getSceneManager();
     e.add<CDeleted>();
-    entt::meta_type cType;
-    entt::meta_any metaComponent;
+
     for (std::string_view target : prefab->getTargets()) {
         e = {sceneManager.getRegistry().create(), &sceneManager};
-        for (std::string_view cTag : prefab->getCTags(target)) {
-            cType = entt::resolve(entt::hashed_string{cTag.data()});
-            if (not cType) {
-                throw std::runtime_error("No component type found for component tag " + std::string(cTag));
-            }
-            entt::meta_func assignFunc = cType.func("assign"_hs);
-            if (not assignFunc) {
-                throw std::runtime_error("No assign function found for component tag " + std::string(cTag));
-            }
-            metaComponent = assignFunc.invoke({}, e);
-            entt::meta_func triggerEventFunc = cType.func("onComponentAdded"_hs);
-            if (triggerEventFunc) {
-                triggerEventFunc.invoke({}, e, metaComponent);
-            }
-        }
+
+        processCTag(prefab, e, target);
 
         for (const auto& [cPrefab, cValue] : prefab->getComponents(target)) {
-            cType = entt::resolve(entt::hashed_string{cPrefab.data()});
-            if (not cType) {
-                throw std::runtime_error("No component type found for component " + cPrefab);
-            }
-            entt::meta_func assignFunc = cType.func("assign"_hs);
-            if (not assignFunc) {
-                throw std::runtime_error("No assign function found for component " + cPrefab);
-            }
-            if (cValue.is_string()) {
-                metaComponent = assignFunc.invoke({}, e, cValue.get<std::string>());
-            } else if (cValue.is_number_integer()) {
-                metaComponent = assignFunc.invoke({}, e, cValue.get<int>());
-            } else if (cValue.is_number_float()) {
-                metaComponent = assignFunc.invoke({}, e, cValue.get<float>());
-            } else if (cValue.is_boolean()) {
-                metaComponent = assignFunc.invoke({}, e, cValue.get<bool>());
-            } else if (cValue.is_object() and cValue.contains("x") and cValue.contains("y") and cValue.contains("z")) {
-                metaComponent = assignFunc.invoke({}, e, vec3FromJson(cValue));
-            } else if (cValue.is_object()) {
-                metaComponent = assignFunc.invoke({}, e);
-                if (not metaComponent) {
-                    throw std::runtime_error("No meta component found for component " + cPrefab);
-                }
-                for (const auto& [cField, cFieldValue] : cValue.items()) {
-                    if (cFieldValue.is_string()) {
-                        metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<std::string>());
-                    } else if (cFieldValue.is_number_integer()) {
-                        metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<int>());
-                    } else if (cFieldValue.is_number_float()) {
-                        metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<float>());
-                    } else if (cFieldValue.is_boolean()) {
-                        metaComponent.set(entt::hashed_string{cField.data()}, cFieldValue.get<bool>());
-                    } else if (cFieldValue.is_array()) {
-                        std::vector<std::string> paths;
-                        for (const auto& value : cFieldValue) {
-                            if (not value.is_string()) {
-                                throw std::runtime_error("Unsupported type " + std::string{value.type_name()} + " for component " + cPrefab + " field " + cField);
-                            }
-                            paths.emplace_back(value.get<std::string>());
-                        }
-                        metaComponent.set(entt::hashed_string{cField.data()}, std::move(paths));
-                    } else if (cFieldValue.is_object()) {
-                        if (cFieldValue.contains("x") and cFieldValue.contains("y") and cFieldValue.contains("z") and cFieldValue.contains("w")) {
-                            if (cField == "rotation") {
-                                metaComponent.set(entt::hashed_string{cField.data()}, quatFromJson(cFieldValue));
-                            } else {
-                                metaComponent.set(entt::hashed_string{cField.data()}, vec4FromJson(cFieldValue));
-                            }
-                        } else if (cFieldValue.contains("x") and cFieldValue.contains("y") and cFieldValue.contains("z")) {
-                            if (cField == "rotation") {
-                                metaComponent.set(entt::hashed_string{cField.data()}, glm::quat(glm::radians(vec3FromJson(cFieldValue))));
-                            } else {
-                                metaComponent.set(entt::hashed_string{cField.data()}, vec3FromJson(cFieldValue));
-                            }
-                        } else if (cFieldValue.contains("x") and cFieldValue.contains("y")) {
-                            metaComponent.set(entt::hashed_string{cField.data()}, vec2FromJson(cFieldValue));
-                        } else if (cFieldValue.contains("r") and cFieldValue.contains("g") and cFieldValue.contains("b") and cFieldValue.contains("a")) {
-                            metaComponent.set(entt::hashed_string{cField.data()}, vec4FromJson(cFieldValue, "color"));
-                        } else if (cFieldValue.contains("r") and cFieldValue.contains("g") and cFieldValue.contains("b")) {
-                            metaComponent.set(entt::hashed_string{cField.data()}, vec3FromJson(cFieldValue, "color"));
-                        } else {
-                            throw std::runtime_error("Unsupported type " + std::string{cFieldValue.type_name()} + " for component " + cPrefab + " field " + cField);
-                        }
-                    } else {
-                        throw std::runtime_error("Unsupported type " + std::string{cFieldValue.type_name()} + " for component " + cPrefab + " field " + cField);
-                    }
-                }
-            } else {
-                throw std::runtime_error("Unsupported type " + std::string{cValue.type_name()} + " for component " + cPrefab);
-            }
-            entt::meta_func triggerEventFunc = cType.func("onComponentAdded"_hs);
-            if (triggerEventFunc) {
-                triggerEventFunc.invoke({}, e, metaComponent);
-            }
+            processComponent(e, cPrefab, cValue);
         }
+        
         m_prototypes.insert({target.data(), e});
     }
 }

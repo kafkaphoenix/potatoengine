@@ -3,16 +3,16 @@
 #include <entt/entt.hpp>
 
 #include "potatoengine/engineAPI.h"
-#include "sandbox/components/inventory/cInventory.h"
-#include "sandbox/components/inventory/cItem.h"
-#include "sandbox/components/loadout/cEquipment.h"
-#include "sandbox/components/skills/cSkills.h"
-#include "sandbox/components/stats/cExperience.h"
-#include "sandbox/components/stats/cHealth.h"
-#include "sandbox/components/stats/cMana.h"
-#include "sandbox/components/stats/cStamina.h"
-#include "sandbox/components/stats/cStats.h"
-#include "sandbox/components/stats/cTalents.h"
+#include "demos/components/inventory/cInventory.h"
+#include "demos/components/inventory/cItem.h"
+#include "demos/components/loadout/cEquipment.h"
+#include "demos/components/skills/cSkills.h"
+#include "demos/components/stats/cExperience.h"
+#include "demos/components/stats/cHealth.h"
+#include "demos/components/stats/cMana.h"
+#include "demos/components/stats/cStamina.h"
+#include "demos/components/stats/cStats.h"
+#include "demos/components/stats/cTalents.h"
 
 
 namespace potatocraft {

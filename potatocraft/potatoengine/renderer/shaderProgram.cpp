@@ -82,6 +82,7 @@ std::vector<ActiveUniform> ShaderProgram::getActiveUniforms() {
     std::vector<ActiveUniform> activeUniforms;
 
     std::vector<GLenum> properties;
+    properties.reserve(3);
     properties.emplace_back(GL_NAME_LENGTH);
     properties.emplace_back(GL_TYPE);
     properties.emplace_back(GL_ARRAY_SIZE);
@@ -89,6 +90,7 @@ std::vector<ActiveUniform> ShaderProgram::getActiveUniforms() {
 
     std::vector<GLchar> nameData(256);
 
+    activeUniforms.reserve(numActiveUniforms);
     for (int i = 0; i < numActiveUniforms; ++i) {
         glGetProgramResourceiv(m_id, GL_UNIFORM, i, properties.size(), &properties[0], values.size(), nullptr, &values[0]);
 

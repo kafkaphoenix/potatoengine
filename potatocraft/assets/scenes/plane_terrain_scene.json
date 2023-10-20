@@ -1,0 +1,124 @@
+{
+    "assets": {
+        "shaders": {
+            "basic": {
+                "vbasic": "assets/shaders/basic.vert",
+                "fbasic": "assets/shaders/basic.frag"
+            },
+            "terrain": {
+                "vterrain": "assets/shaders/terrain.vert",
+                "fterrain": "assets/shaders/terrain.frag"
+            },
+            "skybox": {
+                "vskybox": "assets/shaders/skybox.vert",
+                "fskybox": "assets/shaders/skybox.frag"
+            }
+        },
+        "textures": {
+            "skybox_day": {
+                "filepath": "assets/textures/skybox_day2",
+                "type": "textureDiffuse",
+                "flip_vertically": false
+            },
+            "skybox_night": {
+                "filepath": "assets/textures/skybox_night1",
+                "type": "textureDiffuse",
+                "flip_vertically": false
+            },
+            "default": {
+                "filepath": "assets/textures/default.jpg",
+                "type": "textureDiffuse"
+            },
+            "block_atlas": {
+                "filepath": "assets/textures/block_atlas2.jpg",
+                "type": "textureDiffuse",
+                "flip_vertically": false
+            },
+            "grass": {
+                "filepath": "assets/textures/grass.jpg",
+                "type": "textureDiffuse"
+            }
+        },
+        "models": {
+            "foco": "assets/models/foco/foco.obj",
+            "camera": "assets/models/camera/camera.obj"
+        },
+        "prefabs": {
+            "entities": {
+                "filepath": "assets/prefabs/entities.json",
+                "targets": [
+                    "player",
+                    "skybox",
+                    "foco",
+                    "camera",
+                    "chunk_config"
+                ]
+            }
+        }
+    },
+    "entities": {
+        "auri": {
+            "prefab": "player",
+            "options": {
+                "position": {"x": 8, "y": 5, "z": 8}
+            }
+        },
+        "skybox": {
+            "prefab": "skybox",
+            "options": {
+                "time": 7,
+                "acceleration": 1
+            }
+        },
+        "chunk_config": {
+            "prefab": "chunk_config",
+            "options": {
+                "chunkSize": 160,
+                "blockSize": 1,
+                "width": 0,
+                "height": 0,
+                "noise": {
+                    "type": "simplex",
+                    "seed": 50,
+                    "octaves": 3,
+                    "frequency": 0.005,
+                    "persistence": 0.7,
+                    "lacunarity": 2.0,
+                    "amplitude": 40,
+                    "positive": false
+                },
+                "useLighting": false,
+                "filepaths": ["block_atlas"],
+                "textureAtlas": {
+                    "rows": 2
+                },
+                "drawMode": "color",
+                "useBiomes": true,
+                "meshType": "plane",
+                "meshAlgorithm": "simplifiedQuad"
+            }
+        }
+    },
+    "lights": {
+        "foco": {
+            "prefab": "foco",
+            "options": {
+                "position": {"x": 0, "y": 10, "z": 5},
+                "rotation": {"x": 0, "y": 90, "z": 0},
+                "color": {"r": 1, "g": 1, "b": 1, "a": 1}
+            }
+        }
+    },
+    "cameras": {
+        "scene_camera": {
+            "prefab": "camera",
+            "options": {
+                "position": {"x": 0, "y": 5, "z": -20},
+                "rotation": {"x": 0, "y": 90, "z": 0},
+                "fov": 90,
+                "near": 0.1,
+                "far": 300
+            }
+        }
+    }
+}

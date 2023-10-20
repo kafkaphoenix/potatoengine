@@ -16,19 +16,41 @@
 namespace potatoengine {
 
 struct CMesh {
-    std::vector<Vertex> vertices{};
-    std::vector<uint32_t> indices{};
     std::vector<std::shared_ptr<Texture>> textures;
     std::shared_ptr<VAO> vao;
+    std::vector<Vertex> vertices;  // TODO: remove this
+    std::shared_ptr<VBO> vbo;
+    std::vector<uint32_t> indices;
+    std::string vertexType;
 
     CMesh() = default;
-    explicit CMesh(std::vector<Vertex>&& v, std::vector<uint32_t>&& i, std::vector<std::shared_ptr<engine::Texture>>&& t)
-        : vertices(std::move(v)), indices(std::move(i)), textures(std::move(t)) {}
+    explicit CMesh(std::vector<Vertex>&& v, std::vector<uint32_t>&& i, std::vector<std::shared_ptr<engine::Texture>>&& t, std::string&& vt = "basic")
+        : vertices(std::move(v)), indices(std::move(i)), textures(std::move(t)), vertexType(std::move(vt)) {}
 
     void setupMesh() {
         vao = VAO::Create();
-        vao->attachVertex(VBO::Create(vertices));
+        if (vertexType == "basic") {
+            vao->attachVertex(VBO::Create(vertices), VAO::VertexType::VERTEX);
+        } else if (vertexType == "shape") {
+            vao->attachVertex(VBO::Create(vertices), VAO::VertexType::SHAPE_VERTEX);
+        } else if (vertexType == "terrain") { // TODO maybe a better way to do this using vertices?
+            vao->attachVertex(std::move(vbo), VAO::VertexType::TERRAIN_VERTEX);
+        } else {
+            throw std::runtime_error("Unknown vertex type " + vertexType);
+        }
         vao->setIndex(IBO::Create(indices));
+    }
+
+    void updateMesh() {
+        if (vertexType == "basic") {
+            vao->updateVertex(VBO::Create(vertices), 0, VAO::VertexType::VERTEX);
+        } else if (vertexType == "shape") {
+            vao->updateVertex(VBO::Create(vertices), 0, VAO::VertexType::SHAPE_VERTEX);
+        } else if (vertexType == "terrain") {
+            vao->updateVertex(VBO::Create(vertices), 0, VAO::VertexType::TERRAIN_VERTEX);
+        } else {
+            throw std::runtime_error("Unknown vertex type " + vertexType);
+        }
     }
 
     const std::shared_ptr<VAO>& getVAO() {
@@ -39,7 +61,7 @@ struct CMesh {
     }
 
     void bindTextures(std::unique_ptr<ShaderProgram>& sp, CTexture* cTexture, CTextureAtlas* cTextureAtlas, CTexture* cSkyboxTexture, const glm::vec3& cameraPosition, CMaterial* cMaterial) {
-        using namespace entt::literals;
+        using namespace entt::literals; // TODO rethink this method
         sp->resetActiveUniforms();
         sp->use();
         uint32_t i = 1;
@@ -48,66 +70,61 @@ struct CMesh {
         sp->setFloat("fogGradient", static_cast<float>(entt::monostate<"fogGradient"_hs>{}));
         sp->setVec3("fogColor", static_cast<glm::vec3>(entt::monostate<"fogColor"_hs>{}));
         if (cTexture) {
-            if (cTexture->filepaths.empty()) {
-                if (cTexture->useColor) {
-                    sp->setFloat("useColor", 1.f);
-                    sp->setVec4("color", cTexture->color);
+            for (auto& texture : cTexture->textures) { 
+                sp->setInt(texture->getType().data() + std::to_string(i), i);
+                texture->bindSlot(i);
+                ++i;
+            }
+            if (cTexture->drawMode == CTexture::DrawMode::COLOR or cTexture->drawMode == CTexture::DrawMode::TEXTURE_BLEND_COLOR or cTexture->drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
+                sp->setFloat("useColor", 1.f);
+                sp->setVec4("color", cTexture->color);
+            }
+            if (cTexture->useLighting) {
+                    sp->setFloat("useLighting", 1.f);
+                    sp->setVec3("lightPosition", static_cast<glm::vec3>(entt::monostate<"lightPosition"_hs>{}));
+                    sp->setVec3("lightColor", static_cast<glm::vec3>(entt::monostate<"lightColor"_hs>{}));
+            }
+            if (cTexture->drawMode == CTexture::DrawMode::TEXTURE_ATLAS or cTexture->drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND or cTexture->drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
+                if (sp->getName() == "basic") { // terrain shader get texture atlas data from vertex
+                    sp->setFloat("useTextureAtlas", 1.f);
+                    int index = cTextureAtlas->index;
+                    int rows = cTextureAtlas->rows;
+                    sp->setFloat("numRows", rows);
+                    int col = index % rows;
+                    float coll = static_cast<float>(col) / rows;
+                    int row = index / rows;
+                    float roww = static_cast<float>(row) / rows;
+                    sp->setVec2("offset", glm::vec2(coll, roww));
                 }
-            } else {
-                for (auto& texture : cTexture->textures) {
-                    if (cTexture->useFakeLighting) {
-                        sp->setFloat("useFakeLighting", 1.f);
-                        sp->setVec3("lightPosition", static_cast<glm::vec3>(entt::monostate<"lightPosition"_hs>{}));
-                        sp->setVec3("lightColor", static_cast<glm::vec3>(entt::monostate<"lightColor"_hs>{}));
-                    }
-                    if (cTextureAtlas) {
-                        sp->setFloat("useAtlas", 1.f);
-                        int index = cTextureAtlas->index;
-                        int rows = cTextureAtlas->rows;
-                        sp->setFloat("numRows", rows);
-                        int col = index % rows;
-                        float coll = static_cast<float>(col) / static_cast<float>(rows);
-                        int row = index / rows;
-                        float roww = static_cast<float>(row) / static_cast<float>(rows);
-                        sp->setVec2("offset", glm::vec2(coll, roww));
-                    }
-                    if (cTexture->useBlending) {
-                        sp->setFloat("useBlending", 1.f);
-                        sp->setFloat("blendFactor", cTexture->blendFactor);
-                    }
-                    if (cTexture->useColor) {
-                        sp->setFloat("useColor", 1.f);
-                        sp->setVec4("color", cTexture->color);
-                    }
-                    if (static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}) == 1.f and sp->getName() == "basic") {
-                        sp->setFloat("useSkyBlending", static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}));
-                        sp->setFloat("skyBlendFactor", static_cast<float>(entt::monostate<"skyBlendFactor"_hs>{}));
-                        int ti = 10;
-                        for (auto& t : cSkyboxTexture->textures) {
-                            sp->setInt(t->getType().data() + std::string("Sky") + std::to_string(ti), ti);
-                            t->bindSlot(ti);
-                            ti++;
-                        }
-                        if (cTexture->useReflection) {
-                            sp->setFloat("useReflection", 1.f);
-                            sp->setFloat("reflectivity", cTexture->reflectivity);
-                            sp->setVec3("cameraPosition", cameraPosition);
-                        }
-                        if (cTexture->useRefraction) {
-                            sp->setFloat("useRefraction", 1.f);
-                            sp->setFloat("refractiveIndex", cTexture->refractiveIndex);
-                        }
-                    }
-                    if (cMaterial) {
-                        sp->setVec3("ambient", cMaterial->ambient);
-                        sp->setVec3("diffuse", cMaterial->diffuse);
-                        sp->setVec3("specular", cMaterial->specular);
-                        sp->setFloat("shininess", cMaterial->shininess);
-                    }
-                    sp->setInt(texture->getType().data() + std::to_string(i), i);
-                    texture->bindSlot(i);
-                    ++i;
+            }
+            if (cTexture->drawMode == CTexture::DrawMode::TEXTURES_BLEND or cTexture->drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND or cTexture->drawMode == CTexture::DrawMode::TEXTURE_BLEND_COLOR or cTexture->drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
+                sp->setFloat("useBlending", 1.f);
+                sp->setFloat("blendFactor", cTexture->blendFactor);
+            }
+            if (static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}) == 1.f and sp->getName() == "basic") {
+                sp->setFloat("useSkyBlending", static_cast<float>(entt::monostate<"useSkyBlending"_hs>{}));
+                sp->setFloat("skyBlendFactor", static_cast<float>(entt::monostate<"skyBlendFactor"_hs>{}));
+                int ti = 10;
+                for (auto& t : cSkyboxTexture->textures) {
+                    sp->setInt(t->getType().data() + std::string("Sky") + std::to_string(ti), ti);
+                    t->bindSlot(ti);
+                    ti++;
                 }
+                if (cTexture->useReflection) {
+                    sp->setFloat("useReflection", 1.f);
+                    sp->setFloat("reflectivity", cTexture->reflectivity);
+                    sp->setVec3("cameraPosition", cameraPosition);
+                }
+                if (cTexture->useRefraction) {
+                    sp->setFloat("useRefraction", 1.f);
+                    sp->setFloat("refractiveIndex", cTexture->refractiveIndex);
+                }
+            }
+            if (cMaterial) {
+                sp->setVec3("ambient", cMaterial->ambient);
+                sp->setVec3("diffuse", cMaterial->diffuse);
+                sp->setVec3("specular", cMaterial->specular);
+                sp->setFloat("shininess", cMaterial->shininess);
             }
         } else {
             uint32_t diffuseN = 1;
@@ -133,6 +150,9 @@ struct CMesh {
                 ++i;
             }
             if (textures.size() == 0) {
+                if (not cMaterial) {
+                    throw std::runtime_error("No material found for entity");
+                }
                 sp->setFloat("noTexture", 1.f);
                 sp->setVec3("materialColor", cMaterial->diffuse);
             } else {

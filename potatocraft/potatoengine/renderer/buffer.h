@@ -24,18 +24,27 @@ struct ShapeVertex {
     glm::vec2 textureCoords{};
 };
 
+struct TerrainVertex {
+    glm::vec3 position{};
+    glm::vec3 normal{};
+    glm::vec2 textureCoords{};
+    glm::vec3 color{};
+};
+
 class VBO {
    public:
-    VBO(const std::vector<Vertex>& vertices, bool immutable);
+    VBO(const std::vector<Vertex>& vertices);
     VBO(const std::vector<ShapeVertex>& vertices);
+    VBO(const std::vector<TerrainVertex>& vertices);
     ~VBO();
 
     void reload(const std::vector<Vertex>& vertices);
 
     uint32_t getID() const noexcept { return m_id; }
 
-    static std::unique_ptr<VBO> Create(const std::vector<Vertex>& vertices, bool immutable = true);
+    static std::unique_ptr<VBO> Create(const std::vector<Vertex>& vertices);
     static std::unique_ptr<VBO> CreateShape(const std::vector<ShapeVertex>& vertices);
+    static std::unique_ptr<VBO> CreateTerrain(const std::vector<TerrainVertex>& vertices);
 
    private:
     uint32_t m_id{};
@@ -44,7 +53,7 @@ class VBO {
 
 class IBO {
    public:
-    IBO(const std::vector<uint32_t>& indices, bool immutable);
+    IBO(const std::vector<uint32_t>& indices);
     ~IBO();
 
     void reload(const std::vector<uint32_t>& indices);
@@ -52,7 +61,7 @@ class IBO {
     uint32_t getCount() const noexcept { return m_count; }
     uint32_t getID() const noexcept { return m_id; }
 
-    static std::unique_ptr<IBO> Create(const std::vector<uint32_t>& indices, bool immutable = true);
+    static std::unique_ptr<IBO> Create(const std::vector<uint32_t>& indices);
 
    private:
     uint32_t m_id{};

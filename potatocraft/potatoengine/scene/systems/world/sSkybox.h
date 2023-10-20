@@ -12,7 +12,7 @@ namespace potatoengine {
 void skyboxSystem(entt::registry& reg) {
     using namespace entt::literals;
     reg.view<CSkybox, CTime, CTexture, CUUID>().each([&](const CSkybox& cSkybox, const CTime& cTime, CTexture& cTexture, const CUUID& cUUID) {
-        if (cTexture.useBlending) {
+        if (cTexture.drawMode == CTexture::DrawMode::TEXTURES_BLEND) {
             float blendFactor = 0.f;
             if (cTime.currentHour >= cTime.nightStart and cTime.currentHour < cTime.dayTransitionStart) {
                 blendFactor = 0.f;

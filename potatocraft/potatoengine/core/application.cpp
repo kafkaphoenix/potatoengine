@@ -27,7 +27,7 @@ Application::Application(Config&& c, CLArgs&& args)
     std::filesystem::current_path(c.root);
     m_states = StateStack::Create();
     m_assetsManager = AssetsManager::Create();
-    m_window = Window::Create(WindowProperties{.title = c.name, .width = c.width, .height = c.height});
+    m_window = Window::Create(WindowProperties{.title = m_name, .width = c.width, .height = c.height});
     m_window->setEventCallback(BIND_EVENT(Application::onEvent));
 
     m_renderer = Renderer::Create(m_assetsManager);

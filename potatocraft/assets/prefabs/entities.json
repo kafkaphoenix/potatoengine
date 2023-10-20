@@ -21,7 +21,6 @@
         "inherit": ["creature"],
         "ctags": ["camera", "equipment", "inventory"],
         "components": {
-            "tag": "player",
             "stats": {
                 "strength": 10,
                 "dexterity": 10,
@@ -63,10 +62,7 @@
         }
     },
     "chicken": {
-        "inherit": ["creature"],
-        "components": {
-            "tag": "animal"
-        }
+        "inherit": ["creature"]
     },
     "block": {
         "ctags": ["distanceFromCamera"],
@@ -80,7 +76,8 @@
             },
             "texture": {
                 "filepaths": ["block_atlas"],
-                "useFakeLighting": true
+                "useLighting": true,
+                "drawMode": "textureAtlas"
             },
             "textureAtlas": {
                 "rows": 2
@@ -95,7 +92,6 @@
     "brick_block": {
         "inherit": ["block"],
         "components": {
-            "tag": "brick_block",
             "textureAtlas": {
                 "index": 0
             }
@@ -104,7 +100,6 @@
     "stone_block": {
         "inherit": ["block"],
         "components": {
-            "tag": "stone_block",
             "textureAtlas": {
                 "index": 1
             }
@@ -113,16 +108,14 @@
     "glass_block": {
         "inherit": ["block"],
         "components": {
-            "tag": "glass_block",
             "texture": {
-                "useColor": true,
-                "useBlending": true,
-                "blendFactor": 0.6,
                 "color": {"r": 0.1, "g": 0.3, "b": 0.2, "a": 0.4},
+                "blendFactor": 0.6,
                 "useReflection": true,
                 "useRefraction": true,
                 "refractiveIndex": 1.5,
-                "reflectivity": 0.2
+                "reflectivity": 0.2,
+                "drawMode": "textureAtlasBlendColor"
             },
             "textureAtlas": {
                 "index": 2
@@ -140,7 +133,6 @@
     "wood_block": {
         "inherit": ["block"],
         "components": {
-            "tag": "wood_block",
             "textureAtlas": {
                 "index": 3
             }
@@ -149,7 +141,6 @@
     "skybox": {
         "ctags": ["transform", "time"],
         "components": {
-            "tag": "skybox",
             "shape": {
                 "type": "cube",
                 "size": {"x": 1, "y": 1, "z": 1}
@@ -160,7 +151,7 @@
             "texture": {
                 "filepaths": ["skybox_night", "skybox_day"],
                 "hasTransparency": true,
-                "useBlending": true
+                "drawMode": "texturesBlend"
             },
             "skybox": {
                 "useFog": true,
@@ -175,46 +166,108 @@
     "foco": {
         "ctags": ["transform", "distanceFromCamera"],
         "components": {
-            "tag": "light",
             "body": "foco",
             "light": {
                 "type": "directional"
             },
             "texture": {
-                "useColor": true,
-                "color": {"r": 0, "g": 0, "b": 0, "a": 0.7}
+                "color": {"r": 0, "g": 0, "b": 0, "a": 0.7},
+                "drawMode": "color"
             },
             "shaderProgram": "basic"
         }
     },
     "camera": {
-        "ctags": ["transform", "camera"],
-        "components": {
-            "tag": "camera"
-        }
+        "ctags": ["transform", "camera"]
     },
-    "terrain": {
-        "ctags": ["distanceFromCamera"],
+    "shape": {
+        "ctags": ["transform", "distanceFromCamera"],
         "components": {
-            "tag": "terrain",
             "texture": {
-                "filepaths": ["grass"]
+                "drawMode": "color"
             },
             "shaderProgram": "shape",
             "shape": {
-                "type": "rectangle",
-                "size": {"x": 20, "y": 20, "z": 0},
-                "repeatTexture": true
+                "size": {"x": 1, "y": 1, "z": 1}
+            }
+        }
+    },
+    "triangle": {
+        "inherit": ["shape"],
+        "components": {
+            "shape": {
+                "type": "triangle"
+            }
+        }
+    },
+    "rectangle": {
+        "inherit": ["shape"],
+        "components": {
+            "shape": {
+                "type": "rectangle"
+            }
+        }
+    },
+    "circle": {
+        "inherit": ["shape"],
+        "components": {
+            "shape": {
+                "type": "circle",
+                "size": {"x": 1, "y": 20, "z": 0}
+            }
+        }
+    },
+    "cube": {
+        "inherit": ["shape"],
+        "components": {
+            "shape": {
+                "type": "cube"
+            }
+        }
+    },
+    "chunk_config": {
+        "ctags": ["transform"],
+        "components": {
+            "texture": {
+                "filepaths": ["block_atlas"],
+                "drawMode": "textureAtlas"
             },
-            "transform": {
-                "position": {"x": 0, "y": -5, "z": 0},
-                "rotation": {"x": -90, "y": 0, "z": 0}
+            "textureAtlas": {
+                "rows": 2
+            },
+            "chunkManager": {
+                "chunkSize": 16,
+                "blockSize": 1,
+                "width": 3,
+                "height": 3,
+                "meshType": "chunk",
+                "meshAlgorithm": "greedy",
+                "useBiomes": true
+            },
+            "noise": {
+                "type": "simplex",
+                "seed": 0,
+                "octaves": 4,
+                "frequency": 0.01,
+                "persistence": 0.6,
+                "lacunarity": 2.0,
+                "amplitude": 1,
+                "positive": false
+            },
+            "shaderProgram": "terrain"
+        }
+    },
+    "chunk": {
+        "ctags": ["distanceFromCamera"],
+        "components": {
+            "chunk": {
+                "width": 16,
+                "height": 16
             }
         }
     },
     "fbo": {
         "components": {
-            "tag": "fbo",
             "fbo": {
                 "fbo": "postprocess",
                 "mode": "normal"
@@ -228,7 +281,6 @@
     "building": {
         "ctags": ["transform", "distanceFromCamera"],
         "components": {
-            "tag": "building",
             "shaderProgram": "basic",
             "body": "building"
         }

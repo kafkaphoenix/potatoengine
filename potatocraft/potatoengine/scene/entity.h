@@ -33,6 +33,11 @@ class Entity {
     }
 
     template <typename Component>
+    Component* try_get() {
+        return m_sceneManager->m_registry.try_get<Component>(m_entity);
+    }
+
+    template <typename Component>
     Component const& get() const {
         return m_sceneManager->m_registry.get<Component>(m_entity);
     }
@@ -63,6 +68,6 @@ class Entity {
 
    private:
     entt::entity m_entity{entt::null};
-    SceneManager* m_sceneManager{};  // shared ptr would add a counter we dont need here as we don't own the object
+    SceneManager* m_sceneManager;  // shared ptr would add a counter we dont need here as we don't own the object
 };
 }

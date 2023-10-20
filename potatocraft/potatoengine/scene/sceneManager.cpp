@@ -2,9 +2,17 @@
 
 #include "potatoengine/scene/components/camera/cCamera.h"
 #include "potatoengine/scene/components/common/cName.h"
+#include "potatoengine/scene/components/common/cTag.h"
 #include "potatoengine/scene/components/common/cUUID.h"
 #include "potatoengine/scene/components/graphics/cFBO.h"
+#include "potatoengine/scene/components/graphics/cTextureAtlas.h"
+#include "potatoengine/scene/components/physics/cTransform.h"
 #include "potatoengine/scene/components/utils/cDeleted.h"
+#include "potatoengine/scene/components/utils/cNoise.h"
+#include "potatoengine/scene/components/world/cChunkManager.h"
+#include "potatoengine/scene/components/world/cLight.h"
+#include "potatoengine/scene/components/world/cSkybox.h"
+#include "potatoengine/scene/components/world/cTime.h"
 #include "potatoengine/scene/entity.h"
 #include "potatoengine/scene/systems/sUpdate.h"
 #include "potatoengine/scene/utils.h"
@@ -121,16 +129,21 @@ void SceneManager::createScene(std::string_view id) {
     CORE_INFO("Creating scene entities...");
 #endif
     for (const auto& [name, data] : loadedScene.getLoadedEntities()) {
-        Entity e = createEntity(data.at("prefab").get<std::string_view>());
+        std::string_view prefab = data.at("prefab").get<std::string_view>();
+        Entity e = createEntity(prefab);
         e.add<CName>(std::string(name));
+        e.add<CTag>(prefab.data());
         if (data.contains("options")) {
             json options = data.at("options");
-            if (name == "skybox") {
+            if (prefab == "skybox") {
                 if (options.contains("time")) {
                     e.get<CTime>().setTime(options.at("time").get<float>());
                 }
                 if (options.contains("acceleration")) {
                     e.get<CTime>().acceleration = options.at("acceleration").get<float>();
+                }
+                if (options.contains("useFog")) {
+                    e.get<CSkybox>().useFog = options.at("useFog").get<bool>();
                 }
                 continue;
             }
@@ -138,9 +151,124 @@ void SceneManager::createScene(std::string_view id) {
                 json position = options.at("position");
                 e.get<CTransform>().position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
             }
+            if (options.contains("rotation")) {
+                json rotation = options.at("rotation");
+                glm::vec3 rot = {rotation.at("x").get<float>(), rotation.at("y").get<float>(), rotation.at("z").get<float>()};
+                e.get<CTransform>().rotation = glm::quat(glm::radians(rot));
+            }
+            if (options.contains("size")) {
+                CShape& shape = e.get<CShape>();
+                json size = options.at("size");
+                shape.size = {size.at("x").get<float>(), size.at("y").get<float>(), size.at("z").get<float>()};
+                shape.meshes.clear();
+                shape.createMesh();
+            }
+            if (options.contains("repeatTexture")) {
+                CShape& cShape = e.get<CShape>();
+                cShape.repeatTexture = options.at("repeatTexture").get<bool>();
+                cShape.meshes.clear();
+                cShape.createMesh();
+            }
+            if (options.contains("filepaths")) {
+                const auto& manager = m_assetsManager.lock();
+                if (not manager) {
+                    throw std::runtime_error("Assets manager is null!");
+                }
+
+                json filepaths = options.at("filepaths");
+                CTexture& c = e.get<CTexture>();
+                c.filepaths.clear();
+                c.textures.clear();
+                c.filepaths.reserve(filepaths.size());
+                c.textures.reserve(filepaths.size());
+                for (const auto& filepath : filepaths) {
+                    c.filepaths.emplace_back(filepath.get<std::string>());
+                    c.textures.emplace_back(manager->get<Texture>(filepath.get<std::string>()));
+                }
+            }
+            if (options.contains("color")) {
+                json color = options.at("color");
+                e.get<CTexture>().color = {color.at("r").get<float>(), color.at("g").get<float>(), color.at("b").get<float>(), color.at("a").get<float>()};
+            }
+            if (options.contains("useLighting")) {
+                e.get<CTexture>().useLighting = options.at("useLighting").get<bool>();
+            }
+            if (options.contains("drawMode")) {
+                e.get<CTexture>()._drawMode = options.at("drawMode").get<std::string>();
+                e.get<CTexture>().setDrawMode();
+            }
+            if (options.contains("textureAtlas")) {
+                CTextureAtlas& c = e.get<CTextureAtlas>();
+                json textureAtlasOptions = options.at("textureAtlas");
+                if (textureAtlasOptions.contains("index")) {
+                    c.index = textureAtlasOptions.at("index").get<int>();
+                }
+                if (textureAtlasOptions.contains("rows")) {
+                    c.rows = textureAtlasOptions.at("rows").get<int>();
+                }
+            }
             if (options.contains("scale")) {
                 json scale = options.at("scale");
                 e.get<CTransform>().scale = {scale.at("x").get<float>(), scale.at("y").get<float>(), scale.at("z").get<float>()};
+            }
+            if (prefab == "chunk_config") {
+                if (options.contains("chunkSize")) {
+                    e.get<CChunkManager>().chunkSize = options.at("chunkSize").get<int>();
+                }
+                if (options.contains("blockSize")) {
+                    e.get<CChunkManager>().blockSize = options.at("blockSize").get<int>();
+                }
+                if (options.contains("width")) {
+                    e.get<CChunkManager>().width = options.at("width").get<int>();
+                }
+                if (options.contains("height")) {
+                    e.get<CChunkManager>().height = options.at("height").get<int>();
+                }
+                if (options.contains("meshType")) {
+                    e.get<CChunkManager>()._meshType = options.at("meshType").get<std::string>();
+                    e.get<CChunkManager>().setMeshType();
+                }
+                if (options.contains("meshAlgorithm")) {
+                    e.get<CChunkManager>()._meshAlgorithm = options.at("meshAlgorithm").get<std::string>();
+                    e.get<CChunkManager>().setMeshAlgorithm();
+                }
+                if (options.contains("useBiomes")) {
+                    e.get<CChunkManager>().useBiomes = options.at("useBiomes").get<bool>();
+                }
+            }
+            if (options.contains("noise")) {
+                CNoise& noise = e.get<CNoise>();
+                json noiseOptions = options.at("noise");
+                if (noiseOptions.contains("type")) {
+                    noise._type = noiseOptions.at("type").get<std::string>();
+                    noise.setNoiseType();
+                }
+                if (noiseOptions.contains("seed")) {
+                    noise.seed = noiseOptions.at("seed").get<int>();
+                    noise.setSeed();
+                }
+                if (noiseOptions.contains("octaves")) {
+                    noise.octaves = noiseOptions.at("octaves").get<int>();
+                    noise.setOctaves();
+                }
+                if (noiseOptions.contains("frequency")) {
+                    noise.frequency = noiseOptions.at("frequency").get<float>();
+                    noise.setFrequency();
+                }
+                if (noiseOptions.contains("persistence")) {
+                    noise.persistence = noiseOptions.at("persistence").get<float>();
+                    noise.setPersistence();
+                }
+                if (noiseOptions.contains("lacunarity")) {
+                    noise.lacunarity = noiseOptions.at("lacunarity").get<float>();
+                    noise.setLacunarity();
+                }
+                if (noiseOptions.contains("amplitude")) {
+                    noise.amplitude = noiseOptions.at("amplitude").get<int>();
+                }
+                if (noiseOptions.contains("positive")) {
+                    noise.positive = noiseOptions.at("positive").get<bool>();
+                }
             }
         }
     }
@@ -149,8 +277,10 @@ void SceneManager::createScene(std::string_view id) {
     CORE_INFO("Creating scene lights...");
 #endif
     for (const auto& [name, data] : loadedScene.getLoadedLights()) {
-        Entity e = createEntity(data.at("prefab").get<std::string_view>());
+        std::string_view prefab = data.at("prefab").get<std::string_view>();
+        Entity e = createEntity(prefab);
         e.add<CName>(std::string(name));
+        e.add<CTag>(prefab.data());
         if (data.contains("options")) {
             json options = data.at("options");
             if (options.contains("position")) {
@@ -180,8 +310,10 @@ void SceneManager::createScene(std::string_view id) {
     CORE_INFO("Creating scene cameras...");
 #endif
     for (const auto& [name, data] : loadedScene.getLoadedCameras()) {
-        Entity e = createEntity(data.at("prefab").get<std::string_view>());
+        std::string_view prefab = data.at("prefab").get<std::string_view>();
+        Entity e = createEntity(prefab);
         e.add<CName>(std::string(name));
+        e.add<CTag>(prefab.data());
         if (data.contains("options")) {
             json options = data.at("options");
             if (options.contains("position")) {
@@ -203,8 +335,10 @@ void SceneManager::createScene(std::string_view id) {
     CORE_INFO("Creating scene systems...");
 #endif
     for (const auto& [name, data] : loadedScene.getLoadedSystems()) {
-        Entity e = createEntity(data.at("prefab").get<std::string_view>());
+        std::string_view prefab = data.at("prefab").get<std::string_view>();
+        Entity e = createEntity(prefab);
         e.add<CName>(std::string(name));
+        e.add<CTag>(prefab.data());
         if (data.contains("options")) {
             json options = data.at("options");
             // TODO: implement
@@ -215,8 +349,10 @@ void SceneManager::createScene(std::string_view id) {
     CORE_INFO("Creating scene FBOs...");
 #endif
     for (const auto& [name, data] : loadedScene.getLoadedFBOs()) {
-        Entity e = createEntity(data.at("prefab").get<std::string_view>());
+        std::string_view prefab = data.at("prefab").get<std::string_view>();
+        Entity e = createEntity(prefab);
         e.add<CName>(std::string(name));
+        e.add<CTag>(prefab.data());
         CFBO& fbo = e.get<CFBO>();
         if (data.contains("options")) {
             json options = data.at("options");

@@ -4,6 +4,16 @@
             "basic": {
                 "vbasic": "assets/shaders/basic.vert",
                 "fbasic": "assets/shaders/basic.frag"
+            },
+            "shape": {
+                "vshape": "assets/shaders/shape.vert",
+                "fshape": "assets/shaders/shape.frag"
+            }
+        },
+        "textures": {
+            "pavement": {
+                "filepath": "assets/textures/pavement.jpg",
+                "type": "textureDiffuse"
             }
         },
         "models": {
@@ -13,7 +23,8 @@
             "entities": {
                 "filepath": "assets/prefabs/entities.json",
                 "targets": [
-                    "building"
+                    "building",
+                    "rectangle"
                 ]
             }
         }
@@ -24,6 +35,17 @@
             "options": {
                 "position": {"x": 0, "y": -40, "z": -50},
                 "scale": {"x": 1,"y": 1,"z": 1}
+            }
+        },
+        "pavement": {
+            "prefab": "rectangle",
+            "options": {
+                "size": {"x": 70, "y": 70, "z": 0},
+                "position": {"x": 0, "y": -40, "z": -50},
+                "rotation": {"x": -90, "y": 0, "z": 0},
+                "filepaths": ["pavement"],
+                "repeatTexture": true,
+                "drawMode": "texture"
             }
         }
     }

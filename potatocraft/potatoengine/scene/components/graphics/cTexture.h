@@ -11,29 +11,62 @@
 namespace potatoengine {
 
 struct CTexture {
+    enum class DrawMode {
+        COLOR,
+        TEXTURE,
+        TEXTURE_ATLAS,
+        TEXTURES_BLEND,
+        TEXTURE_ATLAS_BLEND,
+        TEXTURE_BLEND_COLOR,
+        TEXTURE_ATLAS_BLEND_COLOR
+    };
+
     std::vector<std::string> filepaths;
     std::vector<std::shared_ptr<Texture>> textures;
-    bool hasTransparency{};
-    bool useFakeLighting{};
-    bool useBlending{};
-    float blendFactor{};
-    bool useColor{};
     glm::vec4 color{};
-    bool useReflection{};
+    float blendFactor{};
     float reflectivity{};
-    bool useRefraction{};
     float refractiveIndex{};
+    bool hasTransparency{};
+    bool useLighting{};
+    bool useReflection{};
+    bool useRefraction{};
+    std::string _drawMode;
+    DrawMode drawMode{};
 
     CTexture() = default;
-    explicit CTexture(std::vector<std::shared_ptr<Texture>>&& t, bool ht, bool ufl, bool ub, float bf, bool uc, glm::vec4&& c, bool ur, float r, bool urf, float ri)
-        : textures(std::move(t)), hasTransparency(ht), useFakeLighting(ufl), useBlending(ub), blendFactor(bf), useColor(uc), color(std::move(c)), useReflection(ur), reflectivity(r), useRefraction(urf), refractiveIndex(ri) {}
+    explicit CTexture(std::vector<std::string>&& fps, glm::vec4&& c, float bf, float r, float ri, bool ht, bool ul, bool ur, bool uf, std::string&& dm) : filepaths(std::move(fps)), color(std::move(c)), blendFactor(bf), reflectivity(r), refractiveIndex(ri), hasTransparency(ht), useLighting(ul), useReflection(ur), useRefraction(uf), _drawMode(dm) {}
 
     void print() const {
         std::string texturePaths;
-        for (const std::string& filepath : filepaths) {
-            texturePaths += "\n\t\t\t\ttexture: " + filepath;
+        if (filepaths.size() == 0) {
+            texturePaths = "\n\t\t\t\t none";
+        } else {
+            for (const std::string& filepath : filepaths) {
+                texturePaths += "\n\t\t\t\t " + filepath;
+            }
         }
-        CORE_INFO("\t\thasTransparency: {0}\n\t\t\t\tuseFakeLighting: {1}\n\t\t\t\tuseBlending: {2}\n\t\t\t\tblendFactor: {3}\n\t\t\t\tuseColor: {4}\n\t\t\t\tcolor: {5}\n\t\t\t\tuseReflection: {6}\n\t\t\t\treflectivity: {7}\n\t\t\t\tuseRefraction: {8}\n\t\t\t\trefractiveIndex: {9}{10}", hasTransparency, useFakeLighting, useBlending, blendFactor, useColor, glm::to_string(color), useReflection, reflectivity, useRefraction, refractiveIndex, texturePaths);
+        CORE_INFO("\t\tcolor: {0}\n\t\t\t\tblendFactor: {1}\n\t\t\t\treflectivity: {2}\n\t\t\t\trefractiveIndex: {3}\n\t\t\t\thasTransparency: {4}\n\t\t\t\tuseLighting: {5}\n\t\t\t\tuseReflection: {6}\n\t\t\t\tuseRefraction: {7}\n\t\t\t\tdrawMode: {8}\n\t\t\t\ttextures: {9}", glm::to_string(color), blendFactor, reflectivity, refractiveIndex, hasTransparency, useLighting, useReflection, useRefraction, _drawMode, texturePaths);
+    }
+
+    void setDrawMode() { // TODO maybe send assets manager to this function?
+        if (_drawMode == "color") {
+            drawMode = DrawMode::COLOR;
+        } else if (_drawMode == "texture") {
+            drawMode = DrawMode::TEXTURE;
+        } else if (_drawMode == "textureAtlas") {
+            drawMode = DrawMode::TEXTURE_ATLAS;
+        } else if (_drawMode == "texturesBlend") { // blend two textures
+            drawMode = DrawMode::TEXTURES_BLEND;
+        } else if (_drawMode == "textureAtlasBlend") { // blend two textures in the atlas // TODO: this is not implemented
+            drawMode = DrawMode::TEXTURE_ATLAS_BLEND;
+        } else if (_drawMode == "textureBlendColor") { // blend texture with a color
+            drawMode = DrawMode::TEXTURE_BLEND_COLOR;
+        } else if (_drawMode == "textureAtlasBlendColor") { // blend texture in the atlas with a color
+            drawMode = DrawMode::TEXTURE_ATLAS_BLEND_COLOR;
+        } else {
+            throw std::runtime_error("Unknown draw mode " + _drawMode);
+        }
     }
 };
 }

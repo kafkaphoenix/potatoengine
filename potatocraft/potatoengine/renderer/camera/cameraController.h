@@ -47,7 +47,7 @@ class CameraController {
     float m_nearClip = 0.1f;
     float m_farClip = 1000.f;
 
-    glm::vec3 m_position = glm::vec3(0.f, 0.f, 5.f);
+    glm::vec3 m_position = glm::vec3(8.f, 5.f, 8.f);
     glm::quat m_rotation = glm::identity<glm::quat>();
     float m_rightAngle{};
     float m_upAngle{};

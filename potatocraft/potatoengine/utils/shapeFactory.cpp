@@ -6,7 +6,7 @@ namespace potatoengine {
 
 std::shared_ptr<VAO> ShapeFactory::CreateShape(const std::vector<ShapeVertex>& vertices, const std::vector<uint32_t>& indices) {
     std::shared_ptr<VAO> vao = VAO::Create();
-    vao->attachShapeVertex(VBO::CreateShape(vertices));
+    vao->attachVertex(VBO::CreateShape(vertices), VAO::VertexType::SHAPE_VERTEX);
     vao->setIndex(IBO::Create(indices));
     return vao;
 }
@@ -47,7 +47,7 @@ std::shared_ptr<VAO> ShapeFactory::CreateRectangle(float width, float height, bo
 std::shared_ptr<VAO> ShapeFactory::CreateCube(float width, float height, float depth, bool repeatTexture) {
     uint32_t overflow = 1;
     if (repeatTexture) {
-        if (width not_eq height) {
+        if (not(width == height and height == depth)) {
             throw std::runtime_error("Cannot repeat texture on non-square shape");
         }
         overflow = width;
@@ -107,12 +107,14 @@ std::shared_ptr<VAO> ShapeFactory::CreateCircle(float radius, uint32_t segments)
     std::vector<uint32_t> indices;
 
     // Center
+    vertices.reserve(segments + 1);
     vertices.push_back({{0.f, 0.f, 0.f}, {0.5f, 0.5f}});
 
     float angleIncrement = 2 * std::numbers::pi / segments;
 
     // Vertices around the circle
-    for (int i = 0; i < segments; i++) {
+    indices.reserve(segments * 3);
+    for (int i = 0; i < segments; ++i) {
         float x = radius * cos(i * angleIncrement);
         float y = radius * sin(i * angleIncrement);
         float u = 0.5f * (1.0f + cos(i * angleIncrement));

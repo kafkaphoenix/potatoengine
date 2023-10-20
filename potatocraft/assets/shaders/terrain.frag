@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 surfaceNormal;
 layout (location = 1) in vec2 vTextureCoords;
-layout (location = 2) in vec4 vColor;
+layout (location = 2) in vec3 vColor;
 layout (location = 3) in vec3 directionToLight;
 layout (location = 4) in vec3 directionToCamera;
 layout (location = 5) in float fogVisibility;
@@ -12,16 +12,8 @@ layout (location = 7) in vec3 worldNormal;
 layout (location = 0) out vec4 fragColor;
 
 uniform sampler2D textureDiffuse1;
-uniform sampler2D textureDiffuse2;
-uniform sampler2D textureDiffuse3;
-uniform sampler2D textureSpecular1;
-uniform sampler2D textureNormal1;
 uniform float useColor;
-uniform vec4 color;
-uniform float useBlending;
-uniform float blendFactor;
 uniform float useLighting;
-uniform float useTextureAtlas;
 uniform float numRows;
 uniform vec2 offset;
 uniform vec3 fogColor;
@@ -40,39 +32,15 @@ uniform vec3 ambient;
 uniform vec3 diffuse;
 uniform vec3 specular;
 uniform float shininess;
-uniform float noTexture;
-uniform vec3 materialColor;
 
 void main()
 {
-    vec4 base = vec4(0.f);
-    if (int(noTexture) == 1) {
-        base = vec4(materialColor, 1.f);
-    } else {
-        vec2 offsetTexture = vTextureCoords;
-        if (int(useTextureAtlas) == 1) {
-            offsetTexture = vTextureCoords / numRows + offset;
-        }
-        vec4 texture1 = texture(textureDiffuse1, offsetTexture);
-        if (int(useNormal) == 1) {
-            texture1 = texture(textureNormal1, offsetTexture);
-        }
-        vec4 texture2 = texture(textureDiffuse2, offsetTexture);
 
-        if (int(useColor) == 1) {
-            if (int(useBlending) == 1) {
-                base = mix(texture1, texture2, blendFactor);
-                base = vec4(base.rgb * color.rgb, color.a);
-            } else {
-                base = color;
-            }
-        } else {
-            if (int(useBlending) == 1) {
-                base = mix(texture1, texture2, blendFactor);
-            } else {
-                base = texture1;
-            }
-        }
+    vec4 base = vec4(0.f);
+    if (int(useColor) == 1) {
+        base = vec4(vColor, 1.f);
+    } else {
+        base = texture(textureDiffuse1, vTextureCoords);
     }
 
     if (int(useReflection) == 1) {
@@ -84,9 +52,7 @@ void main()
             vec4 skyTexture2 = texture(textureDiffuseSky10, R);
             reflectedSkyColor = mix(skyTexture2, skyTexture1, skyBlendFactor);
         }
-        fragColor = mix(base, reflectedSkyColor, reflectivity);
-    } else {
-        fragColor = base;
+        base = mix(base, reflectedSkyColor, reflectivity);
     }
 
     if (int(useRefraction) == 1) {
@@ -99,7 +65,7 @@ void main()
             vec4 skyTexture2 = texture(textureDiffuseSky10, R);
             refractedSkyColor = mix(skyTexture2, skyTexture1, skyBlendFactor);
         }
-        fragColor = mix(fragColor, refractedSkyColor, 0.5);
+        base = mix(base, refractedSkyColor, 0.5);
     }
 
     if (int(useLighting) == 1) {
@@ -117,8 +83,8 @@ void main()
         vec3 specular_ = lightColor * (spec * specular);
 
         vec3 result = ambient_ + diffuse_; //+ specular;
-        fragColor = vec4(fragColor.rgb * result, fragColor.a);
+        base = vec4(base.rgb * result, base.a);
     }
 
-    fragColor = mix(vec4(fogColor, 1.f), fragColor, fogVisibility);
+    fragColor = mix(vec4(fogColor, 1.f), base, fogVisibility);
 }

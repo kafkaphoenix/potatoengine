@@ -6,9 +6,9 @@
 using json = nlohmann::json;
 
 struct PrefabData {
-    std::unordered_set<std::string> inherits;
-    std::unordered_set<std::string> ctags;
-    std::unordered_map<std::string, json> components;
+    std::unordered_set<std::string> inherits{};
+    std::unordered_set<std::string> ctags{};
+    std::unordered_map<std::string, json> components{};
 };
 
 namespace potatoengine {

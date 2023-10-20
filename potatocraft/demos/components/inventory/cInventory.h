@@ -1,7 +1,7 @@
 #pragma once
 
 #include "potatoengine/engineAPI.h"
-#include "sandbox/components/inventory/cItem.h"
+#include "demos/components/inventory/cItem.h"
 
 namespace potatocraft {
 

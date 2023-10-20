@@ -17,6 +17,8 @@
 #include "potatoengine/scene/components/physics/cTransform.h"
 #include "potatoengine/scene/components/utils/cShape.h"
 #include "potatoengine/scene/components/world/cSkybox.h"
+#include "potatoengine/scene/components/world/cChunk.h"
+#include "potatoengine/scene/components/world/cChunkManager.h"
 
 namespace potatoengine {
 
@@ -73,6 +75,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
         CBody* cBody = reg.try_get<CBody>(e);
         CMesh* cMesh = reg.try_get<CMesh>(e);
         CShape* cShape = reg.try_get<CShape>(e);
+        CChunkManager* cChunkManager = reg.try_get<CChunkManager>(e);
 
         if (cMesh) {  // TODO optimize
             render(cTexture, cTextureAtlas, cSkybox, cMaterial, cMesh, cTransform, cShaderProgram, cSkyboxTexture, renderer);
@@ -85,6 +88,10 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
         } else if (cShape) {
             for (auto& mesh : cShape->meshes) {
                 render(cTexture, cTextureAtlas, cSkybox, cMaterial, &mesh, cTransform, cShaderProgram, cSkyboxTexture, renderer);
+            }
+        } else if (cChunkManager) {
+            for (auto& [position, chunk] : cChunkManager->chunks) {
+                render(cTexture, cTextureAtlas, cSkybox, cMaterial, &chunk.terrainMesh, chunk.transform, cShaderProgram, cSkyboxTexture, renderer);
             }
         } else {
             CName* cName = reg.try_get<CName>(e);

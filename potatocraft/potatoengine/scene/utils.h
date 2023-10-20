@@ -24,8 +24,12 @@
 #include "potatoengine/scene/components/physics/cRigidBody.h"
 #include "potatoengine/scene/components/physics/cTransform.h"
 #include "potatoengine/scene/components/utils/cDeleted.h"
+#include "potatoengine/scene/components/utils/cNoise.h"
 #include "potatoengine/scene/components/utils/cRelationship.h"
 #include "potatoengine/scene/components/utils/cShape.h"
+#include "potatoengine/scene/components/world/cBlock.h"
+#include "potatoengine/scene/components/world/cChunk.h"
+#include "potatoengine/scene/components/world/cChunkManager.h"
 #include "potatoengine/scene/components/world/cLight.h"
 #include "potatoengine/scene/components/world/cSkybox.h"
 #include "potatoengine/scene/components/world/cTime.h"
@@ -134,6 +138,22 @@ CFBO &castCFBO(void *other) {
     return *static_cast<CFBO *>(other);
 }
 
+CNoise &castCNoise(void *other) {
+    return *static_cast<CNoise *>(other);
+}
+
+CChunkManager &castCChunkManager(void *other) {
+    return *static_cast<CChunkManager *>(other);
+}
+
+CChunk &castCChunk(void *other) {
+    return *static_cast<CChunk *>(other);
+}
+
+CBlock &castCBlock(void *other) {
+    return *static_cast<CBlock *>(other);
+}
+
 void registerComponents() {
     using namespace entt::literals;
 
@@ -170,7 +190,6 @@ void registerComponents() {
         .data<&CTransform::position>("position"_hs)
         .data<&CTransform::rotation>("rotation"_hs)
         .data<&CTransform::scale>("scale"_hs)
-        .func<&CTransform::calculate>("calculate"_hs)
         .func<&CTransform::print>("print"_hs)
         .func<&assign<CTransform>, entt::as_ref_t>("assign"_hs);
 
@@ -197,16 +216,15 @@ void registerComponents() {
         .ctor<&castCTexture, entt::as_ref_t>()
         .data<&CTexture::filepaths>("filepaths"_hs)
         .data<&CTexture::textures>("textures"_hs)
-        .data<&CTexture::hasTransparency>("hasTransparency"_hs)
-        .data<&CTexture::useFakeLighting>("useFakeLighting"_hs)
-        .data<&CTexture::useBlending>("useBlending"_hs)
-        .data<&CTexture::blendFactor>("blendFactor"_hs)
-        .data<&CTexture::useColor>("useColor"_hs)
         .data<&CTexture::color>("color"_hs)
-        .data<&CTexture::useReflection>("useReflection"_hs)
+        .data<&CTexture::blendFactor>("blendFactor"_hs)
         .data<&CTexture::reflectivity>("reflectivity"_hs)
-        .data<&CTexture::useRefraction>("useRefraction"_hs)
         .data<&CTexture::refractiveIndex>("refractiveIndex"_hs)
+        .data<&CTexture::hasTransparency>("hasTransparency"_hs)
+        .data<&CTexture::useLighting>("useLighting"_hs)
+        .data<&CTexture::useReflection>("useReflection"_hs)
+        .data<&CTexture::useRefraction>("useRefraction"_hs)
+        .data<&CTexture::_drawMode>("drawMode"_hs)
         .func<&CTexture::print>("print"_hs)
         .func<&onComponentAdded<CTexture>, entt::as_ref_t>("onComponentAdded"_hs)
         .func<&assign<CTexture>, entt::as_ref_t>("assign"_hs);
@@ -218,7 +236,7 @@ void registerComponents() {
         .data<&CMesh::indices>("indices"_hs)
         .data<&CMesh::textures>("textures"_hs)
         .data<&CMesh::vao>("vao"_hs)
-        .func<&CMesh::setupMesh>("setupMesh"_hs)
+        .data<&CMesh::vertexType>("vertexType"_hs)
         .func<&CMesh::print>("print"_hs)
         .func<&assign<CMesh>, entt::as_ref_t>("assign"_hs);
 
@@ -359,7 +377,7 @@ void registerComponents() {
         .type("shape"_hs)
         .ctor<&castCShape, entt::as_ref_t>()
         .data<&CShape::_type>("type"_hs)
-        .data<&CShape::dimensions>("size"_hs)
+        .data<&CShape::size>("size"_hs)
         .data<&CShape::meshes>("meshes"_hs)
         .data<&CShape::repeatTexture>("repeatTexture"_hs)
         .func<&CShape::print>("print"_hs)
@@ -377,6 +395,52 @@ void registerComponents() {
         .func<&CFBO::print>("print"_hs)
         .func<&onComponentAdded<CFBO>, entt::as_ref_t>("onComponentAdded"_hs)
         .func<&assign<CFBO>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CNoise>()
+        .type("noise"_hs)
+        .ctor<&castCNoise, entt::as_ref_t>()
+        .data<&CNoise::_type>("type"_hs)
+        .data<&CNoise::seed>("seed"_hs)
+        .data<&CNoise::octaves>("octaves"_hs)
+        .data<&CNoise::frequency>("frequency"_hs)
+        .data<&CNoise::persistence>("persistence"_hs)
+        .data<&CNoise::lacunarity>("lacunarity"_hs)
+        .data<&CNoise::amplitude>("amplitude"_hs)
+        .data<&CNoise::positive>("positive"_hs)
+        .func<&CNoise::print>("print"_hs)
+        .func<&onComponentAdded<CNoise>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CNoise>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CChunkManager>()
+        .type("chunkManager"_hs)
+        .ctor<&castCChunkManager, entt::as_ref_t>()
+        .data<&CChunkManager::chunkSize>("chunkSize"_hs)
+        .data<&CChunkManager::blockSize>("blockSize"_hs)
+        .data<&CChunkManager::width>("width"_hs)
+        .data<&CChunkManager::height>("height"_hs)
+        .data<&CChunkManager::chunks>("chunks"_hs)
+        .data<&CChunkManager::_meshType>("meshType"_hs)
+        .data<&CChunkManager::_meshAlgorithm>("meshAlgorithm"_hs)
+        .data<&CChunkManager::useBiomes>("useBiomes"_hs)
+        .func<&CChunkManager::print>("print"_hs)
+        .func<&onComponentAdded<CChunkManager>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CChunkManager>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CChunk>()
+        .type("chunk"_hs)
+        .ctor<&castCChunk, entt::as_ref_t>()
+        .data<&CChunk::_biome>("biome"_hs)
+        .func<&CChunk::print>("print"_hs)
+        .func<&onComponentAdded<CChunk>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CChunk>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CBlock>()
+        .type("block"_hs)
+        .ctor<&castCBlock, entt::as_ref_t>()
+        .data<&CBlock::_type>("type"_hs)
+        .func<&CBlock::print>("print"_hs)
+        .func<&onComponentAdded<CBlock>, entt::as_ref_t>("onComponentAdded"_hs)
+        .func<&assign<CBlock>, entt::as_ref_t>("assign"_hs);
 }
 
 void printScene(entt::registry &r) {
@@ -405,16 +469,47 @@ void printScene(entt::registry &r) {
 
 template <>
 void engine::SceneManager::onComponentAdded(Entity e, CTexture &c) {
+    c.setDrawMode();
     const auto &manager = m_assetsManager.lock();
     if (not manager) {
         throw std::runtime_error("Assets manager is null!");
     }
 
-    std::vector<std::shared_ptr<Texture>> textures;
+    c.textures.clear();
+    c.textures.reserve(c.filepaths.size());
     for (std::string_view filepath : c.filepaths) {
-        textures.emplace_back(manager->get<Texture>(filepath.data()));
+        c.textures.emplace_back(manager->get<Texture>(filepath.data()));
     }
-
-    c.textures = std::move(textures);
     e.update<CTexture>(c);
+}
+
+template <>
+void engine::SceneManager::onComponentAdded(Entity e, CChunkManager& c) {
+    c.setMeshType();
+    c.setMeshAlgorithm();
+    e.update<CChunkManager>(c);
+}
+
+template <>
+void engine::SceneManager::onComponentAdded(Entity e, CChunk& c) {
+    c.setBiome();
+    e.update<CChunk>(c);
+}
+
+template <>
+void engine::SceneManager::onComponentAdded(Entity e, CNoise& c) {
+    c.setNoiseType();
+    c.setSeed();
+    c.setOctaves();
+    c.setFrequency();
+    c.setPersistence();
+    c.setLacunarity();
+
+    e.update<CNoise>(c);
+}
+
+template <>
+void engine::SceneManager::onComponentAdded(Entity e, CBlock& c) {
+    c.setBlockType();
+    e.update<CBlock>(c);
 }

@@ -1,4 +1,3 @@
-# Project definition
 cmake_minimum_required(VERSION 3.20...3.25)
 
 project(potatocraft
@@ -8,7 +7,6 @@ VERSION 1.0
 
 # Generate the compilation database
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# Set C++ standard to C++23
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -23,8 +21,8 @@ include_directories("${BASEPATH}")
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/potatoengine/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/potatoengine/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/sandbox/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/sandbox/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/demos/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/demos/*.cpp"
 )
 
 add_subdirectory(vendor)
@@ -46,6 +44,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "STB_IMAGE_IMPLEMENTATION")
 target_compile_definitions(${PROJECT_NAME} PRIVATE "STBI_FAILURE_USERMSG")
 target_compile_definitions(${PROJECT_NAME} PRIVATE "STB_IMAGE_WRITE_IMPLEMENTATION")
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/stb)
+target_include_directories(${PROJECT_NAME} PRIVATE vendor/fastnoiselite)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glfw_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 target_include_directories(${PROJECT_NAME} PRIVATE ${assimp_SOURCE_DIR}/include)
@@ -87,7 +86,7 @@ if(CLANG_TIDY AND ENABLE_CLANG_TIDY)
 
     add_custom_target(
         run_clang_tidy
-        COMMAND ${CLANG_TIDY} ${CLANG_TIDY_OPTIONS} ${CMAKE_SOURCE_DIR}/potatoengine ${CMAKE_SOURCE_DIR}/sandbox
+        COMMAND ${CLANG_TIDY} ${CLANG_TIDY_OPTIONS} ${CMAKE_SOURCE_DIR}/potatoengine ${CMAKE_SOURCE_DIR}/demos
         COMMENT "running clang-tidy static analysis"
     )
 
@@ -112,7 +111,7 @@ if(CPPCHECK AND ENABLE_CPPCHECK)
 
     add_custom_target(
         run_cppcheck
-        COMMAND ${CPPCHECK} ${CPPCHECK_OPTIONS} ${CMAKE_SOURCE_DIR}/potatoengine ${CMAKE_SOURCE_DIR}/sandbox
+        COMMAND ${CPPCHECK} ${CPPCHECK_OPTIONS} ${CMAKE_SOURCE_DIR}/potatoengine ${CMAKE_SOURCE_DIR}/demos
         COMMENT "running cppcheck static analysis"
     )
     add_dependencies(${PROJECT_NAME} run_cppcheck)

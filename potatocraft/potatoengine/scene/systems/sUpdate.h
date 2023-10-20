@@ -11,12 +11,14 @@
 #include "potatoengine/scene/systems/world/sSkybox.h"
 #include "potatoengine/scene/systems/world/sTime.h"
 #include "potatoengine/scene/systems/world/sLight.h"
+#include "potatoengine/scene/systems/world/sTerrain.h"
 
 namespace potatoengine {
 
 void updateSystem(entt::registry& reg, std::weak_ptr<Renderer> r, const Time& ts) {
     deleteSystem(reg);
     timeSystem(reg, ts);
+    terrainSystem(reg);
     lightSystem(reg);
     movementSystem(reg, ts);
     skyboxSystem(reg);

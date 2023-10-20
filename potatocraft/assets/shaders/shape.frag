@@ -6,18 +6,25 @@ layout (location = 1) in float fogVisibility;
 layout (location = 0) out vec4 fragColor;
 
 uniform sampler2D textureDiffuse1;
-uniform float useAtlas;
+uniform float useTextureAtlas;
 uniform float numRows;
 uniform vec2 offset;
 uniform vec3 fogColor;
+uniform float useColor;
+uniform vec4 color;
 
 void main()
 {
-    vec2 offsetTexture = vTextureCoords;
-    if (int(useAtlas) == 1) {
-        offsetTexture = vTextureCoords / numRows + offset;
+    vec4 texture1;
+    if (int(useColor) == 0) {
+        vec2 offsetTexture = vTextureCoords;
+        if (int(useTextureAtlas) == 1) {
+            offsetTexture = vTextureCoords / numRows + offset;
+        }
+        texture1 = texture(textureDiffuse1, offsetTexture);
+    } else {
+        texture1 = color;
     }
-    vec4 texture1 = texture(textureDiffuse1, offsetTexture);
 
     fragColor = mix(vec4(fogColor, 1.f), texture1, fogVisibility);
 }

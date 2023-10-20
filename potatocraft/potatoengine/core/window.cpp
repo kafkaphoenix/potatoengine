@@ -43,7 +43,7 @@ Window::Window(WindowProperties&& properties) {
     m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.data(), nullptr, nullptr);
     ++s_GLFWWindowCount;
 
-    glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, m_data.width, m_data.height, 0);
+    glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, m_data.width, m_data.height, 60);
     m_context = OpenGLContext::Create(m_window);
     m_context->init();
     glViewport(0, 0, m_data.width, m_data.height);

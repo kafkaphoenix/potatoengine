@@ -4,11 +4,11 @@
 
 namespace potatoengine {
 
-constexpr GLbitfield
+static constexpr GLbitfield
     mapping_flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT,
     storage_flags = GL_DYNAMIC_STORAGE_BIT | mapping_flags;  // allow modification of the buffer but not resizing
 
-VBO::VBO(const std::vector<Vertex>& vertices, bool immutable) : m_immutable(immutable) {
+VBO::VBO(const std::vector<Vertex>& vertices) : m_immutable(true) {
     if (m_immutable) {
         glCreateBuffers(1, &m_id);
         glNamedBufferStorage(m_id, sizeof(Vertex) * vertices.size(), vertices.data(), storage_flags);
@@ -21,6 +21,11 @@ VBO::VBO(const std::vector<Vertex>& vertices, bool immutable) : m_immutable(immu
 VBO::VBO(const std::vector<ShapeVertex>& vertices) {
     glCreateBuffers(1, &m_id);
     glNamedBufferStorage(m_id, sizeof(ShapeVertex) * vertices.size(), vertices.data(), storage_flags);
+}
+
+VBO::VBO(const std::vector<TerrainVertex>& vertices) {
+    glCreateBuffers(1, &m_id);
+    glNamedBufferStorage(m_id, sizeof(TerrainVertex) * vertices.size(), vertices.data(), storage_flags);
 }
 
 void VBO::reload(const std::vector<Vertex>& vertices) {
@@ -38,15 +43,19 @@ VBO::~VBO() {
     glDeleteBuffers(1, &m_id);
 }
 
-std::unique_ptr<VBO> VBO::Create(const std::vector<Vertex>& vertices, bool immutable) {
-    return std::make_unique<VBO>(vertices, immutable);
+std::unique_ptr<VBO> VBO::Create(const std::vector<Vertex>& vertices) {
+    return std::make_unique<VBO>(vertices);
 }
 
 std::unique_ptr<VBO> VBO::CreateShape(const std::vector<ShapeVertex>& vertices) {
     return std::make_unique<VBO>(vertices);
 }
 
-IBO::IBO(const std::vector<uint32_t>& indices, bool immutable) : m_count(indices.size()), m_immutable(immutable) {
+std::unique_ptr<VBO> VBO::CreateTerrain(const std::vector<TerrainVertex>& vertices) {
+    return std::make_unique<VBO>(vertices);
+}
+
+IBO::IBO(const std::vector<uint32_t>& indices) : m_count(indices.size()), m_immutable(true) {
     if (m_immutable) {
         glCreateBuffers(1, &m_id);
         glNamedBufferStorage(m_id, sizeof(uint32_t) * indices.size(), indices.data(), storage_flags);
@@ -72,7 +81,7 @@ IBO::~IBO() {
     glDeleteBuffers(1, &m_id);
 }
 
-std::unique_ptr<IBO> IBO::Create(const std::vector<uint32_t>& indices, bool immutable) {
-    return std::make_unique<IBO>(indices, immutable);
+std::unique_ptr<IBO> IBO::Create(const std::vector<uint32_t>& indices) {
+    return std::make_unique<IBO>(indices);
 }
 }

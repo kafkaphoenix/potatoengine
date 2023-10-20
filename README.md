@@ -1,5 +1,12 @@
 # potatocraft
-YAMC 'Yet Another Minecraft Clone'
+C++ Opengl engine, inside the folder `demos` you can find several example scenes:
+- Sponza
+- Dabrovic sponza
+- Lowpoly city
+- Noise generated terrain and skybox
+- Flat terrain with primitives and skybox
+- Several cube instances with reflection, light, using a texture atlas and a skybox
+- Voxel terrain (TODO)
 
 ## To compile and run
 ```
@@ -25,19 +32,21 @@ $ .\Debug\potatocraft.exe
 - Model, Texture and Cubemaps loader
 - Phong lighthing
 - Framebuffer for post processing effects
+- Triangle/Quad meshing terrain generation supporting texture, texture atlas and colors
+- Noise generator for procedural terrain
 
 ## How to use the engine in a personal project
 
-- Create a folder in `\potatocraft\` inside you need to define the app.cpp and your game states with the game logic,
-an example can be seen in `potatocraft\sandbox\`
+- Create the personal project folder inside `\potatocraft\` then inside you need to define the app.cpp and your game states with the game logic,
+an example can be seen in `potatocraft\demos\`
 
 ## Planned features
 
 - Debugging menu
+- Expand camera class supporting more modes
 - Profiler
 - Metrics
 - Serialization
-- Expand camera class supporting more modes
 - Scripting language
 - Tests
 - Engine wiki documentation
@@ -53,3 +62,4 @@ an example can be seen in `potatocraft\sandbox\`
 - [nlohmann_json](https://github.com/nlohmann/json): json processing
 - [assimp](https://github.com/assimp/assimp): model loading
 - [spdlog](https://github.com/gabime/spdlog): structured logging
+- [FastNoiseLite](https://github.com/Auburn/FastNoiseLite): noise generation

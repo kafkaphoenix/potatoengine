@@ -24,10 +24,29 @@ void VAO::unbind() {
 }
 
 // cppcheck-suppress unusedFunction
-void VAO::attachVertex(std::unique_ptr<VBO>&& vbo) {
-    glVertexArrayVertexBuffer(m_id, 0, vbo->getID(), 0, sizeof(Vertex));
+void VAO::attachVertex(std::shared_ptr<VBO>&& vbo, VertexType type) { // vbo should be shared
+    size_t vertexSize = 0;
+    if (type == VertexType::VERTEX) {
+        vertexSize = sizeof(Vertex);
+    } else if (type == VertexType::SHAPE_VERTEX) {
+        vertexSize = sizeof(ShapeVertex);
+    } else if (type == VertexType::TERRAIN_VERTEX) {
+        vertexSize = sizeof(TerrainVertex);
+    }
+
+    glVertexArrayVertexBuffer(m_id, 0, vbo->getID(), 0, vertexSize);
     m_vbos.emplace_back(std::move(vbo));
 
+    if (type == VertexType::VERTEX) {
+        attachVertexAttributes();
+    } else if (type == VertexType::SHAPE_VERTEX) {
+        attachShapeVertexAttributes();
+    } else if (type == VertexType::TERRAIN_VERTEX) {
+        attachTerrainVertexAttributes();
+    }
+}
+
+void VAO::attachVertexAttributes() {
     glEnableVertexArrayAttrib(m_id, 0);
     glVertexArrayAttribFormat(m_id, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
     glVertexArrayAttribBinding(m_id, 0, m_vboIdx);
@@ -63,10 +82,7 @@ void VAO::attachVertex(std::unique_ptr<VBO>&& vbo) {
     ++m_vboIdx;
 }
 
-void VAO::attachShapeVertex(std::unique_ptr<VBO>&& vbo) {
-    glVertexArrayVertexBuffer(m_id, 0, vbo->getID(), 0, sizeof(ShapeVertex));
-    m_vbos.emplace_back(std::move(vbo));
-
+void VAO::attachShapeVertexAttributes() {
     glEnableVertexArrayAttrib(m_id, 0);
     glVertexArrayAttribFormat(m_id, 0, 3, GL_FLOAT, GL_FALSE, offsetof(ShapeVertex, position));
     glVertexArrayAttribBinding(m_id, 0, m_vboIdx);
@@ -76,6 +92,35 @@ void VAO::attachShapeVertex(std::unique_ptr<VBO>&& vbo) {
     glVertexArrayAttribBinding(m_id, 1, m_vboIdx);
 
     ++m_vboIdx;
+}
+
+void VAO::attachTerrainVertexAttributes() {
+    glEnableVertexArrayAttrib(m_id, 0);
+    glVertexArrayAttribFormat(m_id, 0, 3, GL_FLOAT, GL_FALSE, offsetof(TerrainVertex, position));
+    glVertexArrayAttribBinding(m_id, 0, m_vboIdx);
+
+    glEnableVertexArrayAttrib(m_id, 1);
+    glVertexArrayAttribFormat(m_id, 1, 3, GL_FLOAT, GL_FALSE, offsetof(TerrainVertex, normal));
+    glVertexArrayAttribBinding(m_id, 1, m_vboIdx);
+
+    glEnableVertexArrayAttrib(m_id, 2);
+    glVertexArrayAttribFormat(m_id, 2, 2, GL_FLOAT, GL_FALSE, offsetof(TerrainVertex, textureCoords));
+    glVertexArrayAttribBinding(m_id, 2, m_vboIdx);
+
+    glEnableVertexArrayAttrib(m_id, 3);
+    glVertexArrayAttribFormat(m_id, 3, 3, GL_FLOAT, GL_FALSE, offsetof(TerrainVertex, color));
+    glVertexArrayAttribBinding(m_id, 3, m_vboIdx);
+
+    ++m_vboIdx;
+}
+
+void VAO::updateVertex(std::unique_ptr<VBO>&& vbo, uint32_t idx, VertexType type) {
+    // TODO: update only the vbo at idx
+}
+
+void VAO::clearVBOs() noexcept {
+    m_vbos.clear();
+    m_vboIdx = 0;
 }
 
 void VAO::setIndex(std::unique_ptr<IBO>&& ibo) {

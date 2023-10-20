@@ -12,7 +12,7 @@ Texture::Texture(uint32_t width, uint32_t height, GLenum glFormat, std::optional
     glTextureParameteri(m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     if (wrap.value_or(false)) {
-        glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // prevents edge bleeding fbo
+        glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // prevents edge bleeding fbo
         glTextureParameteri(m_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
     m_mipmapLevel = 1;
@@ -29,6 +29,7 @@ Texture::Texture(std::filesystem::path&& fp, std::optional<std::string>&& type, 
       m_gammaCorrection(gammaCorrection.value_or(false)) {
     if (m_isCubemap) {
         std::string fileExt = std::filesystem::exists(fp / "front.jpg") ? ".jpg" : ".png";
+        m_filepaths.reserve(6);
         m_filepaths.emplace_back(std::move((fp / ("front" + fileExt)).string()));  // it needs to be added in this order
         m_filepaths.emplace_back(std::move((fp / ("back" + fileExt)).string()));
         m_filepaths.emplace_back(std::move((fp / ("top" + fileExt)).string()));

@@ -32,6 +32,10 @@
             "grass": {
                 "filepath": "assets/textures/grass.jpg",
                 "type": "textureDiffuse"
+            },
+            "block_atlas": {
+                "filepath": "assets/textures/block_atlas.png",
+                "type": "textureDiffuse"
             }
         },
         "models": {
@@ -48,7 +52,8 @@
                     "skybox",
                     "foco",
                     "camera",
-                    "terrain"
+                    "chunk_config",
+                    "chunk"
                 ]
             }
         }
@@ -67,8 +72,8 @@
                 "acceleration": 1
             }
         },
-        "flat_terrain": {
-            "prefab": "terrain"
+        "terrain": {
+            "prefab": "chunk_config"
         }
     },
     "lights": {
@@ -77,7 +82,7 @@
             "options": {
                 "position": {"x": 0, "y": 10, "z": 5},
                 "rotation": {"x": 0, "y": 90, "z": 0},
-                "color": {"r": 1, "g": 1, "b": 1}
+                "color": {"r": 1, "g": 1, "b": 1, "a": 1}
             }
         }
     },
