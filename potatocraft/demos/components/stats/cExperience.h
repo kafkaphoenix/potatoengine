@@ -9,7 +9,7 @@ struct CExperience {
     explicit CExperience(int c) : current(c) {}
 
     void print() const {
-        CORE_INFO("\t\tcurrent: {}", current);
+        CORE_TRACE("\t\tcurrent: {}", current);
     }
 };
 }

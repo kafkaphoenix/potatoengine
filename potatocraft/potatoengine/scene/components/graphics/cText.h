@@ -18,7 +18,7 @@ struct CText {
     explicit CText(std::string&& t, glm::vec3&& c) : text(std::move(t)), color(std::move(c)) {}
 
     void print() const {
-        CORE_INFO("\t\ttext: {0}\n\t\t\t\tcolor: {1}", text, glm::to_string(color));
+        CORE_TRACE("\t\ttext: {0}\n\t\t\t\tcolor: {1}", text, glm::to_string(color));
     }
 };
 }

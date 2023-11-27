@@ -32,7 +32,7 @@ struct CChunk {
         for (int i = 0; i < blocks.size(); ++i) {
             b += "\n\t\t\t\t\tblock: " + std::to_string(i) + " " + blocks[i]._type;
         }
-        CORE_INFO("\t\tbiome: {0}\n\t\t\t\tblocks: {1}", _biome, b);
+        CORE_TRACE("\t\tbiome: {0}\n\t\t\t\tblocks: {1}", _biome, b);
     }
 
     void setBiome() {

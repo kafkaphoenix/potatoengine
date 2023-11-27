@@ -13,7 +13,7 @@ struct CInventory {
     explicit CInventory(std::vector<CItem> i) : items(std::move(i)) {}
 
     void print() const {
-        CORE_INFO("\t\titems: No implemented"); // TODO finish
+        CORE_TRACE("\t\titems: No implemented"); // TODO finish
     }
 };
 }

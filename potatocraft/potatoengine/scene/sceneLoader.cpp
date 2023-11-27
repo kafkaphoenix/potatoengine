@@ -14,58 +14,36 @@ void SceneLoader::load(std::string_view id) {
 
     const auto& scene = manager->get<Scene>(id);
 
-#ifdef DEBUG
     CORE_INFO("Loading assets...");
     Timer timer = Timer();
-#endif
     loadShaders(scene, manager);
-#ifdef DEBUG
     CORE_INFO("Loading shaders TIME: {}", timer.getSeconds());
     timer.reset();
-#endif
     loadTextures(scene, manager);
-#ifdef DEBUG
     CORE_INFO("Loading textures TIME: {}", timer.getSeconds());
     timer.reset();
-#endif
     loadModels(scene, manager);
-#ifdef DEBUG
     CORE_INFO("Loading models TIME: {}", timer.getSeconds());
     timer.reset();
-#endif
     loadPrefabs(scene, manager);
-#ifdef DEBUG
     CORE_INFO("Loading prefabs TIME: {}", timer.getSeconds());
     timer.reset();
-#endif
     loadScenes(scene, manager);  // TODO: implement
-#ifdef DEBUG
-    CORE_INFO("Loading scenes TIME: {}", timer.getSeconds());
+    CORE_INFO("Loading sub-scenes TIME: {}", timer.getSeconds());
     CORE_INFO("Assets loaded!");
     timer.reset();
-#endif
     loadEntities(scene, manager);
-#ifdef DEBUG
     CORE_INFO("Loading entities TIME: {}", timer.getSeconds());
     timer.reset();
-#endif
     loadLights(scene, manager);
-#ifdef DEBUG
     CORE_INFO("Loading lights TIME: {}", timer.getSeconds());
     timer.reset();
-#endif
     loadCameras(scene, manager);
-#ifdef DEBUG
     CORE_INFO("Loading cameras TIME: {}", timer.getSeconds());
-#endif
     loadSystems(scene, manager);
-#ifdef DEBUG
     CORE_INFO("Loading systems TIME: {}", timer.getSeconds());
-#endif
     loadFBOs(scene, manager);
-#ifdef DEBUG
     CORE_INFO("Loading FBOs TIME: {}", timer.getSeconds());
-#endif
 }
 
 void SceneLoader::loadShaders(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {

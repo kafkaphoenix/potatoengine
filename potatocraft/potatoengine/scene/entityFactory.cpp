@@ -45,7 +45,7 @@ glm::vec4 vec4FromJson(const json& data, std::string_view type = "") {
 }
 
 glm::quat quatFromJson(const json& data) {
-    glm::quat quat{};
+    glm::quat quat{glm::identity<glm::quat>()};
     quat.x = data.at("x").get<float>();
     quat.y = data.at("y").get<float>();
     quat.z = data.at("z").get<float>();

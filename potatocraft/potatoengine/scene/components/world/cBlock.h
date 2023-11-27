@@ -28,7 +28,7 @@ struct CBlock {
     explicit CBlock(std::string&& t) : _type(std::move(t)) {}
 
     void print() const {
-        CORE_INFO("\t\ttype: {0}", _type);
+        CORE_TRACE("\t\ttype: {0}", _type);
     }
 
     void setBlockType() {

@@ -10,8 +10,9 @@ class OpenGLContext {
    public:
     OpenGLContext(GLFWwindow* w);
 
-    void init() const;
-    void swapBuffers() const noexcept;
+    void init();
+    void makeContextCurrent(GLFWwindow* w);
+    void swapBuffers();
 
     static std::unique_ptr<OpenGLContext> Create(GLFWwindow* w);
 

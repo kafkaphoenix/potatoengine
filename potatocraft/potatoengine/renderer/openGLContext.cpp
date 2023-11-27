@@ -10,15 +10,20 @@ OpenGLContext::OpenGLContext(GLFWwindow* w) : m_window(w) {
     }
 }
 
-void OpenGLContext::init() const {
-    glfwMakeContextCurrent(m_window);
+void OpenGLContext::init() {
+    makeContextCurrent(m_window);
 
     if (int status = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)); status == 0) {
         throw std::runtime_error("Failed to initialize Glad!");
     }
 }
 
-void OpenGLContext::swapBuffers() const noexcept {
+void OpenGLContext::makeContextCurrent(GLFWwindow* w) {
+    // TODO check with multi window if this works
+    glfwMakeContextCurrent(w);
+}
+
+void OpenGLContext::swapBuffers() {
     glfwSwapBuffers(m_window);
 }
 

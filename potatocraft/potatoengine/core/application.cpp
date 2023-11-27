@@ -1,8 +1,6 @@
 #include "potatoengine/core/application.h"
 
-#include "potatoengine/assets/assetsManager.h"
 #include "potatoengine/core/time.h"
-#include "potatoengine/renderer/renderer.h"
 // #include <imgui.h>
 // #include <imgui_impl_glfw.h>
 // #include <imgui_impl_opengl3.h>
@@ -27,7 +25,26 @@ Application::Application(Config&& c, CLArgs&& args)
     std::filesystem::current_path(c.root);
     m_states = StateStack::Create();
     m_assetsManager = AssetsManager::Create();
-    m_window = Window::Create(WindowProperties{.title = m_name, .width = c.width, .height = c.height});
+    WindowProperties windowProperties = {
+        .name = m_name,
+        .windowIconPath = c.windowIconPath,
+        .width = c.width,
+        .height = c.height,
+        .depthBits = c.depthBits,
+        .refreshRate = c.refreshRate,
+        .fullscreen = c.fullscreen,
+        .primaryMonitor = c.primaryMonitor,
+        .vSync = c.vSync,
+        .resizable = c.resizable,
+        .openGLMajorVersion = c.openGLMajorVersion,
+        .openGLMinorVersion = c.openGLMinorVersion,
+        .cursorIconPath = c.cursorIconPath,
+        .cursorMode = c.cursorMode,
+        .debugEnabled = c.debugEnabled,
+        .debugLevel = c.debugLevel,
+        .displayFPS = c.displayFPS,
+    };
+    m_window = Window::Create(std::move(windowProperties));
     m_window->setEventCallback(BIND_EVENT(Application::onEvent));
 
     m_renderer = Renderer::Create(m_assetsManager);
@@ -36,35 +53,12 @@ Application::Application(Config&& c, CLArgs&& args)
 }
 
 Application::~Application() {
-#ifdef DEBUG
-    CORE_INFO("Deleting Application");
-#endif
+    CORE_WARN("Deleting Application");
     m_renderer->shutdown();
     // TODO class imgui layer with shutdown and pop overlay
 }
 
-bool Application::onWindowClose(WindowCloseEvent&) {
-    terminate();
-
-    return true;
-}
-
-bool Application::onWindowResize(WindowResizeEvent& e) {
-    if (e.getWidth() == 0 or e.getHeight() == 0) {
-        m_minimized = true;
-    } else {
-        m_minimized = false;
-        m_renderer->onWindowResize(e.getWidth(), e.getHeight());
-    }
-
-    return true;
-}
-
 void Application::onEvent(Event& e) {
-    EventDispatcher dispatcher(e);
-    dispatcher.dispatch<WindowCloseEvent>(BIND_EVENT(Application::onWindowClose));
-    dispatcher.dispatch<WindowResizeEvent>(BIND_EVENT(Application::onWindowResize));
-
     for (auto it = m_states->rbegin(); it not_eq m_states->rend() and not e.m_handled; ++it) {
         (*it)->onEvent(e);
     }
@@ -94,7 +88,7 @@ void Application::run() {
         m_lastFrame = currentFrame;
         m_accumulator += ts;
 
-        if (not m_minimized) [[likely]] {
+        if (not m_paused) [[likely]] {
             while (m_accumulator > ts) {
                 for (auto& state : *m_states) {
                     state->onUpdate(ts);
@@ -105,17 +99,15 @@ void Application::run() {
                 }
             }
 
-            /*if (m_debugging) {
+            /*if (m_debugging) { move to render o imgui render
                 debugger(imgui_debugger, window, clear_color);
                 ImGui::Render();
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             }*/
         }
         // TODO: open menu pause
-#ifdef DEBUG
         // CORE_INFO("FPS: {}", 1.f / ts);
         //  TODO move to imgui debug panel
-#endif
         m_window->onUpdate();
     }
     // espera teardown(window);

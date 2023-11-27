@@ -12,9 +12,7 @@ void Renderer::init() const noexcept {
 }
 
 void Renderer::shutdown() noexcept {
-#ifdef DEBUG
-    CORE_INFO("Shutting down Renderer");
-#endif
+    CORE_WARN("Shutting down Renderer");
     // TODO something to add? reset statistics maybe?
 }
 
@@ -22,10 +20,10 @@ void Renderer::onWindowResize(uint32_t w, uint32_t h) const noexcept {
     RendererAPI::SetViewport(0, 0, w, h);
 }
 
-void Renderer::beginScene(const Camera& c) noexcept {
-    m_viewMatrix = c.getView();
-    m_projectionMatrix = c.getProjection();
-    m_cameraPosition = c.getPosition();
+void Renderer::beginScene(const CCamera& c, const CTransform& t) noexcept {
+    m_view = c.view;
+    m_projection = c.projection;
+    m_cameraPosition = t.position;
 }
 
 void Renderer::endScene() noexcept {
@@ -45,9 +43,7 @@ void Renderer::addShader(std::string&& name) {
     newShaderProgram->link();
     newShaderProgram->detach(*vs);
     newShaderProgram->detach(*fs);
-#ifdef DEBUG
     CORE_INFO("Shader {} linked!", name);
-#endif
     m_shaderPrograms.emplace(std::move(name), std::move(newShaderProgram));
 }
 
@@ -70,8 +66,9 @@ void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transfor
     auto& sp = get(shaderProgram);
 
     sp->use();
-    sp->setMat4("projection", m_projectionMatrix);
-    sp->setMat4("view", m_viewMatrix);
+    sp->setMat4("projection", m_projection);
+    sp->setMat4("view", m_view);
+    sp->setVec3("cameraPosition", m_cameraPosition);
     sp->setMat4("model", transform);
 
     RendererAPI::DrawIndexed(vao);

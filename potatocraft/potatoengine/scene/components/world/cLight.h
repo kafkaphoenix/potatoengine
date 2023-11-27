@@ -31,7 +31,7 @@ struct CLight {
         : _type(std::move(t)), color(std::move(c)), intensity(i), range(r), innerConeAngle(ica), outerConeAngle(oca) {}
 
     void print() const {
-        CORE_INFO("\t\ttype: {0}\n\t\t\t\tcolor: {1}\n\t\t\t\tintensity: {2}\n\t\t\t\trange: {3}\n\t\t\t\tinnerConeAngle: {4}\n\t\t\t\touterConeAngle: {5}", _type, glm::to_string(color), intensity, range, innerConeAngle, outerConeAngle);
+        CORE_TRACE("\t\ttype: {0}\n\t\t\t\tcolor: {1}\n\t\t\t\tintensity: {2}\n\t\t\t\trange: {3}\n\t\t\t\tinnerConeAngle: {4}\n\t\t\t\touterConeAngle: {5}", _type, glm::to_string(color), intensity, range, innerConeAngle, outerConeAngle);
     }
 };
 }

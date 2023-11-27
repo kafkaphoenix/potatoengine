@@ -16,9 +16,7 @@ class AssetsManager {
             throw std::runtime_error("Asset " + std::string(id) + " already exists!");
         }
         m_assets.emplace(id, std::make_shared<Type>(std::forward<Args>(args)...));
-#ifdef DEBUG
-        CORE_INFO("\tLoaded asset {}", id);
-#endif
+        CORE_TRACE("\tLoaded asset {}", id);
     }
 
     template <typename Type>
@@ -54,16 +52,14 @@ class AssetsManager {
         } else {
             throw std::runtime_error("Asset " + std::string(id) + " not found or has an incompatible type. Reload failed!");
         }
-#ifdef DEBUG
-        CORE_INFO("Reloaded asset {}", id);
-#endif
+        CORE_TRACE("Reloaded asset {}", id);
         return std::static_pointer_cast<Type>(std::get<std::shared_ptr<Type>>(m_assets.at(id.data())));
     }
 
     void print() const noexcept {
         for (const auto& [id, asset] : m_assets) {
             std::string_view fp = std::visit([](const auto& asset) { return asset->getFilepath(); }, asset);
-            CORE_INFO("Asset {0}: {1}", id, fp);
+            CORE_TRACE("Asset {0}: {1}", id, fp);
         }
     }
 

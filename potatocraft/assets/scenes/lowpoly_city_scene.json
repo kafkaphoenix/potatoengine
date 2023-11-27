@@ -17,14 +17,16 @@
             }
         },
         "models": {
-            "building": "assets/models/lowpoly_city/lowpoly_city.obj"
+            "building": "assets/models/lowpoly_city/lowpoly_city.obj",
+            "camera": "assets/models/camera/camera.obj"
         },
         "prefabs": {
             "entities": {
                 "filepath": "assets/prefabs/entities.json",
                 "targets": [
                     "building",
-                    "rectangle"
+                    "rectangle",
+                    "camera"
                 ]
             }
         }
@@ -33,7 +35,7 @@
         "lowpoly_city": {
             "prefab": "building",
             "options": {
-                "position": {"x": 0, "y": -40, "z": -50},
+                "position": {"x": 0, "y": 0, "z": 0},
                 "scale": {"x": 1,"y": 1,"z": 1}
             }
         },
@@ -41,11 +43,22 @@
             "prefab": "rectangle",
             "options": {
                 "size": {"x": 70, "y": 70, "z": 0},
-                "position": {"x": 0, "y": -40, "z": -50},
+                "position": {"x": 0, "y": 0, "z": 0},
                 "rotation": {"x": -90, "y": 0, "z": 0},
                 "filepaths": ["pavement"],
                 "repeatTexture": true,
                 "drawMode": "texture"
+            }
+        }
+    },
+    "cameras": {
+        "scene_camera": {
+            "prefab": "camera",
+            "options": {
+                "position": {"x": 16, "y": 2, "z": 38},
+                "type": "perspective",
+                "isActive": true,
+                "isKinematic": true
             }
         }
     }

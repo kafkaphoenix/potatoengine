@@ -7,6 +7,7 @@
 #include "potatoengine/scene/components/audio/cAudio.h"
 #include "potatoengine/scene/components/camera/cCamera.h"
 #include "potatoengine/scene/components/camera/cDistanceFromCamera.h"
+#include "potatoengine/scene/components/camera/cActiveCamera.h"
 #include "potatoengine/scene/components/common/cName.h"
 #include "potatoengine/scene/components/common/cTag.h"
 #include "potatoengine/scene/components/common/cUUID.h"
@@ -92,6 +93,10 @@ CCamera &castCCamera(void *other) {
 
 CDistanceFromCamera &castCDistanceFromCamera(void *other) {
     return *static_cast<CDistanceFromCamera *>(other);
+}
+
+CActiveCamera &castCActiveCamera(void *other) {
+    return *static_cast<CActiveCamera *>(other);
 }
 
 CSkybox &castCSkybox(void *other) {
@@ -180,9 +185,10 @@ void registerComponents() {
     entt::meta<CShaderProgram>()
         .type("shaderProgram"_hs)
         .ctor<&castCShaderProgram, entt::as_ref_t>()
-        .data<&CShaderProgram::shaderProgram>("shaderProgram"_hs)
+        .data<&CShaderProgram::name>("name"_hs)
+        .data<&CShaderProgram::isVisible>("isVisible"_hs)
         .func<&CShaderProgram::print>("print"_hs)
-        .func<&assign<CShaderProgram, std::string>, entt::as_ref_t>("assign"_hs);
+        .func<&assign<CShaderProgram>, entt::as_ref_t>("assign"_hs);
 
     entt::meta<CTransform>()
         .type("transform"_hs)
@@ -272,7 +278,18 @@ void registerComponents() {
     entt::meta<CCamera>()
         .type("camera"_hs)
         .ctor<&castCCamera, entt::as_ref_t>()
-        .data<&CCamera::camera>("camera"_hs)
+        .data<&CCamera::_type>("type"_hs)
+        .data<&CCamera::_aspectRatio>("aspectRatio"_hs)
+        .data<&CCamera::fov>("fov"_hs)
+        .data<&CCamera::zoomFactor>("zoomFactor"_hs)
+        .data<&CCamera::zoomMin>("zoomMin"_hs)
+        .data<&CCamera::zoomMax>("zoomMax"_hs)
+        .data<&CCamera::nearClip>("nearClip"_hs)
+        .data<&CCamera::farClip>("farClip"_hs)
+        .data<&CCamera::mouseSensitivity>("mouseSensitivity"_hs)
+        .data<&CCamera::translationSpeed>("translationSpeed"_hs)
+        .data<&CCamera::verticalSpeed>("verticalSpeed"_hs)
+        .data<&CCamera::rotationSpeed>("rotationSpeed"_hs)
         .func<&CCamera::print>("print"_hs)
         .func<&onComponentAdded<CCamera>, entt::as_ref_t>("onComponentAdded"_hs)
         .func<&assign<CCamera>, entt::as_ref_t>("assign"_hs);
@@ -283,6 +300,11 @@ void registerComponents() {
         .data<&CDistanceFromCamera::distance>("distance"_hs)
         .func<&CDistanceFromCamera::print>("print"_hs)
         .func<&assign<CDistanceFromCamera>, entt::as_ref_t>("assign"_hs);
+
+    entt::meta<CActiveCamera>()
+        .type("activeCamera"_hs)
+        .ctor<&castCActiveCamera, entt::as_ref_t>()
+        .func<&assign<CActiveCamera>, entt::as_ref_t>("assign"_hs);
 
     entt::meta<CSkybox>()
         .type("skybox"_hs)
@@ -445,21 +467,24 @@ void registerComponents() {
 
 void printScene(entt::registry &r) {
     using namespace entt::literals;
-    CORE_INFO("Scene entities:");
+
+    CORE_TRACE("Scene entities:");
+
+    entt::meta_type cType;
+    entt::meta_any cData;
+    entt::meta_func printFunc;
     r.view<CUUID>().each([&](entt::entity e, const CUUID &cUUID) {
-        CORE_INFO("Entity UUID: {}", entt::to_integral(e));
+        CORE_TRACE("Entity UUID: {}", entt::to_integral(e));
         for (auto &&curr : r.storage()) {
             if (auto &storage = curr.second; storage.contains(e)) {
-                entt::meta_type cType = entt::resolve(storage.type());
-                entt::meta_any cData = cType.construct(storage.value(e));
-                entt::meta_func printFunc = cType.func("print"_hs);
+                cType = entt::resolve(storage.type());
+                cData = cType.construct(storage.value(e));
+                printFunc = cType.func("print"_hs);
                 if (printFunc) {
                     std::string_view cName = storage.type().name();
                     cName = cName.substr(cName.find_last_of(':') + 1);
-                    CORE_INFO("\t{}", cName);
+                    CORE_TRACE("\t{}", cName);
                     printFunc.invoke(cData);
-                } else {
-                    throw std::runtime_error("Component does not have a print function");
                 }
             }
         }
@@ -467,6 +492,7 @@ void printScene(entt::registry &r) {
 }
 }
 
+// TODO: fix this, they are here because in their components they would add an import to entity again and it would be a circular dependency as sceneManager already includes entity.h
 template <>
 void engine::SceneManager::onComponentAdded(Entity e, CTexture &c) {
     c.setDrawMode();
@@ -484,20 +510,20 @@ void engine::SceneManager::onComponentAdded(Entity e, CTexture &c) {
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CChunkManager& c) {
+void engine::SceneManager::onComponentAdded(Entity e, CChunkManager &c) {
     c.setMeshType();
     c.setMeshAlgorithm();
     e.update<CChunkManager>(c);
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CChunk& c) {
+void engine::SceneManager::onComponentAdded(Entity e, CChunk &c) {
     c.setBiome();
     e.update<CChunk>(c);
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CNoise& c) {
+void engine::SceneManager::onComponentAdded(Entity e, CNoise &c) {
     c.setNoiseType();
     c.setSeed();
     c.setOctaves();
@@ -509,7 +535,16 @@ void engine::SceneManager::onComponentAdded(Entity e, CNoise& c) {
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CBlock& c) {
+void engine::SceneManager::onComponentAdded(Entity e, CBlock &c) {
     c.setBlockType();
     e.update<CBlock>(c);
+}
+
+template <>
+void engine::SceneManager::onComponentAdded(Entity e, CCamera &c) {
+    c.setCameraType();
+    c.setAspectRatio();
+    c.calculateProjection();
+
+    e.update<CCamera>(c);
 }

@@ -1,6 +1,8 @@
 #include "potatoengine/scene/sceneManager.h"
 
+#include "potatoengine/scene/components/camera/cActiveCamera.h"
 #include "potatoengine/scene/components/camera/cCamera.h"
+#include "potatoengine/scene/components/camera/serializer.h"
 #include "potatoengine/scene/components/common/cName.h"
 #include "potatoengine/scene/components/common/cTag.h"
 #include "potatoengine/scene/components/common/cUUID.h"
@@ -14,10 +16,12 @@
 #include "potatoengine/scene/components/world/cSkybox.h"
 #include "potatoengine/scene/components/world/cTime.h"
 #include "potatoengine/scene/entity.h"
+#include "potatoengine/scene/systems/sEvent.h"
 #include "potatoengine/scene/systems/sUpdate.h"
 #include "potatoengine/scene/utils.h"
 #include "potatoengine/utils/timer.h"
 
+using json = nlohmann::json;
 namespace potatoengine {
 
 Entity SceneManager::createEntity(std::string_view id, const std::optional<uint32_t>& uuid) {
@@ -77,6 +81,8 @@ void SceneManager::updatePrefab(std::string_view id) {
 }
 
 void SceneManager::loadScene(std::string_view id) {
+    CORE_INFO("Loading scene elements...");
+
     const auto& manager = m_assetsManager.lock();
     if (not manager) {
         throw std::runtime_error("Assets manager not found!");
@@ -89,11 +95,10 @@ void SceneManager::loadScene(std::string_view id) {
     }
 }
 
-void SceneManager::createScene(std::string_view id) {
-#ifdef DEBUG
+void SceneManager::createScene(std::string id) {
     CORE_INFO("Creating scene...");
     Timer timer;
-#endif
+
     if (m_activeScene == id) {
         throw std::runtime_error("Scene " + std::string{id} + " is already active!");
     }
@@ -105,29 +110,29 @@ void SceneManager::createScene(std::string_view id) {
     if (not m_activeScene.empty()) {
         clearScene(m_activeScene);
     }
-#ifdef DEBUG
-    CORE_INFO("Linking scene shaders...");
-#endif
+
     const auto& renderer = m_renderer.lock();
     if (not renderer) {
         throw std::runtime_error("Renderer not found!");
     }
 
+    CORE_INFO("Linking scene shaders...");
     const auto& loadedScene = m_loadedScenes.at(id.data());
     for (std::string id : loadedScene.getLoadedShaders()) {
         renderer->addShader(std::move(id));
     }
 
-#ifdef DEBUG
     CORE_INFO("Creating scene prefabs...");
-#endif
     for (std::string_view id : loadedScene.getLoadedPrefabs()) {
         createPrefab(id);
     }
 
-#ifdef DEBUG
+    const auto& manager = m_assetsManager.lock();
+    if (not manager) {
+        throw std::runtime_error("Assets manager is null!");
+    }
+
     CORE_INFO("Creating scene entities...");
-#endif
     for (const auto& [name, data] : loadedScene.getLoadedEntities()) {
         std::string_view prefab = data.at("prefab").get<std::string_view>();
         Entity e = createEntity(prefab);
@@ -135,17 +140,8 @@ void SceneManager::createScene(std::string_view id) {
         e.add<CTag>(prefab.data());
         if (data.contains("options")) {
             json options = data.at("options");
-            if (prefab == "skybox") {
-                if (options.contains("time")) {
-                    e.get<CTime>().setTime(options.at("time").get<float>());
-                }
-                if (options.contains("acceleration")) {
-                    e.get<CTime>().acceleration = options.at("acceleration").get<float>();
-                }
-                if (options.contains("useFog")) {
-                    e.get<CSkybox>().useFog = options.at("useFog").get<bool>();
-                }
-                continue;
+            if (options.contains("isKinematic")) {
+                e.get<CRigidBody>().isKinematic = options.at("isKinematic").get<bool>();
             }
             if (options.contains("position")) {
                 json position = options.at("position");
@@ -154,7 +150,22 @@ void SceneManager::createScene(std::string_view id) {
             if (options.contains("rotation")) {
                 json rotation = options.at("rotation");
                 glm::vec3 rot = {rotation.at("x").get<float>(), rotation.at("y").get<float>(), rotation.at("z").get<float>()};
-                e.get<CTransform>().rotation = glm::quat(glm::radians(rot));
+                e.get<CTransform>().rotate(glm::quat(glm::radians(rot)));
+            }
+            if (e.has_all<CCamera, CTransform>()) {
+                CCamera& cCamera = e.get<CCamera>();
+                CTransform& cTransform = e.get<CTransform>();
+                deserializeCamera(cCamera, options);
+                cCamera.calculateProjection();
+                cCamera.calculateView(cTransform.position, cTransform.rotation);
+            }
+            if (options.contains("isActive")) {
+                bool isActiveCamera = options.at("isActive").get<bool>();
+                if (isActiveCamera and not e.has_all<CActiveCamera>()) {
+                    e.add<CActiveCamera>();
+                } else if (not isActiveCamera and e.has_all<CActiveCamera>()) {
+                    e.remove<CActiveCamera>();
+                }
             }
             if (options.contains("size")) {
                 CShape& shape = e.get<CShape>();
@@ -169,12 +180,17 @@ void SceneManager::createScene(std::string_view id) {
                 cShape.meshes.clear();
                 cShape.createMesh();
             }
+            if (options.contains("body")) {
+                CBody& cBody = e.get<CBody>();
+                std::string filepath = options.at("body").get<std::string>();
+                cBody.filepath = filepath;
+                cBody.meshes.clear();
+                cBody.materials.clear();
+                auto model = *manager->get<Model>(filepath);  // We need a copy of the model
+                cBody.meshes = std::move(model.getMeshes());
+                cBody.materials = std::move(model.getMaterials());
+            }
             if (options.contains("filepaths")) {
-                const auto& manager = m_assetsManager.lock();
-                if (not manager) {
-                    throw std::runtime_error("Assets manager is null!");
-                }
-
                 json filepaths = options.at("filepaths");
                 CTexture& c = e.get<CTexture>();
                 c.filepaths.clear();
@@ -190,21 +206,42 @@ void SceneManager::createScene(std::string_view id) {
                 json color = options.at("color");
                 e.get<CTexture>().color = {color.at("r").get<float>(), color.at("g").get<float>(), color.at("b").get<float>(), color.at("a").get<float>()};
             }
+            if (options.contains("blendFactor")) {
+                e.get<CTexture>().blendFactor = options.at("blendFactor").get<float>();
+            }
+            if (options.contains("reflectivity")) {
+                e.get<CTexture>().reflectivity = options.at("reflectivity").get<float>();
+            }
+            if (options.contains("refractiveIndex")) {
+                e.get<CTexture>().refractiveIndex = options.at("refractiveIndex").get<float>();
+            }
+            if (options.contains("hasTransparency")) {
+                e.get<CTexture>().hasTransparency = options.at("hasTransparency").get<bool>();
+            }
             if (options.contains("useLighting")) {
                 e.get<CTexture>().useLighting = options.at("useLighting").get<bool>();
+            }
+            if (options.contains("useReflection")) {
+                e.get<CTexture>().useReflection = options.at("useReflection").get<bool>();
+            }
+            if (options.contains("useRefraction")) {
+                e.get<CTexture>().useRefraction = options.at("useRefraction").get<bool>();
+            }
+            if (options.contains("isVisible")) {
+                e.get<CShaderProgram>().isVisible = options.at("isVisible").get<bool>();
             }
             if (options.contains("drawMode")) {
                 e.get<CTexture>()._drawMode = options.at("drawMode").get<std::string>();
                 e.get<CTexture>().setDrawMode();
             }
             if (options.contains("textureAtlas")) {
-                CTextureAtlas& c = e.get<CTextureAtlas>();
+                CTextureAtlas& cTextureAtlas = e.get<CTextureAtlas>();
                 json textureAtlasOptions = options.at("textureAtlas");
                 if (textureAtlasOptions.contains("index")) {
-                    c.index = textureAtlasOptions.at("index").get<int>();
+                    cTextureAtlas.index = textureAtlasOptions.at("index").get<int>();
                 }
                 if (textureAtlasOptions.contains("rows")) {
-                    c.rows = textureAtlasOptions.at("rows").get<int>();
+                    cTextureAtlas.rows = textureAtlasOptions.at("rows").get<int>();
                 }
             }
             if (options.contains("scale")) {
@@ -212,28 +249,29 @@ void SceneManager::createScene(std::string_view id) {
                 e.get<CTransform>().scale = {scale.at("x").get<float>(), scale.at("y").get<float>(), scale.at("z").get<float>()};
             }
             if (prefab == "chunk_config") {
+                CChunkManager& cChunkManager = e.get<CChunkManager>();
                 if (options.contains("chunkSize")) {
-                    e.get<CChunkManager>().chunkSize = options.at("chunkSize").get<int>();
+                    cChunkManager.chunkSize = options.at("chunkSize").get<int>();
                 }
                 if (options.contains("blockSize")) {
-                    e.get<CChunkManager>().blockSize = options.at("blockSize").get<int>();
+                    cChunkManager.blockSize = options.at("blockSize").get<int>();
                 }
                 if (options.contains("width")) {
-                    e.get<CChunkManager>().width = options.at("width").get<int>();
+                    cChunkManager.width = options.at("width").get<int>();
                 }
                 if (options.contains("height")) {
-                    e.get<CChunkManager>().height = options.at("height").get<int>();
+                    cChunkManager.height = options.at("height").get<int>();
                 }
                 if (options.contains("meshType")) {
-                    e.get<CChunkManager>()._meshType = options.at("meshType").get<std::string>();
-                    e.get<CChunkManager>().setMeshType();
+                    cChunkManager._meshType = options.at("meshType").get<std::string>();
+                    cChunkManager.setMeshType();
                 }
                 if (options.contains("meshAlgorithm")) {
-                    e.get<CChunkManager>()._meshAlgorithm = options.at("meshAlgorithm").get<std::string>();
-                    e.get<CChunkManager>().setMeshAlgorithm();
+                    cChunkManager._meshAlgorithm = options.at("meshAlgorithm").get<std::string>();
+                    cChunkManager.setMeshAlgorithm();
                 }
                 if (options.contains("useBiomes")) {
-                    e.get<CChunkManager>().useBiomes = options.at("useBiomes").get<bool>();
+                    cChunkManager.useBiomes = options.at("useBiomes").get<bool>();
                 }
             }
             if (options.contains("noise")) {
@@ -270,70 +308,130 @@ void SceneManager::createScene(std::string_view id) {
                     noise.positive = noiseOptions.at("positive").get<bool>();
                 }
             }
+            if (prefab == "skybox") {
+                CTime& cTime = e.get<CTime>();
+                if (options.contains("time")) {
+                    cTime.setTime(options.at("time").get<float>());
+                }
+                if (options.contains("acceleration")) {
+                    cTime.acceleration = options.at("acceleration").get<float>();
+                }
+                if (options.contains("useFog")) {
+                    e.get<CSkybox>().useFog = options.at("useFog").get<bool>();
+                }
+                if (options.contains("fogColor")) {
+                    json fogColor = options.at("fogColor");
+                    e.get<CSkybox>().fogColor = {fogColor.at("r").get<float>(), fogColor.at("g").get<float>(), fogColor.at("b").get<float>()};
+                }
+                if (options.contains("fogDensity")) {
+                    e.get<CSkybox>().fogDensity = options.at("fogDensity").get<float>();
+                }
+                if (options.contains("fogGradient")) {
+                    e.get<CSkybox>().fogGradient = options.at("fogGradient").get<float>();
+                }
+            }
         }
     }
 
-#ifdef DEBUG
     CORE_INFO("Creating scene lights...");
-#endif
     for (const auto& [name, data] : loadedScene.getLoadedLights()) {
         std::string_view prefab = data.at("prefab").get<std::string_view>();
         Entity e = createEntity(prefab);
         e.add<CName>(std::string(name));
         e.add<CTag>(prefab.data());
         if (data.contains("options")) {
+            CTransform& cTransform = e.get<CTransform>();
+            CLight& cLight = e.get<CLight>();
             json options = data.at("options");
+            if (options.contains("isKinematic")) {
+                e.get<CRigidBody>().isKinematic = options.at("isKinematic").get<bool>();
+            }
             if (options.contains("position")) {
                 json position = options.at("position");
-                e.get<CTransform>().position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
-            }
-            if (options.contains("scale")) {
-                json scale = options.at("scale");
-                e.get<CTransform>().scale = {scale.at("x").get<float>(), scale.at("y").get<float>(), scale.at("z").get<float>()};
-            }
-            if (options.contains("intensity")) {
-                e.get<CLight>().intensity = options.at("intensity").get<float>();
-            }
-            if (options.contains("color")) {
-                json color = options.at("color");
-                e.get<CLight>().color = {color.at("r").get<float>(), color.at("g").get<float>(), color.at("b").get<float>()};
+                cTransform.position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
             }
             if (options.contains("rotation")) {
                 json rotation = options.at("rotation");
                 glm::vec3 rot = {rotation.at("x").get<float>(), rotation.at("y").get<float>(), rotation.at("z").get<float>()};
-                e.get<CTransform>().rotation = glm::quat(glm::radians(rot));
+                cTransform.rotate(glm::quat(glm::radians(rot)));
+            }
+            if (options.contains("scale")) {
+                json scale = options.at("scale");
+                cTransform.scale = {scale.at("x").get<float>(), scale.at("y").get<float>(), scale.at("z").get<float>()};
+            }
+            if (options.contains("intensity")) {
+                cLight.intensity = options.at("intensity").get<float>();
+            }
+            if (options.contains("color")) {
+                json color = options.at("color");
+                cLight.color = {color.at("r").get<float>(), color.at("g").get<float>(), color.at("b").get<float>()};
+            }
+            if (options.contains("isVisible")) {
+                e.get<CShaderProgram>().isVisible = options.at("isVisible").get<bool>();
+            }
+            if (options.contains("body")) {
+                CBody& cBody = e.get<CBody>();
+                std::string filepath = options.at("body").get<std::string>();
+                cBody.filepath = filepath;
+                cBody.meshes.clear();
+                cBody.materials.clear();
+                auto model = *manager->get<Model>(filepath);  // We need a copy of the model
+                cBody.meshes = std::move(model.getMeshes());
+                cBody.materials = std::move(model.getMaterials());
             }
         }
     }
 
-#ifdef DEBUG
     CORE_INFO("Creating scene cameras...");
-#endif
     for (const auto& [name, data] : loadedScene.getLoadedCameras()) {
         std::string_view prefab = data.at("prefab").get<std::string_view>();
         Entity e = createEntity(prefab);
         e.add<CName>(std::string(name));
         e.add<CTag>(prefab.data());
         if (data.contains("options")) {
+            CCamera& cCamera = e.get<CCamera>();
+            CTransform& cTransform = e.get<CTransform>();
             json options = data.at("options");
+            if (options.contains("isKinematic")) {
+                e.get<CRigidBody>().isKinematic = options.at("isKinematic").get<bool>();
+            }
             if (options.contains("position")) {
                 json position = options.at("position");
-                e.get<CTransform>().position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
+                cTransform.position = {position.at("x").get<float>(), position.at("y").get<float>(), position.at("z").get<float>()};
             }
             if (options.contains("rotation")) {
                 json rotation = options.at("rotation");
                 glm::vec3 rot = {rotation.at("x").get<float>(), rotation.at("y").get<float>(), rotation.at("z").get<float>()};
-                e.get<CTransform>().rotation = glm::quat(glm::radians(rot));
+                cTransform.rotate(glm::quat(glm::radians(rot))); // TODO: fix this will glitch with camera movement
             }
-            // e.get<CCamera>().fov = options.at("fov").get<float>();
-            // e.get<CCamera>().near = options.at("near").get<float>();
-            // e.get<CCamera>().far = options.at("far").get<float>();
+            deserializeCamera(cCamera, options);
+            cCamera.calculateProjection();
+            cCamera.calculateView(cTransform.position, cTransform.rotation);
+            if (options.contains("isActive")) {
+                bool isActiveCamera = options.at("isActive").get<bool>();
+                if (isActiveCamera and not e.has_all<CActiveCamera>()) {
+                    e.add<CActiveCamera>();
+                } else if (not isActiveCamera and e.has_all<CActiveCamera>()) {
+                    e.remove<CActiveCamera>();
+                }
+            }
+            if (options.contains("isVisible")) {
+                e.get<CShaderProgram>().isVisible = options.at("isVisible").get<bool>();
+            }
+            if (options.contains("body")) {
+                CBody& cBody = e.get<CBody>();
+                std::string filepath = options.at("body").get<std::string>();
+                cBody.filepath = filepath;
+                cBody.meshes.clear();
+                cBody.materials.clear();
+                auto model = *manager->get<Model>(filepath);  // We need a copy of the model
+                cBody.meshes = std::move(model.getMeshes());
+                cBody.materials = std::move(model.getMaterials());
+            }
         }
     }
 
-#ifdef DEBUG
     CORE_INFO("Creating scene systems...");
-#endif
     for (const auto& [name, data] : loadedScene.getLoadedSystems()) {
         std::string_view prefab = data.at("prefab").get<std::string_view>();
         Entity e = createEntity(prefab);
@@ -345,9 +443,7 @@ void SceneManager::createScene(std::string_view id) {
         }
     }
 
-#ifdef DEBUG
     CORE_INFO("Creating scene FBOs...");
-#endif
     for (const auto& [name, data] : loadedScene.getLoadedFBOs()) {
         std::string_view prefab = data.at("prefab").get<std::string_view>();
         Entity e = createEntity(prefab);
@@ -406,16 +502,17 @@ void SceneManager::createScene(std::string_view id) {
         renderer->addFramebuffer(std::string(fbo.fbo), fbo.width, fbo.height, attachment);
     }
 
+    CORE_INFO("Creating sub-scenes...");
+    // TODO: implement
+    
     m_registry.sort<CDistanceFromCamera>([](const CDistanceFromCamera& lhs, const CDistanceFromCamera& rhs) {
         return lhs.distance < rhs.distance;
     });
 
     m_registry.sort<CUUID, CDistanceFromCamera>();
 
-    m_activeScene = id;
-#ifdef DEBUG
-    CORE_INFO("Scene creation TIME: {}", timer.getSeconds());
-#endif
+    m_activeScene = std::move(id);
+    CORE_INFO("Scene {} creation TIME: {}", m_activeScene, timer.getSeconds());
 }
 
 void SceneManager::updateScene(std::string_view id) {
@@ -423,6 +520,7 @@ void SceneManager::updateScene(std::string_view id) {
 }
 
 void SceneManager::clearScene(std::string_view id) {
+    CORE_WARN("Detaching GameState");
     if (m_activeScene == id) {
         m_registry.clear();
         m_entityFactory.clear();
@@ -444,7 +542,9 @@ void SceneManager::onComponentCloned(Entity e, T& c) {
 
 Entity SceneManager::cloneEntity(Entity e, uint32_t uuid) {
     using namespace entt::literals;
+
     Entity dst = {m_registry.create(entt::entity{uuid}), this};
+
     for (auto&& curr : m_registry.storage()) {
         if (auto& storage = curr.second; storage.contains(e)) {
             storage.push(dst, storage.value(e));
@@ -467,14 +567,14 @@ void SceneManager::clearEntity(Entity& e) {
 }
 
 SceneManager::SceneManager(std::weak_ptr<AssetsManager> am, std::weak_ptr<Renderer> r) : m_entityFactory(am), m_assetsManager(am), m_renderer(r) {
-#ifdef DEBUG
     CORE_INFO("Initializing scene manager...");
     CORE_INFO("Registering engine components...");
-#endif
     registerComponents();
-#ifdef DEBUG
     CORE_INFO("Scene manager created!");
-#endif
+}
+
+void SceneManager::onEvent(Event& e) {
+    eventSystem(std::ref(m_registry), e);
 }
 
 void SceneManager::onUpdate(Time ts, std::weak_ptr<Renderer> r) {

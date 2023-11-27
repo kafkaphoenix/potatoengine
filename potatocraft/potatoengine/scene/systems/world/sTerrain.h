@@ -321,6 +321,7 @@ CMesh generateTerrain(CChunkManager::MeshType meshType, CChunkManager::MeshAlgor
 
 void terrainSystem(entt::registry& reg) {  // TODO transform
     using namespace entt::literals;
+    
     reg.view<CChunkManager, CTexture, CNoise, CUUID>().each([&](entt::entity e, CChunkManager& cChunkManager, const CTexture& cTexture, const CNoise& cNoise, const CUUID& cUUID) {
         CTextureAtlas* cTextureAtlas = nullptr;
         if (cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS or cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND or cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {

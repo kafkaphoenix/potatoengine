@@ -9,7 +9,7 @@ namespace potatoengine {
 
 struct CTransform {
     glm::vec3 position{};
-    glm::quat rotation{glm::quat{1.f, 0.f, 0.f, 0.f}};
+    glm::quat rotation{glm::identity<glm::quat>()};
     glm::vec3 scale{glm::vec3{1.f}};
 
     CTransform() = default;
@@ -29,7 +29,7 @@ struct CTransform {
     }
 
     void print() const {
-        CORE_INFO("\t\tposition: {0}\n\t\t\t\trotation: {1}\n\t\t\t\tscale: {2}", glm::to_string(position), glm::to_string(rotation), glm::to_string(scale));
+        CORE_TRACE("\t\tposition: {0}\n\t\t\t\trotation: {1}\n\t\t\t\tscale: {2}", glm::to_string(position), glm::to_string(rotation), glm::to_string(scale));
     }
 
 

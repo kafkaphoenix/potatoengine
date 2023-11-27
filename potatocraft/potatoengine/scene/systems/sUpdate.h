@@ -23,6 +23,6 @@ void updateSystem(entt::registry& reg, std::weak_ptr<Renderer> r, const Time& ts
     movementSystem(reg, ts);
     skyboxSystem(reg);
     renderSystem(reg, r);
-    // printSystem(reg);
+    // printSystem(reg); only for debugging purposes
 }
 }

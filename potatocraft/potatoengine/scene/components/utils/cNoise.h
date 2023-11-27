@@ -21,7 +21,7 @@ struct CNoise {
         : _type(std::move(type)), seed(seed), octaves(octaves), frequency(frequency), persistence(persistence), lacunarity(lacunarity), amplitude(amplitude), positive(positive) {}
 
     void print() const {
-        CORE_INFO("\t\ttype: {0}\n\t\t\t\tseed: {1}\n\t\t\t\toctaves: {2}\n\t\t\t\tfrequency: {3}\n\t\t\t\tpersistence: {4}\n\t\t\t\tlacunarity: {5}\n\t\t\t\tamplitude: {6}\n\t\t\t\tpositive: {7}",
+        CORE_TRACE("\t\ttype: {0}\n\t\t\t\tseed: {1}\n\t\t\t\toctaves: {2}\n\t\t\t\tfrequency: {3}\n\t\t\t\tpersistence: {4}\n\t\t\t\tlacunarity: {5}\n\t\t\t\tamplitude: {6}\n\t\t\t\tpositive: {7}",
                   _type, seed, octaves, frequency, persistence, lacunarity, amplitude, positive);
     }
 

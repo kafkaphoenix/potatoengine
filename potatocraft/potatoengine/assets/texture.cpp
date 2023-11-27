@@ -1,5 +1,7 @@
 #include "potatoengine/assets/texture.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include "potatoengine/pch.h"
@@ -107,10 +109,8 @@ void Texture::loadTexture() {
 }
 
 Texture::~Texture() {
-#ifdef DEBUG
     std::string_view source = (m_filepaths.size() == 1) ? m_filepaths[0] : m_directory;
-    CORE_INFO("Deleting texture {}: {}", m_id, source);
-#endif
+    CORE_WARN("Deleting texture {}: {}", m_id, source);
     glDeleteTextures(1, &m_id);
 }
 

@@ -18,7 +18,7 @@ struct CBody {
         : filepath(std::move(fp)), meshes(std::move(m)), materials(std::move(ma)) {}
 
     void print() const {
-        CORE_INFO("\t\tfilepath: {0}\n\t\t\t\tmeshes: {1}\n\t\t\t\tmaterials: {2}", filepath, meshes.size(), materials.size());
+        CORE_TRACE("\t\tfilepath: {0}\n\t\t\t\tmeshes: {1}\n\t\t\t\tmaterials: {2}", filepath, meshes.size(), materials.size());
     }
 };
 }
@@ -30,8 +30,9 @@ void engine::SceneManager::onComponentAdded(Entity e, CBody& c) {
         throw std::runtime_error("Assets manager is null!");
     }
 
-    auto model = *manager->get<Model>(c.filepath);
+    auto model = *manager->get<Model>(c.filepath); // We need a copy of the model
     c.meshes = std::move(model.getMeshes());
     c.materials = std::move(model.getMaterials());
+
     e.update<CBody>(c);
 }

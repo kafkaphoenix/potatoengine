@@ -17,13 +17,6 @@ class GameState : public engine::State {
     static std::unique_ptr<State> Create(std::weak_ptr<engine::AssetsManager> am, std::weak_ptr<engine::Renderer> r);
 
    private:
-    bool onKeyPressed(engine::KeyPressedEvent& e);
-    bool onKeyReleased(engine::KeyReleasedEvent& e);
-
-    bool m_debugging{};
-    bool m_wireframe{};
-
-    engine::CameraController m_cameraController; //rename to manager if I keep it
     engine::SceneManager m_sceneManager;
     std::weak_ptr<engine::Renderer> m_renderer;
     std::weak_ptr<engine::AssetsManager> m_assetsManager;

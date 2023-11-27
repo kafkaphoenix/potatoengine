@@ -9,9 +9,7 @@ VAO::VAO() {
 }
 
 VAO::~VAO() {
-#ifdef DEBUG
-    CORE_INFO("Deleting VAO {}", m_id);
-#endif
+    CORE_WARN("Deleting VAO {}", m_id);
     glDeleteVertexArrays(1, &m_id);
 }
 
@@ -23,8 +21,7 @@ void VAO::unbind() {
     glBindVertexArray(0);
 }
 
-// cppcheck-suppress unusedFunction
-void VAO::attachVertex(std::shared_ptr<VBO>&& vbo, VertexType type) { // vbo should be shared
+void VAO::attachVertex(std::shared_ptr<VBO>&& vbo, VertexType type) {
     size_t vertexSize = 0;
     if (type == VertexType::VERTEX) {
         vertexSize = sizeof(Vertex);
@@ -114,11 +111,13 @@ void VAO::attachTerrainVertexAttributes() {
     ++m_vboIdx;
 }
 
+// cppcheck-suppress unusedFunction
 void VAO::updateVertex(std::unique_ptr<VBO>&& vbo, uint32_t idx, VertexType type) {
     // TODO: update only the vbo at idx
 }
 
-void VAO::clearVBOs() noexcept {
+// cppcheck-suppress unusedFunction
+void VAO::clearVBOs() noexcept { // TODO: move to on detach on component? Do i need it?
     m_vbos.clear();
     m_vboIdx = 0;
 }

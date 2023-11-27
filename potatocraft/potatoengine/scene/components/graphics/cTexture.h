@@ -46,7 +46,7 @@ struct CTexture {
                 texturePaths += "\n\t\t\t\t " + filepath;
             }
         }
-        CORE_INFO("\t\tcolor: {0}\n\t\t\t\tblendFactor: {1}\n\t\t\t\treflectivity: {2}\n\t\t\t\trefractiveIndex: {3}\n\t\t\t\thasTransparency: {4}\n\t\t\t\tuseLighting: {5}\n\t\t\t\tuseReflection: {6}\n\t\t\t\tuseRefraction: {7}\n\t\t\t\tdrawMode: {8}\n\t\t\t\ttextures: {9}", glm::to_string(color), blendFactor, reflectivity, refractiveIndex, hasTransparency, useLighting, useReflection, useRefraction, _drawMode, texturePaths);
+        CORE_TRACE("\t\tcolor: {0}\n\t\t\t\tblendFactor: {1}\n\t\t\t\treflectivity: {2}\n\t\t\t\trefractiveIndex: {3}\n\t\t\t\thasTransparency: {4}\n\t\t\t\tuseLighting: {5}\n\t\t\t\tuseReflection: {6}\n\t\t\t\tuseRefraction: {7}\n\t\t\t\tdrawMode: {8}\n\t\t\t\ttextures: {9}", glm::to_string(color), blendFactor, reflectivity, refractiveIndex, hasTransparency, useLighting, useReflection, useRefraction, _drawMode, texturePaths);
     }
 
     void setDrawMode() { // TODO maybe send assets manager to this function?

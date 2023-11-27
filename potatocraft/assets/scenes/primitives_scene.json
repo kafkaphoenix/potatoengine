@@ -42,7 +42,6 @@
             "entities": {
                 "filepath": "assets/prefabs/entities.json",
                 "targets": [
-                    "player",
                     "skybox",
                     "foco",
                     "camera",
@@ -55,12 +54,6 @@
         }
     },
     "entities": {
-        "auri": {
-            "prefab": "player",
-            "options": {
-                "position": {"x": 0, "y": 0, "z": 5}
-            }
-        },
         "skybox": {
             "prefab": "skybox",
             "options": {
@@ -72,7 +65,7 @@
             "prefab": "rectangle",
             "options": {
                 "size": {"x": 100, "y": 100, "z": 0},
-                "position": {"x": 0, "y": -5, "z": 0},
+                "position": {"x": 0, "y": 0, "z": 0},
                 "rotation": {"x": -90, "y": 0, "z": 0},
                 "filepaths": ["grass"],
                 "repeatTexture": true,
@@ -178,11 +171,9 @@
         "scene_camera": {
             "prefab": "camera",
             "options": {
-                "position": {"x": 0, "y": 0, "z": -20},
-                "rotation": {"x": 0, "y": 90, "z": 0},
-                "fov": 90,
-                "near": 0.1,
-                "far": 300
+                "position": {"x": 0, "y": 5, "z": 20},
+                "type": "perspective",
+                "isActive": true
             }
         }
     }

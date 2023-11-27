@@ -35,9 +35,7 @@ Shader::Shader(std::filesystem::path&& fp) : m_filepath(std::move(fp.string())) 
 }
 
 Shader::~Shader() {
-#ifdef DEBUG
-    CORE_INFO("Deleting shader {}", m_filepath);
-#endif
+    CORE_WARN("Deleting shader {}", m_filepath);
     glDeleteShader(m_id);
 }
 }

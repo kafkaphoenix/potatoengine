@@ -45,7 +45,7 @@ struct CChunkManager {
         for (const auto& [position, chunk] : chunks) {
             c += "\n\t\t\t\t\tchunk: " + glm::to_string(position) + " " + chunk._biome;
         }
-        CORE_INFO("\t\twidth: {0}\n\t\t\t\theight: {1}\n\t\t\t\tchunkSize: {2}\n\t\t\t\tblockSize: {3}\n\t\t\t\tmeshType: {4}\n\t\t\t\tmeshAlgorithm: {5}\n\t\t\t\tuseBiomes: {6}\n\t\t\t\tchunks: {7}",
+        CORE_TRACE("\t\twidth: {0}\n\t\t\t\theight: {1}\n\t\t\t\tchunkSize: {2}\n\t\t\t\tblockSize: {3}\n\t\t\t\tmeshType: {4}\n\t\t\t\tmeshAlgorithm: {5}\n\t\t\t\tuseBiomes: {6}\n\t\t\t\tchunks: {7}",
                   width, height, chunkSize, blockSize, _meshType, _meshAlgorithm, useBiomes, c);
     }
 

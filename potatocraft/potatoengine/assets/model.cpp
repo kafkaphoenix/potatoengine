@@ -23,11 +23,9 @@ Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection) : 
     }
 
     processNode(scene->mRootNode, scene);
-#ifdef DEBUG
-    CORE_INFO("\t\tmesh count: {}", m_meshes.size());
-    CORE_INFO("\t\ttexture count: {}", m_loadedTextures.size());
-    CORE_INFO("\t\tmaterial count: {}", m_materials.size());
-#endif
+    CORE_TRACE("\t\tmesh count: {}", m_meshes.size());
+    CORE_TRACE("\t\ttexture count: {}", m_loadedTextures.size());
+    CORE_TRACE("\t\tmaterial count: {}", m_materials.size());
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene) {

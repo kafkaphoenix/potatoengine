@@ -19,8 +19,18 @@
     },
     "player": {
         "inherit": ["creature"],
-        "ctags": ["camera", "equipment", "inventory"],
+        "ctags": ["equipment", "inventory", "activeCamera"],
         "components": {
+            "body": "player",
+            "camera": {
+                "type": "perspective",
+                "fov": 90,
+                "translationSpeed": 40,
+                "verticalSpeed": 50
+            },
+            "rigidBody": {
+                "isKinematic": true
+            },
             "stats": {
                 "strength": 10,
                 "dexterity": 10,
@@ -82,7 +92,9 @@
             "textureAtlas": {
                 "rows": 2
             },
-            "shaderProgram": "basic",
+            "shaderProgram": {
+                "name": "basic"
+            },
             "material": {
                 "ambient": {"r": 0.4, "g": 0.4, "b": 0.4},
                 "diffuse": {"r": 0.9, "g": 0.9, "b": 0.9}
@@ -146,7 +158,7 @@
                 "size": {"x": 1, "y": 1, "z": 1}
             },
             "rigidBody": {
-                "isKinematic": false
+                "isKinematic": true
             },
             "texture": {
                 "filepaths": ["skybox_night", "skybox_day"],
@@ -159,26 +171,45 @@
                 "fogDensity": 0.0035,
                 "fogGradient": 5
             },
-            "shaderProgram": "skybox",
+            "shaderProgram": {
+                "name": "skybox"
+            },
             "distanceFromCamera": { "distance": 2 }
         }
     },
     "foco": {
-        "ctags": ["transform", "distanceFromCamera"],
+        "ctags": ["transform", "distanceFromCamera", "rigidBody"],
         "components": {
-            "body": "foco",
             "light": {
                 "type": "directional"
             },
-            "texture": {
-                "color": {"r": 0, "g": 0, "b": 0, "a": 0.7},
-                "drawMode": "color"
+            "body": "foco",
+            "shaderProgram": {
+                "isVisible": false,
+                "name": "basic"
             },
-            "shaderProgram": "basic"
+            "texture": {
+                "drawMode": "color",
+                "color": {"r": 0, "g": 0, "b": 0, "a": 0.7}
+            }
         }
     },
     "camera": {
-        "ctags": ["transform", "camera"]
+        "ctags": ["transform", "distanceFromCamera", "rigidBody"],
+        "components": {
+            "camera": {
+                "type": "perspective"
+            },
+            "body": "camera",
+            "shaderProgram": {
+                "isVisible": false,
+                "name": "basic"
+            },
+            "texture": {
+                "drawMode": "color",
+                "color": {"r": 0, "g": 0, "b": 0, "a": 0.7}
+            }
+        }
     },
     "shape": {
         "ctags": ["transform", "distanceFromCamera"],
@@ -186,7 +217,9 @@
             "texture": {
                 "drawMode": "color"
             },
-            "shaderProgram": "shape",
+            "shaderProgram": {
+                "name": "shape"
+            },
             "shape": {
                 "size": {"x": 1, "y": 1, "z": 1}
             }
@@ -254,15 +287,8 @@
                 "amplitude": 1,
                 "positive": false
             },
-            "shaderProgram": "terrain"
-        }
-    },
-    "chunk": {
-        "ctags": ["distanceFromCamera"],
-        "components": {
-            "chunk": {
-                "width": 16,
-                "height": 16
+            "shaderProgram": {
+                "name": "terrain"
             }
         }
     },
@@ -272,7 +298,9 @@
                 "fbo": "postprocess",
                 "mode": "normal"
             },
-            "shaderProgram": "fbo",
+            "shaderProgram": {
+                "name": "fbo"
+            },
             "shape": {
                 "type": "rectangle"
             }
@@ -281,7 +309,9 @@
     "building": {
         "ctags": ["transform", "distanceFromCamera"],
         "components": {
-            "shaderProgram": "basic",
+            "shaderProgram": {
+                "name": "basic"
+            },
             "body": "building"
         }
     }

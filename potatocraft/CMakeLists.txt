@@ -40,9 +40,7 @@ add_executable(
     ${PROJECT_NAME}
     ${SOURCE_FILES}
 )
-target_compile_definitions(${PROJECT_NAME} PRIVATE "STB_IMAGE_IMPLEMENTATION")
 target_compile_definitions(${PROJECT_NAME} PRIVATE "STBI_FAILURE_USERMSG")
-target_compile_definitions(${PROJECT_NAME} PRIVATE "STB_IMAGE_WRITE_IMPLEMENTATION")
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/stb)
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/fastnoiselite)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glfw_SOURCE_DIR}/include)

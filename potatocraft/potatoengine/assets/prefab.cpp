@@ -31,9 +31,7 @@ Prefab::Prefab(std::filesystem::path&& fp, std::unordered_set<std::string>&& tar
         m_prefabs.emplace(name, PrefabData{.inherits = std::move(inherits), .ctags = std::move(ctags), .components = std::move(components)});
     }
 
-#ifdef DEBUG
     print();
-#endif
 }
 
 void Prefab::read(const json& data, std::unordered_set<std::string>& inherits, std::unordered_set<std::string>& ctags, std::unordered_map<std::string, json>& components) {
@@ -65,15 +63,15 @@ void Prefab::read(const json& data, std::unordered_set<std::string>& inherits, s
 
 void Prefab::print() const {
     for (const auto& [name, prefabData] : m_prefabs) {
-        CORE_INFO("\tLoaded prefab: {0} with {1} inherits, {2} ctags and {3} components", name, prefabData.inherits.size(), prefabData.ctags.size(), prefabData.components.size());
+        CORE_TRACE("\tLoaded prefab: {0} with {1} inherits, {2} ctags and {3} components", name, prefabData.inherits.size(), prefabData.ctags.size(), prefabData.components.size());
         for (std::string_view father : prefabData.inherits) {
-            CORE_INFO("\t\tInherit: {}", father);
+            CORE_TRACE("\t\tInherit: {}", father);
         }
         for (std::string_view ctag : prefabData.ctags) {
-            CORE_INFO("\t\tComponent tag: {}", ctag);
+            CORE_TRACE("\t\tComponent tag: {}", ctag);
         }
         for (const auto& [cKey, _] : prefabData.components) {
-            CORE_INFO("\t\tComponent: {}", cKey);
+            CORE_TRACE("\t\tComponent: {}", cKey);
         }
     }
 }

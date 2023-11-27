@@ -26,9 +26,7 @@ FBO::FBO(uint32_t w, uint32_t h, uint32_t t) : m_depthBufferType(t) {
 }
 
 FBO::~FBO() {
-#ifdef DEBUG
-    CORE_INFO("Deleting framebuffer {}", m_id);
-#endif
+    CORE_WARN("Deleting framebuffer {}", m_id);
     glDeleteFramebuffers(1, &m_id);
     glDeleteRenderbuffers(1, &m_depthRenderBuffer);
     glDeleteRenderbuffers(1, &m_stencilRenderBuffer);

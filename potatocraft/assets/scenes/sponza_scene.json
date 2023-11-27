@@ -7,13 +7,15 @@
             }
         },
         "models": {
-            "building": "assets/models/sponza/sponza.obj"
+            "building": "assets/models/sponza/sponza.obj",
+            "camera": "assets/models/camera/camera.obj"
         },
         "prefabs": {
             "entities": {
                 "filepath": "assets/prefabs/entities.json",
                 "targets": [
-                    "building"
+                    "building",
+                    "camera"
                 ]
             }
         }
@@ -23,7 +25,17 @@
             "prefab": "building",
             "options": {
                 "scale": {"x": 0.01,"y": 0.01,"z": 0.01},
-                "position": {"x": 0, "y": -1, "z": 5}
+                "position": {"x": 0, "y": 0, "z": 0}
+            }
+        }
+    },
+    "cameras": {
+        "scene_camera": {
+            "prefab": "camera",
+            "options": {
+                "position": {"x": 8, "y": 6, "z": 3},
+                "type": "perspective",
+                "isActive": true
             }
         }
     }

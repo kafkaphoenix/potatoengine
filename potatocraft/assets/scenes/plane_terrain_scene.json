@@ -41,7 +41,8 @@
         },
         "models": {
             "foco": "assets/models/foco/foco.obj",
-            "camera": "assets/models/camera/camera.obj"
+            "camera": "assets/models/camera/camera.obj",
+            "player": "assets/models/player/player.obj"
         },
         "prefabs": {
             "entities": {
@@ -60,7 +61,9 @@
         "auri": {
             "prefab": "player",
             "options": {
-                "position": {"x": 8, "y": 5, "z": 8}
+                "position": {"x": 180, "y": 30, "z": 180},
+                "type": "perspective",
+                "isActive": true
             }
         },
         "skybox": {
@@ -73,7 +76,7 @@
         "chunk_config": {
             "prefab": "chunk_config",
             "options": {
-                "chunkSize": 160,
+                "chunkSize": 300,
                 "blockSize": 1,
                 "width": 0,
                 "height": 0,
@@ -103,6 +106,8 @@
         "foco": {
             "prefab": "foco",
             "options": {
+                "isVisible": true,
+                "body": "foco",
                 "position": {"x": 0, "y": 10, "z": 5},
                 "rotation": {"x": 0, "y": 90, "z": 0},
                 "color": {"r": 1, "g": 1, "b": 1, "a": 1}
@@ -113,11 +118,11 @@
         "scene_camera": {
             "prefab": "camera",
             "options": {
-                "position": {"x": 0, "y": 5, "z": -20},
+                "isVisible": true,
+                "body": "camera",
+                "position": {"x": 0, "y": 5, "z": 10},
                 "rotation": {"x": 0, "y": 90, "z": 0},
-                "fov": 90,
-                "near": 0.1,
-                "far": 300
+                "type": "perspective"
             }
         }
     }

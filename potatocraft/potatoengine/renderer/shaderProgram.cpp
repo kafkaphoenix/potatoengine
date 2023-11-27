@@ -7,9 +7,7 @@ ShaderProgram::ShaderProgram(std::string&& name) : m_id(glCreateProgram()), m_na
 }
 
 ShaderProgram::~ShaderProgram() {
-#ifdef DEBUG
-    CORE_INFO("Deleting shader program {}", m_name);
-#endif
+    CORE_WARN("Deleting shader program {}", m_name);
     glDeleteProgram(m_id);
 }
 
@@ -135,24 +133,24 @@ void ShaderProgram::resetActiveUniforms() {
 }
 
 void ShaderProgram::printActiveUniforms() {
-    CORE_INFO("================================");
+    CORE_TRACE("================================");
     for (const auto& [type, name] : m_activeUniforms) {
         if (type == GL_INT) {
-            CORE_INFO("Active uniform {} type: {}", name, "int");
+            CORE_TRACE("Active uniform {} type: {}", name, "int");
         } else if (type == GL_FLOAT) {
-            CORE_INFO("Active uniform {} type: {}", name, "float");
+            CORE_TRACE("Active uniform {} type: {}", name, "float");
         } else if (type == GL_FLOAT_VEC2) {
-            CORE_INFO("Active uniform {} type: {}", name, "vec2");
+            CORE_TRACE("Active uniform {} type: {}", name, "vec2");
         } else if (type == GL_FLOAT_VEC3) {
-            CORE_INFO("Active uniform {} type: {}", name, "vec3");
+            CORE_TRACE("Active uniform {} type: {}", name, "vec3");
         } else if (type == GL_FLOAT_VEC4) {
-            CORE_INFO("Active uniform {} type: {}", name, "vec4");
+            CORE_TRACE("Active uniform {} type: {}", name, "vec4");
         } else if (type == GL_FLOAT_MAT4) {
-            CORE_INFO("Active uniform {} type: {}", name, "mat4");
+            CORE_TRACE("Active uniform {} type: {}", name, "mat4");
         } else if (type == GL_SAMPLER_2D) {
-            CORE_INFO("Active uniform {} type: {}", name, "sampler2D");
+            CORE_TRACE("Active uniform {} type: {}", name, "sampler2D");
         } else if (type == GL_SAMPLER_CUBE) {
-            CORE_INFO("Active uniform {} type: {}", name, "samplerCube");
+            CORE_TRACE("Active uniform {} type: {}", name, "samplerCube");
         } else {
             throw std::runtime_error("Unknown uniform type!");
         }

@@ -6,14 +6,17 @@ namespace potatoengine {
 
 enum class EventType {
     None = 0,
-    WindowClose,
-    WindowResize,
-    WindowFocus,
-    WindowLostFocus,
-    WindowMoved,
     AppTick,
     AppUpdate,
     AppRender,
+    WindowClose,
+    WindowResize,
+    WindowRestored,
+    WindowMinimized,
+    WindowMaximized,
+    WindowFocus,
+    WindowLostFocus,
+    WindowMoved,
     KeyPressed,
     KeyReleased,
     KeyTyped,
@@ -27,10 +30,11 @@ enum EventCategory {
     // Each category is a bit flag
     None = 0,
     EventCategoryApplication = 1,
-    EventCategoryInput = 2,
-    EventCategoryKeyboard = 4,
-    EventCategoryMouse = 8,
-    EventCategoryMouseButton = 16,
+    EventCategoryWindow = 2,
+    EventCategoryInput = 4,
+    EventCategoryKeyboard = 8,
+    EventCategoryMouse = 16,
+    EventCategoryMouseButton = 32,
 };
 
 #define EVENT_CLASS_TYPE(type)                                                           \

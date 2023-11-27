@@ -1,6 +1,7 @@
 #pragma once
 
 #define BIND_EVENT(f) [this](auto &&...args) { return f(std::forward<decltype(args)>(args)...); }
+#define BIND_STATIC_EVENT(f, r) [&r](auto &&...args) { return f(r, std::forward<decltype(args)>(args)...); }
 
 #include <algorithm>
 #include <any>

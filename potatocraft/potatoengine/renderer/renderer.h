@@ -5,7 +5,8 @@
 
 #include "potatoengine/assets/assetsManager.h"
 #include "potatoengine/pch.h"
-#include "potatoengine/renderer/camera/camera.h"
+#include "potatoengine/scene/components/camera/cCamera.h"
+#include "potatoengine/scene/components/physics/cTransform.h"
 #include "potatoengine/renderer/rendererAPI.h"
 #include "potatoengine/renderer/shaderProgram.h"
 #include "potatoengine/renderer/framebuffer.h"
@@ -21,10 +22,8 @@ class Renderer {
 
     void onWindowResize(uint32_t w, uint32_t h) const noexcept;
 
-    void beginScene(const Camera& c) noexcept;
+    void beginScene(const CCamera& c, const CTransform& t) noexcept;
     void endScene() noexcept;
-
-    glm::vec3 getCameraPosition() const noexcept { return m_cameraPosition; }  // TODO: Remove this
 
     void addShader(std::string&& shaderProgram);
     void addFramebuffer(std::string&& framebuffer, uint32_t width, uint32_t height, uint32_t bufferType);
@@ -38,11 +37,12 @@ class Renderer {
     static std::unique_ptr<Renderer> Create(std::weak_ptr<AssetsManager> am) noexcept;
 
    private:
-    glm::mat4 m_viewMatrix{};
-    glm::mat4 m_projectionMatrix{};
+    glm::mat4 m_view{};
+    glm::mat4 m_projection{};
     glm::vec3 m_cameraPosition{};
     std::unordered_map<std::string, std::unique_ptr<ShaderProgram>> m_shaderPrograms;
     std::unordered_map<std::string, std::unique_ptr<FBO>> m_framebuffers;
     std::weak_ptr<AssetsManager> m_assetsManager;
+    
 };
 }

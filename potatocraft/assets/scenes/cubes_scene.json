@@ -44,8 +44,6 @@
             "entities": {
                 "filepath": "assets/prefabs/entities.json",
                 "targets": [
-                    "player",
-                    "chicken",
                     "glass_block",
                     "brick_block",
                     "stone_block",
@@ -59,12 +57,6 @@
         }
     },
     "entities": {
-        "auri": {
-            "prefab": "player",
-            "options": {
-                "position": {"x": 0, "y": 0, "z": 5}
-            }
-        },
         "block1": {
             "prefab": "glass_block",
             "options": {
@@ -139,7 +131,8 @@
             "options": {
                 "position": {"x": 0, "y": 10, "z": 5},
                 "rotation": {"x": 0, "y": 90, "z": 0},
-                "color": {"r": 1, "g": 1, "b": 1, "a": 1}
+                "color": {"r": 1, "g": 1, "b": 1, "a": 1},
+                "isVisible": true
             }
         },
         "foco2": {
@@ -147,7 +140,8 @@
             "options": {
                 "position": {"x": 0, "y": 10, "z": -20},
                 "rotation": {"x": 0, "y": 270, "z": 0},
-                "color": {"r": 0.5, "g": 0.3, "b": 0.2, "a": 1}
+                "color": {"r": 0.5, "g": 0.3, "b": 0.2, "a": 1},
+                "isVisible": true
             }
         } 
     },
@@ -155,11 +149,10 @@
         "scene_camera": {
             "prefab": "camera",
             "options": {
-                "position": {"x": 0, "y": 0, "z": -20},
-                "rotation": {"x": 0, "y": 90, "z": 0},
-                "fov": 90,
-                "near": 0.1,
-                "far": 300
+                "position": {"x": 1, "y": 1, "z": 5},
+                "type": "perspective",
+                "isActive": true,
+                "isKinematic": true
             }
         }
     },

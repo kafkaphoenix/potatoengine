@@ -7,23 +7,31 @@
             }
         },
         "models": {
-            "building": "assets/models/davobric_sponza/sponza.obj"
+            "building": "assets/models/davobric_sponza/sponza.obj",
+            "camera": "assets/models/camera/camera.obj"
         },
         "prefabs": {
             "entities": {
                 "filepath": "assets/prefabs/entities.json",
                 "targets": [
-                    "building"
+                    "building",
+                    "camera"
                 ]
             }
         }
     },
     "entities": {
         "sponza": {
-            "prefab": "building",
+            "prefab": "building"
+        }
+    },
+    "cameras": {
+        "scene_camera": {
+            "prefab": "camera",
             "options": {
-                "scale": {"x": 1,"y": 1,"z": 1},
-                "position": {"x": 0, "y": -1, "z": 5}
+                "position": {"x": 0, "y": 1, "z": 0},
+                "type": "perspective",
+                "isActive": true
             }
         }
     }

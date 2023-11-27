@@ -22,7 +22,7 @@ struct CTime {
         : seconds(s), currentHour(ch), currentMinute(cm), currentSecond(cs), startingTime(st), dayLength(dl), nightStart(ns), dayTransitionStart(dts), dayStart(ds), nightTransitionStart(nts), acceleration(a), fps(f) {}
 
     void print() const {
-        CORE_INFO("\t\tseconds: {0}\n\t\t\t\tcurrentHour: {1}\n\t\t\t\tcurrentMinute: {2}\n\t\t\t\tcurrentSecond: {3}\n\t\t\t\tdayLength: {4}\n\t\t\t\tstartingTime: {5}\n\t\t\t\tdayTransitionStart: {6}\n\t\t\t\tdayStart: {7}\n\t\t\t\tnightTransitionStart: {8}\n\t\t\t\tnightStart: {9}\n\t\t\t\tacceleration: {10}\n\t\t\t\tfps: {11}", seconds, currentHour, currentMinute, currentSecond, dayLength, startingTime, dayTransitionStart, dayStart, nightTransitionStart, nightStart, acceleration, fps);
+        CORE_TRACE("\t\tseconds: {0}\n\t\t\t\tcurrentHour: {1}\n\t\t\t\tcurrentMinute: {2}\n\t\t\t\tcurrentSecond: {3}\n\t\t\t\tdayLength: {4}\n\t\t\t\tstartingTime: {5}\n\t\t\t\tdayTransitionStart: {6}\n\t\t\t\tdayStart: {7}\n\t\t\t\tnightTransitionStart: {8}\n\t\t\t\tnightStart: {9}\n\t\t\t\tacceleration: {10}\n\t\t\t\tfps: {11}", seconds, currentHour, currentMinute, currentSecond, dayLength, startingTime, dayTransitionStart, dayStart, nightTransitionStart, nightStart, acceleration, fps);
     }
 
     void setTime(float time) {

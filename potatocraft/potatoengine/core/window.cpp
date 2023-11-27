@@ -1,20 +1,20 @@
 #include "potatoengine/core/window.h"
 
-#include "potatoengine/events/applicationEvent.h"
+#include <stb_image.h>
+
 #include "potatoengine/events/keyEvent.h"
 #include "potatoengine/events/mouseEvent.h"
+#include "potatoengine/events/windowEvent.h"
 
 namespace potatoengine {
 
 Window::Window(WindowProperties&& properties) {
-    m_data.title = std::move(properties.title);
+    m_data.name = std::move(properties.name);
     m_data.width = properties.width;
     m_data.height = properties.height;
     m_data.lastX = properties.width / 2.f;
     m_data.lastY = properties.height / 2.f;
-#ifdef DEBUG
-    CORE_INFO("Creating window for {} app with resolution {}x{}...", m_data.title, m_data.width, m_data.height);
-#endif
+    CORE_INFO("Creating window for {} app with resolution {}x{}...", m_data.name, m_data.width, m_data.height);
     if (s_GLFWWindowCount == 0) [[unlikely]] {
         if (not glfwInit()) {
             throw std::runtime_error("Failed to initialize GLFW!");
@@ -24,32 +24,45 @@ Window::Window(WindowProperties&& properties) {
         });
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_MAYOR_VERSION);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_MINOR_VERSION);
-    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, properties.openGLMajorVersion);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, properties.openGLMinorVersion);
+    glfwWindowHint(GLFW_DEPTH_BITS, properties.depthBits);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, properties.resizable);
 
-#ifdef DEBUG
-    CORE_INFO("Loading OpengGL version {}.{}", OPENGL_MAYOR_VERSION, OPENGL_MINOR_VERSION);
-#endif
+    CORE_INFO("Loading OpengGL version {}.{}", properties.openGLMajorVersion, properties.openGLMinorVersion);
 
     int monitorCount;
     glfwGetMonitors(&monitorCount);
+    GLFWmonitor* monitor = glfwGetMonitors(&monitorCount)[properties.primaryMonitor];
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    if (properties.fullscreen) {
+        glfwWindowHint(GLFW_REFRESH_RATE, properties.refreshRate);
+        m_data.width = mode->width;
+        m_data.height = mode->height;
+        m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.name.data(), monitor, nullptr);
+        m_data.fullscreen = true;
+    } else {
+        m_data.width = properties.width;
+        m_data.height = properties.height;
+        m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.name.data(), nullptr, nullptr);
+        int xpos = (mode->width - m_data.width) / 2;
+        int ypos = (mode->height - m_data.height) / 2;
+        setPosition(xpos, ypos);
+        m_data.fullscreen = false;
+    }
 
-    int xpos = (monitorCount >= 2) ? 500 : 50;
-    int ypos = (monitorCount >= 2) ? 200 : 50;
-
-    m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.title.data(), nullptr, nullptr);
     ++s_GLFWWindowCount;
 
-    glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, m_data.width, m_data.height, 60);
     m_context = OpenGLContext::Create(m_window);
-    m_context->init();
+    m_context->init();  // make context current window
     glViewport(0, 0, m_data.width, m_data.height);
 
+    setVSync(properties.vSync);
+    setWindowIcon(properties.windowIconPath);
+    setCursorIcon(properties.cursorIconPath);
+    setCursorMode(properties.cursorMode);
     glfwSetWindowUserPointer(m_window, &m_data);
-    setVSync(true);
 
     glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
         WindowData& data = *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
@@ -65,8 +78,6 @@ Window::Window(WindowProperties&& properties) {
         WindowCloseEvent event;
         data.eventCallback(event);
     });
-
-    glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int, int action, int) {
         WindowData& data = *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
@@ -147,12 +158,57 @@ Window::Window(WindowProperties&& properties) {
         MouseScrolledEvent event((float)xoffset, (float)yoffset);
         data.eventCallback(event);
     });
+
+    glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* window, int iconified) {
+        WindowData& data = *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
+
+        if (iconified) {
+            data.minimized = true;
+            WindowMinimizedEvent event;
+            data.eventCallback(event);
+        } else {
+            data.minimized = false;
+            WindowRestoredEvent event;
+            data.eventCallback(event);
+        }
+    });
+
+    glfwSetWindowMaximizeCallback(m_window, [](GLFWwindow* window, int maximized) {
+        WindowData& data = *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
+
+        if (maximized) {
+            data.maximized = true;
+            WindowMaximizedEvent event;
+            data.eventCallback(event);
+        } else {
+            data.maximized = false;
+            WindowRestoredEvent event;
+            data.eventCallback(event);
+        }
+    });
+
+    glfwSetWindowFocusCallback(m_window, [](GLFWwindow* window, int focused) {
+        WindowData& data = *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
+
+        if (focused) {
+            WindowFocusEvent event;
+            data.eventCallback(event);
+        } else {
+            WindowLostFocusEvent event;
+            data.eventCallback(event);
+        }
+    });
+
+    glfwSetWindowPosCallback(m_window, [](GLFWwindow* window, int xpos, int ypos) {
+        WindowData& data = *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
+
+        WindowMovedEvent event(xpos, ypos);
+        data.eventCallback(event);
+    });
 }
 
 Window::~Window() {
-#ifdef DEBUG
-    CORE_INFO("Deleting window");
-#endif
+    CORE_WARN("Deleting window");
     shutdown();
 }
 
@@ -161,9 +217,7 @@ void Window::shutdown() noexcept {
     --s_GLFWWindowCount;
 
     if (s_GLFWWindowCount == 0) {
-#ifdef DEBUG
-        CORE_INFO("No more windows! Terminating GLFW");
-#endif
+        CORE_WARN("No more windows! Terminating GLFW");
         glfwTerminate();
     }
 }
@@ -173,13 +227,143 @@ void Window::onUpdate() noexcept {
     glfwPollEvents();
 }
 
-void Window::setVSync(bool enabled) noexcept {
+void Window::setWindowTitle(const std::string& title) {
+    glfwSetWindowTitle(m_window, title.data());
+}
+
+void Window::setWindowIcon(const std::string& path) {
+    GLFWimage images[1];
+    images[0].pixels = stbi_load(path.data(), &images[0].width, &images[0].height, 0, 4);
+    glfwSetWindowIcon(m_window, 1, images);
+    stbi_image_free(images[0].pixels);
+}
+
+void Window::setWindowMonitor(int monitor) {
+    glfwSetWindowMonitor(m_window, glfwGetMonitors(nullptr)[monitor], 0, 0, m_data.width, m_data.height, GLFW_DONT_CARE);
+}
+
+void Window::setVSync(bool enabled) {
     glfwSwapInterval(enabled ? 1 : 0);
     m_data.vSync = enabled;
 }
 
-void Window::setCursorMode(CursorMode mode) const noexcept {
-    glfwSetInputMode(m_window, GLFW_CURSOR, static_cast<int>(mode));
+void Window::setCursorIcon(const std::string& path) {
+    GLFWimage images[1];
+    images[0].pixels = stbi_load(path.data(), &images[0].width, &images[0].height, 0, 4);
+    GLFWcursor* cursor = glfwCreateCursor(&images[0], 0, 0);
+    glfwSetCursor(m_window, cursor);
+    stbi_image_free(images[0].pixels);
+}
+
+void Window::setCursorMode(CursorMode mode) {
+    if (mode == CursorMode::Normal) {
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    } else if (mode == CursorMode::Hidden) {
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    } else if (mode == CursorMode::Disabled) {
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    } else {
+        throw std::runtime_error("Invalid cursor mode!");
+    }
+    m_data.cursorMode = mode;
+}
+
+void Window::setResizable(bool resizable) {
+    glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, resizable);
+}
+
+void Window::setRefreshRate(int refreshRate) {
+    // This only works for fullscreen windows
+    if (not m_data.fullscreen) {
+        CORE_ERROR("Cannot set refresh rate of windowed window!");
+        return;
+    }
+
+    if (refreshRate not_eq m_data.refreshRate) {
+        int monitorCount;
+        glfwGetMonitors(&monitorCount);
+        GLFWmonitor* monitor = glfwGetMonitors(&monitorCount)[m_data.primaryMonitor];
+        glfwSetWindowMonitor(m_window, monitor, 0, 0, m_data.width, m_data.height, refreshRate);
+        m_data.refreshRate = refreshRate;
+    }
+}
+
+void Window::setSize(int width, int height) {
+    // For fullscreen windows it updates the resolution
+    glfwSetWindowSize(m_window, width, height);
+    m_data.width = width;
+    m_data.height = height;
+    glViewport(0, 0, m_data.width, m_data.height);
+}
+
+void Window::setPosition(int x, int y) {
+    // This only works for windowed windows
+    if (m_data.fullscreen) {
+        CORE_ERROR("Cannot set position of fullscreen window!");
+        return;
+    }
+
+    glfwSetWindowPos(m_window, x, y);
+}
+
+void Window::minimize(bool minimize) {
+    // TODO check with several windows if this stops application
+    if (minimize) {
+        glfwIconifyWindow(m_window);
+    } else {
+        glfwRestoreWindow(m_window);
+    }
+}
+
+void Window::maximize(bool maximize) {
+    // This only works for windowed windows
+    if (m_data.fullscreen) {
+        CORE_ERROR("Cannot maximize fullscreen window!");
+        return;
+    }
+
+    if (maximize) {
+        glfwMaximizeWindow(m_window);
+    } else {
+        glfwRestoreWindow(m_window);
+    }
+}
+
+void Window::setFocus(bool focused) {
+    if (focused) {
+        glfwFocusWindow(m_window);
+    } else {
+        glfwFocusWindow(nullptr);
+    }
+}
+
+void Window::setFullscreen(bool fullscreen) {
+    int monitorCount;
+    glfwGetMonitors(&monitorCount);
+    GLFWmonitor* monitor = glfwGetMonitors(&monitorCount)[m_data.primaryMonitor];
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    if (fullscreen) {
+        m_data.width = mode->width;
+        m_data.height = mode->height;
+        glfwSetWindowMonitor(m_window, monitor, 0, 0, m_data.width, m_data.height, m_data.refreshRate);
+    } else {
+        m_data.width = mode->width / 2;
+        m_data.height = mode->height / 2;
+        int xpos = (mode->width - m_data.width) / 2;
+        int ypos = (mode->height - m_data.height) / 2;
+        glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, m_data.width, m_data.height, GLFW_DONT_CARE);
+    }
+    m_data.fullscreen = fullscreen;
+    glViewport(0, 0, m_data.width, m_data.height);
+}
+
+void Window::setVisible(bool visible) {
+    // TODO check with application pause
+    if (visible) {
+        glfwShowWindow(m_window);
+    } else {
+        glfwHideWindow(m_window);
+    }
 }
 
 std::unique_ptr<Window> Window::Create(WindowProperties&& properties) {

@@ -60,8 +60,9 @@ struct CMesh {
         return vao;
     }
 
-    void bindTextures(std::unique_ptr<ShaderProgram>& sp, CTexture* cTexture, CTextureAtlas* cTextureAtlas, CTexture* cSkyboxTexture, const glm::vec3& cameraPosition, CMaterial* cMaterial) {
+    void bindTextures(std::unique_ptr<ShaderProgram>& sp, CTexture* cTexture, CTextureAtlas* cTextureAtlas, CTexture* cSkyboxTexture, CMaterial* cMaterial) {
         using namespace entt::literals; // TODO rethink this method
+        
         sp->resetActiveUniforms();
         sp->use();
         uint32_t i = 1;
@@ -69,6 +70,7 @@ struct CMesh {
         sp->setFloat("fogDensity", static_cast<float>(entt::monostate<"fogDensity"_hs>{}));
         sp->setFloat("fogGradient", static_cast<float>(entt::monostate<"fogGradient"_hs>{}));
         sp->setVec3("fogColor", static_cast<glm::vec3>(entt::monostate<"fogColor"_hs>{}));
+        
         if (cTexture) {
             for (auto& texture : cTexture->textures) { 
                 sp->setInt(texture->getType().data() + std::to_string(i), i);
@@ -113,7 +115,6 @@ struct CMesh {
                 if (cTexture->useReflection) {
                     sp->setFloat("useReflection", 1.f);
                     sp->setFloat("reflectivity", cTexture->reflectivity);
-                    sp->setVec3("cameraPosition", cameraPosition);
                 }
                 if (cTexture->useRefraction) {
                     sp->setFloat("useRefraction", 1.f);
@@ -176,7 +177,7 @@ struct CMesh {
         for (const auto& texture : textures) {
             texturePaths += "\n\t\tttexture: " + std::string(texture->getFilepath());
         }
-        CORE_INFO("\t\tvertices: {0}\n\t\tindices: {1}{2}", vertices.size(), indices.size(), texturePaths);
+        CORE_TRACE("\t\tvertices: {0}\n\t\tindices: {1}{2}", vertices.size(), indices.size(), texturePaths);
     }
 };
 }

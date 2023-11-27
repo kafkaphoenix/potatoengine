@@ -7,8 +7,6 @@ namespace engine = potatoengine;
 #include "potatoengine/pch.h"
 
 // core
-#include "potatoengine/core/application.h"
-#include "potatoengine/core/input.h"
 #include "potatoengine/core/state.h"
 
 // scene
@@ -17,17 +15,14 @@ namespace engine = potatoengine;
 #include "potatoengine/scene/meta.h"
 
 // renderer
-#include "potatoengine/renderer/camera/cameraController.h"
 #include "potatoengine/renderer/renderer.h"
-#include "potatoengine/renderer/rendererAPI.h"
-#include "potatoengine/renderer/framebuffer.h"
 
 // assets
 #include "potatoengine/assets/assetsManager.h"
 #include "potatoengine/assets/scene.h"
 
 // events
-#include "potatoengine/events/keyEvent.h"
+#include "potatoengine/events/event.h"
 
 // utils
 #include "potatoengine/utils/timer.h"
