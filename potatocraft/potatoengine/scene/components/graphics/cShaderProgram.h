@@ -14,7 +14,7 @@ struct CShaderProgram {
         : name(std::move(n)), isVisible(iv) {}
 
     void print() const {
-        CORE_TRACE("\t\tname: {0}\n\t\t\t\tisVisible: {1}", name, isVisible);
+        ENGINE_TRACE("\t\tname: {0}\n\t\t\t\tisVisible: {1}", name, isVisible);
     }
 };
 }

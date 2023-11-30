@@ -5,10 +5,8 @@
 namespace potatoengine {
 Scene::Scene(std::filesystem::path&& fp) : m_filepath(std::move(fp.string())) {
     std::ifstream f(fp);
-    if (not f.is_open()) [[unlikely]] {
-        f.close();
-        throw std::runtime_error("Failed to load scene: " + m_filepath);
-    }
+    ENGINE_ASSERT(f.is_open(), "Failed to open scene file!");
+    ENGINE_ASSERT(f.peek() != std::ifstream::traits_type::eof(), "Scene file is empty!");
     json data = json::parse(f);
     f.close();
 
@@ -44,30 +42,52 @@ void Scene::read(const json& data) {
         }
     }
     if (data.contains("entities")) {
-        for (const auto& [key, value] : data.at("entities").items()) {
-            m_entities[key] = value;
+        if (data.at("entities").contains("normals")) {
+            for (const auto& [key, value] : data.at("entities").at("normals").items()) {
+                m_normalEntities[key] = value;
+            }
         }
-    }
-    if (data.contains("lights")) {
-        for (const auto& [key, value] : data.at("lights").items()) {
-            m_lights[key] = value;
+        if (data.at("entities").contains("lights")) {
+            for (const auto& [key, value] : data.at("entities").at("lights").items()) {
+                m_lightEntities[key] = value;
+            }
         }
-    }
-    if (data.contains("cameras")) {
-        for (const auto& [key, value] : data.at("cameras").items()) {
-            m_cameras[key] = value;
+        if (data.at("entities").contains("cameras")) {
+            for (const auto& [key, value] : data.at("entities").at("cameras").items()) {
+                m_cameraEntities[key] = value;
+            }
         }
-    }
-    if (data.contains("systems")) {
-        for (const auto& [key, value] : data.at("systems").items()) {
-            m_systems[key] = value;
+        if (data.at("entities").contains("systems")) {
+            for (const auto& [key, value] : data.at("entities").at("systems").items()) {
+                m_systemEntities[key] = value;
+            }
         }
-    }
-    if (data.contains("fbos")) {
-        for (const auto& [key, value] : data.at("fbos").items()) {
-            m_fbos[key] = value;
+        if (data.at("entities").contains("fbos")) {
+            for (const auto& [key, value] : data.at("entities").at("fbos").items()) {
+                m_fboEntities[key] = value;
+            }
         }
     }
 }
 
+const std::map<std::string, std::string, NumericComparator>& Scene::getInfo() {
+    if (not m_info.empty()) {
+        return m_info;
+    }
+
+    m_info["Type"] = "Scene";
+    m_info["Filepath"] = m_filepath;
+    m_info["Shaders"] = std::to_string(m_shaders.size());
+    m_info["Textures"] = std::to_string(m_textures.size());
+    m_info["Models"] = std::to_string(m_models.size());
+    m_info["Prefabs"] = std::to_string(m_prefabs.size());
+    m_info["Scenes"] = std::to_string(m_scenes.size());
+    m_info["Normal entities"] = std::to_string(m_normalEntities.size());
+    m_info["Light entities"] = std::to_string(m_lightEntities.size());
+    m_info["Camera entities"] = std::to_string(m_cameraEntities.size());
+    m_info["System entities"] = std::to_string(m_systemEntities.size());
+    m_info["FBO entities"] = std::to_string(m_fboEntities.size());
+
+    return m_info;
+}
 }

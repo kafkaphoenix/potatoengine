@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glad/glad.h>
+#include "potatoengine/pch.h"
+#include "potatoengine/utils/numericComparator.h"
 
 namespace potatoengine {
 
@@ -10,11 +12,10 @@ class Shader {
     ~Shader();
     Shader& operator=(const Shader&) = delete;
 
-    uint32_t getID() const noexcept { return m_id; }
-    std::string_view getFilepath() const noexcept { return m_filepath; }
+    const std::map<std::string, std::string, NumericComparator>& getInfo();
 
     bool operator==(const Shader& other) const noexcept {
-        return m_id == other.getID() and m_type == other.m_type;
+        return m_filepath == other.m_filepath;
     }
     operator GLuint() const noexcept { return m_id; }
 
@@ -22,6 +23,8 @@ class Shader {
     std::string m_filepath{};
     uint32_t m_id{};
     GLenum m_type{};
+
+    std::map<std::string, std::string, NumericComparator> m_info{};
 };
 
 }

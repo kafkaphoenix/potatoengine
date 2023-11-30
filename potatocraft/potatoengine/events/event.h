@@ -66,7 +66,7 @@ class EventDispatcher {
     }
 
     template <typename Type, typename Func>
-    bool dispatch(const Func &func) noexcept {
+    bool dispatch(const Func &func) {
         if (m_event.getEventType() == Type::GetStaticType()) {
             m_event.m_handled |= func(static_cast<Type &>(m_event));
             return true;

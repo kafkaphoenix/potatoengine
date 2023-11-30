@@ -5,10 +5,8 @@
 namespace potatoengine {
 Shader::Shader(std::filesystem::path&& fp) : m_filepath(std::move(fp.string())) {
     std::ifstream f(fp);
-    if (not f.is_open()) [[unlikely]] {
-        f.close();
-        throw std::runtime_error("Failed to load shader: " + m_filepath);
-    }
+    ENGINE_ASSERT(f.is_open(), "Failed to open shader file!");
+    ENGINE_ASSERT(f.peek() != std::ifstream::traits_type::eof(), "Shader file is empty!");
     std::string data(std::istreambuf_iterator<char>(f), {});
     f.close();
 
@@ -24,18 +22,43 @@ Shader::Shader(std::filesystem::path&& fp) : m_filepath(std::move(fp.string())) 
     if (status not_eq GL_TRUE) [[unlikely]] {
         int infoLogLength = 0;
         glGetShaderiv(m_id, GL_INFO_LOG_LENGTH, &infoLogLength);
-        if (infoLogLength == 0) {
-            throw std::runtime_error("Shader " + m_filepath + " compilation failed!");
-        }
+        ENGINE_ASSERT(infoLogLength > 0, "Shader {} compilation failed!", m_filepath);
         std::vector<GLchar> shaderInfoLog(infoLogLength);
         glGetShaderInfoLog(m_id, infoLogLength, &infoLogLength, shaderInfoLog.data());
         glDeleteShader(m_id);
-        throw std::runtime_error("Shader " + m_filepath + " compilation failed: \n" + std::string(shaderInfoLog.data()));
+        ENGINE_ASSERT(false, "Shader {} compilation failed: \n{}", m_filepath, std::string(shaderInfoLog.data()));
     }
 }
 
 Shader::~Shader() {
-    CORE_WARN("Deleting shader {}", m_filepath);
+    ENGINE_WARN("Deleting shader {}", m_filepath);
     glDeleteShader(m_id);
+}
+
+const std::map<std::string, std::string, NumericComparator>& Shader::getInfo() {
+    if (not m_info.empty()) {
+        return m_info;
+    }
+
+    m_info["Type"] = "Shader";
+    m_info["Filepath"] = m_filepath;
+    m_info["ID"] = std::to_string(m_id);
+    if (m_type == GL_VERTEX_SHADER) {
+        m_info["Shader type"] = "Vertex";
+    } else if (m_type == GL_FRAGMENT_SHADER) {
+        m_info["Shader type"] = "Fragment";
+    } else if (m_type == GL_GEOMETRY_SHADER) {
+        m_info["Shader type"] = "Geometry";
+    } else if (m_type == GL_TESS_CONTROL_SHADER) {
+        m_info["Shader type"] = "Tessellation Control";
+    } else if (m_type == GL_TESS_EVALUATION_SHADER) {
+        m_info["Shader type"] = "Tessellation Evaluation";
+    } else if (m_type == GL_COMPUTE_SHADER) {
+        m_info["Shader type"] = "Compute";
+    } else {
+        m_info["Shader type"] = "Unknown";
+    }
+
+    return m_info;
 }
 }

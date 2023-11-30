@@ -3,7 +3,7 @@
 #include "potatoengine/engineAPI.h"
 #include "demos/components/inventory/cItem.h"
 
-namespace potatocraft {
+namespace demos{
 
 struct CInventory {
     // TODO define
@@ -13,7 +13,7 @@ struct CInventory {
     explicit CInventory(std::vector<CItem> i) : items(std::move(i)) {}
 
     void print() const {
-        CORE_TRACE("\t\titems: No implemented"); // TODO finish
+        APP_TRACE("\t\titems: No implemented"); // TODO finish
     }
 };
 }

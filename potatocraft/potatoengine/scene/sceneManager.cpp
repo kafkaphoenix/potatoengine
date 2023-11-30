@@ -24,20 +24,79 @@
 using json = nlohmann::json;
 namespace potatoengine {
 
-Entity SceneManager::createEntity(std::string_view id, const std::optional<uint32_t>& uuid) {
-    UUID _uuid = uuid.has_value() ? UUID(uuid.value()) : UUID();
-    Entity e = cloneEntity({m_entityFactory.get(id), this}, _uuid);
-    e.add<CUUID>(_uuid);
-
-    return e;
+SceneManager::SceneManager(std::weak_ptr<AssetsManager> am, std::weak_ptr<Renderer> r) : m_entityFactory(am), m_assetsManager(am), m_renderer(r) {
+    ENGINE_INFO("Initializing scene manager...");
+    ENGINE_INFO("Registering engine components...");
+    registerComponents();
+    ENGINE_INFO("Scene manager created!");
 }
 
-void SceneManager::removeEntity(Entity& e) {
-    e.add<CDeleted>();
+void SceneManager::onEvent(Event& e) {
+    eventSystem(std::ref(m_registry), e);
+}
+
+void SceneManager::onUpdate(Time ts, std::weak_ptr<Renderer> r) {
+    updateSystem(std::ref(m_registry), r, ts);
 }
 
 void SceneManager::print() {
     printScene(std::ref(m_registry));
+}
+
+const std::map<std::string, std::string>& SceneManager::getMetrics() {
+    if (not m_isDirty) {
+        return m_metrics;
+    }
+
+    m_metrics.clear();
+    m_metrics["Active scene"] = m_activeScene;
+    int total = m_registry.alive();
+    int prototypes = 0;
+    for (const auto& [key, prototypesMap] : m_entityFactory.getAllPrototypes()) {
+        prototypes += prototypesMap.size();
+        m_metrics["Prefab " + key + " Prototypes Alive"] = std::to_string(prototypesMap.size());
+    }
+    m_metrics["Prototypes Total Alive"] = std::to_string(prototypes);
+    m_metrics["Instances Total Alive"] = std::to_string(total - prototypes);
+    m_metrics["Entities Total Alive"] = std::to_string(total);
+    m_metrics["Entities Total Created"] = std::to_string(m_registry.size());
+    m_metrics["Entities Total Released"] = std::to_string(m_registry.released());
+    m_isDirty = false;
+
+    return m_metrics;
+}
+
+Entity SceneManager::createEntity(std::string_view prefabID, std::string_view prototypeID, const std::optional<uint32_t>& uuid) {
+    UUID _uuid = uuid.has_value() ? UUID(uuid.value()) : UUID();
+    Entity e = cloneEntity(getPrototype(prefabID, prototypeID), _uuid);
+    e.add<CUUID>(_uuid);
+    m_isDirty = true;
+    return e;
+}
+
+Entity SceneManager::cloneEntity(Entity&& e, uint32_t uuid) {
+    using namespace entt::literals;
+    Entity cloned = Entity(m_registry.create(), this);
+
+    for (auto&& curr : m_registry.storage()) {
+        if (auto& storage = curr.second; storage.contains(e)) {
+            storage.push(cloned, storage.value(e));
+            entt::meta_type cType = entt::resolve(storage.type());
+            entt::meta_any cData = cType.construct(storage.value(e));
+            entt::meta_func triggerEventFunc = cType.func("onComponentCloned"_hs);
+            if (triggerEventFunc) {
+                triggerEventFunc.invoke({}, e, cData);
+            }
+        }
+    }
+
+    m_isDirty = true;
+    return cloned;
+}
+
+void SceneManager::removeEntity(Entity&& e) {
+    e.add<CDeleted>();
+    m_isDirty = true;
 }
 
 Entity SceneManager::getEntity(std::string_view name) {
@@ -46,7 +105,7 @@ Entity SceneManager::getEntity(std::string_view name) {
             return Entity(e, this);
         }
     }
-    throw std::runtime_error("Entity not found");
+    ENGINE_ASSERT(false, "Entity not found");
 }
 
 Entity SceneManager::getEntity(UUID& uuid) {
@@ -55,89 +114,129 @@ Entity SceneManager::getEntity(UUID& uuid) {
             return Entity(e, this);
         }
     }
-    throw std::runtime_error("Entity not found");
+    ENGINE_ASSERT(false, "Entity not found");
 }
 
-void SceneManager::createPrefab(std::string_view id) {
-    const auto& manager = m_assetsManager.lock();
-    if (not manager) {
-        throw std::runtime_error("Assets manager not found!");
+const std::map<std::string, entt::entity, NumericComparator>& SceneManager::getAllNamedEntities() {
+    if (not m_isDirty) {
+        return m_namedEntities;
     }
 
-    if (manager->contains<Prefab>(id)) {
-        m_entityFactory.create(id, {m_registry.create(), this});
-    }
+    m_namedEntities.clear();
+    m_registry.view<CName, CUUID>().each([&](entt::entity e, const CName& cName, const CUUID& cUUID) {
+        m_namedEntities.emplace(cName.name, e);
+    });
+    getMetrics();
+
+    return m_namedEntities;
 }
 
-void SceneManager::updatePrefab(std::string_view id) {
-    const auto& manager = m_assetsManager.lock();
-    if (not manager) {
-        throw std::runtime_error("Assets manager not found!");
-    }
-
-    if (manager->contains<Prefab>(id)) {
-        m_entityFactory.update(id, {m_registry.create(), this}, std::ref(m_registry));
-    }
+void SceneManager::createPrototypes(std::string_view prefabID) {
+    // TODO think a better way, we need to create an entity so
+    // we have access to the scene manager and avoid circular
+    // dependency but we discard it afterwards to create one per prototype
+    m_entityFactory.createPrototypes(prefabID, Entity(m_registry.create(), this));
+    m_isDirty = true;
 }
 
-void SceneManager::loadScene(std::string_view id) {
-    CORE_INFO("Loading scene elements...");
-
-    const auto& manager = m_assetsManager.lock();
-    if (not manager) {
-        throw std::runtime_error("Assets manager not found!");
-    }
-
-    if (manager->contains<Scene>(id)) {
-        SceneLoader loadedScene(manager);
-        loadedScene.load(id);
-        m_loadedScenes.emplace(id, std::move(loadedScene));
-    }
+void SceneManager::updatePrototypes(std::string_view prefabID) {
+    m_entityFactory.updatePrototypes(prefabID, Entity(m_registry.create(), this));
 }
 
-void SceneManager::createScene(std::string id) {
-    CORE_INFO("Creating scene...");
+void SceneManager::destroyPrototypes(std::string_view prefabID) {
+    m_entityFactory.destroyPrototypes(prefabID, std::ref(m_registry));
+    m_isDirty = true;
+}
+
+const EntityFactory::Prototypes& SceneManager::getPrototypes(std::string_view prefabID) {
+    return m_entityFactory.getPrototypes(prefabID);
+}
+
+const std::map<std::string, EntityFactory::Prototypes, NumericComparator>& SceneManager::getAllPrototypes() {
+    return m_entityFactory.getAllPrototypes();
+}
+
+bool SceneManager::containsPrototypes(std::string_view prefabID) const {
+    return m_entityFactory.containsPrototypes(prefabID);
+}
+
+void SceneManager::createPrototype(std::string_view prefabID, std::string_view prototypeID) {
+    m_entityFactory.createPrototype(prefabID, prototypeID, Entity(m_registry.create(), this));
+    m_isDirty = true;
+}
+
+void SceneManager::updatePrototype(std::string_view prefabID, std::string_view prototypeID) {
+    m_entityFactory.updatePrototype(prefabID, prototypeID, Entity(m_registry.create(), this));
+}
+
+void SceneManager::destroyPrototype(std::string_view prefabID, std::string_view prototypeID) {
+    m_entityFactory.destroyPrototype(prefabID, prototypeID, std::ref(m_registry));
+    m_isDirty = true;
+}
+
+Entity SceneManager::getPrototype(std::string_view prefabID, std::string_view prototypeID) {
+    return Entity(m_entityFactory.getPrototype(prefabID, prototypeID), this);
+}
+
+bool SceneManager::containsPrototype(std::string_view prefabID, std::string_view prototypeID) const {
+    return m_entityFactory.containsPrototype(prefabID, prototypeID);
+}
+
+void SceneManager::loadScene(std::string_view sceneID) {
+    ENGINE_INFO("Loading scene elements...");
+    SceneLoader loadedScene(m_assetsManager);
+    loadedScene.load(sceneID);
+    m_loadedScenes.emplace(sceneID, std::move(loadedScene));
+    ENGINE_INFO("Scene elements loaded!");
+}
+
+void SceneManager::createScene(std::string sceneID, bool reload) {
+    if (reload) {
+        ENGINE_INFO("Reloading scene...");
+    } else {
+        ENGINE_INFO("Creating scene...");
+    }
     Timer timer;
 
-    if (m_activeScene == id) {
-        throw std::runtime_error("Scene " + std::string{id} + " is already active!");
-    }
-
-    if (not m_loadedScenes.contains(id.data())) {
-        throw std::runtime_error("Scene " + std::string{id} + " is not loaded!");
-    }
-
-    if (not m_activeScene.empty()) {
-        clearScene(m_activeScene);
-    }
-
     const auto& renderer = m_renderer.lock();
-    if (not renderer) {
-        throw std::runtime_error("Renderer not found!");
-    }
+    ENGINE_ASSERT(renderer, "Renderer is null!");
 
-    CORE_INFO("Linking scene shaders...");
-    const auto& loadedScene = m_loadedScenes.at(id.data());
+    const auto& manager = m_assetsManager.lock();
+    ENGINE_ASSERT(manager, "AssetsManager is null!");
+
+    ENGINE_ASSERT(m_activeScene.empty() or reload, "Scene {} already exists!", sceneID);
+    ENGINE_ASSERT(m_loadedScenes.contains(sceneID), "Scene {} is not loaded!", sceneID);
+
+    ENGINE_INFO("Linking scene shaders...");
+    const auto& loadedScene = m_loadedScenes.at(sceneID);
     for (std::string id : loadedScene.getLoadedShaders()) {
         renderer->addShader(std::move(id));
     }
 
-    CORE_INFO("Creating scene prefabs...");
-    for (std::string_view id : loadedScene.getLoadedPrefabs()) {
-        createPrefab(id);
+    // A Prefab asset is a json file that contains a list of entity prototypes
+    for (std::string_view prefabID : loadedScene.getLoadedPrefabs()) {
+        ENGINE_INFO("Creating scene prefabs prototypes...");
+        createPrototypes(prefabID);
+        ENGINE_INFO("Creating scene entities...");
+        createEntities(prefabID, loadedScene, manager, renderer);
     }
 
-    const auto& manager = m_assetsManager.lock();
-    if (not manager) {
-        throw std::runtime_error("Assets manager is null!");
+    if (reload) {
+        ENGINE_INFO("Scene {} reloading TIME: {}", m_activeScene, timer.getSeconds());
+    } else {
+        ENGINE_INFO("Scene {} creation TIME: {}", sceneID, timer.getSeconds());
+        m_activeScene = std::move(sceneID);
     }
+    m_isDirty = true;
+}
 
-    CORE_INFO("Creating scene entities...");
-    for (const auto& [name, data] : loadedScene.getLoadedEntities()) {
-        std::string_view prefab = data.at("prefab").get<std::string_view>();
-        Entity e = createEntity(prefab);
+void SceneManager::createEntities(std::string_view prefabID, const SceneLoader& loadedScene, const std::shared_ptr<AssetsManager>& manager, const std::shared_ptr<Renderer>& renderer) {
+    ENGINE_INFO("Creating scene normal entities...");
+    for (const auto& [name, data] : loadedScene.getLoadedNormalEntities(prefabID)) {
+        std::string_view prototypeID = data.at("prototype").get<std::string_view>();
+        Entity e = createEntity(prefabID, prototypeID);
         e.add<CName>(std::string(name));
-        e.add<CTag>(prefab.data());
+        e.add<CTag>(prototypeID.data());
         if (data.contains("options")) {
             json options = data.at("options");
             if (options.contains("isKinematic")) {
@@ -170,36 +269,49 @@ void SceneManager::createScene(std::string id) {
             if (options.contains("size")) {
                 CShape& shape = e.get<CShape>();
                 json size = options.at("size");
-                shape.size = {size.at("x").get<float>(), size.at("y").get<float>(), size.at("z").get<float>()};
-                shape.meshes.clear();
-                shape.createMesh();
+                glm::vec3 sizeVec = {size.at("x").get<float>(), size.at("y").get<float>(), size.at("z").get<float>()};
+                if (shape.size not_eq sizeVec) {
+                    ENGINE_TRACE("Changing shape size from {0} to {1}", shape.size, sizeVec);
+                    shape.size = sizeVec;
+                    shape.meshes.clear();
+                    shape.createMesh();
+                }
             }
             if (options.contains("repeatTexture")) {
                 CShape& cShape = e.get<CShape>();
-                cShape.repeatTexture = options.at("repeatTexture").get<bool>();
-                cShape.meshes.clear();
-                cShape.createMesh();
+                bool repeatTexture = options.at("repeatTexture").get<bool>();
+                if (cShape.repeatTexture not_eq repeatTexture) {
+                    ENGINE_TRACE("Changing shape repeatTexture from {0} to {1}", cShape.repeatTexture, repeatTexture);
+                    cShape.repeatTexture = repeatTexture;
+                    cShape.meshes.clear();
+                    cShape.createMesh();
+                }
             }
             if (options.contains("body")) {
                 CBody& cBody = e.get<CBody>();
                 std::string filepath = options.at("body").get<std::string>();
-                cBody.filepath = filepath;
-                cBody.meshes.clear();
-                cBody.materials.clear();
-                auto model = *manager->get<Model>(filepath);  // We need a copy of the model
-                cBody.meshes = std::move(model.getMeshes());
-                cBody.materials = std::move(model.getMaterials());
+                if (cBody.filepath not_eq filepath) {
+                    ENGINE_TRACE("Changing body filepath from {0} to {1}", cBody.filepath, filepath);
+                    cBody.filepath = filepath;
+                    cBody.meshes.clear();
+                    cBody.materials.clear();
+                    auto model = *manager->get<Model>(filepath);  // We need a copy of the model
+                    cBody.meshes = std::move(model.getMeshes());
+                    cBody.materials = std::move(model.getMaterials());
+                }
             }
             if (options.contains("filepaths")) {
-                json filepaths = options.at("filepaths");
                 CTexture& c = e.get<CTexture>();
-                c.filepaths.clear();
-                c.textures.clear();
-                c.filepaths.reserve(filepaths.size());
-                c.textures.reserve(filepaths.size());
-                for (const auto& filepath : filepaths) {
-                    c.filepaths.emplace_back(filepath.get<std::string>());
-                    c.textures.emplace_back(manager->get<Texture>(filepath.get<std::string>()));
+                json filepaths = options.at("filepaths");
+                std::vector<std::string> newFilepaths = filepaths.get<std::vector<std::string>>();
+                if (c.filepaths not_eq newFilepaths) {
+                    ENGINE_TRACE("Changing texture filepaths from {} to {}", c.filepaths.size(), newFilepaths.size());
+                    c.filepaths = std::move(newFilepaths);
+                    c.textures.clear();
+                    c.textures.reserve(c.filepaths.size());
+                    for (const auto& filepath : c.filepaths) {
+                        c.textures.emplace_back(manager->get<Texture>(filepath));
+                    }
                 }
             }
             if (options.contains("color")) {
@@ -248,7 +360,7 @@ void SceneManager::createScene(std::string id) {
                 json scale = options.at("scale");
                 e.get<CTransform>().scale = {scale.at("x").get<float>(), scale.at("y").get<float>(), scale.at("z").get<float>()};
             }
-            if (prefab == "chunk_config") {
+            if (prototypeID == "chunk_config") {
                 CChunkManager& cChunkManager = e.get<CChunkManager>();
                 if (options.contains("chunkSize")) {
                     cChunkManager.chunkSize = options.at("chunkSize").get<int>();
@@ -308,7 +420,7 @@ void SceneManager::createScene(std::string id) {
                     noise.positive = noiseOptions.at("positive").get<bool>();
                 }
             }
-            if (prefab == "skybox") {
+            if (prototypeID == "skybox") {
                 CTime& cTime = e.get<CTime>();
                 if (options.contains("time")) {
                     cTime.setTime(options.at("time").get<float>());
@@ -333,12 +445,12 @@ void SceneManager::createScene(std::string id) {
         }
     }
 
-    CORE_INFO("Creating scene lights...");
-    for (const auto& [name, data] : loadedScene.getLoadedLights()) {
-        std::string_view prefab = data.at("prefab").get<std::string_view>();
-        Entity e = createEntity(prefab);
+    ENGINE_INFO("Creating scene light entities...");
+    for (const auto& [name, data] : loadedScene.getLoadedLightEntities(prefabID)) {
+        std::string_view prototypeID = data.at("prototype").get<std::string_view>();
+        Entity e = createEntity(prefabID, prototypeID);
         e.add<CName>(std::string(name));
-        e.add<CTag>(prefab.data());
+        e.add<CTag>(prototypeID.data());
         if (data.contains("options")) {
             CTransform& cTransform = e.get<CTransform>();
             CLight& cLight = e.get<CLight>();
@@ -372,22 +484,25 @@ void SceneManager::createScene(std::string id) {
             if (options.contains("body")) {
                 CBody& cBody = e.get<CBody>();
                 std::string filepath = options.at("body").get<std::string>();
-                cBody.filepath = filepath;
-                cBody.meshes.clear();
-                cBody.materials.clear();
-                auto model = *manager->get<Model>(filepath);  // We need a copy of the model
-                cBody.meshes = std::move(model.getMeshes());
-                cBody.materials = std::move(model.getMaterials());
+                if (cBody.filepath not_eq filepath) {
+                    ENGINE_TRACE("Changing body filepath from {0} to {1}", cBody.filepath, filepath);
+                    cBody.filepath = filepath;
+                    cBody.meshes.clear();
+                    cBody.materials.clear();
+                    auto model = *manager->get<Model>(filepath);  // We need a copy of the model
+                    cBody.meshes = std::move(model.getMeshes());
+                    cBody.materials = std::move(model.getMaterials());
+                }
             }
         }
     }
 
-    CORE_INFO("Creating scene cameras...");
-    for (const auto& [name, data] : loadedScene.getLoadedCameras()) {
-        std::string_view prefab = data.at("prefab").get<std::string_view>();
-        Entity e = createEntity(prefab);
+    ENGINE_INFO("Creating scene camera entities...");
+    for (const auto& [name, data] : loadedScene.getLoadedCameraEntities(prefabID)) {
+        std::string_view prototypeID = data.at("prototype").get<std::string_view>();
+        Entity e = createEntity(prefabID, prototypeID);
         e.add<CName>(std::string(name));
-        e.add<CTag>(prefab.data());
+        e.add<CTag>(prototypeID.data());
         if (data.contains("options")) {
             CCamera& cCamera = e.get<CCamera>();
             CTransform& cTransform = e.get<CTransform>();
@@ -402,7 +517,7 @@ void SceneManager::createScene(std::string id) {
             if (options.contains("rotation")) {
                 json rotation = options.at("rotation");
                 glm::vec3 rot = {rotation.at("x").get<float>(), rotation.at("y").get<float>(), rotation.at("z").get<float>()};
-                cTransform.rotate(glm::quat(glm::radians(rot))); // TODO: fix this will glitch with camera movement
+                cTransform.rotate(glm::quat(glm::radians(rot)));  // TODO: fix this will glitch with camera movement
             }
             deserializeCamera(cCamera, options);
             cCamera.calculateProjection();
@@ -421,34 +536,37 @@ void SceneManager::createScene(std::string id) {
             if (options.contains("body")) {
                 CBody& cBody = e.get<CBody>();
                 std::string filepath = options.at("body").get<std::string>();
-                cBody.filepath = filepath;
-                cBody.meshes.clear();
-                cBody.materials.clear();
-                auto model = *manager->get<Model>(filepath);  // We need a copy of the model
-                cBody.meshes = std::move(model.getMeshes());
-                cBody.materials = std::move(model.getMaterials());
+                if (cBody.filepath not_eq filepath) {
+                    ENGINE_TRACE("Changing body filepath from {0} to {1}", cBody.filepath, filepath);
+                    cBody.filepath = filepath;
+                    cBody.meshes.clear();
+                    cBody.materials.clear();
+                    auto model = *manager->get<Model>(filepath);  // We need a copy of the model
+                    cBody.meshes = std::move(model.getMeshes());
+                    cBody.materials = std::move(model.getMaterials());
+                }
             }
         }
     }
 
-    CORE_INFO("Creating scene systems...");
-    for (const auto& [name, data] : loadedScene.getLoadedSystems()) {
-        std::string_view prefab = data.at("prefab").get<std::string_view>();
-        Entity e = createEntity(prefab);
+    ENGINE_INFO("Creating scene system entities...");
+    for (const auto& [name, data] : loadedScene.getLoadedSystemEntities(prefabID)) {
+        std::string_view prototypeID = data.at("prototype").get<std::string_view>();
+        Entity e = createEntity(prefabID, prototypeID);
         e.add<CName>(std::string(name));
-        e.add<CTag>(prefab.data());
+        e.add<CTag>(prototypeID.data());
         if (data.contains("options")) {
             json options = data.at("options");
             // TODO: implement
         }
     }
 
-    CORE_INFO("Creating scene FBOs...");
-    for (const auto& [name, data] : loadedScene.getLoadedFBOs()) {
-        std::string_view prefab = data.at("prefab").get<std::string_view>();
-        Entity e = createEntity(prefab);
+    ENGINE_INFO("Creating scene FBO entities...");
+    for (const auto& [name, data] : loadedScene.getLoadedFBOEntities(prefabID)) {
+        std::string_view prototypeID = data.at("prototype").get<std::string_view>();
+        Entity e = createEntity(prefabID, prototypeID);
         e.add<CName>(std::string(name));
-        e.add<CTag>(prefab.data());
+        e.add<CTag>(prototypeID.data());
         CFBO& fbo = e.get<CFBO>();
         if (data.contains("options")) {
             json options = data.at("options");
@@ -475,7 +593,7 @@ void SceneManager::createScene(std::string id) {
         } else if (fbo.attachment == "depth_stencil_renderbuffer") {
             attachment = engine::FBO::DEPTH_STENCIL_RENDERBUFFER;
         } else {
-            throw std::runtime_error("Unknown fbo attachment: " + fbo.attachment);
+            ENGINE_ASSERT(false, "Unknown fbo attachment: {}", fbo.attachment);
         }
         CFBO::Mode mode;
         if (fbo._mode == "normal") {
@@ -495,89 +613,57 @@ void SceneManager::createScene(std::string id) {
         } else if (fbo._mode == "emboss") {
             mode = CFBO::Mode::Emboss;
         } else {
-            throw std::runtime_error("Unknown fbo mode " + fbo._mode);
+            ENGINE_ASSERT(false, "Unknown fbo mode: {}", fbo._mode);
         }
         fbo.mode = mode;
 
         renderer->addFramebuffer(std::string(fbo.fbo), fbo.width, fbo.height, attachment);
     }
 
-    CORE_INFO("Creating sub-scenes...");
-    // TODO: implement
-    
     m_registry.sort<CDistanceFromCamera>([](const CDistanceFromCamera& lhs, const CDistanceFromCamera& rhs) {
         return lhs.distance < rhs.distance;
     });
 
     m_registry.sort<CUUID, CDistanceFromCamera>();
-
-    m_activeScene = std::move(id);
-    CORE_INFO("Scene {} creation TIME: {}", m_activeScene, timer.getSeconds());
+    m_isDirty = true;
 }
 
-void SceneManager::updateScene(std::string_view id) {
-    // TODO: implement
+void SceneManager::reloadScene() {
+    ENGINE_ASSERT(not m_activeScene.empty(), "No scene is active!");
+    ENGINE_WARN("Reloading scene {}", m_activeScene);
+    auto renderer = m_renderer.lock();
+    ENGINE_ASSERT(renderer, "Renderer is null!");
+
+    m_registry.clear();  // delete instances and prototypes but reusing them later
+    m_entityFactory.clear();
+    renderer->clear();
+    createScene(m_activeScene, true);
+    m_isDirty = true;
 }
 
-void SceneManager::clearScene(std::string_view id) {
-    CORE_WARN("Detaching GameState");
-    if (m_activeScene == id) {
-        m_registry.clear();
-        m_entityFactory.clear();
-        m_activeScene = "";
-    } else {
-        throw std::runtime_error("Scene " + std::string{id} + " is not active!");
-    }
+void SceneManager::clearScene() {
+    ENGINE_ASSERT(not m_activeScene.empty(), "No scene is active!");
+    ENGINE_WARN("Clearing scene {}", m_activeScene);
+    auto renderer = m_renderer.lock();
+    ENGINE_ASSERT(renderer, "Renderer is null!");
+
+    m_loadedScenes.erase(m_activeScene);
+    m_registry.clear();  // soft delete / = {};  would delete them completely but does not invoke signals/mixin methods
+    m_entityFactory.clear();
+    renderer->clear();
+    m_activeScene = "";
+    m_metrics.clear();
+    m_isDirty = false;
 }
 
 template <typename T>
-void SceneManager::onComponentAdded(Entity e, T& c) {
-    throw std::runtime_error("Unsupported onComponentAdded method for component type " + std::string{entt::type_id<T>().name()});
+void SceneManager::onComponentAdded(Entity& e, T& c) {
+    ENGINE_ASSERT(false, "Unsupported onComponentAdded method for component type {}", entt::type_id<T>().name());
 }
 
 template <typename T>
-void SceneManager::onComponentCloned(Entity e, T& c) {
-    throw std::runtime_error("Unsupported onComponentCloned method for component type " + std::string{entt::type_id<T>().name()});
+void SceneManager::onComponentCloned(Entity& e, T& c) {
+    ENGINE_ASSERT(false, "Unsupported onComponentCloned method for component type {}", entt::type_id<T>().name());
 }
 
-Entity SceneManager::cloneEntity(Entity e, uint32_t uuid) {
-    using namespace entt::literals;
-
-    Entity dst = {m_registry.create(entt::entity{uuid}), this};
-
-    for (auto&& curr : m_registry.storage()) {
-        if (auto& storage = curr.second; storage.contains(e)) {
-            storage.push(dst, storage.value(e));
-            entt::meta_type cType = entt::resolve(storage.type());
-            entt::meta_any cData = cType.construct(storage.value(e));
-            entt::meta_func triggerEventFunc = cType.func("onComponentCloned"_hs);
-            if (triggerEventFunc) {
-                triggerEventFunc.invoke({}, e, cData);
-            }
-        }
-    }
-    return dst;
-}
-
-void SceneManager::clearEntity(Entity& e) {
-    uint32_t uuid = entt::to_integral(static_cast<entt::entity>(e));
-    m_registry.destroy(e);
-    m_registry.create(entt::entity{uuid});
-    e.add<CUUID>(uuid);
-}
-
-SceneManager::SceneManager(std::weak_ptr<AssetsManager> am, std::weak_ptr<Renderer> r) : m_entityFactory(am), m_assetsManager(am), m_renderer(r) {
-    CORE_INFO("Initializing scene manager...");
-    CORE_INFO("Registering engine components...");
-    registerComponents();
-    CORE_INFO("Scene manager created!");
-}
-
-void SceneManager::onEvent(Event& e) {
-    eventSystem(std::ref(m_registry), e);
-}
-
-void SceneManager::onUpdate(Time ts, std::weak_ptr<Renderer> r) {
-    updateSystem(std::ref(m_registry), r, ts);
-}
 }

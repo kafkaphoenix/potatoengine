@@ -20,6 +20,15 @@ Texture::Texture(uint32_t width, uint32_t height, GLenum glFormat, std::optional
     m_mipmapLevel = 1;
     m_flipVertically = false;
     m_filepaths.emplace_back("fbo texture");
+    m_type = "textureDifusse";
+    // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexStorage2D.xhtml
+    if (m_glFormat == GL_RGBA8) {
+        m_format = GL_RGBA;
+    } else if (m_glFormat == GL_DEPTH_COMPONENT24) {
+        m_format = GL_DEPTH_COMPONENT;
+    } else {
+        ENGINE_ASSERT(false, "Texture format not supported: {}", m_glFormat);
+    }
 }
 
 Texture::Texture(std::filesystem::path&& fp, std::optional<std::string>&& type, std::optional<bool> flipVertically, std::optional<uint32_t> mipmap_level, std::optional<bool> gammaCorrection)
@@ -68,7 +77,7 @@ void Texture::loadTexture() {
         stbi_uc* data = stbi_load(filepath.data(), &width, &height, &channels, 0);
         if (not data) [[unlikely]] {
             stbi_image_free(data);
-            throw std::runtime_error("Failed to load texture: " + std::string(filepath) + " " + stbi_failure_reason());
+            ENGINE_ASSERT(false, "Failed to load texture: {} {}", filepath, stbi_failure_reason());
         }
         m_width = width;
         m_height = height;
@@ -93,7 +102,7 @@ void Texture::loadTexture() {
             m_format = GL_RED;
         } else [[unlikely]] {
             stbi_image_free(data);
-            throw std::runtime_error("Texture format not supported: " + std::string(filepath) + " " + std::to_string(channels) + " channels");
+            ENGINE_ASSERT(false, "Texture format not supported: {} {} channels", filepath, channels);
         }
 
         if (m_isCubemap) {
@@ -110,14 +119,12 @@ void Texture::loadTexture() {
 
 Texture::~Texture() {
     std::string_view source = (m_filepaths.size() == 1) ? m_filepaths[0] : m_directory;
-    CORE_WARN("Deleting texture {}: {}", m_id, source);
+    ENGINE_WARN("Deleting texture {}: {}", m_id, source);
     glDeleteTextures(1, &m_id);
 }
 
 void Texture::bindSlot(uint32_t slot) {
-    if (slot == 0) [[unlikely]] {
-        throw std::runtime_error("Texture slot 0 is not allowed!");
-    }
+    ENGINE_ASSERT(slot > 0, "Texture slot {} is not allowed!", slot);
     m_slot = slot;
     glBindTextureUnit(slot, m_id);
 }
@@ -129,6 +136,54 @@ void Texture::rebindSlot() {
 void Texture::unbindSlot() {
     glBindTextureUnit(m_slot, 0);  // unbind texture from slot
     m_slot = 0;                    // nothing render to this slot
+}
+
+const std::map<std::string, std::string, NumericComparator>& Texture::getInfo() {
+    if (not m_info.empty()) {
+        return m_info;
+    }
+
+    m_info["Type"] = "Texture";
+    m_info["ID"] = std::to_string(m_id);
+    for (int i = 0; i < m_filepaths.size(); ++i) {
+        m_info["Filepath " + std::to_string(i)] = m_filepaths[i];
+    }
+    m_info["Width"] = std::to_string(m_width);
+    m_info["Height"] = std::to_string(m_height);
+    m_info["Texture type"] = m_type;
+    if (m_glFormat == GL_RGBA8) {
+        m_info["GL Format"] = "RGBA8";
+    } else if (m_glFormat == GL_RGB8) {
+        m_info["GL Format"] = "RGB8";
+    } else if (m_glFormat == GL_RG8) {
+        m_info["GL Format"] = "RG8";
+    } else if (m_glFormat == GL_R8) {
+        m_info["GL Format"] = "R8";
+    } else if (m_glFormat == GL_DEPTH_COMPONENT24) {
+        m_info["GL Format"] = "DEPTH_COMPONENT24";
+    } else {
+        m_info["GL Format"] = "Unknown";
+    }
+    if (m_format == GL_RGBA) {
+        m_info["Format"] = "RGBA";
+    } else if (m_format == GL_RGB) {
+        m_info["Format"] = "RGB";
+    } else if (m_format == GL_RG) {
+        m_info["Format"] = "RG";
+    } else if (m_format == GL_RED) {
+        m_info["Format"] = "RED";
+    } else if (m_format == GL_DEPTH_COMPONENT) {
+        m_info["Format"] = "DEPTH_COMPONENT";
+    } else {
+        m_info["Format"] = "Unknown";
+    }
+    m_info["Slot"] = std::to_string(m_slot); // will be 0 if not bound except for fbo texture
+    m_info["Is Cubemap"] = m_isCubemap ? "true" : "false";
+    m_info["Flip Vertically"] = m_flipVertically ? "true" : "false";
+    m_info["Mipmap Level"] = std::to_string(m_mipmapLevel);
+    m_info["Gamma Correction"] = m_gammaCorrection ? "true" : "false";
+
+    return m_info;
 }
 
 std::unique_ptr<Texture> Texture::Create(uint32_t width, uint32_t height, GLenum glFormat, std::optional<bool> wrap) {

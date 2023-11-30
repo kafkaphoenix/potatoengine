@@ -25,9 +25,7 @@ std::shared_ptr<VAO> ShapeFactory::CreateTriangle(float size) {
 std::shared_ptr<VAO> ShapeFactory::CreateRectangle(float width, float height, bool repeatTexture) {
     uint32_t overflow = 1;
     if (repeatTexture) {
-        if (width not_eq height) {
-            throw std::runtime_error("Cannot repeat texture on non-square shape");
-        }
+        ENGINE_ASSERT(width == height, "Cannot repeat texture on non-square shape");
         overflow = width;
     }
 
@@ -47,9 +45,7 @@ std::shared_ptr<VAO> ShapeFactory::CreateRectangle(float width, float height, bo
 std::shared_ptr<VAO> ShapeFactory::CreateCube(float width, float height, float depth, bool repeatTexture) {
     uint32_t overflow = 1;
     if (repeatTexture) {
-        if (not(width == height and height == depth)) {
-            throw std::runtime_error("Cannot repeat texture on non-square shape");
-        }
+        ENGINE_ASSERT(width == height, "Cannot repeat texture on non-square shape");
         overflow = width;
     }
 

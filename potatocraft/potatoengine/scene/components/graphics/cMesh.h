@@ -36,7 +36,7 @@ struct CMesh {
         } else if (vertexType == "terrain") { // TODO maybe a better way to do this using vertices?
             vao->attachVertex(std::move(vbo), VAO::VertexType::TERRAIN_VERTEX);
         } else {
-            throw std::runtime_error("Unknown vertex type " + vertexType);
+            ENGINE_ASSERT(false, "Unknown vertex type {}", vertexType);
         }
         vao->setIndex(IBO::Create(indices));
     }
@@ -49,7 +49,7 @@ struct CMesh {
         } else if (vertexType == "terrain") {
             vao->updateVertex(VBO::Create(vertices), 0, VAO::VertexType::TERRAIN_VERTEX);
         } else {
-            throw std::runtime_error("Unknown vertex type " + vertexType);
+            ENGINE_ASSERT(false, "Unknown vertex type {}", vertexType);
         }
     }
 
@@ -65,13 +65,13 @@ struct CMesh {
         
         sp->resetActiveUniforms();
         sp->use();
-        uint32_t i = 1;
         sp->setFloat("useFog", static_cast<float>(entt::monostate<"useFog"_hs>{}));
         sp->setFloat("fogDensity", static_cast<float>(entt::monostate<"fogDensity"_hs>{}));
         sp->setFloat("fogGradient", static_cast<float>(entt::monostate<"fogGradient"_hs>{}));
         sp->setVec3("fogColor", static_cast<glm::vec3>(entt::monostate<"fogColor"_hs>{}));
         
         if (cTexture) {
+            uint32_t i = 1;
             for (auto& texture : cTexture->textures) { 
                 sp->setInt(texture->getType().data() + std::to_string(i), i);
                 texture->bindSlot(i);
@@ -132,6 +132,7 @@ struct CMesh {
             uint32_t specularN = 1;
             uint32_t normalN = 1;
             uint32_t heightN = 1;
+            uint32_t i = 1;
             for (auto& texture : textures) {
                 std::string number;
                 std::string_view type = texture->getType();
@@ -144,16 +145,14 @@ struct CMesh {
                 } else if (type == "textureHeight") {
                     number = std::to_string(heightN++);
                 } else {
-                    throw std::runtime_error("Unknown texture type " + std::string(type));
+                    ENGINE_ASSERT(false, "Unknown texture type {}", type);
                 }
                 sp->setInt(type.data() + number, i);
                 texture->bindSlot(i);
                 ++i;
             }
             if (textures.size() == 0) {
-                if (not cMaterial) {
-                    throw std::runtime_error("No material found for entity");
-                }
+                ENGINE_ASSERT(cMaterial, "No material found for entity");
                 sp->setFloat("noTexture", 1.f);
                 sp->setVec3("materialColor", cMaterial->diffuse);
             } else {
@@ -175,9 +174,9 @@ struct CMesh {
     void print() const {
         std::string texturePaths;
         for (const auto& texture : textures) {
-            texturePaths += "\n\t\tttexture: " + std::string(texture->getFilepath());
+            texturePaths += std::format("\n\t\t\ttexture: {}", texture->getFilepath());
         }
-        CORE_TRACE("\t\tvertices: {0}\n\t\tindices: {1}{2}", vertices.size(), indices.size(), texturePaths);
+        ENGINE_TRACE("\t\tvertices: {0}\n\t\tindices: {1}{2}", vertices.size(), indices.size(), texturePaths);
     }
 };
 }

@@ -10,27 +10,26 @@ namespace potatoengine {
 
 Window::Window(WindowProperties&& properties) {
     m_data.name = std::move(properties.name);
-    m_data.width = properties.width;
-    m_data.height = properties.height;
-    m_data.lastX = properties.width / 2.f;
-    m_data.lastY = properties.height / 2.f;
-    CORE_INFO("Creating window for {} app with resolution {}x{}...", m_data.name, m_data.width, m_data.height);
-    if (s_GLFWWindowCount == 0) [[unlikely]] {
-        if (not glfwInit()) {
-            throw std::runtime_error("Failed to initialize GLFW!");
-        }
+    m_data.width = properties.windowWidth;
+    m_data.height = properties.windowHeight;
+    m_data.lastX = m_data.width / 2.f;
+    m_data.lastY = m_data.height / 2.f;
+    m_data.windowIconPath = std::move(properties.windowIconPath);
+    ENGINE_INFO("Creating window for {} app with resolution {}x{}...", m_data.name, m_data.width, m_data.height);
+    if (s_GLFWWindowCount == 0) {
+        ENGINE_ASSERT(glfwInit(), "Failed to initialize GLFW!");
         glfwSetErrorCallback([](int error, const char* description) {
-            throw std::runtime_error("GLFW Error! " + std::to_string(error) + ": " + description);
+            ENGINE_ASSERT(false, "GLFW Error! {0}: {1}", error, description);
         });
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, properties.openGLMajorVersion);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, properties.openGLMinorVersion);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, properties.openglMajorVersion);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, properties.openglMinorVersion);
     glfwWindowHint(GLFW_DEPTH_BITS, properties.depthBits);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, properties.resizable);
 
-    CORE_INFO("Loading OpengGL version {}.{}", properties.openGLMajorVersion, properties.openGLMinorVersion);
+    ENGINE_INFO("Loading OpengGL version {}.{}", properties.openglMajorVersion, properties.openglMinorVersion);
 
     int monitorCount;
     glfwGetMonitors(&monitorCount);
@@ -43,8 +42,8 @@ Window::Window(WindowProperties&& properties) {
         m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.name.data(), monitor, nullptr);
         m_data.fullscreen = true;
     } else {
-        m_data.width = properties.width;
-        m_data.height = properties.height;
+        m_data.width = properties.windowWidth;
+        m_data.height = properties.windowHeight;
         m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.name.data(), nullptr, nullptr);
         int xpos = (mode->width - m_data.width) / 2;
         int ypos = (mode->height - m_data.height) / 2;
@@ -59,7 +58,7 @@ Window::Window(WindowProperties&& properties) {
     glViewport(0, 0, m_data.width, m_data.height);
 
     setVSync(properties.vSync);
-    setWindowIcon(properties.windowIconPath);
+    setWindowIcon(m_data.windowIconPath);
     setCursorIcon(properties.cursorIconPath);
     setCursorMode(properties.cursorMode);
     glfwSetWindowUserPointer(m_window, &m_data);
@@ -208,7 +207,7 @@ Window::Window(WindowProperties&& properties) {
 }
 
 Window::~Window() {
-    CORE_WARN("Deleting window");
+    ENGINE_WARN("Deleting window");
     shutdown();
 }
 
@@ -217,14 +216,17 @@ void Window::shutdown() noexcept {
     --s_GLFWWindowCount;
 
     if (s_GLFWWindowCount == 0) {
-        CORE_WARN("No more windows! Terminating GLFW");
+        ENGINE_WARN("No more windows! Terminating GLFW");
         glfwTerminate();
     }
 }
 
+void Window::onEvent() noexcept {
+    glfwPollEvents();
+}
+
 void Window::onUpdate() noexcept {
     m_context->swapBuffers();
-    glfwPollEvents();
 }
 
 void Window::setWindowTitle(const std::string& title) {
@@ -236,6 +238,12 @@ void Window::setWindowIcon(const std::string& path) {
     images[0].pixels = stbi_load(path.data(), &images[0].width, &images[0].height, 0, 4);
     glfwSetWindowIcon(m_window, 1, images);
     stbi_image_free(images[0].pixels);
+}
+
+void Window::restoreWindowIcon() {
+    if (not m_data.windowIconPath.empty()) {
+        setWindowIcon(m_data.windowIconPath);
+    }
 }
 
 void Window::setWindowMonitor(int monitor) {
@@ -250,8 +258,8 @@ void Window::setVSync(bool enabled) {
 void Window::setCursorIcon(const std::string& path) {
     GLFWimage images[1];
     images[0].pixels = stbi_load(path.data(), &images[0].width, &images[0].height, 0, 4);
-    GLFWcursor* cursor = glfwCreateCursor(&images[0], 0, 0);
-    glfwSetCursor(m_window, cursor);
+    m_data.cursor = glfwCreateCursor(&images[0], 0, 0);
+    glfwSetCursor(m_window, m_data.cursor);
     stbi_image_free(images[0].pixels);
 }
 
@@ -263,9 +271,15 @@ void Window::setCursorMode(CursorMode mode) {
     } else if (mode == CursorMode::Disabled) {
         glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     } else {
-        throw std::runtime_error("Invalid cursor mode!");
+        ENGINE_ASSERT(false, "Invalid cursor mode!");
     }
     m_data.cursorMode = mode;
+}
+
+void Window::restoreCursor() {
+    if (m_data.cursor) {
+        glfwSetCursor(m_window, m_data.cursor);
+    }
 }
 
 void Window::setResizable(bool resizable) {
@@ -275,7 +289,7 @@ void Window::setResizable(bool resizable) {
 void Window::setRefreshRate(int refreshRate) {
     // This only works for fullscreen windows
     if (not m_data.fullscreen) {
-        CORE_ERROR("Cannot set refresh rate of windowed window!");
+        ENGINE_ERROR("Cannot set refresh rate of windowed window!");
         return;
     }
 
@@ -299,7 +313,7 @@ void Window::setSize(int width, int height) {
 void Window::setPosition(int x, int y) {
     // This only works for windowed windows
     if (m_data.fullscreen) {
-        CORE_ERROR("Cannot set position of fullscreen window!");
+        ENGINE_ERROR("Cannot set position of fullscreen window!");
         return;
     }
 
@@ -318,7 +332,7 @@ void Window::minimize(bool minimize) {
 void Window::maximize(bool maximize) {
     // This only works for windowed windows
     if (m_data.fullscreen) {
-        CORE_ERROR("Cannot maximize fullscreen window!");
+        ENGINE_ERROR("Cannot maximize fullscreen window!");
         return;
     }
 
@@ -352,6 +366,7 @@ void Window::setFullscreen(bool fullscreen) {
         int xpos = (mode->width - m_data.width) / 2;
         int ypos = (mode->height - m_data.height) / 2;
         glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, m_data.width, m_data.height, GLFW_DONT_CARE);
+        restoreWindowIcon();
     }
     m_data.fullscreen = fullscreen;
     glViewport(0, 0, m_data.width, m_data.height);

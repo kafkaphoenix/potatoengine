@@ -17,21 +17,18 @@ enum class CursorMode {
 struct WindowProperties {
     std::string name{};
     std::string windowIconPath{};
-    int width{};
-    int height{};
+    int windowWidth{};
+    int windowHeight{};
     int depthBits{};
     int refreshRate{};
     bool fullscreen{};
     int primaryMonitor{};
     bool vSync{};
     bool resizable{};
-    int openGLMajorVersion{};
-    int openGLMinorVersion{};
+    int openglMajorVersion{};
+    int openglMinorVersion{};
     std::string cursorIconPath{};
     CursorMode cursorMode{};
-    bool debugEnabled{};
-    int debugLevel{};
-    bool displayFPS{};
 };
 
 static int s_GLFWWindowCount = 0;
@@ -45,6 +42,7 @@ class Window {
 
     void shutdown() noexcept;
     void onUpdate() noexcept;
+    void onEvent() noexcept;
 
     GLFWwindow* getNativeWindow() const noexcept { return m_window; }
     int getWidth() const noexcept { return m_data.width; }
@@ -58,10 +56,12 @@ class Window {
     void setEventCallback(const EventCallbackFn& cb) { m_data.eventCallback = cb; }
     void setWindowTitle(const std::string& title);
     void setWindowIcon(const std::string& path);
+    void restoreWindowIcon();
     void setWindowMonitor(int monitor);
     void setVSync(bool enabled);
     void setCursorIcon(const std::string& path);
     void setCursorMode(CursorMode mode);
+    void restoreCursor();
     void setResizable(bool resizable);
     void setRefreshRate(int refreshRate);
     void setSize(int width, int height);
@@ -87,6 +87,7 @@ class Window {
     struct WindowData {
         std::string name{};
         int width{}, height{};
+        std::string windowIconPath{};
         int primaryMonitor{};
         int refreshRate{};
         bool maximized{};
@@ -97,6 +98,7 @@ class Window {
         bool vSync{};
         bool fullscreen{};
         CursorMode cursorMode = CursorMode::Disabled;
+        GLFWcursor* cursor;
         bool updateCameraPosition = true;
         bool wireframe{};
 

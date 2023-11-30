@@ -22,7 +22,7 @@ struct CTime {
         : seconds(s), currentHour(ch), currentMinute(cm), currentSecond(cs), startingTime(st), dayLength(dl), nightStart(ns), dayTransitionStart(dts), dayStart(ds), nightTransitionStart(nts), acceleration(a), fps(f) {}
 
     void print() const {
-        CORE_TRACE("\t\tseconds: {0}\n\t\t\t\tcurrentHour: {1}\n\t\t\t\tcurrentMinute: {2}\n\t\t\t\tcurrentSecond: {3}\n\t\t\t\tdayLength: {4}\n\t\t\t\tstartingTime: {5}\n\t\t\t\tdayTransitionStart: {6}\n\t\t\t\tdayStart: {7}\n\t\t\t\tnightTransitionStart: {8}\n\t\t\t\tnightStart: {9}\n\t\t\t\tacceleration: {10}\n\t\t\t\tfps: {11}", seconds, currentHour, currentMinute, currentSecond, dayLength, startingTime, dayTransitionStart, dayStart, nightTransitionStart, nightStart, acceleration, fps);
+        ENGINE_TRACE("\t\tseconds: {0}\n\t\t\t\tcurrentHour: {1}\n\t\t\t\tcurrentMinute: {2}\n\t\t\t\tcurrentSecond: {3}\n\t\t\t\tdayLength: {4}\n\t\t\t\tstartingTime: {5}\n\t\t\t\tdayTransitionStart: {6}\n\t\t\t\tdayStart: {7}\n\t\t\t\tnightTransitionStart: {8}\n\t\t\t\tnightStart: {9}\n\t\t\t\tacceleration: {10}\n\t\t\t\tfps: {11}", seconds, currentHour, currentMinute, currentSecond, dayLength, startingTime, dayTransitionStart, dayStart, nightTransitionStart, nightStart, acceleration, fps);
     }
 
     void setTime(float time) {
@@ -31,43 +31,23 @@ struct CTime {
         currentMinute = static_cast<int>((seconds / 60.f) - (currentHour * 60.f));
         currentSecond = static_cast<int>(seconds) % 60;
     }
+
+    void validate() {
+        ENGINE_ASSERT(dayLength > 0.f, "Day length must be positive!");
+        ENGINE_ASSERT(startingTime > 0.f, "Starting time must be positive!");
+        ENGINE_ASSERT(nightStart > 0.f, "Night start must be positive!");
+        ENGINE_ASSERT(dayTransitionStart > 0.f, "Day transition start must be positive!");
+        ENGINE_ASSERT(dayStart > 0.f, "Day start must be positive!");
+        ENGINE_ASSERT(nightTransitionStart > 0.f, "Night transition start must be positive!");
+        ENGINE_ASSERT(acceleration > 0.f, "Acceleration must be positive!");
+        ENGINE_ASSERT(fps > 0, "FPS must be positive!");
+    }
 };
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CTime& c) {
-    if (c.dayLength <= 0.f) {
-        throw std::runtime_error("Day length must be positive!");
-    }
-
-    if (c.startingTime < 0.f) {
-        throw std::runtime_error("Starting time must be positive!");
-    }
-
-    if (c.nightStart < 0.f) {
-        throw std::runtime_error("Night start must be positive!");
-    }
-
-    if (c.dayTransitionStart < 0.f) {
-        throw std::runtime_error("Day transition start must be positive!");
-    }
-
-    if (c.dayStart < 0.f) {
-        throw std::runtime_error("Day start must be positive!");
-    }
-
-    if (c.nightTransitionStart < 0.f) {
-        throw std::runtime_error("Night transition start must be positive!");
-    }
-
-    if (c.acceleration < 0.f) {
-        throw std::runtime_error("Acceleration must be positive!");
-    }
-
-    if (c.fps <= 0) {
-        throw std::runtime_error("FPS must be positive!");
-    }
-
+void engine::SceneManager::onComponentAdded(Entity& e, CTime& c) {
+    c.validate();
     c.setTime(c.startingTime);
 
     e.update<CTime>(c);

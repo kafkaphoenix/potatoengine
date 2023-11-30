@@ -2,10 +2,11 @@
 
 #include <assimp/scene.h>
 
+#include "potatoengine/assets/texture.h"
 #include "potatoengine/pch.h"
 #include "potatoengine/scene/components/graphics/cMaterial.h"
 #include "potatoengine/scene/components/graphics/cMesh.h"
-#include "potatoengine/assets/texture.h"
+#include "potatoengine/utils/numericComparator.h"
 
 namespace potatoengine {
 
@@ -14,10 +15,10 @@ class Model {
     Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection = std::nullopt);
     Model& operator=(const Model&) = delete;
 
-    std::string_view getFilepath() const noexcept { return m_filepath; }
+    const std::map<std::string, std::string, NumericComparator>& getInfo();
+    const std::map<std::string, std::string, NumericComparator>& getLoadedTextureInfo(std::string_view textureID);
 
     std::vector<CMesh>& getMeshes() noexcept { return m_meshes; }
-
     std::vector<CMaterial>& getMaterials() noexcept { return m_materials; }
 
     bool operator==(const Model& other) const {
@@ -30,6 +31,9 @@ class Model {
     std::vector<CMesh> m_meshes{};
     std::vector<CMaterial> m_materials{};
     std::vector<std::shared_ptr<Texture>> m_loadedTextures{};
+
+    std::map<std::string, std::string, NumericComparator> m_info{};
+    std::map<std::string, std::map<std::string, std::string, NumericComparator>, NumericComparator> m_loadedTextureInfo{};
 
     void processNode(aiNode* node, const aiScene* scene);
     CMesh processMesh(aiMesh* mesh, const aiScene* scene);

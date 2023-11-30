@@ -1,7 +1,8 @@
 #pragma once
 
 #include <glad/glad.h>
-
+#include "potatoengine/pch.h"
+#include "potatoengine/utils/numericComparator.h"
 namespace potatoengine {
 class Texture {
    public:
@@ -11,17 +12,19 @@ class Texture {
     ~Texture();
     Texture& operator=(const Texture&) = delete;
 
+    void bindSlot(uint32_t slot);
+    void rebindSlot();
+    void unbindSlot();
+
     uint32_t getWidth() const noexcept { return m_width; }
     uint32_t getHeight() const noexcept { return m_height; }
     uint32_t getID() const noexcept { return m_id; }
     std::string_view getFilepath() const noexcept { return (m_filepaths.size() == 1) ? m_filepaths[0] : m_directory; }
     std::string_view getType() const noexcept { return m_type; }
-    void bindSlot(uint32_t slot);
-    void rebindSlot();
-    void unbindSlot();
+    const std::map<std::string, std::string, NumericComparator>& getInfo();
 
     bool operator==(const Texture& other) const noexcept {
-        return m_id == other.getID() and m_width == other.getWidth() and m_height == other.getHeight() and m_type == other.getType();
+        return m_filepaths == other.m_filepaths;
     }
 
     static constexpr bool FLIP_VERTICALLY = true;
@@ -44,6 +47,8 @@ class Texture {
     bool m_flipVertically{true};
     uint32_t m_mipmapLevel{};
     bool m_gammaCorrection{};
+
+    std::map<std::string, std::string, NumericComparator> m_info{};
 
     void loadTexture();
 };

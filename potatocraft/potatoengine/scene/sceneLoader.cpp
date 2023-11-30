@@ -6,44 +6,47 @@ using json = nlohmann::json;
 namespace potatoengine {
 SceneLoader::SceneLoader(std::weak_ptr<AssetsManager> am) : m_assetsManager(am) {}
 
-void SceneLoader::load(std::string_view id) {
+void SceneLoader::load(std::string_view sceneID) {
     const auto& manager = m_assetsManager.lock();
-    if (not manager) {
-        throw std::runtime_error("Assets manager is null!");
-    }
+    ENGINE_ASSERT(manager, "AssetsManager is null!");
 
-    const auto& scene = manager->get<Scene>(id);
+    const auto& scene = manager->get<Scene>(sceneID);
 
-    CORE_INFO("Loading assets...");
+    ENGINE_INFO("Loading assets...");
     Timer timer = Timer();
     loadShaders(scene, manager);
-    CORE_INFO("Loading shaders TIME: {}", timer.getSeconds());
+    ENGINE_INFO("Loading shaders TIME: {}", timer.getSeconds());
     timer.reset();
     loadTextures(scene, manager);
-    CORE_INFO("Loading textures TIME: {}", timer.getSeconds());
+    ENGINE_INFO("Loading textures TIME: {}", timer.getSeconds());
     timer.reset();
     loadModels(scene, manager);
-    CORE_INFO("Loading models TIME: {}", timer.getSeconds());
+    ENGINE_INFO("Loading models TIME: {}", timer.getSeconds());
     timer.reset();
     loadPrefabs(scene, manager);
-    CORE_INFO("Loading prefabs TIME: {}", timer.getSeconds());
+    ENGINE_INFO("Loading prefabs TIME: {}", timer.getSeconds());
     timer.reset();
-    loadScenes(scene, manager);  // TODO: implement
-    CORE_INFO("Loading sub-scenes TIME: {}", timer.getSeconds());
-    CORE_INFO("Assets loaded!");
+    loadChildrenScenes(scene, manager);  // TODO: implement
+    ENGINE_INFO("Loading children scenes TIME: {}", timer.getSeconds());
+    ENGINE_INFO("Assets loaded!");
+
+    ENGINE_INFO("Loading entities...");
     timer.reset();
-    loadEntities(scene, manager);
-    CORE_INFO("Loading entities TIME: {}", timer.getSeconds());
+    loadNormalEntities(scene, manager);
+    ENGINE_INFO("Loading normal entities TIME: {}", timer.getSeconds());
     timer.reset();
-    loadLights(scene, manager);
-    CORE_INFO("Loading lights TIME: {}", timer.getSeconds());
+    loadLightEntities(scene, manager);
+    ENGINE_INFO("Loading light entities TIME: {}", timer.getSeconds());
     timer.reset();
-    loadCameras(scene, manager);
-    CORE_INFO("Loading cameras TIME: {}", timer.getSeconds());
-    loadSystems(scene, manager);
-    CORE_INFO("Loading systems TIME: {}", timer.getSeconds());
-    loadFBOs(scene, manager);
-    CORE_INFO("Loading FBOs TIME: {}", timer.getSeconds());
+    loadCameraEntities(scene, manager);
+    ENGINE_INFO("Loading camera entities TIME: {}", timer.getSeconds());
+    timer.reset();
+    loadSystemEntities(scene, manager);
+    ENGINE_INFO("Loading system entities TIME: {}", timer.getSeconds());
+    timer.reset();
+    loadFBOEntities(scene, manager);
+    ENGINE_INFO("Loading FBO entities TIME: {}", timer.getSeconds());
+    ENGINE_INFO("Entities loaded!");
 }
 
 void SceneLoader::loadShaders(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
@@ -73,42 +76,47 @@ void SceneLoader::loadModels(const std::shared_ptr<Scene>& scene, const std::sha
 
 void SceneLoader::loadPrefabs(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
     for (const auto& [prefab, options] : scene->getPrefabs()) {
-        manager->load<Prefab>(prefab, options.at("filepath").get<std::string>(), options.at("targets").get<std::unordered_set<std::string>>());
+        manager->load<Prefab>(prefab, options.at("filepath").get<std::string>(), options.at("targeted_prototypes").get<std::unordered_set<std::string>>());
         m_loadedPrefabs.emplace(prefab);
+        m_loadedNormalEntities.emplace(prefab, std::unordered_map<std::string, json>());
+        m_loadedLightEntities.emplace(prefab, std::unordered_map<std::string, json>());
+        m_loadedCameraEntities.emplace(prefab, std::unordered_map<std::string, json>());
+        m_loadedSystemEntities.emplace(prefab, std::unordered_map<std::string, json>());
+        m_loadedFBOEntities.emplace(prefab, std::unordered_map<std::string, json>());
     }
 }
 
-void SceneLoader::loadScenes(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
+void SceneLoader::loadChildrenScenes(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
     // TODO: implement
 }
 
-void SceneLoader::loadEntities(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
-    for (const auto& [entity, options] : scene->getEntities()) {
-        m_loadedEntities.emplace(entity, options);
+void SceneLoader::loadNormalEntities(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
+    for (const auto& [entity, options] : scene->getNormalEntities()) {
+        m_loadedNormalEntities.at(options.at("prefab").get<std::string>()).emplace(entity, options);
     }
 }
 
-void SceneLoader::loadLights(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
-    for (const auto& [light, options] : scene->getLights()) {
-        m_loadedLights.emplace(light, options);
+void SceneLoader::loadLightEntities(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
+    for (const auto& [light, options] : scene->getLightEntities()) {
+        m_loadedLightEntities.at(options.at("prefab").get<std::string>()).emplace(light, options);
     }
 }
 
-void SceneLoader::loadCameras(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
-    for (const auto& [camera, options] : scene->getCameras()) {
-        m_loadedCameras.emplace(camera, options);
+void SceneLoader::loadCameraEntities(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
+    for (const auto& [camera, options] : scene->getCameraEntities()) {
+        m_loadedCameraEntities.at(options.at("prefab").get<std::string>()).emplace(camera, options);
     }
 }
 
-void SceneLoader::loadSystems(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
-    for (const auto& [system, options] : scene->getSystems()) {
-        m_loadedSystems.emplace(system, options);
+void SceneLoader::loadSystemEntities(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
+    for (const auto& [system, options] : scene->getSystemEntities()) {
+        m_loadedSystemEntities.at(options.at("prefab").get<std::string>()).emplace(system, options);
     }
 }
 
-void SceneLoader::loadFBOs(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
-    for (const auto& [fbo, options] : scene->getFBOs()) {
-        m_loadedFBOs.emplace(fbo, options);
+void SceneLoader::loadFBOEntities(const std::shared_ptr<Scene>& scene, const std::shared_ptr<AssetsManager>& manager) {
+    for (const auto& [fbo, options] : scene->getFBOEntities()) {
+        m_loadedFBOEntities.at(options.at("prefab").get<std::string>()).emplace(fbo, options);
     }
 }
 

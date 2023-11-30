@@ -18,9 +18,7 @@ void ChunkManager::loadConfig(Entity&& config) {
 // }
 
 void ChunkManager::createChunk(Entity&& chunk, glm::ivec3 position) {
-    // if (m_loadedChunks.contains(position)) {
-    //     throw std::runtime_error("Chunk already exists");
-    // }
+    // ENGINE_ASSERT(not m_loadedChunks.contains(position), "Chunk already exists");
     
     // CBlock block;
     // glm::ivec3 blockPosition{};

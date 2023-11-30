@@ -13,17 +13,13 @@ class Entity {
 
     template <typename Component, typename... Args>
     Component& add(Args&&... args) {
-        if (has_all<Component>()) {
-            throw std::runtime_error("Entity already has component " + std::string(typeid(Component).name()));
-        }
+        ENGINE_ASSERT(not has_all<Component>(), "Entity already has component {}", typeid(Component).name());
         return m_sceneManager->m_registry.emplace<Component>(m_entity, std::forward<Args>(args)...);
     }
 
     template <typename Component, typename... Args>
     Component& update(Args&&... args) {
-        if (not has_all<Component>()) {
-            throw std::runtime_error("Entity does not have component " + std::string(typeid(Component).name()));
-        }
+        ENGINE_ASSERT(has_all<Component>(), "Entity does not have component {}", typeid(Component).name());
         return m_sceneManager->m_registry.replace<Component>(m_entity, std::forward<Args>(args)...);
     }
 
@@ -68,6 +64,6 @@ class Entity {
 
    private:
     entt::entity m_entity{entt::null};
-    SceneManager* m_sceneManager;  // shared ptr would add a counter we dont need here as we don't own the object
+    SceneManager* m_sceneManager;  // shared ptr would add a counter we do not need here as we do not own the object
 };
 }

@@ -299,15 +299,15 @@ CMesh generateTerrain(CChunkManager::MeshType meshType, CChunkManager::MeshAlgor
                 return generateTriangleMesh(chunkSize, blockSize, heights, biomes);
             } else if (drawMode == CTexture::DrawMode::TEXTURE) {
                 return generateTriangleMesh(chunkSize, blockSize, heights);
-            } else {
-                throw std::runtime_error("Draw mode " + std::to_string(static_cast<int>(drawMode)) + " not supported for mesh type " + std::to_string(static_cast<int>(meshType)) + " and mesh algorithm " + std::to_string(static_cast<int>(meshAlgorithm)));
+            } else { // TODO improve log
+                ENGINE_ASSERT(false, "Draw mode {} not supported for mesh type {} and mesh algorithm {}", static_cast<int>(drawMode), static_cast<int>(meshType), static_cast<int>(meshAlgorithm));
             }
         } else if (meshAlgorithm == CChunkManager::MeshAlgorithm::SimplifiedQuad or meshAlgorithm == CChunkManager::MeshAlgorithm::Quad) {
             bool duplicateVertices = meshAlgorithm == CChunkManager::MeshAlgorithm::Quad;
             if (biomes.has_value()) {
                 return generateQuadMesh(chunkSize, blockSize, duplicateVertices, drawMode, heights, biomes);
             } else {
-                throw std::runtime_error("Draw mode " + std::to_string(static_cast<int>(drawMode)) + " not supported for mesh type " + std::to_string(static_cast<int>(meshType)) + " and mesh algorithm " + std::to_string(static_cast<int>(meshAlgorithm)));
+                ENGINE_ASSERT(false, "Draw mode {} not supported for mesh type {} and mesh algorithm {}", static_cast<int>(drawMode), static_cast<int>(meshType), static_cast<int>(meshAlgorithm));
             }
         }
     } else if (meshType == CChunkManager::MeshType::Chunk) {
@@ -326,9 +326,7 @@ void terrainSystem(entt::registry& reg) {  // TODO transform
         CTextureAtlas* cTextureAtlas = nullptr;
         if (cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS or cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND or cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
             cTextureAtlas = reg.try_get<CTextureAtlas>(e);
-            if (not cTextureAtlas) {
-                throw std::runtime_error("Texture atlas not found for entity: " + cUUID.uuid);
-            }
+            ENGINE_ASSERT(cTextureAtlas, "Texture atlas not found for entity: {}", cUUID.uuid);
         }
 
         if (cChunkManager.chunks.empty()) {

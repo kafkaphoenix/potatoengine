@@ -3,7 +3,6 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include "potatoengine/scene/entity.h"
 
@@ -31,13 +30,13 @@ struct CLight {
         : _type(std::move(t)), color(std::move(c)), intensity(i), range(r), innerConeAngle(ica), outerConeAngle(oca) {}
 
     void print() const {
-        CORE_TRACE("\t\ttype: {0}\n\t\t\t\tcolor: {1}\n\t\t\t\tintensity: {2}\n\t\t\t\trange: {3}\n\t\t\t\tinnerConeAngle: {4}\n\t\t\t\touterConeAngle: {5}", _type, glm::to_string(color), intensity, range, innerConeAngle, outerConeAngle);
+        ENGINE_TRACE("\t\ttype: {0}\n\t\t\t\tcolor: {1}\n\t\t\t\tintensity: {2}\n\t\t\t\trange: {3}\n\t\t\t\tinnerConeAngle: {4}\n\t\t\t\touterConeAngle: {5}", _type, color, intensity, range, innerConeAngle, outerConeAngle);
     }
 };
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CLight& c) {
+void engine::SceneManager::onComponentAdded(Entity& e, CLight& c) {
     if (c._type == "directional") {
         c.type = CLight::Type::Directional;
     } else if (c._type == "point") {
@@ -47,7 +46,7 @@ void engine::SceneManager::onComponentAdded(Entity e, CLight& c) {
     } else if (c._type == "area") {
         c.type = CLight::Type::Area;
     } else {
-        throw std::runtime_error("Unknown light type " + c._type);
+        ENGINE_ASSERT(false, "Unknown light type {}", c._type);
     }
 
     e.update<CLight>(c);

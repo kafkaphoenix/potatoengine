@@ -7,7 +7,7 @@ ShaderProgram::ShaderProgram(std::string&& name) : m_id(glCreateProgram()), m_na
 }
 
 ShaderProgram::~ShaderProgram() {
-    CORE_WARN("Deleting shader program {}", m_name);
+    ENGINE_WARN("Deleting shader program {}", m_name);
     glDeleteProgram(m_id);
 }
 
@@ -31,12 +31,10 @@ void ShaderProgram::link() {
     if (status not_eq GL_TRUE) [[unlikely]] {
         int infoLogLength = 0;
         glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &infoLogLength);
-        if (infoLogLength == 0) {
-            throw std::runtime_error("Could not link shader program " + m_name);
-        }
+        ENGINE_ASSERT(infoLogLength > 0, "Shader program {} linking failed!", m_name);
         std::vector<GLchar> shaderProgramInfoLog(infoLogLength);
         glGetProgramInfoLog(m_id, infoLogLength, &infoLogLength, shaderProgramInfoLog.data());
-        throw std::runtime_error("Could not link shader program " + m_name + ": \n" + shaderProgramInfoLog.data());
+        ENGINE_ASSERT(false, "Shader program {} linking failed: \n{}", m_name, std::string(shaderProgramInfoLog.data()));
     }
     m_activeUniforms = getActiveUniforms();
 }
@@ -126,33 +124,33 @@ void ShaderProgram::resetActiveUniforms() {
         } else if (type == GL_SAMPLER_CUBE) {
             setInt(name, 0);
         } else {
-            throw std::runtime_error("Unknown uniform type!");
+            ENGINE_ASSERT(false, "Unknown uniform type {} for uniform {}", type, name);
         }
     }
     unuse();
 }
 
 void ShaderProgram::printActiveUniforms() {
-    CORE_TRACE("================================");
+    ENGINE_TRACE("================================");
     for (const auto& [type, name] : m_activeUniforms) {
         if (type == GL_INT) {
-            CORE_TRACE("Active uniform {} type: {}", name, "int");
+            ENGINE_TRACE("Active uniform {} type: {}", name, "int");
         } else if (type == GL_FLOAT) {
-            CORE_TRACE("Active uniform {} type: {}", name, "float");
+            ENGINE_TRACE("Active uniform {} type: {}", name, "float");
         } else if (type == GL_FLOAT_VEC2) {
-            CORE_TRACE("Active uniform {} type: {}", name, "vec2");
+            ENGINE_TRACE("Active uniform {} type: {}", name, "vec2");
         } else if (type == GL_FLOAT_VEC3) {
-            CORE_TRACE("Active uniform {} type: {}", name, "vec3");
+            ENGINE_TRACE("Active uniform {} type: {}", name, "vec3");
         } else if (type == GL_FLOAT_VEC4) {
-            CORE_TRACE("Active uniform {} type: {}", name, "vec4");
+            ENGINE_TRACE("Active uniform {} type: {}", name, "vec4");
         } else if (type == GL_FLOAT_MAT4) {
-            CORE_TRACE("Active uniform {} type: {}", name, "mat4");
+            ENGINE_TRACE("Active uniform {} type: {}", name, "mat4");
         } else if (type == GL_SAMPLER_2D) {
-            CORE_TRACE("Active uniform {} type: {}", name, "sampler2D");
+            ENGINE_TRACE("Active uniform {} type: {}", name, "sampler2D");
         } else if (type == GL_SAMPLER_CUBE) {
-            CORE_TRACE("Active uniform {} type: {}", name, "samplerCube");
+            ENGINE_TRACE("Active uniform {} type: {}", name, "samplerCube");
         } else {
-            throw std::runtime_error("Unknown uniform type!");
+            ENGINE_ASSERT(false, "Unknown uniform type {} for uniform {}", type, name);
         }
     }
 }

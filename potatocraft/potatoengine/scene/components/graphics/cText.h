@@ -3,7 +3,6 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include "potatoengine/pch.h"
 
@@ -18,7 +17,7 @@ struct CText {
     explicit CText(std::string&& t, glm::vec3&& c) : text(std::move(t)), color(std::move(c)) {}
 
     void print() const {
-        CORE_TRACE("\t\ttext: {0}\n\t\t\t\tcolor: {1}", text, glm::to_string(color));
+        ENGINE_TRACE("\t\ttext: {0}\n\t\t\t\tcolor: {1}", text, color);
     }
 };
 }

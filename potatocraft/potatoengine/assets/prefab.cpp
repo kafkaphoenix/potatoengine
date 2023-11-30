@@ -3,35 +3,32 @@
 #include "potatoengine/utils/timer.h"
 
 namespace potatoengine {
-Prefab::Prefab(std::filesystem::path&& fp, std::unordered_set<std::string>&& targets) : m_filepath(std::move(fp.string())), m_targets(std::move(targets)) {
+Prefab::Prefab(std::filesystem::path&& fp, std::unordered_set<std::string>&& targetedPrototypes) : m_filepath(std::move(fp.string())), m_targetedPrototypes(std::move(targetedPrototypes)) {
+    // One prefab file can contain multiple prototypes and we target only a subset of them
     std::ifstream f(fp);
-    if (not f.is_open()) [[unlikely]] {
-        f.close();
-        throw std::runtime_error("Failed to load prefab: " + m_filepath);
-    }
+    ENGINE_ASSERT(f.is_open(), "Failed to open prefab file!");
+    ENGINE_ASSERT(f.peek() != std::ifstream::traits_type::eof(), "Prefab file is empty!");
     json data = json::parse(f);
     f.close();
 
-    for (const auto& [name, prefabData] : data.items()) {
-        if (not m_targets.contains(name)) {
+    for (const auto& [name, prototypeData] : data.items()) {
+        if (not m_targetedPrototypes.contains(name)) {
             continue;
         }
         std::unordered_set<std::string> inherits;
         std::unordered_set<std::string> ctags;
         std::unordered_map<std::string, json> components;
 
-        if (prefabData.contains("inherit")) {
-            prefabData.at("inherit").get_to(inherits);
+        if (prototypeData.contains("inherit")) {
+            prototypeData.at("inherit").get_to(inherits);
             for (std::string_view father : inherits) {
                 read(data.at(father), inherits, ctags, components);
             }
         }
-        read(prefabData, inherits, ctags, components);  // child overrides parent if common definition exists
+        read(prototypeData, inherits, ctags, components);  // child overrides parent if common definition exists
 
-        m_prefabs.emplace(name, PrefabData{.inherits = std::move(inherits), .ctags = std::move(ctags), .components = std::move(components)});
+        m_prototypes.emplace(name, Prototype{.inherits = std::move(inherits), .ctags = std::move(ctags), .components = std::move(components)});
     }
-
-    print();
 }
 
 void Prefab::read(const json& data, std::unordered_set<std::string>& inherits, std::unordered_set<std::string>& ctags, std::unordered_map<std::string, json>& components) {
@@ -61,18 +58,39 @@ void Prefab::read(const json& data, std::unordered_set<std::string>& inherits, s
     }
 }
 
-void Prefab::print() const {
-    for (const auto& [name, prefabData] : m_prefabs) {
-        CORE_TRACE("\tLoaded prefab: {0} with {1} inherits, {2} ctags and {3} components", name, prefabData.inherits.size(), prefabData.ctags.size(), prefabData.components.size());
-        for (std::string_view father : prefabData.inherits) {
-            CORE_TRACE("\t\tInherit: {}", father);
-        }
-        for (std::string_view ctag : prefabData.ctags) {
-            CORE_TRACE("\t\tComponent tag: {}", ctag);
-        }
-        for (const auto& [cKey, _] : prefabData.components) {
-            CORE_TRACE("\t\tComponent: {}", cKey);
-        }
+const std::map<std::string, std::string, NumericComparator>& Prefab::getInfo() {
+    if (not m_info.empty()) {
+        return m_info;
     }
+
+    m_info["Type"] = "Prefab";
+    m_info["Filepath"] = m_filepath;
+    for (int i = 0; i < m_targetedPrototypes.size(); ++i) {
+        m_info["Targeted Prototype " + std::to_string(i)] = *std::next(m_targetedPrototypes.begin(), i);
+    }
+
+    return m_info;
+}
+
+const std::map<std::string, std::string, NumericComparator>& Prefab::getTargetedPrototypeInfo(std::string_view prototypeID) {
+    if (not m_prototypeInfo.empty() and m_prototypeInfo.contains(prototypeID.data())) {
+        return m_prototypeInfo.at(prototypeID.data());
+    }
+
+    std::map<std::string, std::string, NumericComparator> m_info{};
+    m_info["Name"] = prototypeID.data();
+    for (int i = 0; i < m_prototypes.at(prototypeID.data()).inherits.size(); ++i) {
+        m_info["Inherits " + std::to_string(i)] = *std::next(m_prototypes.at(prototypeID.data()).inherits.begin(), i);
+    }
+    for (int i = 0; i < m_prototypes.at(prototypeID.data()).ctags.size(); ++i) {
+        m_info["CTag " + std::to_string(i)] = *std::next(m_prototypes.at(prototypeID.data()).ctags.begin(), i);
+    }
+    int i = 0;
+    for (const auto& [componentID, _] : m_prototypes.at(prototypeID.data()).components) {
+        m_info["Component " + std::to_string(i++)] = componentID;
+    }
+    m_prototypeInfo[prototypeID.data()] = m_info;
+
+    return m_prototypeInfo.at(prototypeID.data());
 }
 }

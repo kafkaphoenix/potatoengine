@@ -5,7 +5,7 @@ find_package(OpenGL REQUIRED)
 FetchContent_Declare(
   glad
   GIT_REPOSITORY https://github.com/Dav1dde/glad.git
-  GIT_TAG v0.1.36
+  GIT_TAG v0.1.36 # only tag that works
 )
 
 FetchContent_MakeAvailable(glad)
@@ -42,15 +42,17 @@ endif()
 FetchContent_Declare(
   imgui
   GIT_REPOSITORY https://github.com/ocornut/imgui.git
-  GIT_TAG v1.89.5
+  GIT_TAG v1.90
 )
 
 FetchContent_GetProperties(imgui)
 if (NOT imgui_POPULATED)
     FetchContent_Populate(imgui)
     set(IMGUI_INCLUDE_DIR ${imgui_SOURCE_DIR}/ ${imgui_SOURCE_DIR}/backends)
-    file(GLOB IMGUI_SOURCES ${imgui_SOURCE_DIR}/*.cpp)
-    file(GLOB IMGUI_HEADERS ${imgui_SOURCE_DIR}/*.h)
+    set(IMGUI_MISC_CPP_DIR ${imgui_SOURCE_DIR}/misc/cpp)
+    set(IMGUI_INCLUDE_DIR ${IMGUI_INCLUDE_DIR} ${IMGUI_MISC_CPP_DIR})
+    file(GLOB IMGUI_SOURCES ${imgui_SOURCE_DIR}/*.cpp ${IMGUI_MISC_CPP_DIR}/*.cpp)
+    file(GLOB IMGUI_HEADERS ${imgui_SOURCE_DIR}/*.h ${IMGUI_MISC_CPP_DIR}/*.h)
     add_library(imgui STATIC ${IMGUI_SOURCES} ${IMGUI_SOURCES} ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp)
     add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
     target_include_directories(imgui PUBLIC ${IMGUI_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${GLAD_INCLUDE_DIR})
@@ -83,13 +85,14 @@ FetchContent_MakeAvailable(json)
 FetchContent_Declare(
   assimp
   GIT_REPOSITORY https://github.com/assimp/assimp.git
-  GIT_TAG v5.2.5
+  GIT_TAG v5.3.1
 )
 
 FetchContent_GetProperties(assimp)
 if(NOT assimp_POPULATED)
 	FetchContent_Populate(assimp)
   set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
+  set(ASSIMP_BUILD_ZLIB ON CACHE INTERNAL "" FORCE)
   set(ASSIMP_BUILD_TESTS OFF CACHE INTERNAL "" FORCE)
   set(ASSIMP_INSTALL OFF CACHE INTERNAL "" FORCE)
   set(ASSIMP_WARNINGS_AS_ERRORS ON CACHE INTERNAL "" FORCE)
@@ -102,7 +105,7 @@ endif()
 FetchContent_Declare(
   spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG v1.11.0
+  GIT_TAG v1.12.0
 )
 
 FetchContent_GetProperties(spdlog)
@@ -112,3 +115,11 @@ if(NOT spdlog_POPULATED)
   set(SPDLOG_INSTALL OFF CACHE INTERNAL "" FORCE)
   add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
+
+FetchContent_Declare(
+  date_src
+  GIT_REPOSITORY https://github.com/HowardHinnant/date.git
+  GIT_TAG        v3.0.1
+)
+
+FetchContent_MakeAvailable(date_src)

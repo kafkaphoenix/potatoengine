@@ -3,8 +3,7 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include "glm/gtx/hash.hpp"
+#include <glm/gtx/hash.hpp>
 
 #include "potatoengine/scene/components/world/cChunk.h"
 
@@ -42,10 +41,10 @@ struct CChunkManager {
         : width(w), height(h), chunkSize(cs), blockSize(bs), chunks(std::move(c)), _meshType(std::move(mt)), _meshAlgorithm(std::move(ma)), useBiomes(ub) {}
     void print() const {
         std::string c;
-        for (const auto& [position, chunk] : chunks) {
-            c += "\n\t\t\t\t\tchunk: " + glm::to_string(position) + " " + chunk._biome;
+        for (auto [position, chunk] : chunks) {
+            c += std::format("\n\t\t\t\t\tchunk: {} {}", glm::to_string(position), chunk._biome); // with format you need to call glm::to_string for glm types
         }
-        CORE_TRACE("\t\twidth: {0}\n\t\t\t\theight: {1}\n\t\t\t\tchunkSize: {2}\n\t\t\t\tblockSize: {3}\n\t\t\t\tmeshType: {4}\n\t\t\t\tmeshAlgorithm: {5}\n\t\t\t\tuseBiomes: {6}\n\t\t\t\tchunks: {7}",
+        ENGINE_TRACE("\t\twidth: {0}\n\t\t\t\theight: {1}\n\t\t\t\tchunkSize: {2}\n\t\t\t\tblockSize: {3}\n\t\t\t\tmeshType: {4}\n\t\t\t\tmeshAlgorithm: {5}\n\t\t\t\tuseBiomes: {6}\n\t\t\t\tchunks: {7}",
                   width, height, chunkSize, blockSize, _meshType, _meshAlgorithm, useBiomes, c);
     }
 
@@ -57,7 +56,7 @@ struct CChunkManager {
         } else if (_meshType == "chunk") {
             this->meshType = MeshType::Chunk;
         } else {
-            throw std::runtime_error("Unknown mesh type " + _meshType);
+            ENGINE_ASSERT(false, "Unknown mesh type {}", _meshType);
         }
     }
 
@@ -71,7 +70,7 @@ struct CChunkManager {
         } else if (_meshAlgorithm == "greedy") {
             this->meshAlgorithm = MeshAlgorithm::Greedy;
         } else {
-            throw std::runtime_error("Unknown mesh algorithm " + _meshAlgorithm);
+            ENGINE_ASSERT(false, "Unknown mesh algorithm {}", _meshAlgorithm);
         }
     }
 };

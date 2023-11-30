@@ -12,8 +12,7 @@ void Renderer::init() const noexcept {
 }
 
 void Renderer::shutdown() noexcept {
-    CORE_WARN("Shutting down Renderer");
-    // TODO something to add? reset statistics maybe?
+    ENGINE_WARN("Shutting down Renderer");
 }
 
 void Renderer::onWindowResize(uint32_t w, uint32_t h) const noexcept {
@@ -27,13 +26,12 @@ void Renderer::beginScene(const CCamera& c, const CTransform& t) noexcept {
 }
 
 void Renderer::endScene() noexcept {
+    // TODO metrics
 }
 
 void Renderer::addShader(std::string&& name) {
     const auto& manager = m_assetsManager.lock();
-    if (not manager) {
-        throw std::runtime_error("AssetsManager is null!");
-    }
+    ENGINE_ASSERT(manager, "AssetsManager is null!");
 
     auto newShaderProgram = ShaderProgram::Create(std::string(name));
     const auto& vs = manager->get<Shader>("v" + name);
@@ -43,7 +41,7 @@ void Renderer::addShader(std::string&& name) {
     newShaderProgram->link();
     newShaderProgram->detach(*vs);
     newShaderProgram->detach(*fs);
-    CORE_INFO("Shader {} linked!", name);
+    ENGINE_INFO("Shader {} linked!", name);
     m_shaderPrograms.emplace(std::move(name), std::move(newShaderProgram));
 }
 
@@ -75,15 +73,20 @@ void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transfor
     sp->unuse();  // DONT unuse before the draw call
 }
 
+void Renderer::clear() {
+    if (not m_framebuffers.empty()) {
+        m_framebuffers.clear();
+        RendererAPI::SetDepthTest(true);  // to avoid problems after using scenes with fbo
+    }
+    m_shaderPrograms.clear();
+}
+
 std::unique_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) noexcept {
     return std::make_unique<Renderer>(am);
 }
 
 std::unique_ptr<ShaderProgram>& Renderer::get(std::string_view name) {
-    if (m_shaderPrograms.contains(name.data())) {
-        return m_shaderPrograms.at(name.data());
-    } else {
-        throw std::runtime_error("Shader program not found");
-    }
+    ENGINE_ASSERT(m_shaderPrograms.contains(name.data()), "Shader program {} not found!", name);
+    return m_shaderPrograms.at(name.data());
 }
 }

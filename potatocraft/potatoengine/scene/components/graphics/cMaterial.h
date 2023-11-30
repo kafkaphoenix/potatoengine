@@ -2,7 +2,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 namespace potatoengine {
 struct CMaterial {
@@ -16,7 +15,7 @@ struct CMaterial {
         : ambient(std::move(a)), diffuse(std::move(d)), specular(std::move(s)), shininess(sh) {}
 
     void print() const {
-        CORE_TRACE("\t\tambient: {0}\n\t\t\t\tdiffuse: {1}\n\t\t\t\tspecular: {2}\n\t\t\t\tshininess: {3}", glm::to_string(ambient), glm::to_string(diffuse), glm::to_string(specular), shininess);
+        ENGINE_TRACE("\t\tambient: {0}\n\t\t\t\tdiffuse: {1}\n\t\t\t\tspecular: {2}\n\t\t\t\tshininess: {3}", ambient, diffuse, specular, shininess);
     }
 };
 }

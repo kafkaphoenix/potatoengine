@@ -3,7 +3,6 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include "potatoengine/assets/texture.h"
 #include "potatoengine/pch.h"
@@ -42,11 +41,11 @@ struct CTexture {
         if (filepaths.size() == 0) {
             texturePaths = "\n\t\t\t\t none";
         } else {
-            for (const std::string& filepath : filepaths) {
-                texturePaths += "\n\t\t\t\t " + filepath;
+            for (std::string_view filepath : filepaths) {
+                texturePaths += std::format("\n\t\t\t\t {}", filepath);
             }
         }
-        CORE_TRACE("\t\tcolor: {0}\n\t\t\t\tblendFactor: {1}\n\t\t\t\treflectivity: {2}\n\t\t\t\trefractiveIndex: {3}\n\t\t\t\thasTransparency: {4}\n\t\t\t\tuseLighting: {5}\n\t\t\t\tuseReflection: {6}\n\t\t\t\tuseRefraction: {7}\n\t\t\t\tdrawMode: {8}\n\t\t\t\ttextures: {9}", glm::to_string(color), blendFactor, reflectivity, refractiveIndex, hasTransparency, useLighting, useReflection, useRefraction, _drawMode, texturePaths);
+        ENGINE_TRACE("\t\tcolor: {0}\n\t\t\t\tblendFactor: {1}\n\t\t\t\treflectivity: {2}\n\t\t\t\trefractiveIndex: {3}\n\t\t\t\thasTransparency: {4}\n\t\t\t\tuseLighting: {5}\n\t\t\t\tuseReflection: {6}\n\t\t\t\tuseRefraction: {7}\n\t\t\t\tdrawMode: {8}\n\t\t\t\ttextures: {9}", color, blendFactor, reflectivity, refractiveIndex, hasTransparency, useLighting, useReflection, useRefraction, _drawMode, texturePaths);
     }
 
     void setDrawMode() { // TODO maybe send assets manager to this function?
@@ -65,7 +64,7 @@ struct CTexture {
         } else if (_drawMode == "textureAtlasBlendColor") { // blend texture in the atlas with a color
             drawMode = DrawMode::TEXTURE_ATLAS_BLEND_COLOR;
         } else {
-            throw std::runtime_error("Unknown draw mode " + _drawMode);
+            ENGINE_ASSERT(false, "Unknown draw mode {}", _drawMode);
         }
     }
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace potatocraft {
+namespace demos{
 
 struct CHealth {
     int base{};
@@ -10,7 +10,7 @@ struct CHealth {
     explicit CHealth(int b) : base(b), current(b) {}
 
     void print() const {
-        CORE_TRACE("\t\tbase: {0}\n\t\t\t\tcurrent: {1}", base, current);
+        APP_TRACE("\t\tbase: {0}\n\t\t\t\tcurrent: {1}", base, current);
     }
 };
 }

@@ -9,7 +9,7 @@ namespace potatoengine {
 
 void timeSystem(entt::registry& reg, Time ts) {
     reg.view<CTime>().each([&](CTime& cTime) {
-        // We call it fps frames per second instead of 1 but the other functions divide by fps so it's ok
+        // We call it fps frames per second instead of 1 but the other functions divide by fps so it is ok
         float timeScale = 86400.f / (cTime.dayLength * 3600.f);
         cTime.seconds += ts.getSeconds() * timeScale * cTime.acceleration;
         if (cTime.seconds >= 86400) {

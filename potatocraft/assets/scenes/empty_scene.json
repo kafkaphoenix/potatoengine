@@ -1,0 +1,34 @@
+{
+    "assets": {
+        "shaders": {
+            "basic": {
+                "vbasic": "assets/shaders/basic.vert",
+                "fbasic": "assets/shaders/basic.frag"
+            }
+        },
+        "models": {
+            "camera": "assets/models/camera/camera.obj"
+        },
+        "prefabs": {
+            "entities": {
+                "filepath": "assets/prefabs/entities.json",
+                "targeted_prototypes": [
+                    "camera"
+                ]
+            }
+        }
+    },
+    "entities": {
+        "cameras": {
+            "scene_camera": {
+                "prefab": "entities",
+                "prototype": "camera",
+                "options": {
+                    "position": {"x": 8, "y": 6, "z": 3},
+                    "type": "perspective",
+                    "isActive": true
+                }
+            }
+        }
+    }
+}

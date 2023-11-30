@@ -1,5 +1,6 @@
 #pragma once
 
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
 #include "potatoengine/pch.h"
@@ -49,14 +50,10 @@ void render(CTexture* cTexture, CTextureAtlas* cTextureAtlas, CSkybox* cSkybox, 
 
 void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
     const auto& renderer = r.lock();
-    if (not renderer) {
-        throw std::runtime_error("Renderer is null!");
-    }
+    ENGINE_ASSERT(renderer, "Renderer is null!")
 
-    entt::entity camera = reg.view<CCamera, CActiveCamera, CUUID>().front();
-    if (camera == entt::null) {
-        throw std::runtime_error("No camera found!");
-    }
+    entt::entity camera = reg.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
+    ENGINE_ASSERT(camera not_eq entt::null, "No camera found!");
     const CCamera& cCamera = reg.get<CCamera>(camera);
     const CTransform& cCameraTransform = reg.get<CTransform>(camera);
     renderer->beginScene(cCamera, cCameraTransform);
@@ -91,9 +88,9 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
                 if (not cTexture) {
                     CName* cName = reg.try_get<CName>(e);
                     if (cName) {
-                        throw std::runtime_error("No texture found for entity " + std::to_string(cUUID.uuid) + " " + cName->name);
+                        ENGINE_ASSERT(false, "No texture found for entity {} {}", cUUID.uuid, cName->name);
                     } else {
-                        throw std::runtime_error("No texture found for entity " + std::to_string(cUUID.uuid));
+                        ENGINE_ASSERT(false, "No texture found for entity {}", cUUID.uuid);
                     }
                 }
 
@@ -108,9 +105,9 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
                 if (not cTexture) {
                     CName* cName = reg.try_get<CName>(e);
                     if (cName) {
-                        throw std::runtime_error("No texture found for entity " + std::to_string(cUUID.uuid) + " " + cName->name);
+                        ENGINE_ASSERT(false, "No texture found for entity {} {}", cUUID.uuid, cName->name);
                     } else {
-                        throw std::runtime_error("No texture found for entity " + std::to_string(cUUID.uuid));
+                        ENGINE_ASSERT(false, "No texture found for entity {}", cUUID.uuid);
                     }
                 }
 
@@ -121,9 +118,9 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
                 if (not cTexture) {
                     CName* cName = reg.try_get<CName>(e);
                     if (cName) {
-                        throw std::runtime_error("No texture found for entity " + std::to_string(cUUID.uuid) + " " + cName->name);
+                        ENGINE_ASSERT(false, "No texture found for entity {} {}", cUUID.uuid, cName->name);
                     } else {
-                        throw std::runtime_error("No texture found for entity " + std::to_string(cUUID.uuid));
+                        ENGINE_ASSERT(false, "No texture found for entity {}", cUUID.uuid);
                     }
                 }
 
@@ -133,9 +130,9 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
             } else {
                 CName* cName = reg.try_get<CName>(e);
                 if (cName) {
-                    throw std::runtime_error("No mesh found for entity " + std::to_string(cUUID.uuid) + " " + cName->name);
+                    ENGINE_ASSERT(false, "No mesh found for entity {} {}", cUUID.uuid, cName->name);
                 } else {
-                    throw std::runtime_error("No mesh found for entity " + cUUID.uuid);
+                    ENGINE_ASSERT(false, "No mesh found for entity {}", cUUID.uuid);
                 }
             }
         }

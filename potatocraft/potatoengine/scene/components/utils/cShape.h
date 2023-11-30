@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include "potatoengine/scene/entity.h"
 #include "potatoengine/utils/shapeFactory.h"
@@ -27,16 +26,12 @@ struct CShape {
     }
 
     void print() const {
-        CORE_TRACE("\t\ttype: {0}\n\t\t\t\tsize: {1}\n\t\t\t\tmeshes: {2}\n\t\t\t\trepeatTexture: {3}", _type, glm::to_string(size), meshes.size(), repeatTexture);
+        ENGINE_TRACE("\t\ttype: {0}\n\t\t\t\tsize: {1}\n\t\t\t\tmeshes: {2}\n\t\t\t\trepeatTexture: {3}", _type, size, meshes.size(), repeatTexture);
     }
 
     void createMesh() {
-        if (size.x <= 0.f or (size.y <= 0.f and _type not_eq "triangle")) {
-            throw std::runtime_error("Shape's witdh and height must be greater than 0");
-        }
-        if (size.z <= 0.f and _type == "cube") {
-            throw std::runtime_error("Cube's depth must be greater than 0");
-        }
+        ENGINE_ASSERT(size.x > 0.f and (size.y > 0.f or _type == "triangle"), "Shape witdh and height must be greater than 0");
+        ENGINE_ASSERT(size.z > 0.f or _type not_eq "cube", "Cube depth must be greater than 0");
         CMesh mesh;
         if (_type == "triangle") {
             type = CShape::Type::Triangle;
@@ -55,7 +50,7 @@ struct CShape {
             mesh.vao = ShapeFactory::CreateCircle(size.x, size.y);
             mesh.vertexType = "shape";
         } else {
-            throw std::runtime_error("Unknown shape type " + _type);
+            ENGINE_ASSERT(false, "Unknown shape type {}", _type);
         }
         meshes.emplace_back(std::move(mesh));
     }
@@ -63,7 +58,7 @@ struct CShape {
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CShape& c) {
+void engine::SceneManager::onComponentAdded(Entity& e, CShape& c) {
     c.createMesh();
 
     e.update<CShape>(c);

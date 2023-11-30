@@ -27,12 +27,13 @@
         },
         "models": {
             "rock": "assets/models/rock/rock.obj",
-            "cube": "assets/models/cube/cube.obj"
+            "cube": "assets/models/cube/cube.obj",
+            "player": "assets/models/player/player.obj"
         },
         "prefabs": {
             "entities": {
                 "filepath": "assets/prefabs/entities.json",
-                "targets": [
+                "targeted_prototypes": [
                     "player",
                     "chunk_config"
                 ]
@@ -40,14 +41,18 @@
         }
     },
     "entities": {
-        "auri": {
-            "prefab": "player",
-            "options": {
-                "position": {"x": 0, "y": 0, "z": 0}
+        "normals": {
+            "auri": {
+                "prefab": "entities",
+                "prototype": "player",
+                "options": {
+                    "position": {"x": 0, "y": 0, "z": 0}
+                }
+            },
+            "terrain": {
+                "prefab": "entities",
+                "prototype": "chunk_config"
             }
-        },
-        "terrain": {
-            "prefab": "chunk_config"
         }
     }
 }

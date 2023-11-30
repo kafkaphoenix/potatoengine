@@ -1,6 +1,6 @@
 #pragma once
 
-namespace potatocraft {
+namespace demos{
 
 struct CExperience {
     int current{};
@@ -9,7 +9,7 @@ struct CExperience {
     explicit CExperience(int c) : current(c) {}
 
     void print() const {
-        CORE_TRACE("\t\tcurrent: {}", current);
+        APP_TRACE("\t\tcurrent: {}", current);
     }
 };
 }

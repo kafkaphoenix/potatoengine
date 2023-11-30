@@ -9,23 +9,16 @@
 namespace potatoengine {
 
 Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection) : m_filepath(std::move(fp.string())), m_directory(std::move(fp.parent_path().string())) {
-    if (gammaCorrection.has_value()) {
-        throw std::runtime_error("Gamma correction not yet implemented");
-    }
+    ENGINE_ASSERT(not gammaCorrection.has_value(), "Gamma correction not yet implemented");
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(m_filepath, aiProcess_Triangulate | aiProcess_GenSmoothNormals |
                                                              aiProcess_CalcTangentSpace | aiProcess_ValidateDataStructure | aiProcess_JoinIdenticalVertices |
                                                              aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph | aiProcess_SplitLargeMeshes | aiProcess_FindInvalidData);
 
-    if (not scene or scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE or !scene->mRootNode) {
-        throw std::runtime_error("Failed to load model " + m_filepath + ": " + importer.GetErrorString());
-    }
+    ENGINE_ASSERT(scene and scene->mFlags not_eq AI_SCENE_FLAGS_INCOMPLETE and scene->mRootNode, "Failed to load model {}: {}", m_filepath, importer.GetErrorString());
 
     processNode(scene->mRootNode, scene);
-    CORE_TRACE("\t\tmesh count: {}", m_meshes.size());
-    CORE_TRACE("\t\ttexture count: {}", m_loadedTextures.size());
-    CORE_TRACE("\t\tmaterial count: {}", m_materials.size());
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene) {
@@ -47,7 +40,7 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
     for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
         Vertex vertex{};
-        const auto& position = mesh->mVertices[i];  // assimp's vector doesn't directly convert to glm's vec3
+        const auto& position = mesh->mVertices[i];  // assimp vector does not directly convert to glm vec3
         vertex.position = glm::vec3(position.x, position.y, position.z);
 
         if (mesh->HasNormals()) {
@@ -116,7 +109,7 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
     if (textures.empty() and materialData.diffuse == glm::vec3(0.f, 0.f, 0.f)) {
         textures.emplace_back(std::make_shared<Texture>("assets/textures/default.jpg", "textureDiffuse"));  // TODO: add asset manager?
-    } 
+    }
     m_materials.emplace_back(std::move(materialData));
 
     return CMesh(std::move(vertices), std::move(indices), std::move(textures));
@@ -177,6 +170,32 @@ CMaterial Model::loadMaterial(aiMaterial* mat) {
     material.shininess = shininess;
 
     return material;
+}
+
+const std::map<std::string, std::string, NumericComparator>& Model::getInfo() {
+    if (not m_info.empty()) {
+        return m_info;
+    }
+
+    m_info["Type"] = "Model";
+    m_info["Filepath"] = m_filepath;
+    m_info["Meshes"] = std::to_string(m_meshes.size());
+    m_info["Materials"] = std::to_string(m_materials.size());
+    for (int i = 0; i < m_loadedTextures.size(); ++i) {
+        m_info["Loaded Texture " + std::to_string(i)] = std::to_string(i);
+    }
+
+    return m_info;
+}
+
+const std::map<std::string, std::string, NumericComparator>& Model::getLoadedTextureInfo(std::string_view textureID) {
+    if (not m_loadedTextureInfo.empty() and m_loadedTextureInfo.contains(std::string(textureID))) {
+        return m_loadedTextureInfo.at(std::string(textureID));
+    }
+
+    m_loadedTextureInfo[std::string(textureID)] = m_loadedTextures.at(std::stoi(textureID.data()))->getInfo();
+
+    return m_loadedTextureInfo.at(std::string(textureID));
 }
 
 }

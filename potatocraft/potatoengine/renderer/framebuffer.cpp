@@ -20,13 +20,11 @@ FBO::FBO(uint32_t w, uint32_t h, uint32_t t) : m_depthBufferType(t) {
         attachStencilRenderBuffer();
     }
     uint32_t status = glCheckNamedFramebufferStatus(m_id, GL_FRAMEBUFFER);
-    if (status not_eq GL_FRAMEBUFFER_COMPLETE) {
-        throw std::runtime_error("Framebuffer error" + status);
-    }
+    ENGINE_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer error: {}", status);
 }
 
 FBO::~FBO() {
-    CORE_WARN("Deleting framebuffer {}", m_id);
+    ENGINE_WARN("Deleting framebuffer {}", m_id);
     glDeleteFramebuffers(1, &m_id);
     glDeleteRenderbuffers(1, &m_depthRenderBuffer);
     glDeleteRenderbuffers(1, &m_stencilRenderBuffer);
@@ -61,7 +59,7 @@ void FBO::attachDepthStencilRenderBuffer() {
     glNamedFramebufferRenderbuffer(m_id, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depthStencilRenderBuffer);
 }
 
-uint32_t FBO::getBufferId() const noexcept {
+uint32_t FBO::getBufferID() const noexcept {
     if (m_depthBufferType == DEPTH_TEXTURE) {
         return m_depthTexture->getID();
     } else if (m_depthBufferType == DEPTH_RENDERBUFFER) {
@@ -75,14 +73,29 @@ uint32_t FBO::getBufferId() const noexcept {
 
 std::string_view FBO::getBufferType() const noexcept {
     if (m_depthBufferType == DEPTH_TEXTURE) {
-        return "DEPTH_TEXTURE";
+        return "Depth Texture";
     } else if (m_depthBufferType == DEPTH_RENDERBUFFER) {
-        return "DEPTH_RENDERBUFFER";
+        return "Depth Renderbuffer";
     } else if (m_depthBufferType == STENCIL_RENDERBUFFER) {
-        return "STENCIL_RENDERBUFFER";
+        return "Stencil Renderbuffer";
     } else if (m_depthBufferType == DEPTH_STENCIL_RENDERBUFFER) {
-        return "DEPTH_STENCIL_RENDERBUFFER";
+        return "Depth Stencil Renderbuffer";
     }
+}
+
+const std::map<std::string, std::string>& FBO::getInfo() {
+    if (not m_info.empty()) {
+        return m_info;
+    }
+
+    m_info["Type"] = "FBO";
+    m_info["ID"] = std::to_string(m_id);
+    m_info["Width"] = std::to_string(m_width);
+    m_info["Height"] = std::to_string(m_height);
+    m_info["Buffer ID"] = std::to_string(getBufferID());
+    m_info["Buffer type"] = getBufferType();
+
+    return m_info;
 }
 
 void FBO::bindToDraw() {

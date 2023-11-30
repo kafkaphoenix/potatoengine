@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+#include "potatoengine/pch.h"
 #include "potatoengine/renderer/vao.h"
 
 namespace potatoengine {
@@ -10,7 +11,7 @@ class RendererAPI {
     static void Init() noexcept;
     static void SetCulling(bool enabled) noexcept;
     static void SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) noexcept;
-    static void SetClearColor(const float color[]) noexcept;
+    static void SetClearColor(const std::array<float, 4>& color) noexcept;
     static void SetClearDepth(const float depth) noexcept;
     static void SetWireframe(bool enabled) noexcept;
     static void SetBlend(bool enabled) noexcept;

@@ -28,7 +28,7 @@ struct CBlock {
     explicit CBlock(std::string&& t) : _type(std::move(t)) {}
 
     void print() const {
-        CORE_TRACE("\t\ttype: {0}", _type);
+        ENGINE_TRACE("\t\ttype: {0}", _type);
     }
 
     void setBlockType() {
@@ -63,7 +63,7 @@ struct CBlock {
         } else if (_type == "sandstone") {
             type = Type::Sandstone;
         } else {
-            throw std::runtime_error("Unknown block type " + _type);
+            ENGINE_ASSERT(false, "Unknown block type {}", _type);
         }
     }
 };

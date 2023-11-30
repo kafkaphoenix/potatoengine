@@ -4,22 +4,37 @@
 
 #include "potatoengine/assets/assetsManager.h"
 #include "potatoengine/assets/prefab.h"
+#include "potatoengine/utils/numericComparator.h"
 
 namespace potatoengine {
 class Entity;
 
 class EntityFactory {
    public:
+    using Prototypes = std::map<std::string, entt::entity, NumericComparator>;
     EntityFactory(std::weak_ptr<AssetsManager> am);
-    void create(std::string_view id, Entity e);
-    void destroy(std::string_view id, entt::registry& r);
-    void update(std::string_view id, Entity e, entt::registry& r);
-    entt::entity get(std::string_view id);
-    bool contains(std::string_view id) const noexcept { return m_prototypes.contains(id.data()); }
+    void createPrototypes(std::string_view prefabID, Entity&& e);
+    void updatePrototypes(std::string_view prefabID, Entity&& e);
+    void destroyPrototypes(std::string_view prefabID, entt::registry& r);
+    const Prototypes& getPrototypes(std::string_view prefabID);
+    const std::map<std::string, Prototypes, NumericComparator>& getAllPrototypes();
+    bool containsPrototypes(std::string_view prefabID) const;
+
+    void createPrototype(std::string_view prefabID, std::string_view prototypeID, Entity&& e);
+    void updatePrototype(std::string_view prefabID, std::string_view prototypeID, Entity&& e);
+    void destroyPrototype(std::string_view prefabID, std::string_view prototypeID, entt::registry& r);
+    entt::entity getPrototype(std::string_view prefabID, std::string_view prototypeID);
+    bool containsPrototype(std::string_view prefabID, std::string_view prototypeID) const;
+
+    const std::map<std::string, std::string, NumericComparator>& getPrototypesCountByPrefab();
+    // does not destroy entt::entities, just clears the map
     void clear();
 
    private:
-    std::unordered_map<std::string, entt::entity> m_prototypes;
+    std::map<std::string, Prototypes, NumericComparator> m_prefabs;
     std::weak_ptr<AssetsManager> m_assetsManager;
+
+    std::map<std::string, std::string, NumericComparator> m_prototypesCountByPrefab;
+    bool m_isDirty{false};
 };
 }

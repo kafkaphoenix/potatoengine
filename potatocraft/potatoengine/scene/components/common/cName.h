@@ -11,7 +11,7 @@ struct CName {
     explicit CName(std::string&& n) : name(std::move(n)) {}
 
     void print() const {
-        CORE_TRACE("\t\tname: {}", name);
+        ENGINE_TRACE("\t\tname: {}", name);
     }
 };
 }

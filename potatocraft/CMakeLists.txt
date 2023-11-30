@@ -53,7 +53,7 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE potatoengine/pch.h)
 
 if (MSVC)
     # https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=msvc-170
-    target_compile_options(${PROJECT_NAME} PRIVATE /EHs /nologo /std:c++latest /Od /utf-8 /WX /Wall)
+    target_compile_options(${PROJECT_NAME} PRIVATE /EHs /nologo /std:c++latest /Od /utf-8 /WX /Wall /wd4996) # /wd4996 is for deprecated functions msvc delete in the future
     target_compile_options(${PROJECT_NAME} PRIVATE /external:I ${CMAKE_SOURCE_DIR}/build /W0) # Exclude from warnings
 elseif(GCC OR CLANG)
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror)
@@ -68,7 +68,7 @@ add_custom_target(copy_assets
 )
 add_dependencies(${PROJECT_NAME} copy_assets)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog ${CMAKE_DL_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog date::date ${CMAKE_DL_LIBS})
 
 # Linters (Needs compilation database sadly no MSVC support yet, change to GCC to use)
 # https://stackoverflow.com/questions/65544093/no-compile-commands-json-file-using-cmake-with-vs-code-on-windows

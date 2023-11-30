@@ -70,16 +70,16 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum s
 
     switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
-            CORE_CRITICAL(info);
+            ENGINE_CRITICAL(info);
             return;
         case GL_DEBUG_SEVERITY_MEDIUM:
-            CORE_ERROR(info);
+            ENGINE_ERROR(info);
             return;
         case GL_DEBUG_SEVERITY_LOW:
-            CORE_WARN(info);
+            ENGINE_WARN(info);
             return;
         case GL_DEBUG_SEVERITY_NOTIFICATION:
-            CORE_TRACE(info);
+            ENGINE_TRACE(info);
             return;
     }
 }
@@ -108,7 +108,7 @@ void RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) no
     glViewport(x, y, w, h);
 }
 
-void RendererAPI::SetClearColor(const float color[]) noexcept {
+void RendererAPI::SetClearColor(const std::array<float, 4>& color) noexcept {
     glClearColor(color[0], color[1], color[2], color[3]);
 }
 
@@ -129,7 +129,7 @@ void RendererAPI::SetDepthTest(bool enabled) noexcept {
 }
 
 void RendererAPI::SetDepthLEqual() noexcept {
-    glDepthFunc(GL_LEQUAL);  // depth test passes when values are equal to depth buffer's content [for cubemaps]
+    glDepthFunc(GL_LEQUAL);  // depth test passes when values are equal to depth buffer content [for cubemaps]
 }
 
 void RendererAPI::SetDepthLess() noexcept {

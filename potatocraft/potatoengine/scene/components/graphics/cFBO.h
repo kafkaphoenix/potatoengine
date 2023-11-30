@@ -30,7 +30,7 @@ struct CFBO {
         : fbo(std::move(fbo)), mode(m), attachment(std::move(attachment)), width(w), height(h) {}
 
     void print() const {
-        CORE_TRACE("\t\tfbo: {0}\n\t\t\t\tmode: {1}\n\t\t\t\tattachment: {2}\n\t\t\t\twidth: {3}\n\t\t\t\theight: {4}", fbo, _mode, attachment, width, height);
+        ENGINE_TRACE("\t\tfbo: {0}\n\t\t\t\tmode: {1}\n\t\t\t\tattachment: {2}\n\t\t\t\twidth: {3}\n\t\t\t\theight: {4}", fbo, _mode, attachment, width, height);
     }
 
     void setupProperties(std::unique_ptr<ShaderProgram>& sp) {
@@ -59,7 +59,7 @@ struct CFBO {
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CFBO& c) {
+void engine::SceneManager::onComponentAdded(Entity& e, CFBO& c) {
     if (c._mode == "normal") {
         c.mode = CFBO::Mode::Normal;
     } else if (c._mode == "inverse") {
@@ -77,7 +77,7 @@ void engine::SceneManager::onComponentAdded(Entity e, CFBO& c) {
     } else if (c._mode == "emboss") {
         c.mode = CFBO::Mode::Emboss;
     } else {
-        throw std::runtime_error("Unknown fbo mode " + c._mode);
+        ENGINE_ASSERT(false, "Unknown fbo mode {}", c._mode);
     }
 
     e.update<CFBO>(c);

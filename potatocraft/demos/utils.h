@@ -15,7 +15,7 @@
 #include "demos/components/stats/cTalents.h"
 
 
-namespace potatocraft {
+namespace demos{
 
 CItem &castCItem(void *other) {
     return *static_cast<CItem *>(other);

@@ -1,13 +1,12 @@
 #pragma once
 
 #include <entt/entt.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include "potatoengine/scene/components/ai/cAI.h"
 #include "potatoengine/scene/components/audio/cAudio.h"
+#include "potatoengine/scene/components/camera/cActiveCamera.h"
 #include "potatoengine/scene/components/camera/cCamera.h"
 #include "potatoengine/scene/components/camera/cDistanceFromCamera.h"
-#include "potatoengine/scene/components/camera/cActiveCamera.h"
 #include "potatoengine/scene/components/common/cName.h"
 #include "potatoengine/scene/components/common/cTag.h"
 #include "potatoengine/scene/components/common/cUUID.h"
@@ -468,13 +467,13 @@ void registerComponents() {
 void printScene(entt::registry &r) {
     using namespace entt::literals;
 
-    CORE_TRACE("Scene entities:");
+    ENGINE_TRACE("Scene entities:");
 
     entt::meta_type cType;
     entt::meta_any cData;
     entt::meta_func printFunc;
     r.view<CUUID>().each([&](entt::entity e, const CUUID &cUUID) {
-        CORE_TRACE("Entity UUID: {}", entt::to_integral(e));
+        ENGINE_TRACE("Entity UUID: {}", entt::to_integral(e));
         for (auto &&curr : r.storage()) {
             if (auto &storage = curr.second; storage.contains(e)) {
                 cType = entt::resolve(storage.type());
@@ -483,7 +482,7 @@ void printScene(entt::registry &r) {
                 if (printFunc) {
                     std::string_view cName = storage.type().name();
                     cName = cName.substr(cName.find_last_of(':') + 1);
-                    CORE_TRACE("\t{}", cName);
+                    ENGINE_TRACE("\t{}", cName);
                     printFunc.invoke(cData);
                 }
             }
@@ -494,36 +493,34 @@ void printScene(entt::registry &r) {
 
 // TODO: fix this, they are here because in their components they would add an import to entity again and it would be a circular dependency as sceneManager already includes entity.h
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CTexture &c) {
+void engine::SceneManager::onComponentAdded(Entity &e, CTexture &c) {
     c.setDrawMode();
     const auto &manager = m_assetsManager.lock();
-    if (not manager) {
-        throw std::runtime_error("Assets manager is null!");
-    }
+    ENGINE_ASSERT(manager, "AssetsManager is null!");
 
-    c.textures.clear();
     c.textures.reserve(c.filepaths.size());
     for (std::string_view filepath : c.filepaths) {
         c.textures.emplace_back(manager->get<Texture>(filepath.data()));
     }
+
     e.update<CTexture>(c);
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CChunkManager &c) {
+void engine::SceneManager::onComponentAdded(Entity &e, CChunkManager &c) {
     c.setMeshType();
     c.setMeshAlgorithm();
     e.update<CChunkManager>(c);
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CChunk &c) {
+void engine::SceneManager::onComponentAdded(Entity &e, CChunk &c) {
     c.setBiome();
     e.update<CChunk>(c);
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CNoise &c) {
+void engine::SceneManager::onComponentAdded(Entity &e, CNoise &c) {
     c.setNoiseType();
     c.setSeed();
     c.setOctaves();
@@ -535,13 +532,13 @@ void engine::SceneManager::onComponentAdded(Entity e, CNoise &c) {
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CBlock &c) {
+void engine::SceneManager::onComponentAdded(Entity &e, CBlock &c) {
     c.setBlockType();
     e.update<CBlock>(c);
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CCamera &c) {
+void engine::SceneManager::onComponentAdded(Entity &e, CCamera &c) {
     c.setCameraType();
     c.setAspectRatio();
     c.calculateProjection();

@@ -9,16 +9,10 @@
 
 #include "potatoengine/pch.h"
 #include "potatoengine/scene/components/utils/cDeleted.h"
-
 #include "potatoengine/scene/entity.h"
 using json = nlohmann::json;
 
 namespace potatoengine {
-
-// cppcheck-suppress unusedFunction
-json toJson(const glm::vec3& cFieldValue) {
-    return json{{"x", cFieldValue.x}, {"y", cFieldValue.y}, {"z", cFieldValue.z}};
-}
 
 glm::vec2 vec2FromJson(const json& data) {
     glm::vec2 vec{};
@@ -55,25 +49,19 @@ glm::quat quatFromJson(const json& data) {
 
 EntityFactory::EntityFactory(std::weak_ptr<AssetsManager> am) : m_assetsManager(am) {}
 
-void processCTag(const std::shared_ptr<Prefab>& prefab, Entity e, std::string_view target) {
+void processCTag(Entity& e, std::string_view cTag) {
     using namespace entt::literals;
 
-    for (std::string_view cTag : prefab->getCTags(target)) {
-        entt::meta_type cType = entt::resolve(entt::hashed_string{cTag.data()});
-        if (not cType) {
-            throw std::runtime_error("No component type found for component tag " + std::string(cTag));
-        }
+    entt::meta_type cType = entt::resolve(entt::hashed_string{cTag.data()});
+    ENGINE_ASSERT(cType, "No component type found for component tag {}", cTag)
 
-        entt::meta_func assignFunc = cType.func("assign"_hs);
-        if (not assignFunc) {
-            throw std::runtime_error("No assign function found for component tag " + std::string(cTag));
-        }
-        
-        entt::meta_any metaComponent = assignFunc.invoke({}, e);
-        entt::meta_func triggerEventFunc = cType.func("onComponentAdded"_hs);
-        if (triggerEventFunc) {
-            triggerEventFunc.invoke({}, e, metaComponent);
-        }
+    entt::meta_func assignFunc = cType.func("assign"_hs);
+    ENGINE_ASSERT(assignFunc, "No assign function found for component tag {}", cTag)
+
+    entt::meta_any metaComponent = assignFunc.invoke({}, e);
+    entt::meta_func triggerEventFunc = cType.func("onComponentAdded"_hs);
+    if (triggerEventFunc) {
+        triggerEventFunc.invoke({}, e, metaComponent);
     }
 }
 
@@ -81,14 +69,10 @@ void processComponent(Entity& e, const std::string& cPrefab, const json& cValue)
     using namespace entt::literals;
 
     entt::meta_type cType = entt::resolve(entt::hashed_string{cPrefab.data()});
-    if (not cType) {
-        throw std::runtime_error("No component type found for component " + cPrefab);
-    }
+    ENGINE_ASSERT(cType, "No component type found for component {}", cPrefab)
 
     entt::meta_func assignFunc = cType.func("assign"_hs);
-    if (not assignFunc) {
-        throw std::runtime_error("No assign function found for component " + cPrefab);
-    }
+    ENGINE_ASSERT(assignFunc, "No assign function found for component {}", cPrefab)
 
     entt::meta_any metaComponent;
     if (cValue.is_string()) {
@@ -103,9 +87,7 @@ void processComponent(Entity& e, const std::string& cPrefab, const json& cValue)
         metaComponent = assignFunc.invoke({}, e, vec3FromJson(cValue));
     } else if (cValue.is_object()) {
         metaComponent = assignFunc.invoke({}, e);
-        if (not metaComponent) {
-            throw std::runtime_error("No meta component found for component " + cPrefab);
-        }
+        ENGINE_ASSERT(metaComponent, "No meta component found for component {}", cPrefab)
 
         for (const auto& [cField, cFieldValue] : cValue.items()) {
             if (cFieldValue.is_string()) {
@@ -120,9 +102,7 @@ void processComponent(Entity& e, const std::string& cPrefab, const json& cValue)
                 std::vector<std::string> paths;
                 paths.reserve(cFieldValue.size());
                 for (const auto& value : cFieldValue) {
-                    if (not value.is_string()) {
-                        throw std::runtime_error("Unsupported type " + std::string{value.type_name()} + " for component " + cPrefab + " field " + cField);
-                    }
+                    ENGINE_ASSERT(value.is_string(), "Unsupported type {} for component {} field {}", value.type_name(), cPrefab, cField);
                     paths.emplace_back(value.get<std::string>());
                 }
                 metaComponent.set(entt::hashed_string{cField.data()}, std::move(paths));
@@ -145,17 +125,17 @@ void processComponent(Entity& e, const std::string& cPrefab, const json& cValue)
                     metaComponent.set(entt::hashed_string{cField.data()}, vec4FromJson(cFieldValue, "color"));
                 } else if (cFieldValue.contains("r") and cFieldValue.contains("g") and cFieldValue.contains("b")) {
                     metaComponent.set(entt::hashed_string{cField.data()}, vec3FromJson(cFieldValue, "color"));
-                } else if (cField == "json") { // TODO unused
+                } else if (cField == "json") {  // TODO unused
                     metaComponent.set(entt::hashed_string{cField.data()}, std::move(cFieldValue));
                 } else {
-                    throw std::runtime_error("Unsupported type " + std::string{cFieldValue.type_name()} + " for component " + cPrefab + " field " + cField);
+                    ENGINE_ASSERT(false, "Unsupported type {} for component {} field {}", cFieldValue.type_name(), cPrefab, cField)
                 }
             } else {
-                throw std::runtime_error("Unsupported type " + std::string{cFieldValue.type_name()} + " for component " + cPrefab + " field " + cField);
+                ENGINE_ASSERT(false, "Unsupported type {} for component {} field {}", cFieldValue.type_name(), cPrefab, cField)
             }
         }
     } else {
-        throw std::runtime_error("Unsupported type " + std::string{cValue.type_name()} + " for component " + cPrefab);
+        ENGINE_ASSERT(false, "Unsupported type {} for component {}", cValue.type_name(), cPrefab)
     }
     entt::meta_func triggerEventFunc = cType.func("onComponentAdded"_hs);
     if (triggerEventFunc) {
@@ -163,54 +143,129 @@ void processComponent(Entity& e, const std::string& cPrefab, const json& cValue)
     }
 }
 
-void EntityFactory::create(std::string_view id, Entity e) {
-    if (m_prototypes.contains(id.data())) {
-        throw std::runtime_error("Prototype already exists for prefab " + std::string(id));
-    }
+void EntityFactory::createPrototypes(std::string_view prefabID, Entity&& e) {
+    ENGINE_ASSERT(not m_prefabs.contains(prefabID.data()), "Prototypes for prefab {} already exist", prefabID);
 
     const auto& manager = m_assetsManager.lock();
-    if (not manager) {
-        throw std::runtime_error("Assets manager is null!");
-    }
+    ENGINE_ASSERT(manager, "AssetsManager is null!");
 
-    const auto& prefab = manager->get<Prefab>(id);
+    const auto& prefab = manager->get<Prefab>(prefabID);
     auto& sceneManager = e.getSceneManager();
     e.add<CDeleted>();
 
-    for (std::string_view target : prefab->getTargets()) {
-        e = {sceneManager.getRegistry().create(), &sceneManager};
+    Prototypes prototypes;
+    for (std::string_view prototypeID : prefab->getTargetedPrototypes()) {
+        e = Entity(sceneManager.getRegistry().create(), &sceneManager);
 
-        processCTag(prefab, e, target);
+        for (std::string_view cTag : prefab->getCTags(prototypeID)) {
+            processCTag(e, cTag);
+        }
 
-        for (const auto& [cPrefab, cValue] : prefab->getComponents(target)) {
+        for (const auto& [cPrefab, cValue] : prefab->getComponents(prototypeID)) {
             processComponent(e, cPrefab, cValue);
         }
-        
-        m_prototypes.insert({target.data(), e});
+
+        prototypes.insert({prototypeID.data(), e});
     }
+    m_prefabs.insert({prefabID.data(), std::move(prototypes)});
+    m_isDirty = true;
 }
 
-void EntityFactory::destroy(std::string_view id, entt::registry& r) {
-    if (not m_prototypes.contains(id.data())) {
-        throw std::runtime_error("No prototype found for prefab " + std::string(id));
-    }
-    r.emplace<CDeleted>(m_prototypes.at(id.data()));
-    m_prototypes.erase(id.data());
+void EntityFactory::updatePrototypes(std::string_view prefabID, Entity&& e) {
+    ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}", prefabID);
+    destroyPrototypes(prefabID, e.getSceneManager().getRegistry());
+    createPrototypes(prefabID, std::move(e));
+    m_isDirty = true;
 }
 
-void EntityFactory::update(std::string_view id, Entity e, entt::registry& r) {
-    destroy(id, r);
-    create(id, e);
+void EntityFactory::destroyPrototypes(std::string_view prefabID, entt::registry& r) {
+    ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}", prefabID);
+    for (auto& [prototypeID, prototype] : m_prefabs.at(prefabID.data())) {
+        r.emplace<CDeleted>(prototype);
+    }
+    m_prefabs.erase(prefabID.data());
+    m_isDirty = true;
 }
 
-entt::entity EntityFactory::get(std::string_view id) {
-    if (not m_prototypes.contains(id.data())) {
-        throw std::runtime_error("No prototype found for prefab " + std::string(id));
+const EntityFactory::Prototypes& EntityFactory::getPrototypes(std::string_view prefabID) {
+    ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}", prefabID);
+    return m_prefabs.at(prefabID.data());
+}
+
+const std::map<std::string, EntityFactory::Prototypes, NumericComparator>& EntityFactory::getAllPrototypes() {
+    return m_prefabs;
+}
+
+bool EntityFactory::containsPrototypes(std::string_view prefabID) const {
+    return m_prefabs.contains(prefabID.data());
+}
+
+void EntityFactory::createPrototype(std::string_view prefabID, std::string_view prototypeID, Entity&& e) {
+    ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}", prefabID);
+    ENGINE_ASSERT(not m_prefabs.at(prefabID.data()).contains(prototypeID.data()), "Prototype {} for prefab {} already exists", prototypeID, prefabID);
+
+    const auto& manager = m_assetsManager.lock();
+    ENGINE_ASSERT(manager, "AssetsManager is null!");
+
+    const auto& prefab = manager->get<Prefab>(prefabID);
+
+    for (std::string_view cTag : prefab->getCTags(prototypeID)) {
+        processCTag(e, cTag);
     }
-    return m_prototypes.at(id.data());
+
+    for (const auto& [cPrefab, cValue] : prefab->getComponents(prototypeID)) {
+        processComponent(e, cPrefab, cValue);
+    }
+
+    m_prefabs.at(prefabID.data()).insert({prototypeID.data(), e});
+    m_isDirty = true;
+}
+
+void EntityFactory::updatePrototype(std::string_view prefabID, std::string_view prototypeID, Entity&& e) {
+    ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}", prefabID);
+    ENGINE_ASSERT(m_prefabs.at(prefabID.data()).contains(prototypeID.data()), "Unknown prototype {} for prefab {}", prototypeID, prefabID);
+    destroyPrototype(prefabID, prototypeID, e.getSceneManager().getRegistry());
+    createPrototype(prefabID, prototypeID, std::move(e));
+    m_isDirty = true;
+}
+
+void EntityFactory::destroyPrototype(std::string_view prefabID, std::string_view prototypeID, entt::registry& r) {
+    ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}", prefabID);
+    ENGINE_ASSERT(m_prefabs.at(prefabID.data()).contains(prototypeID.data()), "Unknown prototype {} for prefab {}", prototypeID, prefabID);
+    r.emplace<CDeleted>(m_prefabs.at(prefabID.data()).at(prototypeID.data()));
+    m_prefabs.at(prefabID.data()).erase(prototypeID.data());
+    m_isDirty = true;
+}
+
+entt::entity EntityFactory::getPrototype(std::string_view prefabID, std::string_view prototypeID) {
+    ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}", prefabID);
+    ENGINE_ASSERT(m_prefabs.at(prefabID.data()).contains(prototypeID.data()), "Unknown prototype {} for prefab {}", prototypeID, prefabID);
+    return m_prefabs.at(prefabID.data()).at(prototypeID.data());
+}
+
+bool EntityFactory::containsPrototype(std::string_view prefabID, std::string_view prototypeID) const {
+    ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}", prefabID);
+    return m_prefabs.at(prefabID.data()).contains(prototypeID.data());
+}
+
+const std::map<std::string, std::string, NumericComparator>& EntityFactory::getPrototypesCountByPrefab() {
+    if (not m_isDirty) {
+        return m_prototypesCountByPrefab;
+    }
+
+    m_prototypesCountByPrefab.clear();
+    for (const auto& [prefabID, prototypes] : m_prefabs) {
+        m_prototypesCountByPrefab["Prefab " + prefabID] = std::to_string(prototypes.size());
+    }
+    m_isDirty = false;
+
+    return m_prototypesCountByPrefab;
 }
 
 void EntityFactory::clear() {
-    m_prototypes.clear();
+    m_prefabs.clear();
+    m_prototypesCountByPrefab.clear();
+    m_isDirty = false;
 }
+
 }

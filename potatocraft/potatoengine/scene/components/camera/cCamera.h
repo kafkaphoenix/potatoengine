@@ -42,7 +42,7 @@ struct CCamera {
     explicit CCamera(std::string&& t, float f, float zf, float zm, float zM, float ms, float nc, float fc, float ts, float vs, float rs) : _type(std::move(t)), fov(f), zoomFactor(zf), zoomMin(zm), zoomMax(zM), mouseSensitivity(ms), nearClip(nc), farClip(fc), translationSpeed(ts), verticalSpeed(vs), rotationSpeed(rs) {}
 
     void print() const {
-        CORE_TRACE("\t\ttype: {0}\n\t\t\t\taspectRatio: {1}\n\t\t\t\tfov: {2}\n\t\t\t\tzoomFactor: {3}\n\t\t\t\tzoomMin: {4}\n\t\t\t\tzoomMax: {5}\n\t\t\t\tnearClip: {6}\n\t\t\t\tfarClip: {7}\n\t\t\t\tmouseSensitivity: {8}\n\t\t\t\ttranslationSpeed: {9}\n\t\t\t\tverticalSpeed: {10}\n\t\t\t\trotationSpeed: {11}",
+        ENGINE_TRACE("\t\ttype: {0}\n\t\t\t\taspectRatio: {1}\n\t\t\t\tfov: {2}\n\t\t\t\tzoomFactor: {3}\n\t\t\t\tzoomMin: {4}\n\t\t\t\tzoomMax: {5}\n\t\t\t\tnearClip: {6}\n\t\t\t\tfarClip: {7}\n\t\t\t\tmouseSensitivity: {8}\n\t\t\t\ttranslationSpeed: {9}\n\t\t\t\tverticalSpeed: {10}\n\t\t\t\trotationSpeed: {11}",
                    _type, _aspectRatio, fov, zoomFactor, zoomMin, zoomMax, nearClip, farClip, mouseSensitivity, translationSpeed, verticalSpeed, rotationSpeed);
     }
 

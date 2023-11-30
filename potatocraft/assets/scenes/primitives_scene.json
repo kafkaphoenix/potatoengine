@@ -41,7 +41,7 @@
         "prefabs": {
             "entities": {
                 "filepath": "assets/prefabs/entities.json",
-                "targets": [
+                "targeted_prototypes": [
                     "skybox",
                     "foco",
                     "camera",
@@ -54,126 +54,144 @@
         }
     },
     "entities": {
-        "skybox": {
-            "prefab": "skybox",
-            "options": {
-                "time": 7,
-                "useFog": false
+        "normals": {
+            "skybox": {
+                "prefab": "entities",
+                "prototype": "skybox",
+                "options": {
+                    "time": 7,
+                    "useFog": false
+                }
+            },
+            "flat_terrain": {
+                "prefab": "entities",
+                "prototype": "rectangle",
+                "options": {
+                    "size": {"x": 100, "y": 100, "z": 0},
+                    "position": {"x": 0, "y": 0, "z": 0},
+                    "rotation": {"x": -90, "y": 0, "z": 0},
+                    "filepaths": ["grass"],
+                    "repeatTexture": true,
+                    "drawMode": "texture"
+                }
+            },
+            "triangle1": {
+                "prefab": "entities",
+                "prototype": "triangle",
+                "options": {
+                    "position": {"x": 0, "y": 0, "z": 0},
+                    "color": {"r": 0, "g": 0, "b": 1, "a": 1}
+                }
+            },
+            "triangle2": {
+                "prefab": "entities",
+                "prototype": "triangle",
+                "options": {
+                    "position": {"x": 5, "y": 0, "z": 0},
+                    "color": {"r": 1, "g": 0, "b": 0, "a": 1}
+                }
+            },
+            "triangle3" : {
+                "prefab": "entities",
+                "prototype": "triangle",
+                "options": {
+                    "position": {"x": -5, "y": 0, "z": 0},
+                    "color": {"r": 0, "g": 1, "b": 0, "a": 1}
+                }
+            },
+            "cube1": {
+                "prefab": "entities",
+                "prototype": "cube",
+                "options": {
+                    "position": {"x": 0, "y": 5, "z": 0},
+                    "color": {"r": 0, "g": 0, "b": 1, "a": 1}
+                }
+            },
+            "cube2": {
+                "prefab": "entities",
+                "prototype": "cube",
+                "options": {
+                    "position": {"x": 5, "y": 5, "z": 0},
+                    "color": {"r": 1, "g": 0, "b": 0, "a": 1}
+                }
+            },
+            "cube3" : {
+                "prefab": "entities",
+                "prototype": "cube",
+                "options": {
+                    "position": {"x": -5, "y": 5, "z": 0},
+                    "color": {"r": 0, "g": 1, "b": 0, "a": 1}
+                }
+            },
+            "circle1": {
+                "prefab": "entities",
+                "prototype": "circle",
+                "options": {
+                    "position": {"x": 0, "y": 10, "z": 0},
+                    "color": {"r": 0, "g": 0, "b": 1, "a": 1}
+                }
+            },
+            "circle2": {
+                "prefab": "entities",
+                "prototype": "circle",
+                "options": {
+                    "position": {"x": 5, "y": 10, "z": 0},
+                    "color": {"r": 1, "g": 0, "b": 0, "a": 1}
+                }
+            },
+            "circle3" : {
+                "prefab": "entities",
+                "prototype": "circle",
+                "options": {
+                    "position": {"x": -5, "y": 10, "z": 0},
+                    "color": {"r": 0, "g": 1, "b": 0, "a": 1}
+                }
+            },
+            "rectangle1": {
+                "prefab": "entities",
+                "prototype": "rectangle",
+                "options": {
+                    "position": {"x": 0, "y": 15, "z": 0},
+                    "color": {"r": 0, "g": 0, "b": 1, "a": 1}
+                }
+            },
+            "rectangle2": {
+                "prefab": "entities",
+                "prototype": "rectangle",
+                "options": {
+                    "position": {"x": 5, "y": 15, "z": 0},
+                    "color": {"r": 1, "g": 0, "b": 0, "a": 1}
+                }
+            },
+            "rectangle3" : {
+                "prefab": "entities",
+                "prototype": "rectangle",
+                "options": {
+                    "position": {"x": -5, "y": 15, "z": 0},
+                    "color": {"r": 0, "g": 1, "b": 0, "a": 1}
+                }
             }
         },
-        "flat_terrain": {
-            "prefab": "rectangle",
-            "options": {
-                "size": {"x": 100, "y": 100, "z": 0},
-                "position": {"x": 0, "y": 0, "z": 0},
-                "rotation": {"x": -90, "y": 0, "z": 0},
-                "filepaths": ["grass"],
-                "repeatTexture": true,
-                "drawMode": "texture"
+        "lights": {
+            "foco": {
+                "prefab": "entities",
+                "prototype": "foco",
+                "options": {
+                    "position": {"x": 0, "y": 10, "z": 5},
+                    "rotation": {"x": 0, "y": 90, "z": 0},
+                    "color": {"r": 1, "g": 1, "b": 1, "a": 1}
+                }
             }
         },
-        "triangle1": {
-            "prefab": "triangle",
-            "options": {
-                "position": {"x": 0, "y": 0, "z": 0},
-                "color": {"r": 0, "g": 0, "b": 1, "a": 1}
-            }
-        },
-        "triangle2": {
-            "prefab": "triangle",
-            "options": {
-                "position": {"x": 5, "y": 0, "z": 0},
-                "color": {"r": 1, "g": 0, "b": 0, "a": 1}
-            }
-        },
-        "triangle3" : {
-            "prefab": "triangle",
-            "options": {
-                "position": {"x": -5, "y": 0, "z": 0},
-                "color": {"r": 0, "g": 1, "b": 0, "a": 1}
-            }
-        },
-        "cube1": {
-            "prefab": "cube",
-            "options": {
-                "position": {"x": 0, "y": 5, "z": 0},
-                "color": {"r": 0, "g": 0, "b": 1, "a": 1}
-            }
-        },
-        "cube2": {
-            "prefab": "cube",
-            "options": {
-                "position": {"x": 5, "y": 5, "z": 0},
-                "color": {"r": 1, "g": 0, "b": 0, "a": 1}
-            }
-        },
-        "cube3" : {
-            "prefab": "cube",
-            "options": {
-                "position": {"x": -5, "y": 5, "z": 0},
-                "color": {"r": 0, "g": 1, "b": 0, "a": 1}
-            }
-        },
-        "circle1": {
-            "prefab": "circle",
-            "options": {
-                "position": {"x": 0, "y": 10, "z": 0},
-                "color": {"r": 0, "g": 0, "b": 1, "a": 1}
-            }
-        },
-        "circle2": {
-            "prefab": "circle",
-            "options": {
-                "position": {"x": 5, "y": 10, "z": 0},
-                "color": {"r": 1, "g": 0, "b": 0, "a": 1}
-            }
-        },
-        "circle3" : {
-            "prefab": "circle",
-            "options": {
-                "position": {"x": -5, "y": 10, "z": 0},
-                "color": {"r": 0, "g": 1, "b": 0, "a": 1}
-            }
-        },
-        "rectangle1": {
-            "prefab": "rectangle",
-            "options": {
-                "position": {"x": 0, "y": 15, "z": 0},
-                "color": {"r": 0, "g": 0, "b": 1, "a": 1}
-            }
-        },
-        "rectangle2": {
-            "prefab": "rectangle",
-            "options": {
-                "position": {"x": 5, "y": 15, "z": 0},
-                "color": {"r": 1, "g": 0, "b": 0, "a": 1}
-            }
-        },
-        "rectangle3" : {
-            "prefab": "rectangle",
-            "options": {
-                "position": {"x": -5, "y": 15, "z": 0},
-                "color": {"r": 0, "g": 1, "b": 0, "a": 1}
-            }
-        }
-    },
-    "lights": {
-        "foco": {
-            "prefab": "foco",
-            "options": {
-                "position": {"x": 0, "y": 10, "z": 5},
-                "rotation": {"x": 0, "y": 90, "z": 0},
-                "color": {"r": 1, "g": 1, "b": 1, "a": 1}
-            }
-        }
-    },
-    "cameras": {
-        "scene_camera": {
-            "prefab": "camera",
-            "options": {
-                "position": {"x": 0, "y": 5, "z": 20},
-                "type": "perspective",
-                "isActive": true
+        "cameras": {
+            "scene_camera": {
+                "prefab": "entities",
+                "prototype": "camera",
+                "options": {
+                    "position": {"x": 0, "y": 5, "z": 20},
+                    "type": "perspective",
+                    "isActive": true
+                }
             }
         }
     }

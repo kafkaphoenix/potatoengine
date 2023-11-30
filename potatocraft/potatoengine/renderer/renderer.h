@@ -34,6 +34,9 @@ class Renderer {
 
     void render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, std::string_view shaderProgram);
     void renderFBO(const std::shared_ptr<VAO>& vao, std::string_view fbo);
+    int getShaderProgramsCount() const noexcept { return m_shaderPrograms.size(); }
+    int getFramebuffersCount() const noexcept { return m_framebuffers.size(); }
+    void clear();
     static std::unique_ptr<Renderer> Create(std::weak_ptr<AssetsManager> am) noexcept;
 
    private:
@@ -43,6 +46,5 @@ class Renderer {
     std::unordered_map<std::string, std::unique_ptr<ShaderProgram>> m_shaderPrograms;
     std::unordered_map<std::string, std::unique_ptr<FBO>> m_framebuffers;
     std::weak_ptr<AssetsManager> m_assetsManager;
-    
 };
 }

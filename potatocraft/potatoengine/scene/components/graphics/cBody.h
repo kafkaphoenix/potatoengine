@@ -18,18 +18,17 @@ struct CBody {
         : filepath(std::move(fp)), meshes(std::move(m)), materials(std::move(ma)) {}
 
     void print() const {
-        CORE_TRACE("\t\tfilepath: {0}\n\t\t\t\tmeshes: {1}\n\t\t\t\tmaterials: {2}", filepath, meshes.size(), materials.size());
+        ENGINE_TRACE("\t\tfilepath: {0}\n\t\t\t\tmeshes: {1}\n\t\t\t\tmaterials: {2}", filepath, meshes.size(), materials.size());
     }
 };
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity e, CBody& c) {
+void engine::SceneManager::onComponentAdded(Entity& e, CBody& c) {
     const auto& manager = m_assetsManager.lock();
-    if (not manager) {
-        throw std::runtime_error("Assets manager is null!");
-    }
+    ENGINE_ASSERT(manager, "Assets manager is null!")
 
+    // TODO rethink if add if not empty here and do it as ctag but creating all the fields
     auto model = *manager->get<Model>(c.filepath); // We need a copy of the model
     c.meshes = std::move(model.getMeshes());
     c.materials = std::move(model.getMaterials());

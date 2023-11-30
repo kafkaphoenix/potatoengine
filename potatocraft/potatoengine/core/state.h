@@ -13,7 +13,7 @@ class State {
     virtual void onAttach() {}
     virtual void onDetach() {}
     virtual void onUpdate(Time) {}
-    virtual void onImGuiRender() {}
+    virtual void onImguiUpdate() {}
     virtual void onEvent(Event&) {}
 
     std::string_view getName() const noexcept { return m_name; }

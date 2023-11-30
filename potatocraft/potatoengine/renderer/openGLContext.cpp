@@ -5,17 +5,13 @@
 namespace potatoengine {
 
 OpenGLContext::OpenGLContext(GLFWwindow* w) : m_window(w) {
-    if (not w) [[unlikely]] {
-        throw std::runtime_error("Window is null!");
-    }
+    ENGINE_ASSERT(w, "Window is null!");
 }
 
 void OpenGLContext::init() {
     makeContextCurrent(m_window);
 
-    if (int status = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)); status == 0) {
-        throw std::runtime_error("Failed to initialize Glad!");
-    }
+    ENGINE_ASSERT(gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)) != 0, "Failed to initialize Glad!");
 }
 
 void OpenGLContext::makeContextCurrent(GLFWwindow* w) {

@@ -11,7 +11,7 @@ struct CDistanceFromCamera {
     explicit CDistanceFromCamera(int d) : distance(d) {}
 
     void print() const {
-        CORE_TRACE("\t\tdistance: {}", distance);
+        ENGINE_TRACE("\t\tdistance: {}", distance);
     }
 };
 }

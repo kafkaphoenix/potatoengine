@@ -47,7 +47,7 @@
         "prefabs": {
             "entities": {
                 "filepath": "assets/prefabs/entities.json",
-                "targets": [
+                "targeted_prototypes": [
                     "player",
                     "skybox",
                     "foco",
@@ -58,71 +58,78 @@
         }
     },
     "entities": {
-        "auri": {
-            "prefab": "player",
-            "options": {
-                "position": {"x": 180, "y": 30, "z": 180},
-                "type": "perspective",
-                "isActive": true
+        "normals": {
+            "auri": {
+                "prefab": "entities",
+                "prototype": "player",
+                "options": {
+                    "position": {"x": 180, "y": 30, "z": 180},
+                    "type": "perspective",
+                    "isActive": true
+                }
+            },
+            "skybox": {
+                "prefab": "entities",
+                "prototype": "skybox",
+                "options": {
+                    "time": 7,
+                    "acceleration": 1
+                }
+            },
+            "chunk_config": {
+                "prefab": "entities",
+                "prototype": "chunk_config",
+                "options": {
+                    "chunkSize": 300,
+                    "blockSize": 1,
+                    "width": 0,
+                    "height": 0,
+                    "noise": {
+                        "type": "simplex",
+                        "seed": 50,
+                        "octaves": 3,
+                        "frequency": 0.005,
+                        "persistence": 0.7,
+                        "lacunarity": 2.0,
+                        "amplitude": 40,
+                        "positive": false
+                    },
+                    "useLighting": false,
+                    "filepaths": ["block_atlas"],
+                    "textureAtlas": {
+                        "rows": 2
+                    },
+                    "drawMode": "color",
+                    "useBiomes": true,
+                    "meshType": "plane",
+                    "meshAlgorithm": "simplifiedQuad"
+                }
             }
         },
-        "skybox": {
-            "prefab": "skybox",
-            "options": {
-                "time": 7,
-                "acceleration": 1
+        "lights": {
+            "foco": {
+                "prefab": "entities",
+                "prototype": "foco",
+                "options": {
+                    "isVisible": true,
+                    "body": "foco",
+                    "position": {"x": 0, "y": 10, "z": 5},
+                    "rotation": {"x": 0, "y": 90, "z": 0},
+                    "color": {"r": 1, "g": 1, "b": 1, "a": 1}
+                }
             }
         },
-        "chunk_config": {
-            "prefab": "chunk_config",
-            "options": {
-                "chunkSize": 300,
-                "blockSize": 1,
-                "width": 0,
-                "height": 0,
-                "noise": {
-                    "type": "simplex",
-                    "seed": 50,
-                    "octaves": 3,
-                    "frequency": 0.005,
-                    "persistence": 0.7,
-                    "lacunarity": 2.0,
-                    "amplitude": 40,
-                    "positive": false
-                },
-                "useLighting": false,
-                "filepaths": ["block_atlas"],
-                "textureAtlas": {
-                    "rows": 2
-                },
-                "drawMode": "color",
-                "useBiomes": true,
-                "meshType": "plane",
-                "meshAlgorithm": "simplifiedQuad"
-            }
-        }
-    },
-    "lights": {
-        "foco": {
-            "prefab": "foco",
-            "options": {
-                "isVisible": true,
-                "body": "foco",
-                "position": {"x": 0, "y": 10, "z": 5},
-                "rotation": {"x": 0, "y": 90, "z": 0},
-                "color": {"r": 1, "g": 1, "b": 1, "a": 1}
-            }
-        }
-    },
-    "cameras": {
-        "scene_camera": {
-            "prefab": "camera",
-            "options": {
-                "isVisible": true,
-                "body": "camera",
-                "position": {"x": 0, "y": 5, "z": 10},
-                "rotation": {"x": 0, "y": 90, "z": 0},
-                "type": "perspective"
+        "cameras": {
+            "scene_camera": {
+                "prefab": "entities",
+                "prototype": "camera",
+                "options": {
+                    "isVisible": true,
+                    "body": "camera",
+                    "position": {"x": 0, "y": 5, "z": 10},
+                    "rotation": {"x": 0, "y": 90, "z": 0},
+                    "type": "perspective"
+                }
             }
         }
     }

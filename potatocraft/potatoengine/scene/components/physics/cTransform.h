@@ -3,7 +3,6 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 namespace potatoengine {
 
@@ -29,7 +28,7 @@ struct CTransform {
     }
 
     void print() const {
-        CORE_TRACE("\t\tposition: {0}\n\t\t\t\trotation: {1}\n\t\t\t\tscale: {2}", glm::to_string(position), glm::to_string(rotation), glm::to_string(scale));
+        ENGINE_TRACE("\t\tposition: {0}\n\t\t\t\trotation: {1}\n\t\t\t\tscale: {2}", position, rotation, scale);
     }
 
 

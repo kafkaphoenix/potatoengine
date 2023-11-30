@@ -38,7 +38,7 @@ Links below to tutorials, projects, blogs, etc has been useful at some point for
 
 ## Third libraries and tools
 
-- Imgui setup <https://eliasdaler.github.io/using-imgui-with-sfml-pt1/>
+- ImGui setup <https://eliasdaler.github.io/using-imgui-with-sfml-pt1/>
 - Intro to EnTT <https://www.youtube.com/watch?v=D4hz0wEB978>
 - Using cmake <https://eliasdaler.github.io/using-cmake/>
 - Cmake examples

@@ -10,7 +10,7 @@ struct CTextureAtlas {
     explicit CTextureAtlas(int r, int i) : rows(r), index(i) {}
 
     void print() const {
-        CORE_TRACE("\t\trows: {0}\n\t\t\t\tindex: {1}", rows, index);
+        ENGINE_TRACE("\t\trows: {0}\n\t\t\t\tindex: {1}", rows, index);
     }
 };
 }
