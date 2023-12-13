@@ -1,0 +1,125 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "defaults",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "strategy": "set",
+                "value": "win32"
+            },
+            "cacheVariables": {
+                "ENABLE_DEBUG": "OFF",
+                "ENABLE_CLANG_TIDY": "OFF",
+                "ENABLE_CPPCHECK": "OFF",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "OFF",
+                "CMAKE_CXX_COMPILER": "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/MSVC/14.39.33321/bin/Hostx86/x86/cl.exe",
+                "CMAKE_C_COMPILER": "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/MSVC/14.39.33321/bin/Hostx86/x86/cl.exe"
+            }
+        },
+        {
+            "name": "release-MSVC",
+            "inherits": ["defaults"],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "debug-MSVC",
+            "inherits": ["defaults"],
+            "cacheVariables": {
+                "ENABLE_DEBUG": "ON",
+                "ENABLE_CPPCHECK": "ON",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release-clang",
+            "inherits": ["defaults"],
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/Llvm/x64/bin/clang-cl.exe",
+                "CMAKE_C_COMPILER": "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/Llvm/x64/bin/clang-cl.exe",
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "debug-clang",
+            "inherits": ["defaults"],
+            "cacheVariables": {
+                "ENABLE_DEBUG": "ON",
+                "ENABLE_CPPCHECK": "ON",
+                "CMAKE_CXX_COMPILER": "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/Llvm/x64/bin/clang-cl.exe",
+                "CMAKE_C_COMPILER": "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/Llvm/x64/bin/clang-cl.exe",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release-gcc",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "C:/mingw64/bin/g++.exe",
+                "CMAKE_C_COMPILER": "C:/mingw64/bin/gcc.exe",
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "debug-gcc",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "ENABLE_DEBUG": "ON",
+                "ENABLE_CLANG_TIDY": "ON",
+                "ENABLE_CPPCHECK": "ON",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_CXX_COMPILER": "C:/mingw64/bin/g++.exe",
+                "CMAKE_C_COMPILER": "C:/mingw64/bin/gcc.exe",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "release-MSVC",
+            "displayName": "Release",
+            "configurePreset": "release",
+            "configuration": "Release"
+        },
+        {
+            "name": "debug-MSVC",
+            "displayName": "Debug",
+            "configurePreset": "debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "release-clang",
+            "displayName": "Release",
+            "configurePreset": "release-clang",
+            "configuration": "Release"
+        },
+        {
+            "name": "debug-clang",
+            "displayName": "Debug",
+            "configurePreset": "debug-clang",
+            "configuration": "Debug"
+        },
+        {
+            "name": "release-gcc",
+            "displayName": "Release",
+            "configurePreset": "release-gcc",
+            "configuration": "Release"
+        },
+        {
+            "name": "debug-gcc",
+            "displayName": "Debug",
+            "configurePreset": "debug-gcc",
+            "configuration": "Debug"
+        }
+    ]
+}
