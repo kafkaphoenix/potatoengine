@@ -47,7 +47,7 @@ inline Settings load_settings() {
   } else {
     std::ifstream file(path);
     APP_ASSERT(file.is_open(), "Failed to open settings file!");
-    APP_ASSERT(file.peek() != std::ifstream::traits_type::eof(), "Settings file is empty!");
+    APP_ASSERT(file.peek() not_eq std::ifstream::traits_type::eof(), "Settings file is empty!");
     json data = json::parse(file);
     file.close();
 

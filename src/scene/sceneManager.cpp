@@ -236,10 +236,10 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
   }
 
   if (reload) {
-    ENGINE_INFO("Scene {} reloading TIME: {}", m_activeScene,
+    ENGINE_INFO("Scene {} reloading TIME: {:.6f}s", m_activeScene,
                 timer.getSeconds());
   } else {
-    ENGINE_INFO("Scene {} creation TIME: {}", sceneID, timer.getSeconds());
+    ENGINE_INFO("Scene {} creation TIME: {:.6f}s", sceneID, timer.getSeconds());
     m_activeScene = std::move(sceneID);
   }
   m_isDirty = true;

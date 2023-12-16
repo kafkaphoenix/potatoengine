@@ -28,12 +28,14 @@ class LogManager {
 namespace engine = potatoengine;
 
 #define ENGINE_TRACE(...) ::engine::LogManager::GetEngineLogger()->trace(__VA_ARGS__)
+#define ENGINE_DEBUG(...) ::engine::LogManager::GetEngineLogger()->debug(__VA_ARGS__)
 #define ENGINE_INFO(...) ::engine::LogManager::GetEngineLogger()->info(__VA_ARGS__)
 #define ENGINE_WARN(...) ::engine::LogManager::GetEngineLogger()->warn(__VA_ARGS__)
 #define ENGINE_ERROR(...) ::engine::LogManager::GetEngineLogger()->error(__VA_ARGS__)
 #define ENGINE_CRITICAL(...) ::engine::LogManager::GetEngineLogger()->critical(__VA_ARGS__)
 
 #define APP_TRACE(...) ::engine::LogManager::GetAppLogger()->trace(__VA_ARGS__)
+#define APP_DEBUG(...) ::engine::LogManager::GetAppLogger()->debug(__VA_ARGS__)
 #define APP_INFO(...) ::engine::LogManager::GetAppLogger()->info(__VA_ARGS__)
 #define APP_WARN(...) ::engine::LogManager::GetAppLogger()->warn(__VA_ARGS__)
 #define APP_ERROR(...) ::engine::LogManager::GetAppLogger()->error(__VA_ARGS__)

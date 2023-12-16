@@ -3,10 +3,12 @@
 #include "pch.h"
 
 namespace potatoengine {
-Shader::Shader(std::filesystem::path&& fp) : m_filepath(std::move(fp.string())) {
+Shader::Shader(std::filesystem::path&& fp)
+  : m_filepath(std::move(fp.string())) {
   std::ifstream f(fp);
   ENGINE_ASSERT(f.is_open(), "Failed to open shader file!");
-  ENGINE_ASSERT(f.peek() != std::ifstream::traits_type::eof(), "Shader file is empty!");
+  ENGINE_ASSERT(f.peek() not_eq std::ifstream::traits_type::eof(),
+                "Shader file is empty!");
   std::string data(std::istreambuf_iterator<char>(f), {});
   f.close();
 
@@ -22,11 +24,14 @@ Shader::Shader(std::filesystem::path&& fp) : m_filepath(std::move(fp.string())) 
   if (status not_eq GL_TRUE) [[unlikely]] {
     int infoLogLength = 0;
     glGetShaderiv(m_id, GL_INFO_LOG_LENGTH, &infoLogLength);
-    ENGINE_ASSERT(infoLogLength > 0, "Shader {} compilation failed!", m_filepath);
+    ENGINE_ASSERT(infoLogLength > 0, "Shader {} compilation failed!",
+                  m_filepath);
     std::vector<GLchar> shaderInfoLog(infoLogLength);
-    glGetShaderInfoLog(m_id, infoLogLength, &infoLogLength, shaderInfoLog.data());
+    glGetShaderInfoLog(m_id, infoLogLength, &infoLogLength,
+                       shaderInfoLog.data());
     glDeleteShader(m_id);
-    ENGINE_ASSERT(false, "Shader {} compilation failed: \n{}", m_filepath, std::string(shaderInfoLog.data()));
+    ENGINE_ASSERT(false, "Shader {} compilation failed: \n{}", m_filepath,
+                  std::string(shaderInfoLog.data()));
   }
 }
 

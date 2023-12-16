@@ -14,7 +14,7 @@ std::shared_ptr<VAO> ShapeFactory::CreateShape(const std::vector<ShapeVertex>& v
 
 std::shared_ptr<VAO> ShapeFactory::CreateTriangle(float size) {
   std::vector<ShapeVertex> vertices = {
-      {{0.f, size, 0.f}, {0.5f, 1.0f}}, {{-size, -size, 0.f}, {0.f, 0.f}}, {{size, -size, 0.f}, {1.0f, 0.f}}};
+      {{0.f, size, 0.f}, {0.5f, 1.f}}, {{-size, -size, 0.f}, {0.f, 0.f}}, {{size, -size, 0.f}, {1.f, 0.f}}};
 
   std::vector<uint32_t> indices = {0, 1, 2};
 
@@ -99,8 +99,8 @@ std::shared_ptr<VAO> ShapeFactory::CreateCircle(float radius, uint32_t segments)
   for (int i = 0; i < segments; ++i) {
     float x = radius * cos(i * angleIncrement);
     float y = radius * sin(i * angleIncrement);
-    float u = 0.5f * (1.0f + cos(i * angleIncrement));
-    float v = 0.5f * (1.0f + sin(i * angleIncrement));
+    float u = 0.5f * (1.f + cos(i * angleIncrement));
+    float v = 0.5f * (1.f + sin(i * angleIncrement));
     vertices.push_back({{x, y, 0.f}, {u, v}});
     indices.push_back(0);
     indices.push_back(i + 1);

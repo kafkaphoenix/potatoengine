@@ -28,7 +28,7 @@ struct Settings {
     int cursorMode = 2; // 0: normal, 1: hidden, 2: disabled
 
     bool debugEnabled = true;
-    int debugLevel = 0; // 0: trace, 1: info, 2: warn, 3: error, 4: critical
+    int debugLevel = 0; // 0: trace, 1: debug, 2: info, 3: warn, 4: error, 5: critical
     bool displayFPS = false;
 
     std::array<float, 4> clearColor = {0.45f, 0.55f, 0.6f, 1.f};
@@ -46,7 +46,7 @@ struct Settings {
         "assets/scenes/plane_terrain_scene.json", "assets/scenes/primitives_scene.json",
         "assets/scenes/empty_scene.json"};
     std::vector<const char*> cursorModes{"Normal", "Hidden", "Disabled"};
-    std::vector<const char*> debugLevels{"Trace", "Info", "Warn", "Error", "Critical"};
+    std::vector<const char*> debugLevels{"Trace", "Debug", "Info", "Warn", "Error", "Critical"};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Settings, appName, root, logFilePath, windowIconPath, windowWidth, windowHeight,
                                    depthBits, refreshRate, fullscreen, primaryMonitor, vSync, resizable,

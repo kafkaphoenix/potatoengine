@@ -47,12 +47,13 @@ void drawSettings(Settings& settings) {
       ImGui::InputText("Cursor icon path", &settings.cursorIconPath);
       if (ImGui::BeginCombo("Cursor mode", settings.cursorMode == 0   ? "Normal"
                                            : settings.cursorMode == 1 ? "Hidden"
-                                           : settings.cursorMode == 2 ? "Disabled"
-                                                                      : "Unknown")) {
+                                           : settings.cursorMode == 2
+                                             ? "Disabled"
+                                             : "Unknown")) {
         for (int n = 0; n < settings.cursorModes.size(); n++) {
           bool is_selected = (settings.cursorMode == n);
           if (ImGui::Selectable(settings.cursorModes[n], is_selected)) {
-            if (settings.cursorMode != n) {
+            if (settings.cursorMode not_eq n) {
               settings.cursorMode = n;
             }
           }
@@ -65,15 +66,17 @@ void drawSettings(Settings& settings) {
     } else if (selectedSettingTabKey == "Debug") {
       ImGui::Checkbox("Debug enabled", &settings.debugEnabled);
       if (ImGui::BeginCombo("Debug level", settings.debugLevel == 0   ? "Trace"
-                                           : settings.debugLevel == 1 ? "Info"
-                                           : settings.debugLevel == 2 ? "Warn"
-                                           : settings.debugLevel == 3 ? "Error"
-                                           : settings.debugLevel == 4 ? "Critical"
-                                                                      : "Unknown")) {
+                                           : settings.debugLevel == 1 ? "Debug"
+                                           : settings.debugLevel == 2 ? "Info"
+                                           : settings.debugLevel == 3 ? "Warn"
+                                           : settings.debugLevel == 4 ? "Error"
+                                           : settings.debugLevel == 5
+                                             ? "Critical"
+                                             : "Unknown")) {
         for (int n = 0; n < settings.debugLevels.size(); n++) {
           bool is_selected = (settings.debugLevel == n);
           if (ImGui::Selectable(settings.debugLevels[n], is_selected)) {
-            if (settings.debugLevel != n) {
+            if (settings.debugLevel not_eq n) {
               settings.debugLevel = n;
             }
           }
@@ -94,7 +97,7 @@ void drawSettings(Settings& settings) {
         for (int n = 0; n < settings.scenes.size(); n++) {
           bool is_selected = (settings.activeScene == settings.scenes[n]);
           if (ImGui::Selectable(settings.scenes[n], is_selected)) {
-            if (settings.activeScene != settings.scenes[n]) {
+            if (settings.activeScene not_eq settings.scenes[n]) {
               settings.reloadScene = true;
               settings.activeScene = settings.scenes[n];
               settings.activeScenePath = settings.scenesPaths[n];

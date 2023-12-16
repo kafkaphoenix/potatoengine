@@ -17,15 +17,15 @@ struct NumericComparator {
         return false;
       }
 
-      if (std::isdigit(lhs[0]) && !std::isdigit(rhs[0])) {
+      if (std::isdigit(lhs[0]) and not std::isdigit(rhs[0])) {
         return true;
       }
 
-      if (!std::isdigit(lhs[0]) && std::isdigit(rhs[0])) {
+      if (!std::isdigit(lhs[0]) and std::isdigit(rhs[0])) {
         return false;
       }
 
-      if (!std::isdigit(lhs[0]) && !std::isdigit(rhs[0])) {
+      if (!std::isdigit(lhs[0]) and not std::isdigit(rhs[0])) {
         if (lhs[0] == rhs[0]) {
           return NumericComparator{}(lhs.substr(1), rhs.substr(1));
         }

@@ -11,7 +11,8 @@ void drawRenderer(std::weak_ptr<engine::Renderer> r) {
   APP_ASSERT(renderer, "Renderer is null!");
 
   const auto& fbos = renderer->getFramebuffers();
-  if (fbos.empty()) { // TODO after other renderer objects are added, this should be a check for all renderer objects
+  if (fbos.empty()) { // TODO after other renderer objects are added, this
+                      // should be a check for all renderer objects
     ImGui::Text("No FBOS");
     return;
   }
@@ -20,8 +21,8 @@ void drawRenderer(std::weak_ptr<engine::Renderer> r) {
 
   ImGui::Columns(2);
 
-  if (collapsed != -1)
-    ImGui::SetNextItemOpen(collapsed != 0);
+  if (collapsed not_eq -1)
+    ImGui::SetNextItemOpen(collapsed not_eq 0);
 
   if (ImGui::CollapsingHeader("FBOS")) {
     for (const auto& [key, value] : fbos) {

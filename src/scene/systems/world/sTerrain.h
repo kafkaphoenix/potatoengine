@@ -13,10 +13,10 @@
 
 namespace potatoengine {
 
-static constexpr glm::vec3 LIGHT_BLUE = {0.0f, 0.9725f, 0.9725f};
-static constexpr glm::vec3 LIGHT_YELLOW = {0.9725f, 0.9725f, 0.0f};
-static constexpr glm::vec3 LIGHT_GREEN = {0.0f, 0.9725f, 0.0f};
-static constexpr glm::vec3 DARK_GREEN = {0.0f, 0.5f, 0.0f};
+static constexpr glm::vec3 LIGHT_BLUE = {0.f, 0.9725f, 0.9725f};
+static constexpr glm::vec3 LIGHT_YELLOW = {0.9725f, 0.9725f, 0.f};
+static constexpr glm::vec3 LIGHT_GREEN = {0.f, 0.9725f, 0.f};
+static constexpr glm::vec3 DARK_GREEN = {0.f, 0.5f, 0.f};
 static constexpr glm::vec3 LIGHT_GREY = {0.5f, 0.5f, 0.5f};
 static constexpr glm::vec3 WHITE = {0.9725f, 0.9725f, 0.9725f};
 

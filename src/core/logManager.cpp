@@ -31,8 +31,9 @@ void LogManager::Init() {
 void LogManager::CreateFileLogger(std::string_view filepath) {
   auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filepath.data(), true);
 
-  fileSink->set_pattern("[%T] [%l] %n: %v");
+  fileSink->set_pattern("[%D %T] [%l] %n: %v");
 
+  s_engineLogger->sinks().emplace_back(fileSink);
   s_appLogger->sinks().emplace_back(fileSink);
 }
 }

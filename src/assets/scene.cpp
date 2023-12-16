@@ -6,7 +6,8 @@ namespace potatoengine {
 Scene::Scene(std::filesystem::path&& fp) : m_filepath(std::move(fp.string())) {
   std::ifstream f(fp);
   ENGINE_ASSERT(f.is_open(), "Failed to open scene file!");
-  ENGINE_ASSERT(f.peek() != std::ifstream::traits_type::eof(), "Scene file is empty!");
+  ENGINE_ASSERT(f.peek() not_eq std::ifstream::traits_type::eof(),
+                "Scene file is empty!");
   json data = json::parse(f);
   f.close();
 
@@ -21,7 +22,8 @@ void Scene::read(const json& data) {
       }
     }
     if (data.at("assets").contains("textures")) {
-      for (const auto& [key, value] : data.at("assets").at("textures").items()) {
+      for (const auto& [key, value] :
+           data.at("assets").at("textures").items()) {
         m_textures[key] = value;
       }
     }
@@ -43,22 +45,26 @@ void Scene::read(const json& data) {
   }
   if (data.contains("entities")) {
     if (data.at("entities").contains("normals")) {
-      for (const auto& [key, value] : data.at("entities").at("normals").items()) {
+      for (const auto& [key, value] :
+           data.at("entities").at("normals").items()) {
         m_normalEntities[key] = value;
       }
     }
     if (data.at("entities").contains("lights")) {
-      for (const auto& [key, value] : data.at("entities").at("lights").items()) {
+      for (const auto& [key, value] :
+           data.at("entities").at("lights").items()) {
         m_lightEntities[key] = value;
       }
     }
     if (data.at("entities").contains("cameras")) {
-      for (const auto& [key, value] : data.at("entities").at("cameras").items()) {
+      for (const auto& [key, value] :
+           data.at("entities").at("cameras").items()) {
         m_cameraEntities[key] = value;
       }
     }
     if (data.at("entities").contains("systems")) {
-      for (const auto& [key, value] : data.at("entities").at("systems").items()) {
+      for (const auto& [key, value] :
+           data.at("entities").at("systems").items()) {
         m_systemEntities[key] = value;
       }
     }

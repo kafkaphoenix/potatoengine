@@ -13,6 +13,11 @@ void ImGuiAPI::Init(GLFWwindow* window, int openglMajorVersion, int openglMinorV
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version.data());
+
+  ImGuiStyle& style = ImGui::GetStyle();
+  style.WindowRounding = 5.f;
+  style.FrameRounding = 5.f;
+  style.PopupRounding = 5.f;
 }
 
 void ImGuiAPI::NewFrame() {

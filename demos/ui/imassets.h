@@ -6,6 +6,7 @@ namespace demos {
 
 std::string selectedAssetTabKey;
 std::string selectedAssetTabType;
+char textFilterAssets[128]{}; // TODO: move to class
 
 void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
   auto manager = am.lock();
@@ -18,16 +19,30 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
     return;
   }
 
-  ImGui::Columns(2);
-
   int collapsed = engine::ui::collapser();
 
+  ImGui::InputText("##filter", textFilterAssets, IM_ARRAYSIZE(textFilterAssets));
+  if (ImGui::IsItemHovered()) {
+    ImGui::SetTooltip("Filter assets by name");
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Clear Filter")) {
+    textFilterAssets[0] = '\0';
+  }
+
+  ImGui::Separator();
+  ImGui::Columns(2);
+
+  bool filterOption = false;
   for (const auto& [AssetType, AssetsData] : assets) {
-    if (collapsed != -1)
-      ImGui::SetNextItemOpen(collapsed != 0);
+    if (collapsed not_eq -1)
+      ImGui::SetNextItemOpen(collapsed not_eq 0);
 
     if (ImGui::CollapsingHeader(AssetType.c_str())) {
       for (const auto& [AssetName, _] : AssetsData) {
+        if (textFilterAssets[0] not_eq '\0' and strstr(AssetName.c_str(), textFilterAssets) == nullptr) {
+          continue;
+        }
         if (ImGui::Selectable(AssetName.c_str())) {
           selectedAssetTabKey = AssetName;
           selectedAssetTabType = AssetType;
@@ -44,10 +59,12 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
   ImGui::NextColumn();
   if (not selectedAssetTabKey.empty()) {
     const auto& asset = assets.at(selectedAssetTabType).at(selectedAssetTabKey);
-    const auto& assetInfo = std::visit([](const auto& asset) { return asset->getInfo(); }, asset);
+    const auto& assetInfo =
+      std::visit([](const auto& asset) { return asset->getInfo(); }, asset);
 
     for (const auto& [key, value] : assetInfo) {
-      if (key.contains("Targeted Prototype") and selectedAssetTabType == "Prefab") {
+      if (key.contains("Targeted Prototype") and
+          selectedAssetTabType == "Prefab") {
         const auto& prefab = manager->get<engine::Prefab>(selectedAssetTabKey);
         const auto& prototypeInfo = prefab->getTargetedPrototypeInfo(value);
         if (ImGui::TreeNode(key.c_str())) {
@@ -56,7 +73,8 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
           }
           ImGui::TreePop();
         }
-      } else if (key.contains("Loaded Texture") and selectedAssetTabType == "Model") {
+      } else if (key.contains("Loaded Texture") and
+                 selectedAssetTabType == "Model") {
         const auto& model = manager->get<engine::Model>(selectedAssetTabKey);
         const auto& textureInfo = model->getLoadedTextureInfo(value);
         if (ImGui::TreeNode(key.c_str())) {
