@@ -27,7 +27,7 @@ struct CBlock {
     CBlock() = default;
     explicit CBlock(std::string&& t) : _type(std::move(t)) {}
 
-    void print() const { ENGINE_TRACE("\t\ttype: {0}", _type); }
+    void print() const { ENGINE_BACKTRACE("\t\ttype: {0}", _type); }
 
     void setBlockType() {
       if (_type == "air") {

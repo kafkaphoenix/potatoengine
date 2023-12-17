@@ -9,7 +9,11 @@
 
 namespace potatoengine {
 
-enum class CursorMode { Normal = GLFW_CURSOR_NORMAL, Hidden = GLFW_CURSOR_HIDDEN, Disabled = GLFW_CURSOR_DISABLED };
+enum class CursorMode {
+  Normal = GLFW_CURSOR_NORMAL,
+  Hidden = GLFW_CURSOR_HIDDEN,
+  Disabled = GLFW_CURSOR_DISABLED
+};
 struct WindowProperties {
     std::string name{};
     std::string windowIconPath{};
@@ -36,20 +40,22 @@ class Window {
     Window(WindowProperties&& properties);
     ~Window();
 
-    void shutdown() noexcept;
-    void onUpdate() noexcept;
-    void onEvent() noexcept;
+    void shutdown();
+    void onUpdate();
+    void onEvent();
 
     GLFWwindow* getNativeWindow() const noexcept { return m_window; }
-    int getWidth() const noexcept { return m_data.width; }
-    int getHeight() const noexcept { return m_data.height; }
-    bool isVSync() const noexcept { return m_data.vSync; }
-    bool isFullscreen() const noexcept { return m_data.fullscreen; }
-    bool isMaximized() const noexcept { return m_data.maximized; }
-    bool isMinimized() const noexcept { return m_data.minimized; }
-    bool isWireframe() const noexcept { return m_data.wireframe; }
+    int getWidth() const { return m_data.width; }
+    int getHeight() const { return m_data.height; }
+    bool isVSync() const { return m_data.vSync; }
+    bool isFullscreen() const { return m_data.fullscreen; }
+    bool isMaximized() const { return m_data.maximized; }
+    bool isMinimized() const { return m_data.minimized; }
+    bool isWireframe() const { return m_data.wireframe; }
 
-    void setEventCallback(const EventCallbackFn& cb) { m_data.eventCallback = cb; }
+    void setEventCallback(const EventCallbackFn& cb) {
+      m_data.eventCallback = cb;
+    }
     void setWindowTitle(const std::string& title);
     void setWindowIcon(const std::string& path);
     void restoreWindowIcon();
@@ -67,17 +73,20 @@ class Window {
     void setFocus(bool focused);
     void setFullscreen(bool fullscreen);
     void setVisible(bool visible);
-    void updateCameraPosition(bool update) noexcept { m_data.updateCameraPosition = update; }
-    void setLastMousePosition(float x, float y) noexcept {
+    void updateCameraPosition(bool update) {
+      m_data.updateCameraPosition = update;
+    }
+    void setLastMousePosition(float x, float y) {
       m_data.lastX = x;
       m_data.lastY = y;
     }
-    void setWireframe(bool wireframe) noexcept { m_data.wireframe = wireframe; }
+    void setWireframe(bool wireframe) { m_data.wireframe = wireframe; }
 
     static std::unique_ptr<Window> Create(WindowProperties&& properties);
 
   private:
-    GLFWwindow* m_window{}; // TODO: this class should be a window manager, and this should be a vector of windows
+    GLFWwindow* m_window{}; // TODO: this class should be a window manager, and
+                            // this should be a vector of windows
     std::unique_ptr<OpenGLContext> m_context;
 
     struct WindowData {

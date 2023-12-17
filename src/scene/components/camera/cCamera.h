@@ -36,18 +36,23 @@ struct CCamera {
     float upAngle{};
 
     CCamera() = default;
-    explicit CCamera(std::string&& t, float f, float zf, float zm, float zM, float ms, float nc, float fc, float ts,
-                     float vs, float rs)
-        : _type(std::move(t)), fov(f), zoomFactor(zf), zoomMin(zm), zoomMax(zM), mouseSensitivity(ms), nearClip(nc),
-          farClip(fc), translationSpeed(ts), verticalSpeed(vs), rotationSpeed(rs) {}
+    explicit CCamera(std::string&& t, float f, float zf, float zm, float zM,
+                     float ms, float nc, float fc, float ts, float vs, float rs)
+      : _type(std::move(t)), fov(f), zoomFactor(zf), zoomMin(zm), zoomMax(zM),
+        mouseSensitivity(ms), nearClip(nc), farClip(fc), translationSpeed(ts),
+        verticalSpeed(vs), rotationSpeed(rs) {}
 
     void print() const {
-      ENGINE_TRACE(
-          "\t\ttype: {0}\n\t\t\t\taspectRatio: {1}\n\t\t\t\tfov: {2}\n\t\t\t\tzoomFactor: {3}\n\t\t\t\tzoomMin: "
-          "{4}\n\t\t\t\tzoomMax: {5}\n\t\t\t\tnearClip: {6}\n\t\t\t\tfarClip: {7}\n\t\t\t\tmouseSensitivity: "
-          "{8}\n\t\t\t\ttranslationSpeed: {9}\n\t\t\t\tverticalSpeed: {10}\n\t\t\t\trotationSpeed: {11}",
-          _type, _aspectRatio, fov, zoomFactor, zoomMin, zoomMax, nearClip, farClip, mouseSensitivity, translationSpeed,
-          verticalSpeed, rotationSpeed);
+      ENGINE_BACKTRACE(
+        "\t\ttype: {0}\n\t\t\t\taspectRatio: {1}\n\t\t\t\tfov: "
+        "{2}\n\t\t\t\tzoomFactor: {3}\n\t\t\t\tzoomMin: "
+        "{4}\n\t\t\t\tzoomMax: {5}\n\t\t\t\tnearClip: {6}\n\t\t\t\tfarClip: "
+        "{7}\n\t\t\t\tmouseSensitivity: "
+        "{8}\n\t\t\t\ttranslationSpeed: {9}\n\t\t\t\tverticalSpeed: "
+        "{10}\n\t\t\t\trotationSpeed: {11}",
+        _type, _aspectRatio, fov, zoomFactor, zoomMin, zoomMax, nearClip,
+        farClip, mouseSensitivity, translationSpeed, verticalSpeed,
+        rotationSpeed);
     }
 
     void setCameraType() {
@@ -71,10 +76,12 @@ struct CCamera {
     void calculateProjection() {
       if (type == CameraType::Perspective) {
         zoomFactor = std::clamp(zoomFactor, zoomMin, zoomMax);
-        projection = glm::perspective(glm::radians(fov * 1.f / zoomFactor), aspectRatioValue, nearClip, farClip);
+        projection = glm::perspective(glm::radians(fov * 1.f / zoomFactor),
+                                      aspectRatioValue, nearClip, farClip);
       } else if (type == CameraType::Orthographic) {
-        projection = glm::ortho(-aspectRatioValue * zoomFactor, aspectRatioValue * zoomFactor, -zoomFactor, zoomFactor,
-                                nearClip, farClip);
+        projection = glm::ortho(-aspectRatioValue * zoomFactor,
+                                aspectRatioValue * zoomFactor, -zoomFactor,
+                                zoomFactor, nearClip, farClip);
       }
     }
 

@@ -18,7 +18,7 @@ struct CBody {
         : filepath(std::move(fp)), meshes(std::move(m)), materials(std::move(ma)) {}
 
     void print() const {
-      ENGINE_TRACE("\t\tfilepath: {0}\n\t\t\t\tmeshes: {1}\n\t\t\t\tmaterials: {2}", filepath, meshes.size(),
+      ENGINE_BACKTRACE("\t\tfilepath: {0}\n\t\t\t\tmeshes: {1}\n\t\t\t\tmaterials: {2}", filepath, meshes.size(),
                    materials.size());
     }
 };

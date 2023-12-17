@@ -32,14 +32,14 @@ Application::Application(Config&& c, CLArgs&& args)
 
   m_renderer = Renderer::Create(m_assetsManager);
   m_renderer->init();
-  ImGuiAPI::Init(m_window->getNativeWindow(), c.openglMajorVersion,
+  ui::ImGuiAPI::Init(m_window->getNativeWindow(), c.openglMajorVersion,
                  c.openglMinorVersion);
 }
 
 Application::~Application() {
   ENGINE_WARN("Deleting Application");
   m_renderer->shutdown();
-  ImGuiAPI::Shutdown();
+  ui::ImGuiAPI::Shutdown();
 }
 
 void Application::onEvent(Event& e) {
@@ -80,11 +80,11 @@ void Application::run() {
       }
 
       if (m_debugging) {
-        ImGuiAPI::NewFrame();
+        ui::ImGuiAPI::NewFrame();
         for (auto& state : *m_states) {
           state->onImguiUpdate();
         }
-        ImGuiAPI::Render();
+        ui::ImGuiAPI::Render();
       }
     }
 

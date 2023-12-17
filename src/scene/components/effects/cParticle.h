@@ -11,6 +11,6 @@ struct CParticle {
     CParticle() = default;
     explicit CParticle(std::string&& e) : emitter(std::move(e)) {}
 
-    void print() const { ENGINE_TRACE("\t\temitter: {}", emitter); }
+    void print() const { ENGINE_BACKTRACE("\t\temitter: {}", emitter); }
 };
 }

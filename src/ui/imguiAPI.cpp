@@ -1,8 +1,8 @@
 #include "ui/imguiAPI.h"
 
-namespace potatoengine {
+namespace potatoengine::ui {
 void ImGuiAPI::Init(GLFWwindow* window, int openglMajorVersion, int openglMinorVersion) {
-  ENGINE_INFO("Initializing ImGuiAPI");
+  ENGINE_TRACE("Initializing ImGuiAPI");
   std::string glsl_version = std::format("#version {}{}0", openglMajorVersion, openglMinorVersion);
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();

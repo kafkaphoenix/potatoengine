@@ -12,6 +12,6 @@ struct CRelationship {
     CRelationship() = default;
     explicit CRelationship(entt::entity p) : parent(p) {}
 
-    void print() const { ENGINE_TRACE("\t\tparent UUID: {}", entt::to_integral(parent)); }
+    void print() const { ENGINE_BACKTRACE("\t\tparent UUID: {}", entt::to_integral(parent)); }
 };
 }

@@ -19,19 +19,19 @@ class SceneLoader {
     const std::unordered_set<std::string>& getLoadedPrefabs() const noexcept { return m_loadedPrefabs; }
     const std::unordered_set<std::string>& getLoadedChildrenScenes() const noexcept { return m_loadedChildrenScenes; }
 
-    const std::unordered_map<std::string, json>& getLoadedNormalEntities(std::string_view prefabID) const noexcept {
+    const std::unordered_map<std::string, json>& getLoadedNormalEntities(std::string_view prefabID) const {
       return m_loadedNormalEntities.at(prefabID.data());
     }
-    const std::unordered_map<std::string, json>& getLoadedLightEntities(std::string_view prefabID) const noexcept {
+    const std::unordered_map<std::string, json>& getLoadedLightEntities(std::string_view prefabID) const {
       return m_loadedLightEntities.at(prefabID.data());
     }
-    const std::unordered_map<std::string, json>& getLoadedCameraEntities(std::string_view prefabID) const noexcept {
+    const std::unordered_map<std::string, json>& getLoadedCameraEntities(std::string_view prefabID) const {
       return m_loadedCameraEntities.at(prefabID.data());
     }
-    const std::unordered_map<std::string, json>& getLoadedSystemEntities(std::string_view prefabID) const noexcept {
+    const std::unordered_map<std::string, json>& getLoadedSystemEntities(std::string_view prefabID) const {
       return m_loadedSystemEntities.at(prefabID.data());
     }
-    const std::unordered_map<std::string, json>& getLoadedFBOEntities(std::string_view prefabID) const noexcept {
+    const std::unordered_map<std::string, json>& getLoadedFBOEntities(std::string_view prefabID) const {
       return m_loadedFBOEntities.at(prefabID.data());
     }
 

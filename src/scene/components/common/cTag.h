@@ -10,6 +10,6 @@ struct CTag {
     CTag() = default;
     explicit CTag(std::string&& t) : tag(std::move(t)) {}
 
-    void print() const { ENGINE_TRACE("\t\ttag: {}", tag); }
+    void print() const { ENGINE_BACKTRACE("\t\ttag: {}", tag); }
 };
 }

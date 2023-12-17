@@ -10,6 +10,6 @@ struct CName {
     CName() = default;
     explicit CName(std::string&& n) : name(std::move(n)) {}
 
-    void print() const { ENGINE_TRACE("\t\tname: {}", name); }
+    void print() const { ENGINE_BACKTRACE("\t\tname: {}", name); }
 };
 }

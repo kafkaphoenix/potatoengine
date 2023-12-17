@@ -3,6 +3,7 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "scene/entity.h"
 
@@ -26,13 +27,18 @@ struct CLight {
 
     CLight() = default;
     explicit CLight(std::string&& t) : _type(std::move(t)) {}
-    explicit CLight(std::string&& t, glm::vec3&& c, float i, float r, float ica, float oca)
-        : _type(std::move(t)), color(std::move(c)), intensity(i), range(r), innerConeAngle(ica), outerConeAngle(oca) {}
+    explicit CLight(std::string&& t, glm::vec3&& c, float i, float r, float ica,
+                    float oca)
+      : _type(std::move(t)), color(std::move(c)), intensity(i), range(r),
+        innerConeAngle(ica), outerConeAngle(oca) {}
 
     void print() const {
-      ENGINE_TRACE("\t\ttype: {0}\n\t\t\t\tcolor: {1}\n\t\t\t\tintensity: {2}\n\t\t\t\trange: "
-                   "{3}\n\t\t\t\tinnerConeAngle: {4}\n\t\t\t\touterConeAngle: {5}",
-                   _type, color, intensity, range, innerConeAngle, outerConeAngle);
+      ENGINE_BACKTRACE(
+        "\t\ttype: {0}\n\t\t\t\tcolor: {1}\n\t\t\t\tintensity: "
+        "{2}\n\t\t\t\trange: "
+        "{3}\n\t\t\t\tinnerConeAngle: {4}\n\t\t\t\touterConeAngle: {5}",
+        _type, glm::to_string(color), intensity, range, innerConeAngle,
+        outerConeAngle);
     }
 };
 }

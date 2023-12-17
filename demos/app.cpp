@@ -10,13 +10,16 @@ namespace demos {
 
 class Demos : public engine::Application {
   public:
-    Demos(engine::Config&& c, engine::CLArgs&& args) : engine::Application(std::move(c), std::move(args)) {
-      APP_INFO("Registering app components...");
+    Demos(engine::Config&& c, engine::CLArgs&& args)
+      : engine::Application(std::move(c), std::move(args)) {
+      APP_TRACE("Registering app components...");
       registerComponents();
-      APP_INFO("Loading initial state...");
-      pushState(GameState::Create(std::weak_ptr<engine::AssetsManager>(m_assetsManager),
-                                  std::weak_ptr<engine::Renderer>(m_renderer), serializers::load_settings()));
-      APP_INFO("State loaded!");
+      APP_TRACE("Loading initial state...");
+      pushState(
+        GameState::Create(std::weak_ptr<engine::AssetsManager>(m_assetsManager),
+                          std::weak_ptr<engine::Renderer>(m_renderer),
+                          serializers::load_settings()));
+      APP_TRACE("State loaded!");
     }
 
     ~Demos() override { APP_WARN("Deleting Demos application"); }
@@ -26,14 +29,28 @@ class Demos : public engine::Application {
 
 engine::Application* engine::CreateApp(engine::CLArgs&& args) {
   demos::Settings settings = demos::serializers::load_settings();
-  LogManager::GetEngineLogger()->set_level(static_cast<spdlog::level::level_enum>(settings.debugLevel));
-  LogManager::GetEngineLogger()->flush_on(static_cast<spdlog::level::level_enum>(settings.debugLevel));
-  LogManager::GetAppLogger()->set_level(static_cast<spdlog::level::level_enum>(settings.debugLevel));
-  LogManager::GetAppLogger()->flush_on(static_cast<spdlog::level::level_enum>(settings.debugLevel));
+  LogManager::SetEngineLoggerLevel(
+    static_cast<spdlog::level::level_enum>(settings.engineLogLevel));
+  LogManager::SetEngineLoggerFlushLevel(
+    static_cast<spdlog::level::level_enum>(settings.engineFlushLevel));
+  LogManager::SetAppLoggerLevel(
+    static_cast<spdlog::level::level_enum>(settings.appLogLevel));
+  LogManager::SetAppLoggerFlushLevel(
+    static_cast<spdlog::level::level_enum>(settings.appFlushLevel));
+  LogManager::toggleEngineLogger(settings.enableEngineLogger);
+  LogManager::toggleAppLogger(settings.enableAppLogger);
 
   if (not settings.logFilePath.empty()) {
     LogManager::CreateFileLogger(settings.root + "/" + settings.logFilePath);
   }
+
+  if (not settings.backtraceLogFilePath.empty()) {
+    LogManager::CreateBacktraceLogger(settings.backtraceLogFilePath,
+                                      settings.enableEngineBacktraceLogger,
+                                      settings.enableAppBacktraceLogger);
+  }
+  LogManager::toggleEngineBacktraceLogger(settings.enableEngineBacktraceLogger);
+  LogManager::toggleAppBacktraceLogger(settings.enableAppBacktraceLogger);
 
   APP_INFO("Loading settings...");
   CursorMode cursorMode;
@@ -63,6 +80,6 @@ engine::Application* engine::CreateApp(engine::CLArgs&& args) {
                       .cursorIconPath = settings.cursorIconPath,
                       .cursorMode = cursorMode};
 
-  APP_INFO("Creating Demos application");
+  APP_INFO("Initializating Demos application");
   return new demos::Demos(std::move(appConfig), std::move(args));
 }

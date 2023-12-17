@@ -4,7 +4,7 @@
 
 namespace potatoengine {
 struct NumericComparator {
-    bool operator()(const std::string& lhs, const std::string& rhs) const noexcept {
+    bool operator()(const std::string& lhs, const std::string& rhs) const {
       if (lhs == rhs) {
         return false;
       }

@@ -20,6 +20,9 @@ void drawSettings(Settings& settings) {
   if (ImGui::Selectable("Debug")) {
     selectedSettingTabKey = "Debug";
   }
+  if (ImGui::Selectable("Logger")) {
+    selectedSettingTabKey = "Logger";
+  }
   ImGui::SeparatorText("App");
   if (ImGui::Selectable("Renderer")) {
     selectedSettingTabKey = "Renderer";
@@ -65,19 +68,30 @@ void drawSettings(Settings& settings) {
       }
     } else if (selectedSettingTabKey == "Debug") {
       ImGui::Checkbox("Debug enabled", &settings.debugEnabled);
-      if (ImGui::BeginCombo("Debug level", settings.debugLevel == 0   ? "Trace"
-                                           : settings.debugLevel == 1 ? "Debug"
-                                           : settings.debugLevel == 2 ? "Info"
-                                           : settings.debugLevel == 3 ? "Warn"
-                                           : settings.debugLevel == 4 ? "Error"
-                                           : settings.debugLevel == 5
-                                             ? "Critical"
-                                             : "Unknown")) {
-        for (int n = 0; n < settings.debugLevels.size(); n++) {
-          bool is_selected = (settings.debugLevel == n);
-          if (ImGui::Selectable(settings.debugLevels[n], is_selected)) {
-            if (settings.debugLevel not_eq n) {
-              settings.debugLevel = n;
+      ImGui::Checkbox("Display FPS", &settings.displayFPS);
+    } else if (selectedSettingTabKey == "Logger") {
+      ImGui::Checkbox("Enable engine logger", &settings.enableEngineLogger);
+      if (settings.enableEngineLogger and not engine::LogManager::isEngineLoggerEnabled()) {
+        engine::LogManager::toggleEngineLogger(true);
+      }
+      if (not settings.enableEngineLogger and engine::LogManager::isEngineLoggerEnabled()) {
+        engine::LogManager::toggleEngineLogger(false);
+      }
+      if (ImGui::BeginCombo("Engine log level",
+                            settings.engineLogLevel == 0   ? "Trace"
+                            : settings.engineLogLevel == 1 ? "Debug"
+                            : settings.engineLogLevel == 2 ? "Info"
+                            : settings.engineLogLevel == 3 ? "Warning"
+                            : settings.engineLogLevel == 4 ? "Error"
+                            : settings.engineLogLevel == 5 ? "Critical"
+                                                           : "Unknown")) {
+        for (int n = 0; n < settings.logLevels.size(); n++) {
+          bool is_selected = (settings.engineLogLevel == n);
+          if (ImGui::Selectable(settings.logLevels[n], is_selected)) {
+            if (settings.engineLogLevel not_eq n) {
+              settings.engineLogLevel = n;
+              engine::LogManager::SetEngineLoggerLevel(
+                static_cast<spdlog::level::level_enum>(n));
             }
           }
           if (is_selected) {
@@ -86,7 +100,110 @@ void drawSettings(Settings& settings) {
         }
         ImGui::EndCombo();
       }
-      ImGui::Checkbox("Display FPS", &settings.displayFPS);
+      if (ImGui::BeginCombo("Engine log flush level",
+                            settings.engineFlushLevel == 0   ? "Trace"
+                            : settings.engineFlushLevel == 1 ? "Debug"
+                            : settings.engineFlushLevel == 2 ? "Info"
+                            : settings.engineFlushLevel == 3 ? "Warning"
+                            : settings.engineFlushLevel == 4 ? "Error"
+                            : settings.engineFlushLevel == 5 ? "Critical"
+                                                             : "Unknown")) {
+        for (int n = 0; n < settings.logLevels.size(); n++) {
+          bool is_selected = (settings.engineFlushLevel == n);
+          if (ImGui::Selectable(settings.logLevels[n], is_selected)) {
+            if (settings.engineFlushLevel not_eq n) {
+              settings.engineFlushLevel = n;
+              engine::LogManager::SetEngineLoggerFlushLevel(
+                static_cast<spdlog::level::level_enum>(n));
+            }
+          }
+          if (is_selected) {
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+        ImGui::EndCombo();
+      }
+      ImGui::Checkbox("Enable app logger", &settings.enableAppLogger);
+      if (settings.enableAppLogger and not engine::LogManager::isAppLoggerEnabled()) {
+        engine::LogManager::toggleAppLogger(true);
+      }
+      if (not settings.enableAppLogger and engine::LogManager::isAppLoggerEnabled()) {
+        engine::LogManager::toggleAppLogger(false);
+      }
+      if (ImGui::BeginCombo("App log level",
+                            settings.appLogLevel == 0   ? "Trace"
+                            : settings.appLogLevel == 1 ? "Debug"
+                            : settings.appLogLevel == 2 ? "Info"
+                            : settings.appLogLevel == 3 ? "Warning"
+                            : settings.appLogLevel == 4 ? "Error"
+                            : settings.appLogLevel == 5 ? "Critical"
+                                                        : "Unknown")) {
+        for (int n = 0; n < settings.logLevels.size(); n++) {
+          bool is_selected = (settings.appLogLevel == n);
+          if (ImGui::Selectable(settings.logLevels[n], is_selected)) {
+            if (settings.appLogLevel not_eq n) {
+              settings.appLogLevel = n;
+              engine::LogManager::SetAppLoggerLevel(
+                static_cast<spdlog::level::level_enum>(n));
+            }
+          }
+          if (is_selected) {
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+        ImGui::EndCombo();
+      }
+      if (ImGui::BeginCombo("App log flush level",
+                            settings.appFlushLevel == 0   ? "Trace"
+                            : settings.appFlushLevel == 1 ? "Debug"
+                            : settings.appFlushLevel == 2 ? "Info"
+                            : settings.appFlushLevel == 3 ? "Warning"
+                            : settings.appFlushLevel == 4 ? "Error"
+                            : settings.appFlushLevel == 5 ? "Critical"
+                                                          : "Unknown")) {
+        for (int n = 0; n < settings.logLevels.size(); n++) {
+          bool is_selected = (settings.appFlushLevel == n);
+          if (ImGui::Selectable(settings.logLevels[n], is_selected)) {
+            if (settings.appFlushLevel not_eq n) {
+              settings.appFlushLevel = n;
+              engine::LogManager::SetAppLoggerFlushLevel(
+                static_cast<spdlog::level::level_enum>(n));
+            }
+          }
+          if (is_selected) {
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+        ImGui::EndCombo();
+      }
+      ImGui::Checkbox("Enable engine backtrace logger",
+                      &settings.enableEngineBacktraceLogger);
+      if (settings.enableEngineBacktraceLogger and not engine::LogManager::isEngineBacktraceLoggerEnabled()) {
+        engine::LogManager::toggleAppBacktraceLogger(true);
+      }
+      if (not settings.enableEngineBacktraceLogger and engine::LogManager::isEngineBacktraceLoggerEnabled()) {
+        engine::LogManager::toggleEngineBacktraceLogger(false);
+      }
+      ImGui::Checkbox("Enable app backtrace logger",
+                      &settings.enableAppBacktraceLogger);
+      if (settings.enableAppBacktraceLogger and not engine::LogManager::isAppBacktraceLoggerEnabled()) {
+        engine::LogManager::toggleAppBacktraceLogger(true);
+      }
+      if (not settings.enableAppBacktraceLogger and engine::LogManager::isAppBacktraceLoggerEnabled()) {
+        engine::LogManager::toggleAppBacktraceLogger(false);
+      }
+      if (ImGui::Button("Clear all backtrace logger")) {
+        engine::LogManager::clearAllBacktraceLogger();
+      }
+      if (ImGui::Button("Clear engine backtrace logger")) {
+        engine::LogManager::clearEngineBacktraceLogger();
+      }
+      if (ImGui::Button("Clear app backtrace logger")) {
+        engine::LogManager::clearAppBacktraceLogger();
+      }
+      if (ImGui::Button("Dump backtrace")) {
+        engine::LogManager::DumpBacktrace();
+      }
     } else if (selectedSettingTabKey == "Renderer") {
       ImGui::ColorEdit4("Clear color", settings.clearColor.data());
       ImGui::SliderFloat("Clear depth", &settings.clearDepth, 0.f, 1.f);

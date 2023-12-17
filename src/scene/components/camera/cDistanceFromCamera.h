@@ -10,6 +10,6 @@ struct CDistanceFromCamera {
     CDistanceFromCamera() = default;
     explicit CDistanceFromCamera(int d) : distance(d) {}
 
-    void print() const { ENGINE_TRACE("\t\tdistance: {}", distance); }
+    void print() const { ENGINE_BACKTRACE("\t\tdistance: {}", distance); }
 };
 }

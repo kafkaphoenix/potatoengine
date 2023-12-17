@@ -113,6 +113,7 @@ if(NOT spdlog_POPULATED)
   FetchContent_Populate(spdlog)
   set(SPDLOG_BUILD_EXAMPLE OFF CACHE INTERNAL "" FORCE)
   set(SPDLOG_INSTALL OFF CACHE INTERNAL "" FORCE)
+  set(SPDLOG_USE_STD_FORMAT ON CACHE INTERNAL "" FORCE)
   add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 

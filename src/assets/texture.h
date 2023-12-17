@@ -7,9 +7,12 @@ namespace potatoengine {
 class Texture {
   public:
     Texture() = default;
-    Texture(uint32_t width, uint32_t height, GLenum glFormat, std::optional<bool> wrap = std::nullopt);
-    Texture(std::filesystem::path&& fp, std::optional<std::string>&& type = std::nullopt,
-            std::optional<bool> flipVertically = std::nullopt, std::optional<uint32_t> mipmap_level = std::nullopt,
+    Texture(uint32_t width, uint32_t height, GLenum glFormat,
+            std::optional<bool> wrap = std::nullopt);
+    Texture(std::filesystem::path&& fp,
+            std::optional<std::string>&& type = std::nullopt,
+            std::optional<bool> flipVertically = std::nullopt,
+            std::optional<uint32_t> mipmap_level = std::nullopt,
             std::optional<bool> gammaCorrection = std::nullopt);
     ~Texture();
     Texture& operator=(const Texture&) = delete;
@@ -21,11 +24,15 @@ class Texture {
     uint32_t getWidth() const noexcept { return m_width; }
     uint32_t getHeight() const noexcept { return m_height; }
     uint32_t getID() const noexcept { return m_id; }
-    std::string_view getFilepath() const noexcept { return (m_filepaths.size() == 1) ? m_filepaths[0] : m_directory; }
+    std::string_view getFilepath() const {
+      return (m_filepaths.size() == 1) ? m_filepaths[0] : m_directory;
+    }
     std::string_view getType() const noexcept { return m_type; }
     const std::map<std::string, std::string, NumericComparator>& getInfo();
 
-    bool operator==(const Texture& other) const noexcept { return m_filepaths == other.m_filepaths; }
+    bool operator==(const Texture& other) const {
+      return m_filepaths == other.m_filepaths;
+    }
 
     static constexpr bool FLIP_VERTICALLY = true;
     static constexpr bool DONT_FLIP_VERTICALLY = false;
@@ -33,7 +40,9 @@ class Texture {
     static constexpr bool WRAP = true;
     static constexpr bool DONT_WRAP = false;
 
-    static std::unique_ptr<Texture> Create(uint32_t width, uint32_t height, GLenum glFormat, std::optional<bool> wrap);
+    static std::unique_ptr<Texture> Create(uint32_t width, uint32_t height,
+                                           GLenum glFormat,
+                                           std::optional<bool> wrap);
 
   private:
     std::vector<std::string> m_filepaths{};

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 #include "scene/entity.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 namespace potatoengine {
 
@@ -21,11 +22,15 @@ struct CCollider {
     CCollider() = default;
     explicit CCollider(Type t, glm::vec3&& s) : type(t), size(std::move(s)) {}
 
-    void print() const { ENGINE_TRACE("\t\ttype: {0}\n\t\t\t\tsize: {1}", _type, size); }
+    void print() const {
+      ENGINE_BACKTRACE("\t\ttype: {0}\n\t\t\t\tsize: {1}", _type,
+                       glm::to_string(size));
+    }
 };
 }
 
-template <> void engine::SceneManager::onComponentAdded(Entity& e, CCollider& c) {
+template <>
+void engine::SceneManager::onComponentAdded(Entity& e, CCollider& c) {
   if (c._type == "box") {
     c.type = CCollider::Type::Box;
   } else if (c._type == "capsule") {

@@ -3,7 +3,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace potatoengine {
-ShaderProgram::ShaderProgram(std::string&& name) : m_id(glCreateProgram()), m_name(std::move(name)) {}
+ShaderProgram::ShaderProgram(std::string&& name)
+  : m_id(glCreateProgram()), m_name(std::move(name)) {}
 
 ShaderProgram::~ShaderProgram() {
   ENGINE_WARN("Deleting shader program {}", m_name);
@@ -24,12 +25,16 @@ void ShaderProgram::link() {
   if (status not_eq GL_TRUE) [[unlikely]] {
     int infoLogLength = 0;
     glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &infoLogLength);
-    ENGINE_ASSERT(infoLogLength > 0, "Shader program {} linking failed!", m_name);
+    ENGINE_ASSERT(infoLogLength > 0, "Shader program {} linking failed!",
+                  m_name);
     std::vector<GLchar> shaderProgramInfoLog(infoLogLength);
-    glGetProgramInfoLog(m_id, infoLogLength, &infoLogLength, shaderProgramInfoLog.data());
-    ENGINE_ASSERT(false, "Shader program {} linking failed: \n{}", m_name, std::string(shaderProgramInfoLog.data()));
+    glGetProgramInfoLog(m_id, infoLogLength, &infoLogLength,
+                        shaderProgramInfoLog.data());
+    ENGINE_ASSERT(false, "Shader program {} linking failed: \n{}", m_name,
+                  std::string(shaderProgramInfoLog.data()));
   }
   m_activeUniforms = getActiveUniforms();
+  printActiveUniforms();
 }
 
 void ShaderProgram::use() { glUseProgram(m_id); }
@@ -53,16 +58,19 @@ void ShaderProgram::setVec3(std::string_view name, const glm::vec3& vec) {
 }
 
 void ShaderProgram::setVec4(std::string_view name, const glm::vec4& vec) {
-  glUniform4f(glGetUniformLocation(m_id, name.data()), vec.x, vec.y, vec.z, vec.w);
+  glUniform4f(glGetUniformLocation(m_id, name.data()), vec.x, vec.y, vec.z,
+              vec.w);
 }
 
 void ShaderProgram::setMat4(std::string_view name, const glm::mat4& mat) {
-  glUniformMatrix4fv(glGetUniformLocation(m_id, name.data()), 1, GL_FALSE, glm::value_ptr(mat));
+  glUniformMatrix4fv(glGetUniformLocation(m_id, name.data()), 1, GL_FALSE,
+                     glm::value_ptr(mat));
 }
 
 std::vector<ActiveUniform> ShaderProgram::getActiveUniforms() {
   GLint numActiveUniforms = 0;
-  glGetProgramInterfaceiv(m_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
+  glGetProgramInterfaceiv(m_id, GL_UNIFORM, GL_ACTIVE_RESOURCES,
+                          &numActiveUniforms);
 
   std::vector<ActiveUniform> activeUniforms;
 
@@ -77,10 +85,12 @@ std::vector<ActiveUniform> ShaderProgram::getActiveUniforms() {
 
   activeUniforms.reserve(numActiveUniforms);
   for (int i = 0; i < numActiveUniforms; ++i) {
-    glGetProgramResourceiv(m_id, GL_UNIFORM, i, properties.size(), &properties[0], values.size(), nullptr, &values[0]);
+    glGetProgramResourceiv(m_id, GL_UNIFORM, i, properties.size(),
+                           &properties[0], values.size(), nullptr, &values[0]);
 
     nameData.resize(values[0]);
-    glGetProgramResourceName(m_id, GL_UNIFORM, i, nameData.size(), nullptr, &nameData[0]);
+    glGetProgramResourceName(m_id, GL_UNIFORM, i, nameData.size(), nullptr,
+                             &nameData[0]);
     std::string name(reinterpret_cast<char*>(&nameData[0]), values[0] - 1);
 
     ActiveUniform uniform;
@@ -113,38 +123,42 @@ void ShaderProgram::resetActiveUniforms() {
     } else if (type == GL_SAMPLER_CUBE) {
       setInt(name, 0);
     } else {
-      ENGINE_ASSERT(false, "Unknown uniform type {} for uniform {}", type, name);
+      ENGINE_ASSERT(false, "Unknown uniform type {} for uniform {}", type,
+                    name);
     }
   }
   unuse();
 }
 
 void ShaderProgram::printActiveUniforms() {
-  ENGINE_TRACE("================================");
+  ENGINE_BACKTRACE("===================Active Uniforms===================");
   for (const auto& [type, name] : m_activeUniforms) {
     if (type == GL_INT) {
-      ENGINE_TRACE("Active uniform {} type: {}", name, "int");
+      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "int");
     } else if (type == GL_FLOAT) {
-      ENGINE_TRACE("Active uniform {} type: {}", name, "float");
+      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "float");
     } else if (type == GL_FLOAT_VEC2) {
-      ENGINE_TRACE("Active uniform {} type: {}", name, "vec2");
+      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "vec2");
     } else if (type == GL_FLOAT_VEC3) {
-      ENGINE_TRACE("Active uniform {} type: {}", name, "vec3");
+      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "vec3");
     } else if (type == GL_FLOAT_VEC4) {
-      ENGINE_TRACE("Active uniform {} type: {}", name, "vec4");
+      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "vec4");
     } else if (type == GL_FLOAT_MAT4) {
-      ENGINE_TRACE("Active uniform {} type: {}", name, "mat4");
+      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "mat4");
     } else if (type == GL_SAMPLER_2D) {
-      ENGINE_TRACE("Active uniform {} type: {}", name, "sampler2D");
+      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "sampler2D");
     } else if (type == GL_SAMPLER_CUBE) {
-      ENGINE_TRACE("Active uniform {} type: {}", name, "samplerCube");
+      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "samplerCube");
     } else {
-      ENGINE_ASSERT(false, "Unknown uniform type {} for uniform {}", type, name);
+      ENGINE_ASSERT(false, "Unknown uniform type {} for uniform {}", type,
+                    name);
     }
   }
+  ENGINE_BACKTRACE("=====================================================");
 }
 
-std::unique_ptr<ShaderProgram> ShaderProgram::Create(std::string&& name) noexcept {
+std::unique_ptr<ShaderProgram>
+ShaderProgram::Create(std::string&& name) {
   return std::make_unique<ShaderProgram>(std::move(name));
 }
 

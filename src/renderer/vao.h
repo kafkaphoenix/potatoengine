@@ -18,7 +18,7 @@ class VAO {
     void attachShapeVertexAttributes();
     void attachTerrainVertexAttributes();
     void updateVertex(std::unique_ptr<VBO>&& vbo, uint32_t idx, VertexType type);
-    void clearVBOs() noexcept;
+    void clearVBOs();
     void setIndex(std::unique_ptr<IBO>&& ibo);
 
     const std::vector<std::shared_ptr<VBO>>& getVBOs() const noexcept { return m_vbos; }
@@ -26,7 +26,7 @@ class VAO {
     uint32_t getVBOIndex() const noexcept { return m_vboIDX; }
     uint32_t getID() const noexcept { return m_id; }
 
-    static std::shared_ptr<VAO> Create() noexcept;
+    static std::shared_ptr<VAO> Create();
 
   private:
     uint32_t m_id;

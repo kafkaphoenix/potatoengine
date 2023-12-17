@@ -44,7 +44,7 @@ class Application {
     void pushState(std::unique_ptr<State>&& s);
     void pushOverlay(std::unique_ptr<State>&& s);
 
-    Window& getWindow() const noexcept {
+    Window& getWindow() const {
       return *m_window;
     } // todo rename to getActiveWindow when multi-window support is added
 
@@ -55,7 +55,7 @@ class Application {
     bool isPaused() const noexcept { return m_paused; }
     bool isDebugging() const noexcept { return m_debugging; }
 
-    static Application& Get() noexcept { return *s_instance; }
+    static Application& Get() { return *s_instance; }
 
   protected:
     std::shared_ptr<AssetsManager> m_assetsManager;

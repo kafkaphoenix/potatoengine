@@ -20,7 +20,8 @@ FBO::FBO(uint32_t w, uint32_t h, uint32_t t) : m_depthBufferType(t) {
     attachStencilRenderBuffer();
   }
   uint32_t status = glCheckNamedFramebufferStatus(m_id, GL_FRAMEBUFFER);
-  ENGINE_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer error: {}", status);
+  ENGINE_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer error: {}",
+                status);
 }
 
 FBO::~FBO() {
@@ -32,34 +33,43 @@ FBO::~FBO() {
 
 void FBO::attachTexture() {
   m_colorTexture = Texture::Create(m_width, m_height, GL_RGBA8, Texture::WRAP);
-  glNamedFramebufferTexture(m_id, GL_COLOR_ATTACHMENT0, m_colorTexture->getID(), 0);
+  glNamedFramebufferTexture(m_id, GL_COLOR_ATTACHMENT0, m_colorTexture->getID(),
+                            0);
 }
 
 void FBO::attachDepthTexture() {
   // slower than renderbuffer but can be sampled in shaders
-  m_depthTexture = Texture::Create(m_width, m_height, GL_DEPTH_COMPONENT24, Texture::DONT_WRAP);
-  glNamedFramebufferTexture(m_id, GL_DEPTH_ATTACHMENT, m_depthTexture->getID(), 0);
+  m_depthTexture = Texture::Create(m_width, m_height, GL_DEPTH_COMPONENT24,
+                                   Texture::DONT_WRAP);
+  glNamedFramebufferTexture(m_id, GL_DEPTH_ATTACHMENT, m_depthTexture->getID(),
+                            0);
 }
 
 void FBO::attachDepthRenderBuffer() {
   glCreateRenderbuffers(1, &m_depthRenderBuffer);
-  glNamedRenderbufferStorage(m_depthRenderBuffer, GL_DEPTH_COMPONENT24, m_width, m_height);
-  glNamedFramebufferRenderbuffer(m_id, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthRenderBuffer);
+  glNamedRenderbufferStorage(m_depthRenderBuffer, GL_DEPTH_COMPONENT24, m_width,
+                             m_height);
+  glNamedFramebufferRenderbuffer(m_id, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                                 m_depthRenderBuffer);
 }
 
 void FBO::attachStencilRenderBuffer() {
   glCreateRenderbuffers(1, &m_stencilRenderBuffer);
-  glNamedRenderbufferStorage(m_stencilRenderBuffer, GL_STENCIL_INDEX8, m_width, m_height);
-  glNamedFramebufferRenderbuffer(m_id, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_stencilRenderBuffer);
+  glNamedRenderbufferStorage(m_stencilRenderBuffer, GL_STENCIL_INDEX8, m_width,
+                             m_height);
+  glNamedFramebufferRenderbuffer(m_id, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
+                                 m_stencilRenderBuffer);
 }
 
 void FBO::attachDepthStencilRenderBuffer() {
   glCreateRenderbuffers(1, &m_depthStencilRenderBuffer);
-  glNamedRenderbufferStorage(m_depthStencilRenderBuffer, GL_DEPTH24_STENCIL8, m_width, m_height);
-  glNamedFramebufferRenderbuffer(m_id, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depthStencilRenderBuffer);
+  glNamedRenderbufferStorage(m_depthStencilRenderBuffer, GL_DEPTH24_STENCIL8,
+                             m_width, m_height);
+  glNamedFramebufferRenderbuffer(m_id, GL_DEPTH_STENCIL_ATTACHMENT,
+                                 GL_RENDERBUFFER, m_depthStencilRenderBuffer);
 }
 
-uint32_t FBO::getBufferID() const noexcept {
+uint32_t FBO::getBufferID() const {
   if (m_depthBufferType == DEPTH_TEXTURE) {
     return m_depthTexture->getID();
   } else if (m_depthBufferType == DEPTH_RENDERBUFFER) {
@@ -111,7 +121,8 @@ void FBO::bindToRead() {
 
 void FBO::unbind() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0); // default framebuffer
-  glViewport(0, 0, Application::Get().getWindow().getWidth(), Application::Get().getWindow().getHeight());
+  glViewport(0, 0, Application::Get().getWindow().getWidth(),
+             Application::Get().getWindow().getHeight());
 }
 
 void FBO::clear(const float color[4], const float depth) {
@@ -125,7 +136,8 @@ void FBO::resize(uint32_t width, uint32_t height) {
   bindToDraw();
 }
 
-std::unique_ptr<FBO> FBO::Create(uint32_t width, uint32_t height, uint32_t bufferType) {
+std::unique_ptr<FBO> FBO::Create(uint32_t width, uint32_t height,
+                                 uint32_t bufferType) {
   return std::make_unique<FBO>(width, height, bufferType);
 }
 }

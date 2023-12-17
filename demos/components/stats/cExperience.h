@@ -8,6 +8,6 @@ struct CExperience {
   CExperience() = default;
   explicit CExperience(int c) : current(c) {}
 
-  void print() const { APP_TRACE("\t\tcurrent: {}", current); }
+  void print() const { APP_BACKTRACE("\t\tcurrent: {}", current); }
 };
 }

@@ -43,9 +43,9 @@ class Entity {
 
     SceneManager& getSceneManager() const { return *m_sceneManager; }
 
-    operator bool() const noexcept;
-    bool operator==(const Entity other) const noexcept;
-    bool operator!=(const Entity other) const noexcept;
+    operator bool() const;
+    bool operator==(const Entity other) const;
+    bool operator!=(const Entity other) const;
     operator entt::entity() const noexcept;
     operator uint32_t() const;
     operator std::string() const;

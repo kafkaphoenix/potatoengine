@@ -9,6 +9,6 @@ struct CTextureAtlas {
     CTextureAtlas() = default;
     explicit CTextureAtlas(int r, int i) : rows(r), index(i) {}
 
-    void print() const { ENGINE_TRACE("\t\trows: {0}\n\t\t\t\tindex: {1}", rows, index); }
+    void print() const { ENGINE_BACKTRACE("\t\trows: {0}\n\t\t\t\tindex: {1}", rows, index); }
 };
 }

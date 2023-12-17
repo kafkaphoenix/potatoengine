@@ -14,7 +14,9 @@ class Shader {
 
     const std::map<std::string, std::string, NumericComparator>& getInfo();
 
-    bool operator==(const Shader& other) const noexcept { return m_filepath == other.m_filepath; }
+    bool operator==(const Shader& other) const {
+      return m_filepath == other.m_filepath;
+    }
     operator GLuint() const noexcept { return m_id; }
 
   private:

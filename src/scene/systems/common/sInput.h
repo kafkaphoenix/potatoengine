@@ -28,7 +28,8 @@ bool onMouseMoved(MouseMovedEvent& e, entt::registry& r) {
   // pitch (rotate around x in radians)
   // yaw (rotate around y in radians)
   // roll (rotate around z in radians)
-  entt::entity camera = r.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
+  entt::entity camera =
+    r.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
   ENGINE_ASSERT(camera not_eq entt::null, "No camera found!");
   CCamera& cCamera = r.get<CCamera>(camera);
   CTransform& cTransform = r.get<CTransform>(camera);
@@ -40,9 +41,11 @@ bool onMouseMoved(MouseMovedEvent& e, entt::registry& r) {
   cCamera.upAngle = std::clamp(cCamera.upAngle, -89.f, 89.f);
 
   // yaw mouse movement in x-direction
-  glm::quat rotY = glm::angleAxis(glm::radians(-cCamera.rightAngle), glm::vec3(0, 1, 0));
+  glm::quat rotY =
+    glm::angleAxis(glm::radians(-cCamera.rightAngle), glm::vec3(0, 1, 0));
   // pitch mouse movement in y-direction
-  glm::quat rotX = glm::angleAxis(glm::radians(cCamera.upAngle), glm::vec3(1, 0, 0));
+  glm::quat rotX =
+    glm::angleAxis(glm::radians(cCamera.upAngle), glm::vec3(1, 0, 0));
 
   cTransform.rotation = rotY * rotX;
 
@@ -62,12 +65,14 @@ bool onMouseScrolled(MouseScrolledEvent& e, entt::registry& r) {
     io.ClearEventsQueue();
   }
 
-  entt::entity camera = r.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
+  entt::entity camera =
+    r.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
   ENGINE_ASSERT(camera not_eq entt::null, "No camera found!");
   CCamera& cCamera = r.get<CCamera>(camera);
   CTransform& cTransform = r.get<CTransform>(camera);
 
-  cCamera.zoomFactor = std::clamp(cCamera.zoomFactor + float(e.getY()), cCamera.zoomMin, cCamera.zoomMax);
+  cCamera.zoomFactor = std::clamp(cCamera.zoomFactor + float(e.getY()),
+                                  cCamera.zoomMin, cCamera.zoomMax);
   cCamera.calculateProjection();
 
   return true;
@@ -102,7 +107,8 @@ bool onKeyPressed(KeyPressedEvent& e) {
     if (isDebugging) {
       Application::Get().debug(false);
       window.setCursorMode(CursorMode::Disabled);
-      window.restoreCursor(); // imgui does not restore the custom cursor if any is set
+      window.restoreCursor(); // imgui does not restore the custom cursor if any
+                              // is set
       window.updateCameraPosition(true);
       window.setLastMousePosition(Input::GetMouseX(), Input::GetMouseY());
     } else {
@@ -136,8 +142,10 @@ bool onKeyPressed(KeyPressedEvent& e) {
     return false;
 
   auto& window = Application::Get().getWindow();
-  // bool control = Input::IsKeyPressed(Key::LeftControl) or Input::IsKeyPressed(Key::RightControl);
-  // bool shift = Input::IsKeyPressed(Key::LeftShift) or Input::IsKeyPressed(Key::RightShift);
+  // bool control = Input::IsKeyPressed(Key::LeftControl) or
+  // Input::IsKeyPressed(Key::RightControl); bool shift =
+  // Input::IsKeyPressed(Key::LeftShift) or
+  // Input::IsKeyPressed(Key::RightShift);
 
   switch (e.getKeyCode()) {
   case Key::LeftAlt:
@@ -189,9 +197,12 @@ void inputSystem(entt::registry& r, Event& e) {
   EventDispatcher dispatcher(e);
 
   dispatcher.dispatch<MouseMovedEvent>(BIND_STATIC_EVENT(onMouseMoved, r));
-  dispatcher.dispatch<MouseScrolledEvent>(BIND_STATIC_EVENT(onMouseScrolled, r));
-  dispatcher.dispatch<MouseButtonPressedEvent>(BIND_STATIC_EVENT(onMouseButtonPressed));
-  dispatcher.dispatch<MouseButtonReleasedEvent>(BIND_STATIC_EVENT(onMouseButtonReleased));
+  dispatcher.dispatch<MouseScrolledEvent>(
+    BIND_STATIC_EVENT(onMouseScrolled, r));
+  dispatcher.dispatch<MouseButtonPressedEvent>(
+    BIND_STATIC_EVENT(onMouseButtonPressed));
+  dispatcher.dispatch<MouseButtonReleasedEvent>(
+    BIND_STATIC_EVENT(onMouseButtonReleased));
 
   dispatcher.dispatch<KeyPressedEvent>(BIND_STATIC_EVENT(onKeyPressed));
   dispatcher.dispatch<KeyReleasedEvent>(BIND_STATIC_EVENT(onKeyReleased));

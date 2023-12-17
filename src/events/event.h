@@ -37,12 +37,14 @@ enum EventCategory {
   EventCategoryMouseButton = 32,
 };
 
-#define EVENT_CLASS_TYPE(type)                                                                                         \
-  static EventType GetStaticType() noexcept { return EventType::type; }                                                \
-  virtual EventType getEventType() const noexcept override { return GetStaticType(); }                                 \
+#define EVENT_CLASS_TYPE(type)                                                 \
+  static EventType GetStaticType() noexcept { return EventType::type; }        \
+  virtual EventType getEventType() const noexcept override {                   \
+    return GetStaticType();                                                    \
+  }                                                                            \
   virtual const char* getName() const noexcept override { return #type; }
 
-#define EVENT_CLASS_CATEGORY(category)                                                                                 \
+#define EVENT_CLASS_CATEGORY(category)                                         \
   virtual int getCategoryFlags() const noexcept override { return category; }
 
 class Event {
@@ -54,7 +56,9 @@ class Event {
     virtual const char* getName() const noexcept = 0;
     virtual int getCategoryFlags() const noexcept = 0;
 
-    bool isInCategory(EventCategory category) const noexcept { return getCategoryFlags() & category; }
+    bool isInCategory(EventCategory category) const noexcept {
+      return getCategoryFlags() & category;
+    }
 };
 
 class EventDispatcher {

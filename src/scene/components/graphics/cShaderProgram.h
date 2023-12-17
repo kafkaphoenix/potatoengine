@@ -12,6 +12,6 @@ struct CShaderProgram {
     CShaderProgram() = default;
     explicit CShaderProgram(std::string&& n, bool iv = true) : name(std::move(n)), isVisible(iv) {}
 
-    void print() const { ENGINE_TRACE("\t\tname: {0}\n\t\t\t\tisVisible: {1}", name, isVisible); }
+    void print() const { ENGINE_BACKTRACE("\t\tname: {0}\n\t\t\t\tisVisible: {1}", name, isVisible); }
 };
 }

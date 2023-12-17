@@ -9,7 +9,10 @@ using json = nlohmann::json;
 namespace demos::serializers {
 
 inline std::filesystem::path load_path() {
-  auto path = std::filesystem::temp_directory_path().parent_path().parent_path().parent_path();
+  auto path = std::filesystem::temp_directory_path()
+                .parent_path()
+                .parent_path()
+                .parent_path();
 
   path /= "Roaming";
 
@@ -17,7 +20,7 @@ inline std::filesystem::path load_path() {
     std::filesystem::create_directories(path);
   }
 
-  path /= "Potatoengine"; // Change this to your app name
+  path /= "Demos"; // Change this to your app name
 
   if (!std::filesystem::exists(path)) {
     std::filesystem::create_directories(path);
@@ -28,7 +31,8 @@ inline std::filesystem::path load_path() {
   return path;
 }
 
-inline void save_settings(const Settings& settings, std::filesystem::path path = load_path()) {
+inline void save_settings(const Settings& settings,
+                          std::filesystem::path path = load_path()) {
   json data = settings;
 
   std::ofstream file(path);
@@ -47,7 +51,8 @@ inline Settings load_settings() {
   } else {
     std::ifstream file(path);
     APP_ASSERT(file.is_open(), "Failed to open settings file!");
-    APP_ASSERT(file.peek() not_eq std::ifstream::traits_type::eof(), "Settings file is empty!");
+    APP_ASSERT(file.peek() not_eq std::ifstream::traits_type::eof(),
+               "Settings file is empty!");
     json data = json::parse(file);
     file.close();
 

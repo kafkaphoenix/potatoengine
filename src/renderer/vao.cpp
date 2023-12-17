@@ -111,7 +111,7 @@ void VAO::updateVertex(std::unique_ptr<VBO>&& vbo, uint32_t idx, VertexType type
 }
 
 // cppcheck-suppress unusedFunction
-void VAO::clearVBOs() noexcept { // TODO: move to on detach on component? Do i need it?
+void VAO::clearVBOs() { // TODO: move to on detach on component? Do i need it?
   m_vbos.clear();
   m_vboIDX = 0;
 }
@@ -121,5 +121,5 @@ void VAO::setIndex(std::unique_ptr<IBO>&& ibo) {
   m_ibo = std::move(ibo);
 }
 
-std::shared_ptr<VAO> VAO::Create() noexcept { return std::make_shared<VAO>(); }
+std::shared_ptr<VAO> VAO::Create() { return std::make_shared<VAO>(); }
 }

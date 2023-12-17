@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "scene/entity.h"
 #include "utils/shapeFactory.h"
@@ -17,18 +18,22 @@ struct CShape {
     bool repeatTexture{};
 
     CShape() = default;
-    explicit CShape(Type t, glm::vec3&& d, std::vector<CMesh>&& m, bool r = false)
-        : type(t), size(d), meshes(std::move(m)), repeatTexture(r) {}
+    explicit CShape(Type t, glm::vec3&& d, std::vector<CMesh>&& m,
+                    bool r = false)
+      : type(t), size(d), meshes(std::move(m)), repeatTexture(r) {}
 
     void print() const {
-      ENGINE_TRACE("\t\ttype: {0}\n\t\t\t\tsize: {1}\n\t\t\t\tmeshes: {2}\n\t\t\t\trepeatTexture: {3}", _type, size,
-                   meshes.size(), repeatTexture);
+      ENGINE_BACKTRACE("\t\ttype: {0}\n\t\t\t\tsize: {1}\n\t\t\t\tmeshes: "
+                       "{2}\n\t\t\t\trepeatTexture: {3}",
+                       _type, glm::to_string(size), meshes.size(),
+                       repeatTexture);
     }
 
     void createMesh() {
       ENGINE_ASSERT(size.x > 0.f and (size.y > 0.f or _type == "triangle"),
                     "Shape witdh and height must be greater than 0");
-      ENGINE_ASSERT(size.z > 0.f or _type not_eq "cube", "Cube depth must be greater than 0");
+      ENGINE_ASSERT(size.z > 0.f or _type not_eq "cube",
+                    "Cube depth must be greater than 0");
       CMesh mesh;
       if (_type == "triangle") {
         type = CShape::Type::Triangle;
@@ -40,7 +45,8 @@ struct CShape {
         mesh.vertexType = "shape";
       } else if (_type == "cube") {
         type = CShape::Type::Cube;
-        mesh.vao = ShapeFactory::CreateCube(size.x, size.y, size.z, repeatTexture);
+        mesh.vao =
+          ShapeFactory::CreateCube(size.x, size.y, size.z, repeatTexture);
         mesh.vertexType = "shape";
       } else if (_type == "circle") {
         type = CShape::Type::Circle;

@@ -26,7 +26,7 @@ struct CEquipment {
         feet(std::move(f)) {}
 
   void print() const {
-    APP_TRACE("\t\thead: {0}\n\t\t\t\tneck: {1}\n\t\t\t\tshoulders: {2}\n\t\t\t\tchest: {3}\n\t\t\t\tback: "
+    APP_BACKTRACE("\t\thead: {0}\n\t\t\t\tneck: {1}\n\t\t\t\tshoulders: {2}\n\t\t\t\tchest: {3}\n\t\t\t\tback: "
               "{4}\n\t\t\t\thands: {5}\n\t\t\t\tlfinger: {6}\n\t\t\t\trfinger: {7}\n\t\t\t\tbelt: {8}\n\t\t\t\tlegs: "
               "{9}\n\t\t\t\tfeet: {10}",
               head, neck, shoulders, chest, back, hands, lfinger, rfinger, belt, legs, feet);

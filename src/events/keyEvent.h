@@ -19,7 +19,8 @@ class KeyEvent : public Event {
 
 class KeyPressedEvent : public KeyEvent {
   public:
-    KeyPressedEvent(const KeyCode keycode, bool repeating) : KeyEvent(keycode), m_repeating(repeating) {}
+    KeyPressedEvent(const KeyCode keycode, bool repeating)
+      : KeyEvent(keycode), m_repeating(repeating) {}
 
     bool repeating() const noexcept { return m_repeating; }
 

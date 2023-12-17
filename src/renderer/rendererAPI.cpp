@@ -4,7 +4,8 @@
 
 namespace potatoengine {
 
-void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum severity, GLsizei, GLchar const* msg,
+void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id,
+                               GLenum severity, GLsizei, GLchar const* msg,
                                void const*) {
   std::string_view _source = [source]() {
     switch (source) {
@@ -42,7 +43,8 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum s
   }();
 
   std::string info =
-      std::format("Source[{}]| Type [{}]| Severity [{}]| ID [{}]| Message: {}\n", _source, _type, _severity, id, msg);
+    std::format("Source[{}]| Type [{}]| Severity [{}]| ID [{}]| Message: {}\n",
+                _source, _type, _severity, id, msg);
 
   switch (severity) {
   case GL_DEBUG_SEVERITY_HIGH: ENGINE_CRITICAL(info); return;
@@ -52,12 +54,13 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id, GLenum s
   }
 }
 
-void RendererAPI::Init() noexcept {
+void RendererAPI::Init() {
   glEnable(GL_DEBUG_OUTPUT);
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
   glDebugMessageCallback(message_callback, nullptr);
 
-  glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+  glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE,
+                        GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
 
   glEnable(GL_CULL_FACE); // BACK FACE CULLING CCW
   glCullFace(GL_BACK);
@@ -68,41 +71,54 @@ void RendererAPI::Init() noexcept {
   glEnable(GL_DEPTH_TEST);
 }
 
-void RendererAPI::SetCulling(bool enabled) noexcept { enabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE); }
+void RendererAPI::SetCulling(bool enabled) {
+  enabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+}
 
-void RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) noexcept { glViewport(x, y, w, h); }
+void RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+  glViewport(x, y, w, h);
+}
 
-void RendererAPI::SetClearColor(const std::array<float, 4>& color) noexcept {
+void RendererAPI::SetClearColor(const std::array<float, 4>& color) {
   glClearColor(color[0], color[1], color[2], color[3]);
 }
 
-void RendererAPI::SetClearDepth(const float depth) noexcept { glClearDepth(depth); }
+void RendererAPI::SetClearDepth(const float depth) { glClearDepth(depth); }
 
-void RendererAPI::SetWireframe(bool enabled) noexcept {
-  enabled ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+void RendererAPI::SetWireframe(bool enabled) {
+  enabled ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+          : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void RendererAPI::SetBlend(bool enabled) noexcept { enabled ? glEnable(GL_BLEND) : glDisable(GL_BLEND); }
-
-void RendererAPI::SetDepthTest(bool enabled) noexcept { enabled ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST); }
-
-void RendererAPI::SetDepthLEqual() noexcept {
-  glDepthFunc(GL_LEQUAL); // depth test passes when values are equal to depth buffer content [for cubemaps]
+void RendererAPI::SetBlend(bool enabled) {
+  enabled ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
 }
 
-void RendererAPI::SetDepthLess() noexcept {
+void RendererAPI::SetDepthTest(bool enabled) {
+  enabled ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+}
+
+void RendererAPI::SetDepthLEqual() {
+  glDepthFunc(GL_LEQUAL); // depth test passes when values are equal to depth
+                          // buffer content [for cubemaps]
+}
+
+void RendererAPI::SetDepthLess() {
   glDepthFunc(GL_LESS); // default
 }
 
-void RendererAPI::Clear() noexcept { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
+void RendererAPI::Clear() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
 
-void RendererAPI::ClearColor() noexcept { glClear(GL_COLOR_BUFFER_BIT); }
+void RendererAPI::ClearColor() { glClear(GL_COLOR_BUFFER_BIT); }
 
-void RendererAPI::ClearDepth() noexcept { glClear(GL_DEPTH_BUFFER_BIT); }
+void RendererAPI::ClearDepth() { glClear(GL_DEPTH_BUFFER_BIT); }
 
 void RendererAPI::DrawIndexed(const std::shared_ptr<VAO>& vao) {
   vao->bind();
-  glDrawElements(GL_TRIANGLES, vao->getEBO()->getCount(), GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, vao->getEBO()->getCount(), GL_UNSIGNED_INT,
+                 nullptr);
   vao->unbind();
 }
 

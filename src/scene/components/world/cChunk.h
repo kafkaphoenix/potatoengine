@@ -32,7 +32,7 @@ struct CChunk {
       for (int i = 0; i < blocks.size(); ++i) {
         b += std::format("\n\t\t\t\t\tblock: {} {}", i, blocks[i]._type);
       }
-      ENGINE_TRACE("\t\tbiome: {0}\n\t\t\t\tblocks: {1}", _biome, b);
+      ENGINE_BACKTRACE("\t\tbiome: {0}\n\t\t\t\tblocks: {1}", _biome, b);
     }
 
     void setBiome() {

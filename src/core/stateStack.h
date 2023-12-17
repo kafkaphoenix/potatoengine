@@ -24,7 +24,7 @@ class StateStack {
     auto rbegin() const { return m_states.rbegin(); }
     auto rend() const { return m_states.rend(); }
 
-    static std::unique_ptr<StateStack> Create() noexcept;
+    static std::unique_ptr<StateStack> Create();
 
   private:
     std::vector<std::unique_ptr<State>> m_states{};

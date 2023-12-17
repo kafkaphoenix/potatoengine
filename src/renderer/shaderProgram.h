@@ -35,7 +35,7 @@ class ShaderProgram {
     uint32_t getID() const noexcept { return m_id; }
     operator GLuint() const;
 
-    static std::unique_ptr<ShaderProgram> Create(std::string&& name) noexcept;
+    static std::unique_ptr<ShaderProgram> Create(std::string&& name);
 
   private:
     uint32_t m_id{};

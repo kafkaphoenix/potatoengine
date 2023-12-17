@@ -21,7 +21,7 @@ struct CFBO {
         : fbo(std::move(fbo)), mode(m), attachment(std::move(attachment)), width(w), height(h) {}
 
     void print() const {
-      ENGINE_TRACE("\t\tfbo: {0}\n\t\t\t\tmode: {1}\n\t\t\t\tattachment: {2}\n\t\t\t\twidth: {3}\n\t\t\t\theight: {4}",
+      ENGINE_BACKTRACE("\t\tfbo: {0}\n\t\t\t\tmode: {1}\n\t\t\t\tattachment: {2}\n\t\t\t\twidth: {3}\n\t\t\t\theight: {4}",
                    fbo, _mode, attachment, width, height);
     }
 

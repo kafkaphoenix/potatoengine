@@ -1,5 +1,7 @@
 #include "scene/sceneManager.h"
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "scene/components/camera/cActiveCamera.h"
 #include "scene/components/camera/cCamera.h"
 #include "scene/components/camera/serializer.h"
@@ -27,10 +29,10 @@ namespace potatoengine {
 SceneManager::SceneManager(std::weak_ptr<AssetsManager> am,
                            std::weak_ptr<Renderer> r)
   : m_entityFactory(am), m_assetsManager(am), m_renderer(r) {
-  ENGINE_INFO("Initializing scene manager...");
-  ENGINE_INFO("Registering engine components...");
+  ENGINE_TRACE("Initializing scene manager...");
+  ENGINE_TRACE("Registering engine components...");
   registerComponents();
-  ENGINE_INFO("Scene manager created!");
+  ENGINE_TRACE("Scene manager created!");
 }
 
 void SceneManager::onEvent(Event& e) { eventSystem(std::ref(m_registry), e); }
@@ -195,11 +197,11 @@ bool SceneManager::containsPrototype(std::string_view prefabID,
 }
 
 void SceneManager::loadScene(std::string_view sceneID) {
-  ENGINE_INFO("Loading scene elements...");
+  ENGINE_TRACE("Loading scene elements...");
   SceneLoader loadedScene(m_assetsManager);
   loadedScene.load(sceneID);
   m_loadedScenes.emplace(sceneID, std::move(loadedScene));
-  ENGINE_INFO("Scene elements loaded!");
+  ENGINE_TRACE("Scene elements loaded!");
 }
 
 void SceneManager::createScene(std::string sceneID, bool reload) {
@@ -221,7 +223,7 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
   ENGINE_ASSERT(m_loadedScenes.contains(sceneID), "Scene {} is not loaded!",
                 sceneID);
 
-  ENGINE_INFO("Linking scene shaders...");
+  ENGINE_TRACE("Linking scene shaders...");
   const auto& loadedScene = m_loadedScenes.at(sceneID);
   for (std::string id : loadedScene.getLoadedShaders()) {
     renderer->addShader(std::move(id));
@@ -229,9 +231,9 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
 
   // A Prefab asset is a json file that contains a list of entity prototypes
   for (std::string_view prefabID : loadedScene.getLoadedPrefabs()) {
-    ENGINE_INFO("Creating scene prefabs prototypes...");
+    ENGINE_TRACE("Creating scene prefabs prototypes...");
     createPrototypes(prefabID);
-    ENGINE_INFO("Creating scene entities...");
+    ENGINE_TRACE("Creating scene entities...");
     createEntities(prefabID, loadedScene, manager, renderer);
   }
 
@@ -243,13 +245,14 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
     m_activeScene = std::move(sceneID);
   }
   m_isDirty = true;
+  printScene(std::ref(m_registry));
 }
 
 void SceneManager::createEntities(std::string_view prefabID,
                                   const SceneLoader& loadedScene,
                                   const std::shared_ptr<AssetsManager>& manager,
                                   const std::shared_ptr<Renderer>& renderer) {
-  ENGINE_INFO("Creating scene normal entities...");
+  ENGINE_TRACE("Creating scene normal entities...");
   for (const auto& [name, data] :
        loadedScene.getLoadedNormalEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
@@ -296,8 +299,8 @@ void SceneManager::createEntities(std::string_view prefabID,
                              size.at("y").get<float>(),
                              size.at("z").get<float>()};
         if (shape.size not_eq sizeVec) {
-          ENGINE_TRACE("Changing shape size from {0} to {1}", shape.size,
-                       sizeVec);
+          ENGINE_TRACE("Changing shape size from {0} to {1}",
+                       glm::to_string(shape.size), glm::to_string(sizeVec));
           shape.size = sizeVec;
           shape.meshes.clear();
           shape.createMesh();
@@ -335,8 +338,16 @@ void SceneManager::createEntities(std::string_view prefabID,
         std::vector<std::string> newFilepaths =
           filepaths.get<std::vector<std::string>>();
         if (c.filepaths not_eq newFilepaths) {
-          ENGINE_TRACE("Changing texture filepaths from {} to {}",
-                       c.filepaths.size(), newFilepaths.size());
+          std::string oldPaths;
+          std::string newPaths;
+          for (const auto& filepath : c.filepaths) {
+            oldPaths += filepath + " ";
+          }
+          for (const auto& filepath : newFilepaths) {
+            newPaths += filepath + " ";
+          }
+          ENGINE_TRACE("Changing texture filepaths from {} to {}", oldPaths,
+                       newPaths);
           c.filepaths = std::move(newFilepaths);
           c.textures.clear();
           c.textures.reserve(c.filepaths.size());
@@ -488,7 +499,7 @@ void SceneManager::createEntities(std::string_view prefabID,
     }
   }
 
-  ENGINE_INFO("Creating scene light entities...");
+  ENGINE_TRACE("Creating scene light entities...");
   for (const auto& [name, data] :
        loadedScene.getLoadedLightEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
@@ -550,7 +561,7 @@ void SceneManager::createEntities(std::string_view prefabID,
     }
   }
 
-  ENGINE_INFO("Creating scene camera entities...");
+  ENGINE_TRACE("Creating scene camera entities...");
   for (const auto& [name, data] :
        loadedScene.getLoadedCameraEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
@@ -610,7 +621,7 @@ void SceneManager::createEntities(std::string_view prefabID,
     }
   }
 
-  ENGINE_INFO("Creating scene system entities...");
+  ENGINE_TRACE("Creating scene system entities...");
   for (const auto& [name, data] :
        loadedScene.getLoadedSystemEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
@@ -623,7 +634,7 @@ void SceneManager::createEntities(std::string_view prefabID,
     }
   }
 
-  ENGINE_INFO("Creating scene FBO entities...");
+  ENGINE_TRACE("Creating scene FBO entities...");
   for (const auto& [name, data] : loadedScene.getLoadedFBOEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
     Entity e = createEntity(prefabID, prototypeID);

@@ -7,19 +7,23 @@ namespace potatoengine {
 
 Renderer::Renderer(std::weak_ptr<AssetsManager> am) : m_assetsManager(am) {}
 
-void Renderer::init() const noexcept { RendererAPI::Init(); }
+void Renderer::init() const { RendererAPI::Init(); }
 
-void Renderer::shutdown() noexcept { ENGINE_WARN("Shutting down Renderer"); }
+void Renderer::shutdown() {
+  ENGINE_WARN("Shutting down Renderer");
+} // TODO: shutdown renderer
 
-void Renderer::onWindowResize(uint32_t w, uint32_t h) const noexcept { RendererAPI::SetViewport(0, 0, w, h); }
+void Renderer::onWindowResize(uint32_t w, uint32_t h) const {
+  RendererAPI::SetViewport(0, 0, w, h);
+}
 
-void Renderer::beginScene(const CCamera& c, const CTransform& t) noexcept {
+void Renderer::beginScene(const CCamera& c, const CTransform& t) {
   m_view = c.view;
   m_projection = c.projection;
   m_cameraPosition = t.position;
 }
 
-void Renderer::endScene() noexcept {
+void Renderer::endScene() {
   // TODO renderer metrics
 }
 
@@ -35,15 +39,17 @@ void Renderer::addShader(std::string&& name) {
   newShaderProgram->link();
   newShaderProgram->detach(*vs);
   newShaderProgram->detach(*fs);
-  ENGINE_INFO("Shader {} linked!", name);
+  ENGINE_TRACE("Shader {} linked!", name);
   m_shaderPrograms.emplace(std::move(name), std::move(newShaderProgram));
 }
 
-void Renderer::addFramebuffer(std::string&& name, uint32_t w, uint32_t h, uint32_t t) {
+void Renderer::addFramebuffer(std::string&& name, uint32_t w, uint32_t h,
+                              uint32_t t) {
   m_framebuffers.emplace(std::move(name), FBO::Create(w, h, t));
 }
 
-void Renderer::renderFBO(const std::shared_ptr<VAO>& vao, std::string_view fbo) {
+void Renderer::renderFBO(const std::shared_ptr<VAO>& vao,
+                         std::string_view fbo) {
   auto& sp = get("fbo");
 
   sp->use();
@@ -54,7 +60,9 @@ void Renderer::renderFBO(const std::shared_ptr<VAO>& vao, std::string_view fbo) 
   sp->unuse();
 }
 
-void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform, std::string_view shaderProgram) {
+void Renderer::render(const std::shared_ptr<VAO>& vao,
+                      const glm::mat4& transform,
+                      std::string_view shaderProgram) {
   auto& sp = get(shaderProgram);
 
   sp->use();
@@ -70,17 +78,19 @@ void Renderer::render(const std::shared_ptr<VAO>& vao, const glm::mat4& transfor
 void Renderer::clear() {
   if (not m_framebuffers.empty()) {
     m_framebuffers.clear();
-    RendererAPI::SetDepthTest(true); // to avoid problems after using scenes with fbo
+    RendererAPI::SetDepthTest(
+      true); // to avoid problems after using scenes with fbo
   }
   m_shaderPrograms.clear();
 }
 
-std::unique_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) noexcept {
+std::unique_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) {
   return std::make_unique<Renderer>(am);
 }
 
 std::unique_ptr<ShaderProgram>& Renderer::get(std::string_view name) {
-  ENGINE_ASSERT(m_shaderPrograms.contains(name.data()), "Shader program {} not found!", name);
+  ENGINE_ASSERT(m_shaderPrograms.contains(name.data()),
+                "Shader program {} not found!", name);
   return m_shaderPrograms.at(name.data());
 }
 }

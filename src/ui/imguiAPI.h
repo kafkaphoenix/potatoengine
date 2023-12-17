@@ -7,7 +7,7 @@
 
 #include "ui/imutils.h"
 
-namespace potatoengine {
+namespace potatoengine::ui {
 class ImGuiAPI {
   public:
     static void Init(GLFWwindow* window, int openglMajorVersion, int openglMinorVersion);

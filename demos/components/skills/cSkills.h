@@ -30,7 +30,7 @@ struct CSkills {
         woodcutting(wc), farming(fa), quarrying(q), masonry(ma) {}
 
   void print() const {
-    APP_TRACE("\t\tmining: {0}\n\t\t\t\tjewelcrafting: {1}\n\t\t\t\tblacksmithing: {2}\n\t\t\t\thunting: "
+    APP_BACKTRACE("\t\tmining: {0}\n\t\t\t\tjewelcrafting: {1}\n\t\t\t\tblacksmithing: {2}\n\t\t\t\thunting: "
               "{3}\n\t\t\t\tfishing: {4}\n\t\t\t\tskinning: {5}\n\t\t\t\tleatherworking: {6}\n\t\t\t\therbalism: "
               "{7}\n\t\t\t\tcooking: {8}\n\t\t\t\talchemy: {9}\n\t\t\t\tenchanting: {10}\n\t\t\t\tharvesting: "
               "{11}\n\t\t\t\ttailoring: {12}\n\t\t\t\twoodworking: {13}\n\t\t\t\twoodcutting: {14}\n\t\t\t\tfarming: "

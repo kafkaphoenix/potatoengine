@@ -12,28 +12,126 @@ namespace potatoengine {
 void LogManager::Init() {
   std::vector<spdlog::sink_ptr> logSinks;
   logSinks.reserve(2);
-  logSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+  logSinks.emplace_back(
+    std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
   logSinks.emplace_back(std::make_shared<ui::ImGuiLogSink>());
 
   logSinks[0]->set_pattern("%^[%T] %n: %v%$");
 
-  s_engineLogger = std::make_shared<spdlog::logger>("ENGINE", begin(logSinks), end(logSinks));
+  s_engineLogger =
+    std::make_shared<spdlog::logger>("ENGINE", begin(logSinks), end(logSinks));
   spdlog::register_logger(s_engineLogger);
-  s_engineLogger->set_level(spdlog::level::trace);
-  s_engineLogger->flush_on(spdlog::level::trace);
+  s_engineLogger->set_level(s_engineLogLevel);
+  s_engineLogger->flush_on(s_engineFlushLevel);
 
-  s_appLogger = std::make_shared<spdlog::logger>("APP", begin(logSinks), end(logSinks));
+  s_appLogger =
+    std::make_shared<spdlog::logger>("APP", begin(logSinks), end(logSinks));
   spdlog::register_logger(s_appLogger);
-  s_appLogger->set_level(spdlog::level::trace);
-  s_appLogger->flush_on(spdlog::level::trace);
+  s_appLogger->set_level(s_appLogLevel);
+  s_appLogger->flush_on(s_appFlushLevel);
 }
 
 void LogManager::CreateFileLogger(std::string_view filepath) {
-  auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filepath.data(), true);
+  auto fileSink =
+    std::make_shared<spdlog::sinks::basic_file_sink_mt>(filepath.data(), true);
 
   fileSink->set_pattern("[%D %T] [%l] %n: %v");
 
   s_engineLogger->sinks().emplace_back(fileSink);
   s_appLogger->sinks().emplace_back(fileSink);
 }
+
+void LogManager::CreateBacktraceLogger(std::string_view filepath,
+                                       bool enableEngineBacktraceLogger,
+                                       bool enableAppBacktraceLogger) {
+  auto backtraceSink = std::make_shared<BacktraceLogSink>(filepath.data());
+  s_engineBacktraceLogger =
+    std::make_shared<spdlog::logger>("ENGINE", backtraceSink);
+  s_appBacktraceLogger = std::make_shared<spdlog::logger>("APP", backtraceSink);
+}
+
+void LogManager::clearAllBacktraceLogger() {
+  auto sink =
+    dynamic_cast<BacktraceLogSink*>(s_engineBacktraceLogger->sinks()[0].get());
+  sink->Clear("all");
+}
+
+void LogManager::clearEngineBacktraceLogger() {
+  auto sink =
+    dynamic_cast<BacktraceLogSink*>(s_engineBacktraceLogger->sinks()[0].get());
+  sink->Clear("ENGINE");
+}
+
+void LogManager::clearAppBacktraceLogger() {
+  auto sink =
+    dynamic_cast<BacktraceLogSink*>(s_appBacktraceLogger->sinks()[0].get());
+  sink->Clear("APP");
+}
+
+void LogManager::DumpBacktrace() {
+  auto sink =
+    dynamic_cast<BacktraceLogSink*>(s_engineBacktraceLogger->sinks()[0].get());
+  sink->DumpToFile();
+}
+
+void LogManager::SetEngineLoggerLevel(spdlog::level::level_enum level) {
+  s_engineLogLevel = level;
+  s_engineLogger->set_level(s_engineLogLevel);
+}
+
+void LogManager::SetAppLoggerLevel(spdlog::level::level_enum level) {
+  s_appLogLevel = level;
+  s_appLogger->set_level(s_appLogLevel);
+}
+
+void LogManager::SetEngineLoggerFlushLevel(spdlog::level::level_enum level) {
+  s_engineFlushLevel = level;
+  s_engineLogger->flush_on(level);
+}
+
+void LogManager::SetAppLoggerFlushLevel(spdlog::level::level_enum level) {
+  s_appFlushLevel = level;
+  s_appLogger->flush_on(level);
+}
+
+void LogManager::toggleEngineLogger(bool enable) {
+  if (enable) {
+    s_engineLogger->set_level(s_engineLogLevel);
+    s_engineLogger->flush_on(s_engineFlushLevel);
+  } else {
+    s_engineLogger->set_level(spdlog::level::off);
+    s_engineLogger->flush_on(spdlog::level::off);
+  }
+}
+
+void LogManager::toggleAppLogger(bool enable) {
+  if (enable) {
+    s_appLogger->set_level(s_appLogLevel);
+    s_appLogger->flush_on(s_appFlushLevel);
+  } else {
+    s_appLogger->set_level(spdlog::level::off);
+    s_appLogger->flush_on(spdlog::level::off);
+  }
+}
+
+void LogManager::toggleEngineBacktraceLogger(bool enable) {
+  if (enable) {
+    s_engineBacktraceLogger->set_level(s_engineLogLevel);
+    s_engineBacktraceLogger->flush_on(s_engineFlushLevel);
+  } else {
+    s_engineBacktraceLogger->set_level(spdlog::level::off);
+    s_engineBacktraceLogger->flush_on(spdlog::level::off);
+  }
+}
+
+void LogManager::toggleAppBacktraceLogger(bool enable) {
+  if (enable) {
+    s_appBacktraceLogger->set_level(s_appLogLevel);
+    s_appBacktraceLogger->flush_on(s_appFlushLevel);
+  } else {
+    s_appBacktraceLogger->set_level(spdlog::level::off);
+    s_appBacktraceLogger->flush_on(spdlog::level::off);
+  }
+}
+
 }

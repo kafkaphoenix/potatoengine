@@ -4,6 +4,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "scene/components/world/cChunk.h"
 
@@ -37,20 +38,26 @@ struct CChunkManager {
     bool useBiomes{};
 
     CChunkManager() = default;
-    explicit CChunkManager(int w, int h, int cs, int bs, std::unordered_map<glm::vec3, CChunk>&& c, std::string&& mt,
-                           std::string&& ma, bool ub)
-        : width(w), height(h), chunkSize(cs), blockSize(bs), chunks(std::move(c)), _meshType(std::move(mt)),
-          _meshAlgorithm(std::move(ma)), useBiomes(ub) {}
+    explicit CChunkManager(int w, int h, int cs, int bs,
+                           std::unordered_map<glm::vec3, CChunk>&& c,
+                           std::string&& mt, std::string&& ma, bool ub)
+      : width(w), height(h), chunkSize(cs), blockSize(bs), chunks(std::move(c)),
+        _meshType(std::move(mt)), _meshAlgorithm(std::move(ma)), useBiomes(ub) {
+    }
     void print() const {
       std::string c;
       for (auto [position, chunk] : chunks) {
         c += std::format("\n\t\t\t\t\tchunk: {} {}", glm::to_string(position),
-                         chunk._biome); // with format you need to call glm::to_string for glm types
+                         chunk._biome); // with format you need to call
+                                        // glm::to_string for glm types
       }
-      ENGINE_TRACE(
-          "\t\twidth: {0}\n\t\t\t\theight: {1}\n\t\t\t\tchunkSize: {2}\n\t\t\t\tblockSize: {3}\n\t\t\t\tmeshType: "
-          "{4}\n\t\t\t\tmeshAlgorithm: {5}\n\t\t\t\tuseBiomes: {6}\n\t\t\t\tchunks: {7}",
-          width, height, chunkSize, blockSize, _meshType, _meshAlgorithm, useBiomes, c);
+      ENGINE_BACKTRACE(
+        "\t\twidth: {0}\n\t\t\t\theight: {1}\n\t\t\t\tchunkSize: "
+        "{2}\n\t\t\t\tblockSize: {3}\n\t\t\t\tmeshType: "
+        "{4}\n\t\t\t\tmeshAlgorithm: {5}\n\t\t\t\tuseBiomes: "
+        "{6}\n\t\t\t\tchunks: {7}",
+        width, height, chunkSize, blockSize, _meshType, _meshAlgorithm,
+        useBiomes, c);
     }
 
     void setMeshType() {

@@ -3,6 +3,7 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "assets/texture.h"
 #include "pch.h"
@@ -34,10 +35,12 @@ struct CTexture {
     DrawMode drawMode{};
 
     CTexture() = default;
-    explicit CTexture(std::vector<std::string>&& fps, glm::vec4&& c, float bf, float r, float ri, bool ht, bool ul,
-                      bool ur, bool uf, std::string&& dm)
-        : filepaths(std::move(fps)), color(std::move(c)), blendFactor(bf), reflectivity(r), refractiveIndex(ri),
-          hasTransparency(ht), useLighting(ul), useReflection(ur), useRefraction(uf), _drawMode(dm) {}
+    explicit CTexture(std::vector<std::string>&& fps, glm::vec4&& c, float bf,
+                      float r, float ri, bool ht, bool ul, bool ur, bool uf,
+                      std::string&& dm)
+      : filepaths(std::move(fps)), color(std::move(c)), blendFactor(bf),
+        reflectivity(r), refractiveIndex(ri), hasTransparency(ht),
+        useLighting(ul), useReflection(ur), useRefraction(uf), _drawMode(dm) {}
 
     void print() const {
       std::string texturePaths;
@@ -48,11 +51,16 @@ struct CTexture {
           texturePaths += std::format("\n\t\t\t\t {}", filepath);
         }
       }
-      ENGINE_TRACE("\t\tcolor: {0}\n\t\t\t\tblendFactor: {1}\n\t\t\t\treflectivity: {2}\n\t\t\t\trefractiveIndex: "
-                   "{3}\n\t\t\t\thasTransparency: {4}\n\t\t\t\tuseLighting: {5}\n\t\t\t\tuseReflection: "
-                   "{6}\n\t\t\t\tuseRefraction: {7}\n\t\t\t\tdrawMode: {8}\n\t\t\t\ttextures: {9}",
-                   color, blendFactor, reflectivity, refractiveIndex, hasTransparency, useLighting, useReflection,
-                   useRefraction, _drawMode, texturePaths);
+      ENGINE_BACKTRACE(
+        "\t\tcolor: {0}\n\t\t\t\tblendFactor: {1}\n\t\t\t\treflectivity: "
+        "{2}\n\t\t\t\trefractiveIndex: "
+        "{3}\n\t\t\t\thasTransparency: {4}\n\t\t\t\tuseLighting: "
+        "{5}\n\t\t\t\tuseReflection: "
+        "{6}\n\t\t\t\tuseRefraction: {7}\n\t\t\t\tdrawMode: "
+        "{8}\n\t\t\t\ttextures: {9}",
+        glm::to_string(color), blendFactor, reflectivity, refractiveIndex,
+        hasTransparency, useLighting, useReflection, useRefraction, _drawMode,
+        texturePaths);
     }
 
     void setDrawMode() { // TODO maybe send assets manager to this function?
@@ -64,11 +72,16 @@ struct CTexture {
         drawMode = DrawMode::TEXTURE_ATLAS;
       } else if (_drawMode == "texturesBlend") { // blend two textures
         drawMode = DrawMode::TEXTURES_BLEND;
-      } else if (_drawMode == "textureAtlasBlend") { // blend two textures in the atlas // TODO: this is not implemented
+      } else if (_drawMode ==
+                 "textureAtlasBlend") { // blend two textures in the atlas //
+                                        // TODO: this is not implemented
         drawMode = DrawMode::TEXTURE_ATLAS_BLEND;
-      } else if (_drawMode == "textureBlendColor") { // blend texture with a color
+      } else if (_drawMode ==
+                 "textureBlendColor") { // blend texture with a color
         drawMode = DrawMode::TEXTURE_BLEND_COLOR;
-      } else if (_drawMode == "textureAtlasBlendColor") { // blend texture in the atlas with a color
+      } else if (_drawMode ==
+                 "textureAtlasBlendColor") { // blend texture in the atlas with
+                                             // a color
         drawMode = DrawMode::TEXTURE_ATLAS_BLEND_COLOR;
       } else {
         ENGINE_ASSERT(false, "Unknown draw mode {}", _drawMode);

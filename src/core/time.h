@@ -9,7 +9,7 @@ class Time {
     operator float() const noexcept { return m_time; }
 
     float getSeconds() const noexcept { return m_time; }
-    float getMilliseconds() const noexcept { return m_time * 1000.f; }
+    float getMilliseconds() const { return m_time * 1000.f; }
 
   private:
     float m_time{};

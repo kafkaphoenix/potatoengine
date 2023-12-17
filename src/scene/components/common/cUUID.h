@@ -7,6 +7,6 @@ namespace potatoengine {
 struct CUUID {
     uint32_t uuid{};
 
-    void print() const { ENGINE_TRACE("\t\tuuid: {}", uuid); }
+    void print() const { ENGINE_BACKTRACE("\t\tuuid: {}", uuid); }
 };
 }

@@ -15,7 +15,7 @@ struct CStats {
       : strength(s), dexterity(d), constitution(c), intelligence(i), wisdom(w), charisma(ch) {}
 
   void print() const {
-    APP_TRACE("\t\tstrength: {0}\n\t\t\t\tdexterity: {1}\n\t\t\t\tconstitution: {2}\n\t\t\t\tintelligence: "
+    APP_BACKTRACE("\t\tstrength: {0}\n\t\t\t\tdexterity: {1}\n\t\t\t\tconstitution: {2}\n\t\t\t\tintelligence: "
               "{3}\n\t\t\t\twisdom: {4}\n\t\t\t\tcharisma: {5}",
               strength, dexterity, constitution, intelligence, wisdom, charisma);
   }
