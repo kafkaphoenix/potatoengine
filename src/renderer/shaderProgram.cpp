@@ -157,6 +157,39 @@ void ShaderProgram::printActiveUniforms() {
   ENGINE_BACKTRACE("=====================================================");
 }
 
+const std::map<std::string, std::string, NumericComparator>& ShaderProgram::getInfo() {
+  if (not m_info.empty()) {
+    return m_info;
+  }
+
+  m_info["Name"] = m_name;
+  m_info["ID"] = std::to_string(m_id);
+  for (const auto& [type, name] : m_activeUniforms) {
+    if (type == GL_INT) {
+      m_info["Active uniform " + name] = "int";
+    } else if (type == GL_FLOAT) {
+      m_info["Active uniform " + name] = "float";
+    } else if (type == GL_FLOAT_VEC2) {
+      m_info["Active uniform " + name] = "vec2";
+    } else if (type == GL_FLOAT_VEC3) {
+      m_info["Active uniform " + name] = "vec3";
+    } else if (type == GL_FLOAT_VEC4) {
+      m_info["Active uniform " + name] = "vec4";
+    } else if (type == GL_FLOAT_MAT4) {
+      m_info["Active uniform " + name] = "mat4";
+    } else if (type == GL_SAMPLER_2D) {
+      m_info["Active uniform " + name] = "sampler2D";
+    } else if (type == GL_SAMPLER_CUBE) {
+      m_info["Active uniform " + name] = "samplerCube";
+    } else {
+      ENGINE_ASSERT(false, "Unknown uniform type {} for uniform {}", type,
+                    name);
+    }
+  }
+
+  return m_info;
+}
+
 std::unique_ptr<ShaderProgram>
 ShaderProgram::Create(std::string&& name) {
   return std::make_unique<ShaderProgram>(std::move(name));

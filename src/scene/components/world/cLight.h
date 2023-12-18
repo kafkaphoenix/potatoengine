@@ -6,6 +6,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "scene/entity.h"
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 
@@ -39,6 +40,18 @@ struct CLight {
         "{3}\n\t\t\t\tinnerConeAngle: {4}\n\t\t\t\touterConeAngle: {5}",
         _type, glm::to_string(color), intensity, range, innerConeAngle,
         outerConeAngle);
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["type"] = _type;
+      info["color"] = glm::to_string(color);
+      info["intensity"] = std::to_string(intensity);
+      info["range"] = std::to_string(range);
+      info["innerConeAngle"] = std::to_string(innerConeAngle);
+      info["outerConeAngle"] = std::to_string(outerConeAngle);
+
+      return info;
     }
 };
 }

@@ -36,6 +36,8 @@
 #include "scene/entity.h"
 #include "scene/meta.h"
 
+using namespace entt::literals;
+
 namespace potatoengine {
 
 CUUID& CastCUUID(void* other) { return *static_cast<CUUID*>(other); }
@@ -123,19 +125,19 @@ CChunk& CastCChunk(void* other) { return *static_cast<CChunk*>(other); }
 CBlock& CastCBlock(void* other) { return *static_cast<CBlock*>(other); }
 
 void RegisterComponents() {
-  using namespace entt::literals;
-
   entt::meta<CUUID>()
     .type("uuid"_hs)
     .ctor<&CastCUUID, entt::as_ref_t>()
     .data<&CUUID::uuid>("uuid"_hs)
-    .func<&CUUID::print>("print"_hs);
+    .func<&CUUID::print>("print"_hs)
+    .func<&CUUID::getInfo>("getInfo"_hs);
 
   entt::meta<CName>()
     .type("name"_hs)
     .ctor<&CastCName, entt::as_ref_t>()
     .data<&CName::name>("name"_hs)
     .func<&CName::print>("print"_hs)
+    .func<&CName::getInfo>("getInfo"_hs)
     .func<&assign<CName, std::string>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CTag>()
@@ -143,6 +145,7 @@ void RegisterComponents() {
     .ctor<&CastCTag, entt::as_ref_t>()
     .data<&CTag::tag>("tag"_hs)
     .func<&CTag::print>("print"_hs)
+    .func<&CTag::getInfo>("getInfo"_hs)
     .func<&assign<CTag, std::string>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CShaderProgram>()
@@ -151,6 +154,7 @@ void RegisterComponents() {
     .data<&CShaderProgram::name>("name"_hs)
     .data<&CShaderProgram::isVisible>("isVisible"_hs)
     .func<&CShaderProgram::print>("print"_hs)
+    .func<&CShaderProgram::getInfo>("getInfo"_hs)
     .func<&assign<CShaderProgram>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CTransform>()
@@ -160,6 +164,7 @@ void RegisterComponents() {
     .data<&CTransform::rotation>("rotation"_hs)
     .data<&CTransform::scale>("scale"_hs)
     .func<&CTransform::print>("print"_hs)
+    .func<&CTransform::getInfo>("getInfo"_hs)
     .func<&assign<CTransform>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CMaterial>()
@@ -170,6 +175,7 @@ void RegisterComponents() {
     .data<&CMaterial::specular>("specular"_hs)
     .data<&CMaterial::shininess>("shininess"_hs)
     .func<&CMaterial::print>("print"_hs)
+    .func<&CMaterial::getInfo>("getInfo"_hs)
     .func<&assign<CMaterial>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CTextureAtlas>()
@@ -178,6 +184,7 @@ void RegisterComponents() {
     .data<&CTextureAtlas::rows>("rows"_hs)
     .data<&CTextureAtlas::index>("index"_hs)
     .func<&CTextureAtlas::print>("print"_hs)
+    .func<&CTextureAtlas::getInfo>("getInfo"_hs)
     .func<&assign<CTextureAtlas>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CTexture>()
@@ -195,6 +202,8 @@ void RegisterComponents() {
     .data<&CTexture::useRefraction>("useRefraction"_hs)
     .data<&CTexture::_drawMode>("drawMode"_hs)
     .func<&CTexture::print>("print"_hs)
+    .func<&CTexture::getInfo>("getInfo"_hs)
+    .func<&CTexture::getTextureInfo>("getTextureInfo"_hs)
     .func<&onComponentAdded<CTexture>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CTexture>, entt::as_ref_t>("assign"_hs);
 
@@ -207,6 +216,7 @@ void RegisterComponents() {
     .data<&CMesh::vao>("vao"_hs)
     .data<&CMesh::vertexType>("vertexType"_hs)
     .func<&CMesh::print>("print"_hs)
+    .func<&CMesh::getInfo>("getInfo"_hs)
     .func<&assign<CMesh>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CBody>()
@@ -216,6 +226,9 @@ void RegisterComponents() {
     .data<&CBody::meshes>("meshes"_hs)
     .data<&CBody::materials>("materials"_hs)
     .func<&CBody::print>("print"_hs)
+    .func<&CBody::getInfo>("getInfo"_hs)
+    .func<&CBody::getMeshInfo>("getMeshInfo"_hs)
+    .func<&CBody::getMaterialInfo>("getMaterialInfo"_hs)
     .func<&onComponentAdded<CBody>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CBody, std::string>, entt::as_ref_t>("assign"_hs);
 
@@ -227,6 +240,7 @@ void RegisterComponents() {
     .data<&CRigidBody::bounciness>("bounciness"_hs)
     .data<&CRigidBody::isKinematic>("isKinematic"_hs)
     .func<&CRigidBody::print>("print"_hs)
+    .func<&CRigidBody::getInfo>("getInfo"_hs)
     .func<&assign<CRigidBody>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CCollider>()
@@ -235,6 +249,7 @@ void RegisterComponents() {
     .data<&CCollider::_type>("type"_hs)
     .data<&CCollider::size>("size"_hs)
     .func<&CCollider::print>("print"_hs)
+    .func<&CCollider::getInfo>("getInfo"_hs)
     .func<&onComponentAdded<CCollider>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CCollider>, entt::as_ref_t>("assign"_hs);
 
@@ -254,6 +269,7 @@ void RegisterComponents() {
     .data<&CCamera::verticalSpeed>("verticalSpeed"_hs)
     .data<&CCamera::rotationSpeed>("rotationSpeed"_hs)
     .func<&CCamera::print>("print"_hs)
+    .func<&CCamera::getInfo>("getInfo"_hs)
     .func<&onComponentAdded<CCamera>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CCamera>, entt::as_ref_t>("assign"_hs);
 
@@ -262,11 +278,14 @@ void RegisterComponents() {
     .ctor<&CastCDistanceFromCamera, entt::as_ref_t>()
     .data<&CDistanceFromCamera::distance>("distance"_hs)
     .func<&CDistanceFromCamera::print>("print"_hs)
+    .func<&CDistanceFromCamera::getInfo>("getInfo"_hs)
     .func<&assign<CDistanceFromCamera>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CActiveCamera>()
     .type("activeCamera"_hs)
     .ctor<&CastCActiveCamera, entt::as_ref_t>()
+    .func<&CActiveCamera::print>("print"_hs)
+    .func<&CActiveCamera::getInfo>("getInfo"_hs)
     .func<&assign<CActiveCamera>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CSkybox>()
@@ -278,6 +297,7 @@ void RegisterComponents() {
     .data<&CSkybox::fogGradient>("fogGradient"_hs)
     .data<&CSkybox::rotationSpeed>("rotationSpeed"_hs)
     .func<&CSkybox::print>("print"_hs)
+    .func<&CSkybox::getInfo>("getInfo"_hs)
     .func<&assign<CSkybox>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CTime>()
@@ -296,6 +316,7 @@ void RegisterComponents() {
     .data<&CTime::acceleration>("acceleration"_hs)
     .data<&CTime::fps>("fps"_hs)
     .func<&CTime::print>("print"_hs)
+    .func<&CTime::getInfo>("getInfo"_hs)
     .func<&onComponentAdded<CTime>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CTime>, entt::as_ref_t>("assign"_hs);
 
@@ -309,6 +330,7 @@ void RegisterComponents() {
     .data<&CLight::innerConeAngle>("innerConeAngle"_hs)
     .data<&CLight::outerConeAngle>("outerConeAngle"_hs)
     .func<&CLight::print>("print"_hs)
+    .func<&CLight::getInfo>("getInfo"_hs)
     .func<&onComponentAdded<CLight>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CLight>, entt::as_ref_t>("assign"_hs);
 
@@ -320,6 +342,7 @@ void RegisterComponents() {
     .data<&CAudio::pitch>("pitch"_hs)
     .data<&CAudio::loop>("loop"_hs)
     .func<&CAudio::print>("print"_hs)
+    .func<&CAudio::getInfo>("getInfo"_hs)
     .func<&assign<CAudio>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CParticle>()
@@ -327,6 +350,7 @@ void RegisterComponents() {
     .ctor<&CastCParticle, entt::as_ref_t>()
     .data<&CParticle::emitter>("emitter"_hs)
     .func<&CParticle::print>("print"_hs)
+    .func<&CParticle::getInfo>("getInfo"_hs)
     .func<&assign<CParticle>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CAnimation>()
@@ -334,6 +358,7 @@ void RegisterComponents() {
     .ctor<&CastCAnimation, entt::as_ref_t>()
     .data<&CAnimation::filepath>("filepath"_hs)
     .func<&CAnimation::print>("print"_hs)
+    .func<&CAnimation::getInfo>("getInfo"_hs)
     .func<&assign<CAnimation>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CText>()
@@ -342,6 +367,7 @@ void RegisterComponents() {
     .data<&CText::text>("text"_hs)
     .data<&CText::color>("color"_hs)
     .func<&CText::print>("print"_hs)
+    .func<&CText::getInfo>("getInfo"_hs)
     .func<&assign<CText>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CAI>()
@@ -349,6 +375,7 @@ void RegisterComponents() {
     .ctor<&CastCAI, entt::as_ref_t>()
     .data<&CAI::filepath>("filepath"_hs)
     .func<&CAI::print>("print"_hs)
+    .func<&CAI::getInfo>("getInfo"_hs)
     .func<&assign<CAI>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CRelationship>()
@@ -356,6 +383,7 @@ void RegisterComponents() {
     .ctor<&CastCRelationship, entt::as_ref_t>()
     .data<&CRelationship::parent>("parent"_hs)
     .func<&CRelationship::print>("print"_hs)
+    .func<&CRelationship::getInfo>("getInfo"_hs)
     .func<&assign<CRelationship>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CShape>()
@@ -366,6 +394,8 @@ void RegisterComponents() {
     .data<&CShape::meshes>("meshes"_hs)
     .data<&CShape::repeatTexture>("repeatTexture"_hs)
     .func<&CShape::print>("print"_hs)
+    .func<&CShape::getInfo>("getInfo"_hs)
+    .func<&CShape::getMeshInfo>("getMeshInfo"_hs)
     .func<&onComponentAdded<CShape>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CShape>, entt::as_ref_t>("assign"_hs);
 
@@ -378,6 +408,7 @@ void RegisterComponents() {
     .data<&CFBO::width>("width"_hs)
     .data<&CFBO::height>("height"_hs)
     .func<&CFBO::print>("print"_hs)
+    .func<&CFBO::getInfo>("getInfo"_hs)
     .func<&onComponentAdded<CFBO>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CFBO>, entt::as_ref_t>("assign"_hs);
 
@@ -393,6 +424,7 @@ void RegisterComponents() {
     .data<&CNoise::amplitude>("amplitude"_hs)
     .data<&CNoise::positive>("positive"_hs)
     .func<&CNoise::print>("print"_hs)
+    .func<&CNoise::getInfo>("getInfo"_hs)
     .func<&onComponentAdded<CNoise>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CNoise>, entt::as_ref_t>("assign"_hs);
 
@@ -408,6 +440,7 @@ void RegisterComponents() {
     .data<&CChunkManager::_meshAlgorithm>("meshAlgorithm"_hs)
     .data<&CChunkManager::useBiomes>("useBiomes"_hs)
     .func<&CChunkManager::print>("print"_hs)
+    .func<&CChunkManager::getInfo>("getInfo"_hs)
     .func<&onComponentAdded<CChunkManager>, entt::as_ref_t>(
       "onComponentAdded"_hs)
     .func<&assign<CChunkManager>, entt::as_ref_t>("assign"_hs);
@@ -417,6 +450,9 @@ void RegisterComponents() {
     .ctor<&CastCChunk, entt::as_ref_t>()
     .data<&CChunk::_biome>("biome"_hs)
     .func<&CChunk::print>("print"_hs)
+    .func<&CChunk::getInfo>("getInfo"_hs)
+    .func<&CChunk::getMeshInfo>("getMeshInfo"_hs)
+    .func<&CChunk::getTransformInfo>("getTransformInfo"_hs)
     .func<&onComponentAdded<CChunk>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CChunk>, entt::as_ref_t>("assign"_hs);
 
@@ -425,17 +461,17 @@ void RegisterComponents() {
     .ctor<&CastCBlock, entt::as_ref_t>()
     .data<&CBlock::_type>("type"_hs)
     .func<&CBlock::print>("print"_hs)
+    .func<&CBlock::getInfo>("getInfo"_hs)
     .func<&onComponentAdded<CBlock>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CBlock>, entt::as_ref_t>("assign"_hs);
 }
 
-void printScene(entt::registry& r) {
-  using namespace entt::literals;
-
+void PrintScene(entt::registry& r) {
   entt::meta_type cType;
   entt::meta_any cData;
   entt::meta_func printFunc;
   auto entities = r.view<CUUID>();
+  std::string_view cName;
   if (entities.empty()) {
     ENGINE_BACKTRACE("===================Entities===================");
     ENGINE_BACKTRACE("No entities in scene");
@@ -446,19 +482,20 @@ void printScene(entt::registry& r) {
   ENGINE_BACKTRACE("===================Entities===================");
   for (auto&& e : entities) {
     ENGINE_BACKTRACE("Entity UUID: {}", entt::to_integral(e));
-    for (auto&& curr : r.storage()) {
-      if (auto& storage = curr.second; storage.contains(e)) {
+    for (auto&& [id, storage] : r.storage()) {
+      if (storage.contains(e)) {
         cType = entt::resolve(storage.type());
         cData = cType.construct(storage.value(e));
         printFunc = cType.func("print"_hs);
         if (printFunc) {
-          std::string_view cName = storage.type().name();
+          cName = storage.type().name();
           cName = cName.substr(cName.find_last_of(':') + 1);
           ENGINE_BACKTRACE("\t{}", cName);
           printFunc.invoke(cData);
         } else {
-          std::string_view cName = storage.type().name();
+          cName = storage.type().name();
           cName = cName.substr(cName.find_last_of(':') + 1);
+          ENGINE_ERROR("{} has no print function", cName);
           ENGINE_BACKTRACE("\t{} has no print function", cName);
         }
       }

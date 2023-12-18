@@ -57,6 +57,12 @@ void Renderer::renderFBO(const std::shared_ptr<VAO>& vao,
   getFramebuffers().at(fbo.data())->getColorTexture()->bindSlot(100);
 
   RendererAPI::DrawIndexed(vao);
+  m_drawCalls++;
+  m_triangles += vao->getEBO()->getCount() / 3;
+  for (const auto& vbo : vao->getVBOs()) {
+    m_vertices += vbo->getCount();
+  }
+  m_indices += vao->getEBO()->getCount();
   sp->unuse();
 }
 
@@ -72,6 +78,12 @@ void Renderer::render(const std::shared_ptr<VAO>& vao,
   sp->setMat4("model", transform);
 
   RendererAPI::DrawIndexed(vao);
+  m_drawCalls++;
+  m_triangles += vao->getEBO()->getCount() / 3;
+  for (const auto& vbo : vao->getVBOs()) {
+    m_vertices += vbo->getCount();
+  }
+  m_indices += vao->getEBO()->getCount();
   sp->unuse(); // DONT unuse before the draw call
 }
 
@@ -92,5 +104,25 @@ std::unique_ptr<ShaderProgram>& Renderer::get(std::string_view name) {
   ENGINE_ASSERT(m_shaderPrograms.contains(name.data()),
                 "Shader program {} not found!", name);
   return m_shaderPrograms.at(name.data());
+}
+
+const std::map<std::string, std::string, NumericComparator>&
+Renderer::getMetrics() {
+  m_metrics["Framebuffers"] = std::to_string(m_framebuffers.size());
+  m_metrics["Shader programs"] = std::to_string(m_shaderPrograms.size());
+  m_metrics["Draw calls"] = std::to_string(m_drawCalls);
+  m_metrics["Triangles"] = std::to_string(m_triangles);
+  m_metrics["Vertices"] = std::to_string(m_vertices);
+  m_metrics["Indices"] = std::to_string(m_indices);
+
+  return m_metrics;
+}
+
+void Renderer::resetMetrics() {
+  m_drawCalls = 0;
+  m_triangles = 0;
+  m_vertices = 0;
+  m_indices = 0;
+  m_metrics.clear();
 }
 }

@@ -12,6 +12,10 @@
 #include "scene/components/graphics/cTexture.h"
 #include "scene/components/graphics/cTextureAtlas.h"
 #include "scene/components/world/cSkybox.h"
+#include "utils/mapJsonSerializer.h"
+#include "utils/numericComparator.h"
+
+using namespace entt::literals;
 
 namespace potatoengine {
 
@@ -34,7 +38,7 @@ struct CMesh {
       vao = VAO::Create();
       if (vertexType == "basic") {
         vao->attachVertex(VBO::Create(vertices), VAO::VertexType::VERTEX);
-      } else if (vertexType == "shape") {
+      } else if (vertexType == "shape") { // TODO this is not used
         vao->attachVertex(VBO::Create(vertices), VAO::VertexType::SHAPE_VERTEX);
       } else if (vertexType == "terrain") { // TODO maybe a better way to do
                                             // this using vertices?
@@ -52,8 +56,7 @@ struct CMesh {
         vao->updateVertex(VBO::Create(vertices), 0,
                           VAO::VertexType::SHAPE_VERTEX);
       } else if (vertexType == "terrain") {
-        vao->updateVertex(VBO::Create(vertices), 0,
-                          VAO::VertexType::TERRAIN_VERTEX);
+        vao->updateVertex(std::move(vbo), 0, VAO::VertexType::TERRAIN_VERTEX);
       } else {
         ENGINE_ASSERT(false, "Unknown vertex type {}", vertexType);
       }
@@ -66,11 +69,10 @@ struct CMesh {
       return vao;
     }
 
+    // TODO rethink this method
     void bindTextures(std::unique_ptr<ShaderProgram>& sp, CTexture* cTexture,
                       CTextureAtlas* cTextureAtlas, CTexture* cSkyboxTexture,
                       CMaterial* cMaterial) {
-      using namespace entt::literals; // TODO rethink this method
-
       sp->resetActiveUniforms();
       sp->use();
       sp->setFloat("useFog",
@@ -213,6 +215,23 @@ struct CMesh {
       }
       ENGINE_BACKTRACE("\t\tvertices: {0}\n\t\tindices: {1}{2}",
                        vertices.size(), indices.size(), texturePaths);
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      for (int i = 0; i < textures.size(); ++i) {
+        info["texture " + std::to_string(i)] = getTextureInfo(i);
+      }
+      info["vao 0"] = vao ? getVAOInfo() : "undefined";
+      info["vertexType"] = vertexType;
+
+      return info;
+    }
+
+    std::string getVAOInfo() const { return MapToJson(vao->getInfo()); }
+
+    std::string getTextureInfo(int index) const {
+      return MapToJson(textures.at(index)->getInfo());
     }
 };
 }

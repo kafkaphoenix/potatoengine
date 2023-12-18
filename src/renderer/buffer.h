@@ -40,14 +40,19 @@ class VBO {
 
     void reload(const std::vector<Vertex>& vertices);
 
+    uint32_t getCount() const noexcept { return m_count; }
     uint32_t getID() const noexcept { return m_id; }
+    bool isImmutable() const noexcept { return m_immutable; }
 
     static std::unique_ptr<VBO> Create(const std::vector<Vertex>& vertices);
-    static std::unique_ptr<VBO> CreateShape(const std::vector<ShapeVertex>& vertices);
-    static std::unique_ptr<VBO> CreateTerrain(const std::vector<TerrainVertex>& vertices);
+    static std::unique_ptr<VBO>
+    CreateShape(const std::vector<ShapeVertex>& vertices);
+    static std::unique_ptr<VBO>
+    CreateTerrain(const std::vector<TerrainVertex>& vertices);
 
   private:
     uint32_t m_id{};
+    uint32_t m_count{};
     bool m_immutable{};
 };
 
@@ -60,6 +65,7 @@ class IBO {
 
     uint32_t getCount() const noexcept { return m_count; }
     uint32_t getID() const noexcept { return m_id; }
+    bool isImmutable() const noexcept { return m_immutable; }
 
     static std::unique_ptr<IBO> Create(const std::vector<uint32_t>& indices);
 

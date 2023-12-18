@@ -31,10 +31,15 @@
             "player": "assets/models/player/player.obj"
         },
         "prefabs": {
-            "entities": {
-                "filepath": "assets/prefabs/entities.json",
+            "creatures": {
+                "filepath": "assets/prefabs/creatures.json",
                 "targeted_prototypes": [
-                    "player",
+                    "player"
+                ]
+            },
+            "systems": {
+                "filepath": "assets/prefabs/systems.json",
+                "targeted_prototypes": [
                     "chunk_config"
                 ]
             }
@@ -43,14 +48,14 @@
     "entities": {
         "normals": {
             "auri": {
-                "prefab": "entities",
+                "prefab": "creatures",
                 "prototype": "player",
                 "options": {
                     "position": {"x": 0, "y": 0, "z": 0}
                 }
             },
             "terrain": {
-                "prefab": "entities",
+                "prefab": "systems",
                 "prototype": "chunk_config"
             }
         }

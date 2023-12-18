@@ -41,8 +41,9 @@ void drawMetrics(std::weak_ptr<engine::AssetsManager> am,
     }
 
     ImGui::SeparatorText("Renderer");
-    ImGui::Text("Framebuffers: %d", renderer->getFramebuffers().size());
-    ImGui::Text("Shader programs: %d", renderer->getShaderPrograms().size());
+    for (const auto& [key, value] : renderer->getMetrics()) {
+      ImGui::Text("%s: %s", key.c_str(), value.c_str());
+    }
 
     ImGui::SeparatorText("Hardware");
     ImGui::Text("GPU: %s", glGetString(GL_RENDERER));

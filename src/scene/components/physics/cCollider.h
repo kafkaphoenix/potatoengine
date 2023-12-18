@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scene/entity.h"
+#include "utils/numericComparator.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -25,6 +26,14 @@ struct CCollider {
     void print() const {
       ENGINE_BACKTRACE("\t\ttype: {0}\n\t\t\t\tsize: {1}", _type,
                        glm::to_string(size));
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["type"] = _type;
+      info["size"] = glm::to_string(size);
+
+      return info;
     }
 };
 }

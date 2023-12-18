@@ -3,6 +3,7 @@
 #include "scene/components/graphics/cMesh.h"
 #include "scene/components/physics/cTransform.h"
 #include "scene/components/world/cBlock.h"
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 
@@ -33,6 +34,25 @@ struct CChunk {
         b += std::format("\n\t\t\t\t\tblock: {} {}", i, blocks[i]._type);
       }
       ENGINE_BACKTRACE("\t\tbiome: {0}\n\t\t\t\tblocks: {1}", _biome, b);
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["biome"] = _biome;
+      info["mesh 0"] = "0";
+      info["transform 0"] = "0";
+
+      return info;
+    }
+
+    std::map<std::string, std::string, NumericComparator>
+    getMeshInfo(int index) const {
+      return terrainMesh.getInfo();
+    }
+
+    std::map<std::string, std::string, NumericComparator>
+    getTransformInfo(int index) const {
+      return transform.getInfo();
     }
 
     void setBiome() {

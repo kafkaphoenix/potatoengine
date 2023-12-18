@@ -21,12 +21,22 @@
             "camera": "assets/models/camera/camera.obj"
         },
         "prefabs": {
-            "entities": {
-                "filepath": "assets/prefabs/entities.json",
+            "structures": {
+                "filepath": "assets/prefabs/structures.json",
                 "targeted_prototypes": [
-                    "building",
-                    "rectangle",
+                    "building"
+                ]
+            },
+            "objects": {
+                "filepath": "assets/prefabs/objects.json",
+                "targeted_prototypes": [
                     "camera"
+                ]
+            },
+            "primitives": {
+                "filepath": "assets/prefabs/primitives.json",
+                "targeted_prototypes": [
+                    "rectangle"
                 ]
             }
         }
@@ -34,7 +44,7 @@
     "entities": {
         "normals": {
             "lowpoly_city": {
-                "prefab": "entities",
+                "prefab": "structures",
                 "prototype": "building",
                 "options": {
                     "position": {"x": 0, "y": 0, "z": 0},
@@ -42,7 +52,7 @@
                 }
             },
             "pavement": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "rectangle",
                 "options": {
                     "size": {"x": 70, "y": 70, "z": 0},
@@ -56,7 +66,7 @@
         },
         "cameras": {
             "scene_camera": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "camera",
                 "options": {
                     "position": {"x": 16, "y": 2, "z": 38},

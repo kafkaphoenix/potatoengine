@@ -2,6 +2,7 @@
 
 #define GLM_FORCE_CTOR_INIT
 
+#include "utils/numericComparator.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -53,6 +54,24 @@ struct CCamera {
         _type, _aspectRatio, fov, zoomFactor, zoomMin, zoomMax, nearClip,
         farClip, mouseSensitivity, translationSpeed, verticalSpeed,
         rotationSpeed);
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["type"] = _type;
+      info["aspectRatio"] = _aspectRatio;
+      info["fov"] = std::to_string(fov);
+      info["zoomFactor"] = std::to_string(zoomFactor);
+      info["zoomMin"] = std::to_string(zoomMin);
+      info["zoomMax"] = std::to_string(zoomMax);
+      info["nearClip"] = std::to_string(nearClip);
+      info["farClip"] = std::to_string(farClip);
+      info["mouseSensitivity"] = std::to_string(mouseSensitivity);
+      info["translationSpeed"] = std::to_string(translationSpeed);
+      info["verticalSpeed"] = std::to_string(verticalSpeed);
+      info["rotationSpeed"] = std::to_string(rotationSpeed);
+
+      return info;
     }
 
     void setCameraType() {

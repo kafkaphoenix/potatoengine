@@ -1,6 +1,7 @@
 #include "scene/sceneLoader.h"
 
 #include "utils/timer.h"
+
 using json = nlohmann::json;
 
 namespace potatoengine {

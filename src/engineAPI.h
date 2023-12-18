@@ -35,3 +35,5 @@ namespace engine = potatoengine;
 
 // utils
 #include "utils/timer.h"
+#include "utils/numericComparator.h"
+#include "utils/mapJsonSerializer.h"

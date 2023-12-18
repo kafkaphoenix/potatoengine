@@ -16,18 +16,29 @@ void drawTabBar(std::weak_ptr<engine::AssetsManager> am, std::weak_ptr<engine::R
       ImGui::EndTabItem();
     } else {
       selectedAssetTabKey = "";
+      selectedAssetTabType = "";
+      textFilterAssets[0] = '\0';
     }
     if (ImGui::BeginTabItem("Entities")) {
       drawEntities(sm);
       ImGui::EndTabItem();
     } else {
       selectedEntityTabKey = "";
+      textFilterEntities[0] = '\0';
+      filterPrefabs = false;
+      filterPrototypes = false;
+      filterInstances = false;
+      filterComponents = false;
     }
     if (ImGui::BeginTabItem("Renderer")) {
       drawRenderer(r);
       ImGui::EndTabItem();
     } else {
       selectedRendererTabKey = "";
+      selectedRendererTabType = "";
+      textFilterRenderer[0] = '\0';
+      filterFBOS = false;
+      filterShaderPrograms = false;
     }
     if (ImGui::BeginTabItem("Settings")) {
       drawSettings(settings);

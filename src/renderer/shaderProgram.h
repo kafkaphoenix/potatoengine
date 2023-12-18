@@ -4,6 +4,7 @@
 
 #include "assets/shader.h"
 #include "pch.h"
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 
@@ -30,6 +31,7 @@ class ShaderProgram {
     void setMat4(std::string_view name, const glm::mat4& mat);
     void resetActiveUniforms();
     void printActiveUniforms();
+    const std::map<std::string, std::string, NumericComparator>& getInfo();
 
     std::string_view getName() const noexcept { return m_name; }
     uint32_t getID() const noexcept { return m_id; }
@@ -41,6 +43,7 @@ class ShaderProgram {
     uint32_t m_id{};
     std::string m_name{};
     std::vector<ActiveUniform> m_activeUniforms{};
+    std::map<std::string, std::string, NumericComparator> m_info{};
 
     std::vector<ActiveUniform> getActiveUniforms();
 };

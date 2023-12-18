@@ -1,0 +1,36 @@
+{
+    "foco": {
+        "ctags": ["transform", "distanceFromCamera", "rigidBody"],
+        "components": {
+            "light": {
+                "type": "directional"
+            },
+            "body": "foco",
+            "shaderProgram": {
+                "isVisible": false,
+                "name": "basic"
+            },
+            "texture": {
+                "drawMode": "color",
+                "color": {"r": 0, "g": 0, "b": 0, "a": 0.7}
+            }
+        }
+    },
+    "camera": {
+        "ctags": ["transform", "distanceFromCamera", "rigidBody"],
+        "components": {
+            "camera": {
+                "type": "perspective"
+            },
+            "body": "camera",
+            "shaderProgram": {
+                "isVisible": false,
+                "name": "basic"
+            },
+            "texture": {
+                "drawMode": "color",
+                "color": {"r": 0, "g": 0, "b": 0, "a": 0.7}
+            }
+        }
+    }
+}

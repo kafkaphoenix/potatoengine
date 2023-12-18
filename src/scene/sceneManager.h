@@ -20,7 +20,7 @@ class SceneManager {
     void onEvent(Event& e);
     void onUpdate(Time ts, std::weak_ptr<Renderer> r);
     void print();
-    const std::map<std::string, std::string>& getMetrics();
+    const std::map<std::string, std::string, NumericComparator>& getMetrics();
     entt::registry& getRegistry() noexcept { return m_registry; }
 
     // Entity is a wrapper around entt::entity without persistency
@@ -65,9 +65,9 @@ class SceneManager {
     std::string m_activeScene{};
     std::unordered_map<std::string, SceneLoader> m_loadedScenes{};
 
-    std::map<std::string, std::string> m_metrics{};
+    std::map<std::string, std::string, NumericComparator> m_metrics{};
     std::map<std::string, entt::entity, NumericComparator> m_namedEntities{};
-    bool m_isDirty{false};
+    bool m_dirty{};
 
     friend class Entity;
 };

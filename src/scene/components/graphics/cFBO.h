@@ -3,11 +3,21 @@
 
 #include "pch.h"
 #include "scene/entity.h"
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 
 struct CFBO {
-    enum class Mode { Normal, Inverse, Greyscale, Blur, Edge, Sharpen, NightVision, Emboss };
+    enum class Mode {
+      Normal,
+      Inverse,
+      Greyscale,
+      Blur,
+      Edge,
+      Sharpen,
+      NightVision,
+      Emboss
+    };
 
     std::string fbo{};
     std::string _mode{};
@@ -17,12 +27,26 @@ struct CFBO {
     uint32_t height{};
 
     CFBO() = default;
-    explicit CFBO(std::string&& fbo, Mode m, std::string&& attachment, uint32_t w, uint32_t h)
-        : fbo(std::move(fbo)), mode(m), attachment(std::move(attachment)), width(w), height(h) {}
+    explicit CFBO(std::string&& fbo, Mode m, std::string&& attachment,
+                  uint32_t w, uint32_t h)
+      : fbo(std::move(fbo)), mode(m), attachment(std::move(attachment)),
+        width(w), height(h) {}
 
     void print() const {
-      ENGINE_BACKTRACE("\t\tfbo: {0}\n\t\t\t\tmode: {1}\n\t\t\t\tattachment: {2}\n\t\t\t\twidth: {3}\n\t\t\t\theight: {4}",
-                   fbo, _mode, attachment, width, height);
+      ENGINE_BACKTRACE("\t\tfbo: {0}\n\t\t\t\tmode: {1}\n\t\t\t\tattachment: "
+                       "{2}\n\t\t\t\twidth: {3}\n\t\t\t\theight: {4}",
+                       fbo, _mode, attachment, width, height);
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["fbo"] = fbo;
+      info["mode"] = _mode;
+      info["attachment"] = attachment;
+      info["width"] = std::to_string(width);
+      info["height"] = std::to_string(height);
+
+      return info;
     }
 
     void setupProperties(std::unique_ptr<ShaderProgram>& sp) {

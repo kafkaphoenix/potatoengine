@@ -45,13 +45,23 @@
             "player": "assets/models/player/player.obj"
         },
         "prefabs": {
-            "entities": {
-                "filepath": "assets/prefabs/entities.json",
+            "creatures": {
+                "filepath": "assets/prefabs/creatures.json",
                 "targeted_prototypes": [
-                    "player",
-                    "skybox",
+                    "player"
+                ]
+            },
+            "objects": {
+                "filepath": "assets/prefabs/objects.json",
+                "targeted_prototypes": [
                     "foco",
-                    "camera",
+                    "camera"
+                ]
+            },
+            "systems": {
+                "filepath": "assets/prefabs/systems.json",
+                "targeted_prototypes": [
+                    "skybox",
                     "chunk_config"
                 ]
             }
@@ -60,7 +70,7 @@
     "entities": {
         "normals": {
             "auri": {
-                "prefab": "entities",
+                "prefab": "creatures",
                 "prototype": "player",
                 "options": {
                     "position": {"x": 180, "y": 30, "z": 180},
@@ -69,7 +79,7 @@
                 }
             },
             "skybox": {
-                "prefab": "entities",
+                "prefab": "systems",
                 "prototype": "skybox",
                 "options": {
                     "time": 7,
@@ -77,7 +87,7 @@
                 }
             },
             "chunk_config": {
-                "prefab": "entities",
+                "prefab": "systems",
                 "prototype": "chunk_config",
                 "options": {
                     "chunkSize": 300,
@@ -108,7 +118,7 @@
         },
         "lights": {
             "foco": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "foco",
                 "options": {
                     "isVisible": true,
@@ -121,7 +131,7 @@
         },
         "cameras": {
             "scene_camera": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "camera",
                 "options": {
                     "isVisible": true,

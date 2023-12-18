@@ -2,6 +2,7 @@
 
 #include "assets/texture.h"
 #include "pch.h"
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 
@@ -29,7 +30,7 @@ class FBO {
     }
     uint32_t getBufferID() const;
     std::string_view getBufferType() const noexcept;
-    const std::map<std::string, std::string>& getInfo();
+    const std::map<std::string, std::string, NumericComparator>& getInfo();
 
     static std::unique_ptr<FBO> Create(uint32_t width, uint32_t height,
                                        uint32_t bufferType);
@@ -50,6 +51,6 @@ class FBO {
     uint32_t m_stencilRenderBuffer{};
     uint32_t m_depthStencilRenderBuffer{};
 
-    std::map<std::string, std::string> m_info{};
+    std::map<std::string, std::string, NumericComparator> m_info{};
 };
 }

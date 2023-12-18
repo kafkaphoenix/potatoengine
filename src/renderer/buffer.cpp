@@ -9,7 +9,7 @@ static constexpr GLbitfield mapping_flags =
 static constexpr GLbitfield storage_flags =
     GL_DYNAMIC_STORAGE_BIT | mapping_flags; // allow modification of the buffer but not resizing
 
-VBO::VBO(const std::vector<Vertex>& vertices) : m_immutable(true) {
+VBO::VBO(const std::vector<Vertex>& vertices) : m_count(vertices.size()), m_immutable(true) {
   if (m_immutable) {
     glCreateBuffers(1, &m_id);
     glNamedBufferStorage(m_id, sizeof(Vertex) * vertices.size(), vertices.data(), storage_flags);
@@ -19,12 +19,12 @@ VBO::VBO(const std::vector<Vertex>& vertices) : m_immutable(true) {
   }
 }
 
-VBO::VBO(const std::vector<ShapeVertex>& vertices) {
+VBO::VBO(const std::vector<ShapeVertex>& vertices): m_count(vertices.size()) {
   glCreateBuffers(1, &m_id);
   glNamedBufferStorage(m_id, sizeof(ShapeVertex) * vertices.size(), vertices.data(), storage_flags);
 }
 
-VBO::VBO(const std::vector<TerrainVertex>& vertices) {
+VBO::VBO(const std::vector<TerrainVertex>& vertices) : m_count(vertices.size()) {
   glCreateBuffers(1, &m_id);
   glNamedBufferStorage(m_id, sizeof(TerrainVertex) * vertices.size(), vertices.data(), storage_flags);
 }

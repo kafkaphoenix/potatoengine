@@ -1,0 +1,77 @@
+{
+    "creature": {
+        "ctags": ["transform"],
+        "components": {
+            "health": {
+                "base": 100,
+                "current": 100
+            },
+            "mana": {
+                "base": 100,
+                "current": 100
+            },
+            "stamina": {
+                "base": 100,
+                "current": 100
+            },
+            "experience": 0
+        }
+    },
+    "player": {
+        "inherit": ["creature"],
+        "ctags": ["equipment", "inventory", "activeCamera"],
+        "components": {
+            "body": "player",
+            "camera": {
+                "type": "perspective",
+                "fov": 90,
+                "translationSpeed": 40,
+                "verticalSpeed": 50
+            },
+            "rigidBody": {
+                "isKinematic": true
+            },
+            "stats": {
+                "strength": 10,
+                "dexterity": 10,
+                "constitution": 10,
+                "intelligence": 10,
+                "wisdom": 10,
+                "charisma": 10
+            },
+            "talents": {
+                "acrobatics": 0,
+                "arcana": 0,
+                "athletics": 0,
+                "perception": 0,
+                "persuasion": 0,
+                "stealth": 0,
+                "survival": 0,
+                "luck": 0
+            },
+            "skills": {
+                "mining": 0,
+                "jewelcrafting": 0,
+                "blacksmithing": 0,
+                "fishing": 0,
+                "hunting": 0,
+                "skinning": 0,
+                "leatherworking": 0,
+                "herbalism": 0,
+                "cooking": 0,
+                "alchemy": 0,
+                "enchanting": 0,
+                "gathering": 0,
+                "tailoring": 0,
+                "woodworking": 0,
+                "woodcutting": 0,
+                "farming": 0,
+                "quarrying": 0,
+                "masonry": 0
+            }
+        }
+    },
+    "chicken": {
+        "inherit": ["creature"]
+    }
+}

@@ -51,6 +51,19 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
   const auto& renderer = r.lock();
   ENGINE_ASSERT(renderer, "Renderer is null!")
 
+  entt::entity fbo =
+    reg.view<CFBO, CUUID>().front(); // TODO: support more than one?
+  if (fbo not_eq entt::null) {
+    CFBO& cfbo = reg.get<CFBO>(fbo);
+    const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
+    defaultFBO->bindToDraw();
+    RendererAPI::ToggleDepthTest(true);
+  }
+
+  // FBOs are cleared in their own render pass at the end of the scene
+  RendererAPI::Clear();
+  renderer->resetMetrics();
+
   entt::entity camera =
     reg.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
   ENGINE_ASSERT(camera not_eq entt::null, "No camera found!");
@@ -65,16 +78,6 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
     cSkyboxTexture = reg.try_get<CTexture>(sky);
   }
 
-  entt::entity fbo =
-    reg.view<CFBO, CUUID>().front(); // TODO: support more than one?
-  if (fbo not_eq entt::null) {
-    CFBO& cfbo = reg.get<CFBO>(fbo);
-    const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
-    defaultFBO->bindToDraw();
-    RendererAPI::ToggleDepthTest(true);
-  }
-  RendererAPI::Clear();
-
   reg.view<CTransform, CShaderProgram, CUUID>().each(
     [&](entt::entity e, const CTransform& cTransform,
         const CShaderProgram& cShaderProgram, const CUUID& cUUID) {
@@ -88,7 +91,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
       CChunkManager* cChunkManager = reg.try_get<CChunkManager>(e);
 
       if (cShaderProgram.isVisible) {
-        if (cMesh) { // objects
+        if (cMesh) { // TODO objects with one mesh unused
           if (not cTexture) {
             CName* cName = reg.try_get<CName>(e);
             if (cName) {

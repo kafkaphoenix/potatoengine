@@ -4,6 +4,7 @@
 
 #include "pch.h"
 #include "utils/numericComparator.h"
+
 using json = nlohmann::json;
 
 struct Prototype {

@@ -1,0 +1,11 @@
+{
+    "building": {
+        "ctags": ["transform", "distanceFromCamera"],
+        "components": {
+            "shaderProgram": {
+                "name": "basic"
+            },
+            "body": "building"
+        }
+    }
+}

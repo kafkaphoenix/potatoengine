@@ -11,10 +11,15 @@
             "camera": "assets/models/camera/camera.obj"
         },
         "prefabs": {
-            "entities": {
-                "filepath": "assets/prefabs/entities.json",
+            "structures": {
+                "filepath": "assets/prefabs/structures.json",
                 "targeted_prototypes": [
-                    "building",
+                    "building"
+                ]
+            },
+            "objects": {
+                "filepath": "assets/prefabs/objects.json",
+                "targeted_prototypes": [
                     "camera"
                 ]
             }
@@ -23,7 +28,7 @@
     "entities": {
         "normals": {
             "sponza": {
-                "prefab": "entities",
+                "prefab": "structures",
                 "prototype": "building",
                 "options": {
                     "scale": {"x": 0.01,"y": 0.01,"z": 0.01},
@@ -33,7 +38,7 @@
         },
         "cameras": {
             "scene_camera": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "camera",
                 "options": {
                     "position": {"x": 8, "y": 6, "z": 3},

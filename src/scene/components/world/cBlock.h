@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils/numericComparator.h"
+
 namespace potatoengine {
 
 struct CBlock {
@@ -28,6 +30,13 @@ struct CBlock {
     explicit CBlock(std::string&& t) : _type(std::move(t)) {}
 
     void print() const { ENGINE_BACKTRACE("\t\ttype: {0}", _type); }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["type"] = _type;
+
+      return info;
+    }
 
     void setBlockType() {
       if (_type == "air") {

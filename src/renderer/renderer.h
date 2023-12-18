@@ -10,6 +10,7 @@
 #include "renderer/shaderProgram.h"
 #include "scene/components/camera/cCamera.h"
 #include "scene/components/physics/cTransform.h"
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 
@@ -47,6 +48,8 @@ class Renderer {
     int getShaderProgramsCount() const { return m_shaderPrograms.size(); }
     int getFramebuffersCount() const { return m_framebuffers.size(); }
     void clear();
+    void resetMetrics();
+    const std::map<std::string, std::string, NumericComparator>& getMetrics();
     static std::unique_ptr<Renderer> Create(std::weak_ptr<AssetsManager> am);
 
   private:
@@ -57,5 +60,10 @@ class Renderer {
       m_shaderPrograms;
     std::unordered_map<std::string, std::unique_ptr<FBO>> m_framebuffers;
     std::weak_ptr<AssetsManager> m_assetsManager;
+    std::map<std::string, std::string, NumericComparator> m_metrics{};
+    int m_drawCalls{};
+    int m_triangles{};
+    int m_vertices{};
+    int m_indices{};
 };
 }

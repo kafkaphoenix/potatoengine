@@ -2,8 +2,10 @@
 
 #define GLM_FORCE_CTOR_INIT
 
+#include "utils/numericComparator.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
+
 namespace potatoengine {
 
 struct CTransform {
@@ -33,6 +35,15 @@ struct CTransform {
         "\t\tposition: {0}\n\t\t\t\trotation: {1}\n\t\t\t\tscale: {2}",
         glm::to_string(position), glm::to_string(rotation),
         glm::to_string(scale));
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["position"] = glm::to_string(position);
+      info["rotation"] = glm::to_string(rotation);
+      info["scale"] = glm::to_string(scale);
+
+      return info;
     }
 };
 }

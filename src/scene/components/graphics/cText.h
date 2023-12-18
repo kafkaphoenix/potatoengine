@@ -6,6 +6,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "pch.h"
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 
@@ -21,6 +22,14 @@ struct CText {
     void print() const {
       ENGINE_BACKTRACE("\t\ttext: {0}\n\t\t\t\tcolor: {1}", text,
                        glm::to_string(color));
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["text"] = text;
+      info["color"] = glm::to_string(color);
+
+      return info;
     }
 };
 }

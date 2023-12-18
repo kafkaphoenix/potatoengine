@@ -99,7 +99,7 @@ std::string_view FBO::getBufferType() const noexcept {
   }
 }
 
-const std::map<std::string, std::string>& FBO::getInfo() {
+const std::map<std::string, std::string, NumericComparator>& FBO::getInfo() {
   if (not m_info.empty()) {
     return m_info;
   }

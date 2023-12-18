@@ -39,12 +39,22 @@
             "camera": "assets/models/camera/camera.obj"
         },
         "prefabs": {
-            "entities": {
-                "filepath": "assets/prefabs/entities.json",
+            "systems": {
+                "filepath": "assets/prefabs/systems.json",
                 "targeted_prototypes": [
-                    "skybox",
+                    "skybox"
+                ]
+            },
+            "objects": {
+                "filepath": "assets/prefabs/objects.json",
+                "targeted_prototypes": [
                     "foco",
-                    "camera",
+                    "camera"
+                ]
+            },
+            "primitives": {
+                "filepath": "assets/prefabs/primitives.json",
+                "targeted_prototypes": [
                     "rectangle",
                     "triangle",
                     "circle",
@@ -56,7 +66,7 @@
     "entities": {
         "normals": {
             "skybox": {
-                "prefab": "entities",
+                "prefab": "systems",
                 "prototype": "skybox",
                 "options": {
                     "time": 7,
@@ -64,7 +74,7 @@
                 }
             },
             "flat_terrain": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "rectangle",
                 "options": {
                     "size": {"x": 100, "y": 100, "z": 0},
@@ -76,7 +86,7 @@
                 }
             },
             "triangle1": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "triangle",
                 "options": {
                     "position": {"x": 0, "y": 0, "z": 0},
@@ -84,7 +94,7 @@
                 }
             },
             "triangle2": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "triangle",
                 "options": {
                     "position": {"x": 5, "y": 0, "z": 0},
@@ -92,7 +102,7 @@
                 }
             },
             "triangle3" : {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "triangle",
                 "options": {
                     "position": {"x": -5, "y": 0, "z": 0},
@@ -100,7 +110,7 @@
                 }
             },
             "cube1": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "cube",
                 "options": {
                     "position": {"x": 0, "y": 5, "z": 0},
@@ -108,7 +118,7 @@
                 }
             },
             "cube2": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "cube",
                 "options": {
                     "position": {"x": 5, "y": 5, "z": 0},
@@ -116,7 +126,7 @@
                 }
             },
             "cube3" : {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "cube",
                 "options": {
                     "position": {"x": -5, "y": 5, "z": 0},
@@ -124,7 +134,7 @@
                 }
             },
             "circle1": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "circle",
                 "options": {
                     "position": {"x": 0, "y": 10, "z": 0},
@@ -132,7 +142,7 @@
                 }
             },
             "circle2": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "circle",
                 "options": {
                     "position": {"x": 5, "y": 10, "z": 0},
@@ -140,7 +150,7 @@
                 }
             },
             "circle3" : {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "circle",
                 "options": {
                     "position": {"x": -5, "y": 10, "z": 0},
@@ -148,7 +158,7 @@
                 }
             },
             "rectangle1": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "rectangle",
                 "options": {
                     "position": {"x": 0, "y": 15, "z": 0},
@@ -156,7 +166,7 @@
                 }
             },
             "rectangle2": {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "rectangle",
                 "options": {
                     "position": {"x": 5, "y": 15, "z": 0},
@@ -164,7 +174,7 @@
                 }
             },
             "rectangle3" : {
-                "prefab": "entities",
+                "prefab": "primitives",
                 "prototype": "rectangle",
                 "options": {
                     "position": {"x": -5, "y": 15, "z": 0},
@@ -174,7 +184,7 @@
         },
         "lights": {
             "foco": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "foco",
                 "options": {
                     "position": {"x": 0, "y": 10, "z": 5},
@@ -185,7 +195,7 @@
         },
         "cameras": {
             "scene_camera": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "camera",
                 "options": {
                     "position": {"x": 0, "y": 5, "z": 20},

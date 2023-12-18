@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 struct CMaterial {
@@ -21,6 +22,16 @@ struct CMaterial {
                        "{1}\n\t\t\t\tspecular: {2}\n\t\t\t\tshininess: {3}",
                        glm::to_string(ambient), glm::to_string(diffuse),
                        glm::to_string(specular), shininess);
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["ambient"] = glm::to_string(ambient);
+      info["diffuse"] = glm::to_string(diffuse);
+      info["specular"] = glm::to_string(specular);
+      info["shininess"] = std::to_string(shininess);
+
+      return info;
     }
 };
 }

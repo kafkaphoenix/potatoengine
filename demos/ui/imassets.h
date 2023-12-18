@@ -67,7 +67,7 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
           selectedAssetTabType == "Prefab") {
         const auto& prefab = manager->get<engine::Prefab>(selectedAssetTabKey);
         const auto& prototypeInfo = prefab->getTargetedPrototypeInfo(value);
-        if (ImGui::TreeNode(key.c_str())) {
+        if (ImGui::TreeNode((selectedAssetTabType + selectedAssetTabKey + key).c_str(), key.c_str())) {
           for (const auto& [key, value] : prototypeInfo) {
             ImGui::BulletText("%s: %s", key.c_str(), value.c_str());
           }
@@ -77,7 +77,7 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
                  selectedAssetTabType == "Model") {
         const auto& model = manager->get<engine::Model>(selectedAssetTabKey);
         const auto& textureInfo = model->getLoadedTextureInfo(value);
-        if (ImGui::TreeNode(key.c_str())) {
+        if (ImGui::TreeNode((selectedAssetTabType + selectedAssetTabKey + key).c_str(), key.c_str())) {
           for (const auto& [key, value] : textureInfo) {
             ImGui::BulletText("%s: %s", key.c_str(), value.c_str());
           }

@@ -6,7 +6,7 @@
 
 using json = nlohmann::json;
 
-namespace potatoengine {
+namespace potatoengine { // TODO move or rethink this
 
 void deserializeCamera(CCamera& cCamera, const json& options) {
   if (options.contains("type")) {

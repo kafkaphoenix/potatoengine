@@ -4,6 +4,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "scene/entity.h"
+#include "utils/numericComparator.h"
 #include "utils/shapeFactory.h"
 
 namespace potatoengine {
@@ -27,6 +28,23 @@ struct CShape {
                        "{2}\n\t\t\t\trepeatTexture: {3}",
                        _type, glm::to_string(size), meshes.size(),
                        repeatTexture);
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["type"] = _type;
+      info["size"] = glm::to_string(size);
+      for (int i = 0; i < meshes.size(); ++i) {
+        info["mesh " + std::to_string(i)] = std::to_string(i);
+      }
+      info["repeatTexture"] = repeatTexture ? "true" : "false";
+
+      return info;
+    }
+
+    std::map<std::string, std::string, NumericComparator>
+    getMeshInfo(int index) const {
+      return meshes.at(index).getInfo();
     }
 
     void createMesh() {

@@ -24,6 +24,8 @@
 #include "utils/timer.h"
 
 using json = nlohmann::json;
+using namespace entt::literals;
+
 namespace potatoengine {
 
 SceneManager::SceneManager(std::weak_ptr<AssetsManager> am,
@@ -41,10 +43,11 @@ void SceneManager::onUpdate(Time ts, std::weak_ptr<Renderer> r) {
   updateSystem(std::ref(m_registry), r, ts);
 }
 
-void SceneManager::print() { printScene(std::ref(m_registry)); }
+void SceneManager::print() { PrintScene(std::ref(m_registry)); }
 
-const std::map<std::string, std::string>& SceneManager::getMetrics() {
-  if (not m_isDirty) {
+const std::map<std::string, std::string, NumericComparator>&
+SceneManager::getMetrics() {
+  if (not m_dirty) {
     return m_metrics;
   }
 
@@ -63,7 +66,7 @@ const std::map<std::string, std::string>& SceneManager::getMetrics() {
   m_metrics["Entities Total Alive"] = std::to_string(total);
   m_metrics["Entities Total Created"] = std::to_string(created);
   m_metrics["Entities Total Released"] = std::to_string(created - total);
-  m_isDirty = false;
+  m_dirty = false;
 
   return m_metrics;
 }
@@ -74,12 +77,11 @@ Entity SceneManager::createEntity(std::string_view prefabID,
   UUID _uuid = uuid.has_value() ? UUID(uuid.value()) : UUID();
   Entity e = cloneEntity(getPrototype(prefabID, prototypeID), _uuid);
   e.add<CUUID>(_uuid);
-  m_isDirty = true;
+  m_dirty = true;
   return e;
 }
 
 Entity SceneManager::cloneEntity(Entity&& e, uint32_t uuid) {
-  using namespace entt::literals;
   Entity cloned = Entity(m_registry.create(), this);
 
   for (auto&& curr : m_registry.storage()) {
@@ -94,13 +96,13 @@ Entity SceneManager::cloneEntity(Entity&& e, uint32_t uuid) {
     }
   }
 
-  m_isDirty = true;
+  m_dirty = true;
   return cloned;
 }
 
 void SceneManager::removeEntity(Entity&& e) {
   e.add<CDeleted>();
-  m_isDirty = true;
+  m_dirty = true;
 }
 
 Entity SceneManager::getEntity(std::string_view name) {
@@ -123,7 +125,7 @@ Entity SceneManager::getEntity(UUID& uuid) {
 
 const std::map<std::string, entt::entity, NumericComparator>&
 SceneManager::getAllNamedEntities() {
-  if (not m_isDirty) {
+  if (not m_dirty) {
     return m_namedEntities;
   }
 
@@ -142,7 +144,7 @@ void SceneManager::createPrototypes(std::string_view prefabID) {
   // we have access to the scene manager and avoid circular
   // dependency but we discard it afterwards to create one per prototype
   m_entityFactory.createPrototypes(prefabID, Entity(m_registry.create(), this));
-  m_isDirty = true;
+  m_dirty = true;
 }
 
 void SceneManager::updatePrototypes(std::string_view prefabID) {
@@ -151,7 +153,7 @@ void SceneManager::updatePrototypes(std::string_view prefabID) {
 
 void SceneManager::destroyPrototypes(std::string_view prefabID) {
   m_entityFactory.destroyPrototypes(prefabID, std::ref(m_registry));
-  m_isDirty = true;
+  m_dirty = true;
 }
 
 const EntityFactory::Prototypes&
@@ -172,7 +174,7 @@ void SceneManager::createPrototype(std::string_view prefabID,
                                    std::string_view prototypeID) {
   m_entityFactory.createPrototype(prefabID, prototypeID,
                                   Entity(m_registry.create(), this));
-  m_isDirty = true;
+  m_dirty = true;
 }
 
 void SceneManager::updatePrototype(std::string_view prefabID,
@@ -184,7 +186,7 @@ void SceneManager::updatePrototype(std::string_view prefabID,
 void SceneManager::destroyPrototype(std::string_view prefabID,
                                     std::string_view prototypeID) {
   m_entityFactory.destroyPrototype(prefabID, prototypeID, std::ref(m_registry));
-  m_isDirty = true;
+  m_dirty = true;
 }
 
 Entity SceneManager::getPrototype(std::string_view prefabID,
@@ -245,8 +247,8 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
     ENGINE_INFO("Scene {} creation TIME: {:.6f}s", sceneID, timer.getSeconds());
     m_activeScene = std::move(sceneID);
   }
-  m_isDirty = true;
-  printScene(std::ref(m_registry));
+  m_dirty = true;
+  PrintScene(std::ref(m_registry));
 }
 
 void SceneManager::createEntities(std::string_view prefabID,
@@ -701,7 +703,7 @@ void SceneManager::createEntities(std::string_view prefabID,
     });
 
   m_registry.sort<CUUID, CDistanceFromCamera>();
-  m_isDirty = true;
+  m_dirty = true;
 }
 
 void SceneManager::reloadScene() {
@@ -714,7 +716,7 @@ void SceneManager::reloadScene() {
   m_entityFactory.clear();
   renderer->clear();
   createScene(m_activeScene, true);
-  m_isDirty = true;
+  m_dirty = true;
 }
 
 void SceneManager::clearScene() {
@@ -730,7 +732,7 @@ void SceneManager::clearScene() {
   renderer->clear();
   m_activeScene = "";
   m_metrics.clear();
-  m_isDirty = false;
+  m_dirty = false;
 }
 
 template <typename T> void SceneManager::onComponentAdded(Entity& e, T& c) {

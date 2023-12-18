@@ -7,6 +7,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "scene/components/world/cChunk.h"
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 
@@ -58,6 +59,20 @@ struct CChunkManager {
         "{6}\n\t\t\t\tchunks: {7}",
         width, height, chunkSize, blockSize, _meshType, _meshAlgorithm,
         useBiomes, c);
+    }
+
+    std::map<std::string, std::string, NumericComparator> getInfo() const {
+      std::map<std::string, std::string, NumericComparator> info;
+      info["width"] = std::to_string(width);
+      info["height"] = std::to_string(height);
+      info["chunkSize"] = std::to_string(chunkSize);
+      info["blockSize"] = std::to_string(blockSize);
+      info["meshType"] = _meshType;
+      info["meshAlgorithm"] = _meshAlgorithm;
+      info["useBiomes"] = useBiomes ? "true" : "false";
+      info["chunks"] = std::to_string(chunks.size());
+
+      return info;
     }
 
     void setMeshType() {

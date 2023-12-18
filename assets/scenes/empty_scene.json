@@ -10,8 +10,8 @@
             "camera": "assets/models/camera/camera.obj"
         },
         "prefabs": {
-            "entities": {
-                "filepath": "assets/prefabs/entities.json",
+            "objects": {
+                "filepath": "assets/prefabs/objects.json",
                 "targeted_prototypes": [
                     "camera"
                 ]
@@ -21,7 +21,7 @@
     "entities": {
         "cameras": {
             "scene_camera": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "camera",
                 "options": {
                     "position": {"x": 8, "y": 6, "z": 3},

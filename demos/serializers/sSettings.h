@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 
 #include "settings.h"
+
 using json = nlohmann::json;
 
 namespace demos::serializers {

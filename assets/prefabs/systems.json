@@ -1,0 +1,77 @@
+{
+    "skybox": {
+        "ctags": ["transform", "time"],
+        "components": {
+            "shape": {
+                "type": "cube",
+                "size": {"x": 1, "y": 1, "z": 1}
+            },
+            "rigidBody": {
+                "isKinematic": true
+            },
+            "texture": {
+                "filepaths": ["skybox_night", "skybox_day"],
+                "hasTransparency": true,
+                "drawMode": "texturesBlend"
+            },
+            "skybox": {
+                "useFog": true,
+                "fogColor": {"r": 0.45, "g": 0.55, "b": 0.6},
+                "fogDensity": 0.0035,
+                "fogGradient": 5
+            },
+            "shaderProgram": {
+                "name": "skybox"
+            },
+            "distanceFromCamera": { "distance": 2 }
+        }
+    },
+    "chunk_config": {
+        "ctags": ["transform"],
+        "components": {
+            "texture": {
+                "filepaths": ["block_atlas"],
+                "drawMode": "textureAtlas"
+            },
+            "textureAtlas": {
+                "rows": 2
+            },
+            "chunkManager": {
+                "chunkSize": 16,
+                "blockSize": 1,
+                "width": 3,
+                "height": 3,
+                "meshType": "chunk",
+                "meshAlgorithm": "greedy",
+                "useBiomes": true
+            },
+            "noise": {
+                "type": "simplex",
+                "seed": 0,
+                "octaves": 4,
+                "frequency": 0.01,
+                "persistence": 0.6,
+                "lacunarity": 2.0,
+                "amplitude": 1,
+                "positive": false
+            },
+            "shaderProgram": {
+                "name": "terrain"
+            }
+        }
+    },
+    "fbo": {
+        "components": {
+            "fbo": {
+                "fbo": "postprocess",
+                "mode": "normal"
+            },
+            "shaderProgram": {
+                "name": "fbo"
+            },
+            "shape": {
+                "type": "rectangle"
+            }
+        }
+    }
+}

@@ -11,6 +11,8 @@
 #include "scene/components/world/cChunk.h"
 #include "scene/components/world/cChunkManager.h"
 
+using namespace entt::literals;
+
 namespace potatoengine {
 
 static constexpr glm::vec3 LIGHT_BLUE = {0.f, 0.9725f, 0.9725f};
@@ -424,8 +426,6 @@ CMesh generateTerrain(
 }
 
 void terrainSystem(entt::registry& reg) { // TODO transform
-  using namespace entt::literals;
-
   reg.view<CChunkManager, CTexture, CNoise, CUUID>().each(
     [&](entt::entity e, CChunkManager& cChunkManager, const CTexture& cTexture,
         const CNoise& cNoise, const CUUID& cUUID) {

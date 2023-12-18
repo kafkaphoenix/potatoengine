@@ -41,16 +41,26 @@
             "camera": "assets/models/camera/camera.obj"
         },
         "prefabs": {
-            "entities": {
-                "filepath": "assets/prefabs/entities.json",
+            "blocks": {
+                "filepath": "assets/prefabs/blocks.json",
                 "targeted_prototypes": [
                     "glass_block",
                     "brick_block",
                     "stone_block",
-                    "wood_block",
-                    "skybox",
+                    "wood_block"
+                ]
+            },
+            "objects": {
+                "filepath": "assets/prefabs/objects.json",
+                "targeted_prototypes": [
                     "foco",
-                    "camera",
+                    "camera"
+                ]
+            },
+            "systems": {
+                "filepath": "assets/prefabs/systems.json",
+                "targeted_prototypes": [
+                    "skybox",
                     "fbo"
                 ]
             }
@@ -59,77 +69,77 @@
     "entities": {
         "normals": {
             "block1": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "glass_block",
                 "options": {
                     "position": {"x": 0, "y": 0, "z": 0}
                 }
             },
             "block2": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "glass_block",
                 "options": {
                     "position": {"x": 2, "y": 5, "z": -15}
                 }
             },
             "block3": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "stone_block",
                 "options": {
                     "position": {"x": -1.5, "y": -2.2, "z": -2.5}
                 }
             },
             "block4": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "stone_block",
                 "options": {
                     "position": {"x": -3.8, "y": -2, "z": -12.3}
                 }
             },
             "block5": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "brick_block",
                 "options": {
                     "position": {"x": 2.4, "y": -0.4, "z": -3.5}
                 }
             },
             "block6": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "brick_block",
                 "options": {
                     "position": {"x": -1.7, "y": 3, "z": -7.5}
                 }
             },
             "block7": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "wood_block",
                 "options": {
                     "position": {"x": 1.3, "y": -2, "z": -2.5}
                 }
             },
             "block8": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "wood_block",
                 "options": {
                     "position": {"x": 1.5, "y": 2, "z": -2.5}
                 }
             },
             "block9": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "stone_block",
                 "options": {
                     "position": {"x": 1.5, "y": 0.2, "z": -1.5}
                 }
             },
             "block10": {
-                "prefab": "entities",
+                "prefab": "blocks",
                 "prototype": "glass_block",
                 "options": {
                     "position": {"x": -1.3, "y": 1, "z": -1.5}
                 }
             },
             "skybox": {
-                "prefab": "entities",
+                "prefab": "systems",
                 "prototype": "skybox",
                 "options": {
                     "time": 7,
@@ -139,7 +149,7 @@
         },
         "lights": {
             "foco": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "foco",
                 "options": {
                     "position": {"x": 0, "y": 10, "z": 5},
@@ -149,7 +159,7 @@
                 }
             },
             "foco2": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "foco",
                 "options": {
                     "position": {"x": 0, "y": 10, "z": -20},
@@ -161,7 +171,7 @@
         },
         "cameras": {
             "scene_camera": {
-                "prefab": "entities",
+                "prefab": "objects",
                 "prototype": "camera",
                 "options": {
                     "position": {"x": 1, "y": 1, "z": 5},
@@ -173,7 +183,7 @@
         },
         "fbos": {
             "postprocess_fbo": {
-                "prefab": "entities",
+                "prefab": "systems",
                 "prototype": "fbo",
                 "options": {
                     "attachment": "depth_texture",

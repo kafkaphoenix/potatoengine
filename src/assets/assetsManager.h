@@ -6,6 +6,7 @@
 #include "assets/shader.h"
 #include "assets/texture.h"
 #include "pch.h"
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 class AssetsManager {
@@ -15,7 +16,7 @@ class AssetsManager {
       ENGINE_ASSERT(not m_assets.contains(id.data()),
                     "Asset {} already exists!", id);
       m_assets.emplace(id, std::make_shared<Type>(std::forward<Args>(args)...));
-      m_isDirty = true;
+      m_dirty = true;
     }
 
     template <typename Type> bool contains(std::string_view id) const {
@@ -27,7 +28,7 @@ class AssetsManager {
     template <typename Type> std::shared_ptr<Type>& get(std::string_view id) {
       ENGINE_ASSERT(contains<Type>(id), "Asset {} not found!", id);
       AssetTypes& asset = m_assets.at(id.data());
-      m_isDirty = true;
+      m_dirty = true;
       return *std::get_if<std::shared_ptr<Type>>(&asset);
     }
 
@@ -52,7 +53,7 @@ class AssetsManager {
 
       std::get<std::shared_ptr<Type>>(maybeAsset->second) = asset;
 
-      m_isDirty = true;
+      m_dirty = true;
       ENGINE_TRACE("Reloaded asset {}", id);
       return std::static_pointer_cast<Type>(
         std::get<std::shared_ptr<Type>>(m_assets.at(id.data())));
@@ -62,7 +63,7 @@ class AssetsManager {
       m_assets.clear();
       m_assetsByType.clear();
       m_metrics.clear();
-      m_isDirty = false;
+      m_dirty = false;
     }
 
     static std::shared_ptr<AssetsManager> Create() {
@@ -81,7 +82,7 @@ class AssetsManager {
     const std::unordered_map<std::string,
                              std::unordered_map<std::string, AssetTypes>>&
     getAssetsByType() {
-      if (not m_isDirty) {
+      if (not m_dirty) {
         return m_assetsByType;
       }
 
@@ -116,12 +117,12 @@ class AssetsManager {
       m_metrics["Models"] = std::to_string(models);
       m_metrics["Scenes"] = std::to_string(scenes);
       m_metrics["Total"] = std::to_string(m_assets.size());
-      m_isDirty = false;
+      m_dirty = false;
       return m_assetsByType;
     }
 
-    const std::map<std::string, std::string>& getMetrics() {
-      if (not m_isDirty) {
+    const std::map<std::string, std::string, NumericComparator>& getMetrics() {
+      if (not m_dirty) {
         return m_metrics;
       }
 
@@ -134,7 +135,7 @@ class AssetsManager {
     std::unordered_map<std::string, AssetTypes> m_assets{};
     std::unordered_map<std::string, std::unordered_map<std::string, AssetTypes>>
       m_assetsByType{};
-    std::map<std::string, std::string> m_metrics{};
-    bool m_isDirty{false};
+    std::map<std::string, std::string, NumericComparator> m_metrics{};
+    bool m_dirty{};
 };
 }
