@@ -13,7 +13,7 @@ class Demos : public engine::Application {
     Demos(engine::Config&& c, engine::CLArgs&& args)
       : engine::Application(std::move(c), std::move(args)) {
       APP_TRACE("Registering app components...");
-      registerComponents();
+      RegisterComponents();
       APP_TRACE("Loading initial state...");
       pushState(
         GameState::Create(std::weak_ptr<engine::AssetsManager>(m_assetsManager),
@@ -37,8 +37,8 @@ engine::Application* engine::CreateApp(engine::CLArgs&& args) {
     static_cast<spdlog::level::level_enum>(settings.appLogLevel));
   LogManager::SetAppLoggerFlushLevel(
     static_cast<spdlog::level::level_enum>(settings.appFlushLevel));
-  LogManager::toggleEngineLogger(settings.enableEngineLogger);
-  LogManager::toggleAppLogger(settings.enableAppLogger);
+  LogManager::ToggleEngineLogger(settings.enableEngineLogger);
+  LogManager::ToggleAppLogger(settings.enableAppLogger);
 
   if (not settings.logFilePath.empty()) {
     LogManager::CreateFileLogger(settings.root + "/" + settings.logFilePath);
@@ -49,11 +49,11 @@ engine::Application* engine::CreateApp(engine::CLArgs&& args) {
                                       settings.enableEngineBacktraceLogger,
                                       settings.enableAppBacktraceLogger);
   }
-  LogManager::toggleEngineBacktraceLogger(settings.enableEngineBacktraceLogger);
-  LogManager::toggleAppBacktraceLogger(settings.enableAppBacktraceLogger);
+  LogManager::ToggleEngineBacktraceLogger(settings.enableEngineBacktraceLogger);
+  LogManager::ToggleAppBacktraceLogger(settings.enableAppBacktraceLogger);
 
   APP_INFO("Loading settings...");
-  CursorMode cursorMode;
+  CursorMode cursorMode{};
   if (settings.cursorMode == 0) {
     cursorMode = CursorMode::Normal;
   } else if (settings.cursorMode == 1) {

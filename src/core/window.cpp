@@ -62,7 +62,7 @@ Window::Window(WindowProperties&& properties) {
   m_context->init(); // make context current window
   glViewport(0, 0, m_data.width, m_data.height);
 
-  setVSync(properties.vSync);
+  toggleVSync(properties.vSync);
   setWindowIcon(m_data.windowIconPath);
   setCursorIcon(properties.cursorIconPath);
   setCursorMode(properties.cursorMode);
@@ -273,7 +273,7 @@ void Window::setWindowMonitor(int monitor) {
                        m_data.width, m_data.height, GLFW_DONT_CARE);
 }
 
-void Window::setVSync(bool enabled) {
+void Window::toggleVSync(bool enabled) {
   glfwSwapInterval(enabled ? 1 : 0);
   m_data.vSync = enabled;
 }

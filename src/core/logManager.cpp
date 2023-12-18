@@ -50,19 +50,19 @@ void LogManager::CreateBacktraceLogger(std::string_view filepath,
   s_appBacktraceLogger = std::make_shared<spdlog::logger>("APP", backtraceSink);
 }
 
-void LogManager::clearAllBacktraceLogger() {
+void LogManager::ClearAllBacktraceLogger() {
   auto sink =
     dynamic_cast<BacktraceLogSink*>(s_engineBacktraceLogger->sinks()[0].get());
   sink->Clear("all");
 }
 
-void LogManager::clearEngineBacktraceLogger() {
+void LogManager::ClearEngineBacktraceLogger() {
   auto sink =
     dynamic_cast<BacktraceLogSink*>(s_engineBacktraceLogger->sinks()[0].get());
   sink->Clear("ENGINE");
 }
 
-void LogManager::clearAppBacktraceLogger() {
+void LogManager::ClearAppBacktraceLogger() {
   auto sink =
     dynamic_cast<BacktraceLogSink*>(s_appBacktraceLogger->sinks()[0].get());
   sink->Clear("APP");
@@ -94,7 +94,7 @@ void LogManager::SetAppLoggerFlushLevel(spdlog::level::level_enum level) {
   s_appLogger->flush_on(level);
 }
 
-void LogManager::toggleEngineLogger(bool enable) {
+void LogManager::ToggleEngineLogger(bool enable) {
   if (enable) {
     s_engineLogger->set_level(s_engineLogLevel);
     s_engineLogger->flush_on(s_engineFlushLevel);
@@ -104,7 +104,7 @@ void LogManager::toggleEngineLogger(bool enable) {
   }
 }
 
-void LogManager::toggleAppLogger(bool enable) {
+void LogManager::ToggleAppLogger(bool enable) {
   if (enable) {
     s_appLogger->set_level(s_appLogLevel);
     s_appLogger->flush_on(s_appFlushLevel);
@@ -114,7 +114,7 @@ void LogManager::toggleAppLogger(bool enable) {
   }
 }
 
-void LogManager::toggleEngineBacktraceLogger(bool enable) {
+void LogManager::ToggleEngineBacktraceLogger(bool enable) {
   if (enable) {
     s_engineBacktraceLogger->set_level(s_engineLogLevel);
     s_engineBacktraceLogger->flush_on(s_engineFlushLevel);
@@ -124,7 +124,7 @@ void LogManager::toggleEngineBacktraceLogger(bool enable) {
   }
 }
 
-void LogManager::toggleAppBacktraceLogger(bool enable) {
+void LogManager::ToggleAppBacktraceLogger(bool enable) {
   if (enable) {
     s_appBacktraceLogger->set_level(s_appLogLevel);
     s_appBacktraceLogger->flush_on(s_appFlushLevel);

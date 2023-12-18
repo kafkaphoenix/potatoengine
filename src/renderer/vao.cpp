@@ -105,12 +105,10 @@ void VAO::attachTerrainVertexAttributes() {
   ++m_vboIDX;
 }
 
-// cppcheck-suppress unusedFunction
 void VAO::updateVertex(std::unique_ptr<VBO>&& vbo, uint32_t idx, VertexType type) {
   // TODO: update only the vbo at idx
 }
 
-// cppcheck-suppress unusedFunction
 void VAO::clearVBOs() { // TODO: move to on detach on component? Do i need it?
   m_vbos.clear();
   m_vboIDX = 0;

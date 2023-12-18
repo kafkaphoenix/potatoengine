@@ -30,7 +30,7 @@ void render(CTexture* cTexture, CTextureAtlas* cTextureAtlas, CSkybox* cSkybox,
             const CShaderProgram& cShaderProgram, CTexture* cSkyboxTexture,
             const std::shared_ptr<Renderer>& r) {
   if (cTexture and cTexture->hasTransparency) {
-    RendererAPI::SetCulling(false);
+    RendererAPI::ToggleCulling(false);
   }
   if (cSkybox) {
     RendererAPI::SetDepthLEqual();
@@ -40,7 +40,7 @@ void render(CTexture* cTexture, CTextureAtlas* cTextureAtlas, CSkybox* cSkybox,
   r->render(cMesh->getVAO(), cTransform.calculate(), cShaderProgram.name);
   cMesh->unbindTextures(cTexture);
   if (cTexture and cTexture->hasTransparency) {
-    RendererAPI::SetCulling(true);
+    RendererAPI::ToggleCulling(true);
   }
   if (cSkybox) {
     RendererAPI::SetDepthLess();
@@ -71,7 +71,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
     CFBO& cfbo = reg.get<CFBO>(fbo);
     const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
     defaultFBO->bindToDraw();
-    RendererAPI::SetDepthTest(true);
+    RendererAPI::ToggleDepthTest(true);
   }
   RendererAPI::Clear();
 
@@ -159,7 +159,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
     const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
     defaultFBO->unbind(); // go back to default framebuffer
     RendererAPI::ClearColor();
-    engine::RendererAPI::SetDepthTest(
+    engine::RendererAPI::ToggleDepthTest(
       false); // disable depth test so screen-space quad isn't discarded due to
               // depth test.
     auto& cShape = reg.get<CShape>(fbo);

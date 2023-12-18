@@ -16,32 +16,32 @@
 
 namespace demos {
 
-CItem& castCItem(void* other) { return *static_cast<CItem*>(other); }
+CItem&CastCItem(void* other) { return *static_cast<CItem*>(other); }
 
-CInventory& castCInventory(void* other) { return *static_cast<CInventory*>(other); }
+CInventory&CastCInventory(void* other) { return *static_cast<CInventory*>(other); }
 
-CHealth& castCHealth(void* other) { return *static_cast<CHealth*>(other); }
+CHealth&CastCHealth(void* other) { return *static_cast<CHealth*>(other); }
 
-CMana& castCMana(void* other) { return *static_cast<CMana*>(other); }
+CMana&CastCMana(void* other) { return *static_cast<CMana*>(other); }
 
-CStamina& castCStamina(void* other) { return *static_cast<CStamina*>(other); }
+CStamina&CastCStamina(void* other) { return *static_cast<CStamina*>(other); }
 
-CExperience& castCExperience(void* other) { return *static_cast<CExperience*>(other); }
+CExperience&CastCExperience(void* other) { return *static_cast<CExperience*>(other); }
 
-CEquipment& castCEquipment(void* other) { return *static_cast<CEquipment*>(other); }
+CEquipment&CastCEquipment(void* other) { return *static_cast<CEquipment*>(other); }
 
-CStats& castCStats(void* other) { return *static_cast<CStats*>(other); }
+CStats&CastCStats(void* other) { return *static_cast<CStats*>(other); }
 
-CTalents& castCTalents(void* other) { return *static_cast<CTalents*>(other); }
+CTalents&CastCTalents(void* other) { return *static_cast<CTalents*>(other); }
 
-CSkills& castCSkills(void* other) { return *static_cast<CSkills*>(other); }
+CSkills&CastCSkills(void* other) { return *static_cast<CSkills*>(other); }
 
-void registerComponents() {
+void RegisterComponents() {
   using namespace entt::literals;
 
   entt::meta<CItem>() // TODO probably this is not a component?
       .type("item"_hs)
-      .ctor<&castCItem, entt::as_ref_t>()
+      .ctor<&CastCItem, entt::as_ref_t>()
       .data<&CItem::name>("name"_hs)
       .data<&CItem::description>("description"_hs)
       .data<&CItem::icon>("icon"_hs)
@@ -52,14 +52,14 @@ void registerComponents() {
 
   entt::meta<CInventory>()
       .type("inventory"_hs)
-      .ctor<&castCInventory, entt::as_ref_t>()
+      .ctor<&CastCInventory, entt::as_ref_t>()
       .data<&CInventory::items>("items"_hs) // TODO modify assign rethink initialization
       .func<&CInventory::print>("print"_hs)
       .func<&engine::assign<CInventory>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CHealth>()
       .type("health"_hs)
-      .ctor<&castCHealth, entt::as_ref_t>()
+      .ctor<&CastCHealth, entt::as_ref_t>()
       .data<&CHealth::base>("base"_hs)
       .data<&CHealth::current>("current"_hs)
       .func<&CHealth::print>("print"_hs)
@@ -67,7 +67,7 @@ void registerComponents() {
 
   entt::meta<CMana>()
       .type("mana"_hs)
-      .ctor<&castCMana, entt::as_ref_t>()
+      .ctor<&CastCMana, entt::as_ref_t>()
       .data<&CMana::base>("base"_hs)
       .data<&CMana::current>("current"_hs)
       .func<&CMana::print>("print"_hs)
@@ -75,7 +75,7 @@ void registerComponents() {
 
   entt::meta<CStamina>()
       .type("stamina"_hs)
-      .ctor<&castCStamina, entt::as_ref_t>()
+      .ctor<&CastCStamina, entt::as_ref_t>()
       .data<&CStamina::base>("base"_hs)
       .data<&CStamina::current>("current"_hs)
       .func<&CStamina::print>("print"_hs)
@@ -83,14 +83,14 @@ void registerComponents() {
 
   entt::meta<CExperience>()
       .type("experience"_hs)
-      .ctor<&castCExperience, entt::as_ref_t>()
+      .ctor<&CastCExperience, entt::as_ref_t>()
       .data<&CExperience::current>("current"_hs)
       .func<&CExperience::print>("print"_hs)
       .func<&engine::assign<CExperience, int>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CEquipment>()
       .type("equipment"_hs)
-      .ctor<&castCEquipment, entt::as_ref_t>()
+      .ctor<&CastCEquipment, entt::as_ref_t>()
       .data<&CEquipment::head>("head"_hs)
       .data<&CEquipment::neck>("neck"_hs)
       .data<&CEquipment::shoulders>("shoulders"_hs)
@@ -108,7 +108,7 @@ void registerComponents() {
 
   entt::meta<CStats>()
       .type("stats"_hs)
-      .ctor<&castCStats, entt::as_ref_t>()
+      .ctor<&CastCStats, entt::as_ref_t>()
       .data<&CStats::strength>("strength"_hs)
       .data<&CStats::dexterity>("dexterity"_hs)
       .data<&CStats::constitution>("constitution"_hs)
@@ -120,7 +120,7 @@ void registerComponents() {
 
   entt::meta<CTalents>()
       .type("talents"_hs)
-      .ctor<&castCTalents, entt::as_ref_t>()
+      .ctor<&CastCTalents, entt::as_ref_t>()
       .data<&CTalents::acrobatics>("acrobatics"_hs)
       .data<&CTalents::arcana>("arcana"_hs)
       .data<&CTalents::athletics>("athletics"_hs)
@@ -134,7 +134,7 @@ void registerComponents() {
 
   entt::meta<CSkills>()
       .type("skills"_hs)
-      .ctor<&castCSkills, entt::as_ref_t>()
+      .ctor<&CastCSkills, entt::as_ref_t>()
       .data<&CSkills::mining>("mining"_hs)
       .data<&CSkills::jewelcrafting>("jewelcrafting"_hs)
       .data<&CSkills::blacksmithing>("blacksmithing"_hs)

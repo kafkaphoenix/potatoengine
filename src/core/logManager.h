@@ -15,18 +15,18 @@ class LogManager {
     static void CreateBacktraceLogger(std::string_view filepath,
                                       bool enableEngineBacktraceLogger,
                                       bool enableAppBacktraceLogger);
-    static void clearAllBacktraceLogger();
-    static void clearEngineBacktraceLogger();
-    static void clearAppBacktraceLogger();
+    static void ClearAllBacktraceLogger();
+    static void ClearEngineBacktraceLogger();
+    static void ClearAppBacktraceLogger();
     static void DumpBacktrace();
     static void SetEngineLoggerLevel(spdlog::level::level_enum level);
     static void SetAppLoggerLevel(spdlog::level::level_enum level);
     static void SetEngineLoggerFlushLevel(spdlog::level::level_enum level);
     static void SetAppLoggerFlushLevel(spdlog::level::level_enum level);
-    static void toggleEngineLogger(bool enable);
-    static void toggleAppLogger(bool enable);
-    static void toggleEngineBacktraceLogger(bool enable);
-    static void toggleAppBacktraceLogger(bool enable);
+    static void ToggleEngineLogger(bool enable);
+    static void ToggleAppLogger(bool enable);
+    static void ToggleEngineBacktraceLogger(bool enable);
+    static void ToggleAppBacktraceLogger(bool enable);
     static std::shared_ptr<spdlog::logger>& GetEngineLogger() noexcept {
       return s_engineLogger;
     }
@@ -40,32 +40,32 @@ class LogManager {
     static std::shared_ptr<spdlog::logger>& GetAppBacktraceLogger() noexcept {
       return s_appBacktraceLogger;
     }
-    static std::string_view getEngineLoggerLevel() {
+    static std::string_view GetEngineLoggerLevel() {
       return std::string_view(
         spdlog::level::to_string_view(s_engineLogger->level()));
     }
-    static std::string_view getAppLoggerLevel() {
+    static std::string_view GetAppLoggerLevel() {
       return std::string_view(
         spdlog::level::to_string_view(s_appLogger->level()));
     }
-    static std::string_view getEngineLoggerFlushLevel() {
+    static std::string_view GetEngineLoggerFlushLevel() {
       return std::string_view(
         spdlog::level::to_string_view(s_engineLogger->flush_level()));
     }
-    static std::string_view getAppLoggerFlushLevel() {
+    static std::string_view GetAppLoggerFlushLevel() {
       return std::string_view(
         spdlog::level::to_string_view(s_appLogger->flush_level()));
     }
-    static bool isEngineLoggerEnabled() {
+    static bool IsEngineLoggerEnabled() {
       return s_engineLogger->level() != spdlog::level::off;
     }
-    static bool isAppLoggerEnabled() {
+    static bool IsAppLoggerEnabled() {
       return s_appLogger->level() != spdlog::level::off;
     }
-    static bool isEngineBacktraceLoggerEnabled() {
+    static bool IsEngineBacktraceLoggerEnabled() {
       return s_engineBacktraceLogger->level() != spdlog::level::off;
     }
-    static bool isAppBacktraceLoggerEnabled() {
+    static bool IsAppBacktraceLoggerEnabled() {
       return s_appBacktraceLogger->level() != spdlog::level::off;
     }
 

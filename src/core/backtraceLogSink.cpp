@@ -3,8 +3,8 @@
 extern template class spdlog::sinks::base_sink<std::mutex>;
 namespace potatoengine {
 
-BacktraceLogSink::BacktraceLogSink(std::string_view filepath)
-  : m_filepath(filepath) {}
+BacktraceLogSink::BacktraceLogSink(std::string&& filepath)
+  : m_filepath(std::move(filepath)) {}
 
 void BacktraceLogSink::DumpToFile() {
   std::unique_lock<std::shared_timed_mutex> lock(m_recordsMutex);

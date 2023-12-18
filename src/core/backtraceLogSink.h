@@ -14,7 +14,7 @@ namespace potatoengine {
 
 class BacktraceLogSink : public spdlog::sinks::base_sink<std::mutex> {
   public:
-    BacktraceLogSink(std::string_view filepath);
+    BacktraceLogSink(std::string&& filepath);
     void DumpToFile();
     void Clear(std::string_view source);
 

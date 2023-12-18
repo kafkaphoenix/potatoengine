@@ -15,7 +15,7 @@ bool filterInstances{false};
 void drawEntities(engine::SceneManager& sm) {
   entt::registry& registry = sm.getRegistry();
 
-  if (registry.empty()) {
+  if (registry.storage<entt::entity>().in_use() == 0) {
     ImGui::Text("No entities loaded");
     return;
   }

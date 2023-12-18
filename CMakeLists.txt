@@ -53,7 +53,7 @@ if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /EHs /nologo /std:c++latest /Od /utf-8 /WX /Wall /wd4996) # /wd4996 is for deprecated functions msvc delete in the future
     target_compile_options(${PROJECT_NAME} PRIVATE /external:I ${CMAKE_SOURCE_DIR}/build /W0) # Exclude from warnings
 elseif(GCC OR CLANG)
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -Wa -mbig-obj)
     target_compile_options(-isystem ${CMAKE_SOURCE_DIR}/build)  # Exclude from warnings
     target_compile_options(${PROJECT_NAME} PRIVATE -fmodules-ts)
 endif()
@@ -71,17 +71,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_
 # https://stackoverflow.com/questions/65544093/no-compile-commands-json-file-using-cmake-with-vs-code-on-windows
 find_program(CLANG_TIDY NAMES "clang-tidy")
 
-if(CLANG_TIDY AND ENABLE_CLANG_TIDY)
-    set(CLANG_TIDY_OPTIONS
-        "-checks=*"
-        "-header-filter=."
-        "-warnings-as-errors=*"
-        "-p=${CMAKE_SOURCE_DIR}"
-    )
-
+if(CLANG_TIDY AND ENABLE_CLANG_TIDY AND NOT GCC) # GCC doesn't support clang-tidy with precompiled headers
     add_custom_target(
         run_clang_tidy
-        COMMAND ${CLANG_TIDY} ${CLANG_TIDY_OPTIONS} ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/demos
+        COMMAND ${CLANG_TIDY} ${CMAKE_SOURCE_DIR}/src/* ${CMAKE_SOURCE_DIR}/demos/* -p ${CMAKE_BINARY_DIR}/compile_commands.json
         COMMENT "running clang-tidy static analysis"
     )
 
@@ -91,22 +84,27 @@ endif()
 find_program(CPPCHECK NAMES "cppcheck")
 
 if(CPPCHECK AND ENABLE_CPPCHECK)
+    set(CPPCHECK_SOURCES
+        ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/demos
+    )
+
     set(CPPCHECK_OPTIONS
-        "--enable=all"
-        "--std=c++23"
-        #"--check-config"
-        "--platform=win64"
-        #"--suppress=missingIncludeSystem"
-        "--suppress=missingInclude"
         "--template=gcc"
-        #"--project=compile_commands.json"
+        "--platform=win64"
+        "--std=c++2b"
+        # "--project=${CMAKE_BINARY_DIR}\\compile_commands.json"
+        "--enable=style,performance,portability"
         "--inline-suppr"
-        "-I${CMAKE_SOURCE_DIR}/build"
+        "-I${CMAKE_SOURCE_DIR}\\build\\*"
+        "-i${CMAKE_SOURCE_DIR}\\vendor\\*"
+        "--suppress=*:*\\potatoengine\\vendor\\*:*"
+        "--suppress=*:*\\potatoengine\\build\\*:*"
     )
 
     add_custom_target(
         run_cppcheck
-        COMMAND ${CPPCHECK} ${CPPCHECK_OPTIONS} ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/demos
+        COMMAND ${CPPCHECK} ${CPPCHECK_OPTIONS} ${CPPCHECK_SOURCES}
         COMMENT "running cppcheck static analysis"
     )
     add_dependencies(${PROJECT_NAME} run_cppcheck)

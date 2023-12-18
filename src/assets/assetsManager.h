@@ -43,7 +43,7 @@ class AssetsManager {
       std::shared_ptr<Type> asset =
         std::make_shared<Type>(std::forward<Args>(args)...);
 
-      auto& maybeAsset = m_assets.find(id);
+      auto& maybeAsset = m_assets.find(id.data());
       ENGINE_ASSERT(maybeAsset not_eq m_assets.end(), "Asset {} not found!",
                     id);
       ENGINE_ASSERT(

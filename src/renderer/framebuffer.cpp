@@ -78,6 +78,9 @@ uint32_t FBO::getBufferID() const {
     return m_stencilRenderBuffer;
   } else if (m_depthBufferType == DEPTH_STENCIL_RENDERBUFFER) {
     return m_depthStencilRenderBuffer;
+  } else {
+    ENGINE_ERROR("No buffer attached to framebuffer {}", m_id);
+    return 0;
   }
 }
 
@@ -90,6 +93,9 @@ std::string_view FBO::getBufferType() const noexcept {
     return "Stencil Renderbuffer";
   } else if (m_depthBufferType == DEPTH_STENCIL_RENDERBUFFER) {
     return "Depth Stencil Renderbuffer";
+  } else {
+    ENGINE_ERROR("No buffer attached to framebuffer {}", m_id);
+    return "None";
   }
 }
 

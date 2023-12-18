@@ -60,7 +60,7 @@ class Window {
     void setWindowIcon(const std::string& path);
     void restoreWindowIcon();
     void setWindowMonitor(int monitor);
-    void setVSync(bool enabled);
+    void toggleVSync(bool enabled);
     void setCursorIcon(const std::string& path);
     void setCursorMode(CursorMode mode);
     void restoreCursor();
@@ -80,7 +80,7 @@ class Window {
       m_data.lastX = x;
       m_data.lastY = y;
     }
-    void setWireframe(bool wireframe) { m_data.wireframe = wireframe; }
+    void ToggleWireframe(bool wireframe) { m_data.wireframe = wireframe; }
 
     static std::unique_ptr<Window> Create(WindowProperties&& properties);
 

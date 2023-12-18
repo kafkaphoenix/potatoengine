@@ -31,7 +31,7 @@ SceneManager::SceneManager(std::weak_ptr<AssetsManager> am,
   : m_entityFactory(am), m_assetsManager(am), m_renderer(r) {
   ENGINE_TRACE("Initializing scene manager...");
   ENGINE_TRACE("Registering engine components...");
-  registerComponents();
+  RegisterComponents();
   ENGINE_TRACE("Scene manager created!");
 }
 
@@ -50,7 +50,8 @@ const std::map<std::string, std::string>& SceneManager::getMetrics() {
 
   m_metrics.clear();
   m_metrics["Active scene"] = m_activeScene;
-  int total = m_registry.alive();
+  int total = m_registry.storage<entt::entity>().in_use();
+  int created = m_registry.storage<entt::entity>().size();
   int prototypes = 0;
   for (const auto& [key, prototypesMap] : m_entityFactory.getAllPrototypes()) {
     prototypes += prototypesMap.size();
@@ -60,8 +61,8 @@ const std::map<std::string, std::string>& SceneManager::getMetrics() {
   m_metrics["Prototypes Total Alive"] = std::to_string(prototypes);
   m_metrics["Instances Total Alive"] = std::to_string(total - prototypes);
   m_metrics["Entities Total Alive"] = std::to_string(total);
-  m_metrics["Entities Total Created"] = std::to_string(m_registry.size());
-  m_metrics["Entities Total Released"] = std::to_string(m_registry.released());
+  m_metrics["Entities Total Created"] = std::to_string(created);
+  m_metrics["Entities Total Released"] = std::to_string(created - total);
   m_isDirty = false;
 
   return m_metrics;

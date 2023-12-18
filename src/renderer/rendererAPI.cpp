@@ -71,7 +71,7 @@ void RendererAPI::Init() {
   glEnable(GL_DEPTH_TEST);
 }
 
-void RendererAPI::SetCulling(bool enabled) {
+void RendererAPI::ToggleCulling(bool enabled) {
   enabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 }
 
@@ -85,16 +85,16 @@ void RendererAPI::SetClearColor(const std::array<float, 4>& color) {
 
 void RendererAPI::SetClearDepth(const float depth) { glClearDepth(depth); }
 
-void RendererAPI::SetWireframe(bool enabled) {
+void RendererAPI::ToggleWireframe(bool enabled) {
   enabled ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
           : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void RendererAPI::SetBlend(bool enabled) {
+void RendererAPI::ToggleBlend(bool enabled) {
   enabled ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
 }
 
-void RendererAPI::SetDepthTest(bool enabled) {
+void RendererAPI::ToggleDepthTest(bool enabled) {
   enabled ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 }
 

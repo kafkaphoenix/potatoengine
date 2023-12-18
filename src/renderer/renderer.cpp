@@ -78,7 +78,7 @@ void Renderer::render(const std::shared_ptr<VAO>& vao,
 void Renderer::clear() {
   if (not m_framebuffers.empty()) {
     m_framebuffers.clear();
-    RendererAPI::SetDepthTest(
+    RendererAPI::ToggleDepthTest(
       true); // to avoid problems after using scenes with fbo
   }
   m_shaderPrograms.clear();
