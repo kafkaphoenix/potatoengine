@@ -95,40 +95,40 @@ void LogManager::SetAppLoggerFlushLevel(spdlog::level::level_enum level) {
 }
 
 void LogManager::ToggleEngineLogger(bool enable) {
-  if (enable) {
+  if (enable and not IsEngineLoggerEnabled()) {
     s_engineLogger->set_level(s_engineLogLevel);
     s_engineLogger->flush_on(s_engineFlushLevel);
-  } else {
+  } else if (not enable and IsEngineLoggerEnabled()) {
     s_engineLogger->set_level(spdlog::level::off);
     s_engineLogger->flush_on(spdlog::level::off);
   }
 }
 
 void LogManager::ToggleAppLogger(bool enable) {
-  if (enable) {
+  if (enable and not IsAppLoggerEnabled()) {
     s_appLogger->set_level(s_appLogLevel);
     s_appLogger->flush_on(s_appFlushLevel);
-  } else {
+  } else if (not enable and IsAppLoggerEnabled()) {
     s_appLogger->set_level(spdlog::level::off);
     s_appLogger->flush_on(spdlog::level::off);
   }
 }
 
 void LogManager::ToggleEngineBacktraceLogger(bool enable) {
-  if (enable) {
+  if (enable and not IsEngineBacktraceLoggerEnabled()) {
     s_engineBacktraceLogger->set_level(s_engineLogLevel);
     s_engineBacktraceLogger->flush_on(s_engineFlushLevel);
-  } else {
+  } else if (not enable and IsEngineBacktraceLoggerEnabled()) {
     s_engineBacktraceLogger->set_level(spdlog::level::off);
     s_engineBacktraceLogger->flush_on(spdlog::level::off);
   }
 }
 
 void LogManager::ToggleAppBacktraceLogger(bool enable) {
-  if (enable) {
+  if (enable and not IsAppBacktraceLoggerEnabled()) {
     s_appBacktraceLogger->set_level(s_appLogLevel);
     s_appBacktraceLogger->flush_on(s_appFlushLevel);
-  } else {
+  } else if (not enable and IsAppBacktraceLoggerEnabled()) {
     s_appBacktraceLogger->set_level(spdlog::level::off);
     s_appBacktraceLogger->flush_on(spdlog::level::off);
   }

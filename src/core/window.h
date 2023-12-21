@@ -2,6 +2,8 @@
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#define GLM_FORCE_CTOR_INIT
+#include <glm/glm.hpp>
 
 #include "events/event.h"
 #include "pch.h"
@@ -17,8 +19,7 @@ enum class CursorMode {
 struct WindowProperties {
     std::string name{};
     std::string windowIconPath{};
-    int windowWidth{};
-    int windowHeight{};
+    glm::vec2 windowSize{};
     int depthBits{};
     int refreshRate{};
     bool fullscreen{};
@@ -29,6 +30,8 @@ struct WindowProperties {
     int openglMinorVersion{};
     std::string cursorIconPath{};
     CursorMode cursorMode{};
+    bool windowInsideImgui{};
+    bool fitToWindow{};
 };
 
 static int s_GLFWWindowCount = 0;
@@ -45,13 +48,15 @@ class Window {
     void onEvent();
 
     GLFWwindow* getNativeWindow() const noexcept { return m_window; }
-    int getWidth() const { return m_data.width; }
-    int getHeight() const { return m_data.height; }
+    int getWidth() const { return m_data.size.x; }
+    int getHeight() const { return m_data.size.y; }
     bool isVSync() const { return m_data.vSync; }
     bool isFullscreen() const { return m_data.fullscreen; }
     bool isMaximized() const { return m_data.maximized; }
     bool isMinimized() const { return m_data.minimized; }
     bool isWireframe() const { return m_data.wireframe; }
+    bool isWindowInsideImgui() const { return m_data.windowInsideImgui; }
+    bool fitToWindow() const { return m_data.fitToWindow; }
 
     void setEventCallback(const EventCallbackFn& cb) {
       m_data.eventCallback = cb;
@@ -66,7 +71,7 @@ class Window {
     void restoreCursor();
     void setResizable(bool resizable);
     void setRefreshRate(int refreshRate);
-    void setSize(int width, int height);
+    void setSize(glm::vec2&& size);
     void setPosition(int x, int y);
     void minimize(bool minimize);
     void maximize(bool maximize);
@@ -80,7 +85,9 @@ class Window {
       m_data.lastX = x;
       m_data.lastY = y;
     }
-    void ToggleWireframe(bool wireframe) { m_data.wireframe = wireframe; }
+    void toggleWindowInsideImgui(bool windowInsideImgui);
+    void toggleWireframe(bool wireframe);
+    void toggleFitToWindow(bool fitToWindow);
 
     static std::unique_ptr<Window> Create(WindowProperties&& properties);
 
@@ -91,7 +98,7 @@ class Window {
 
     struct WindowData {
         std::string name{};
-        int width{}, height{};
+        glm::vec2 size{};
         std::string windowIconPath{};
         int primaryMonitor{};
         int refreshRate{};
@@ -106,6 +113,8 @@ class Window {
         GLFWcursor* cursor;
         bool updateCameraPosition = true;
         bool wireframe{};
+        bool windowInsideImgui{};
+        bool fitToWindow{};
 
         EventCallbackFn eventCallback;
     };

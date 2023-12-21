@@ -24,6 +24,8 @@ struct Settings {
     bool resizable = true;
     int openglMajorVersion = 4;
     int openglMinorVersion = 5;
+    bool windowInsideImgui = true; // it needs an opengl fbo to work
+    bool fitToWindow = true;
 
     std::string cursorIconPath = "assets/textures/cursor.png";
     int cursorMode = 2; // 0: normal, 1: hidden, 2: disabled
@@ -53,8 +55,6 @@ struct Settings {
     std::string activeScenePath{"assets/scenes/empty_scene.json"};
     bool reloadScene = false;
 
-    bool renderInsideImGui = true;
-
     std::vector<const char*> scenes{
       "Sponza", "Dabrovic Sponza", "Lowpoly City", "Skycrappers", "Room",
       "Cubes",  "Plane Terrain",   "Primitives",   "Empty",
@@ -77,9 +77,10 @@ struct Settings {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
   Settings, appName, root, logFilePath, backtraceLogFilePath, windowIconPath,
   windowWidth, windowHeight, depthBits, refreshRate, fullscreen, primaryMonitor,
-  vSync, resizable, openglMajorVersion, openglMinorVersion, cursorIconPath,
-  cursorMode, debugEnabled, displayFPS, enableEngineLogger, enableAppLogger,
-  engineLogLevel, appLogLevel, engineFlushLevel, appFlushLevel,
-  enableEngineBacktraceLogger, enableAppBacktraceLogger, clearColor, clearDepth,
-  activeScene, activeScenePath, renderInsideImGui);
+  vSync, resizable, openglMajorVersion, openglMinorVersion, windowInsideImgui,
+  fitToWindow, cursorIconPath, cursorMode, debugEnabled, displayFPS,
+  enableEngineLogger, enableAppLogger, engineLogLevel, appLogLevel,
+  engineFlushLevel, appFlushLevel, enableEngineBacktraceLogger,
+  enableAppBacktraceLogger, clearColor, clearDepth, activeScene,
+  activeScenePath);
 }

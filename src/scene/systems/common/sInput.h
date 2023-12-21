@@ -122,7 +122,7 @@ bool onKeyPressed(KeyPressedEvent& e) {
     return true;
   } else if (e.getKeyCode() == Key::F4) {
     auto& window = Application::Get().getWindow();
-    window.ToggleWireframe(not window.isWireframe());
+    window.toggleWireframe(not window.isWireframe());
     RendererAPI::ToggleWireframe(window.isWireframe());
     return true;
   } else if (e.getKeyCode() == Key::F12) {

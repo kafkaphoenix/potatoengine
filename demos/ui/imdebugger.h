@@ -13,9 +13,11 @@ void drawDebugger(std::weak_ptr<engine::AssetsManager> am,
   ImGui::SetNextWindowPos(
     ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20),
     ImGuiCond_FirstUseEver);
-  ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
 
-  if (ImGui::Begin("Debugger", nullptr, ImGuiWindowFlags_MenuBar)) {
+  ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+
+  ImGui::SetNextWindowSize(ImVec2(500, 600), ImGuiCond_FirstUseEver);
+  if (ImGui::Begin("Debugger", nullptr, window_flags)) {
     drawMenuBar(am, r, sm, settings);
     drawTabBar(am, r, sm, settings);
   }

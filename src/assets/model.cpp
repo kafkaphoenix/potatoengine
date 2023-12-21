@@ -9,17 +9,23 @@
 namespace potatoengine {
 
 Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection)
-    : m_filepath(std::move(fp.string())), m_directory(std::move(fp.parent_path().string())) {
-  ENGINE_ASSERT(not gammaCorrection.has_value(), "Gamma correction not yet implemented");
+  : m_filepath(std::move(fp.string())),
+    m_directory(std::move(fp.parent_path().string())) {
+  ENGINE_ASSERT(not gammaCorrection.has_value(),
+                "Gamma correction not yet implemented");
 
   Assimp::Importer importer;
   const aiScene* scene = importer.ReadFile(
-      m_filepath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace |
-                      aiProcess_ValidateDataStructure | aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes |
-                      aiProcess_OptimizeGraph | aiProcess_SplitLargeMeshes | aiProcess_FindInvalidData);
+    m_filepath, aiProcess_Triangulate | aiProcess_GenSmoothNormals |
+                  aiProcess_CalcTangentSpace | aiProcess_ValidateDataStructure |
+                  aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes |
+                  aiProcess_OptimizeGraph | aiProcess_SplitLargeMeshes |
+                  aiProcess_FindInvalidData);
 
-  ENGINE_ASSERT(scene and scene->mFlags not_eq AI_SCENE_FLAGS_INCOMPLETE and scene->mRootNode,
-                "Failed to load model {}: {}", m_filepath, importer.GetErrorString());
+  ENGINE_ASSERT(scene and scene->mFlags not_eq AI_SCENE_FLAGS_INCOMPLETE and
+                  scene->mRootNode,
+                "Failed to load model {}: {}", m_filepath,
+                importer.GetErrorString());
 
   processNode(scene->mRootNode, scene);
 }
@@ -43,7 +49,8 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
   for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
     Vertex vertex{};
-    const auto& position = mesh->mVertices[i]; // assimp vector does not directly convert to glm vec3
+    const auto& position =
+      mesh->mVertices[i]; // assimp vector does not directly convert to glm vec3
     vertex.position = glm::vec3(position.x, position.y, position.z);
 
     if (mesh->HasNormals()) {
@@ -52,16 +59,19 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     if (mesh->mTextureCoords[0]) {
-      // a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't
-      // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
+      // a vertex can contain up to 8 different texture coordinates. We thus
+      // make the assumption that we won't use models where a vertex can have
+      // multiple texture coordinates so we always take the first set (0).
       const auto& textureCoords = mesh->mTextureCoords[0][i];
       vertex.textureCoords = glm::vec2(textureCoords.x, textureCoords.y);
 
       const auto& tangentVector = mesh->mTangents[i];
-      vertex.tangent = glm::vec3(tangentVector.x, tangentVector.y, tangentVector.z);
+      vertex.tangent =
+        glm::vec3(tangentVector.x, tangentVector.y, tangentVector.z);
 
       const auto& bitangentVector = mesh->mBitangents[i];
-      vertex.bitangent = glm::vec3(bitangentVector.x, bitangentVector.y, bitangentVector.z);
+      vertex.bitangent =
+        glm::vec3(bitangentVector.x, bitangentVector.y, bitangentVector.z);
     }
 
     if (mesh->HasBones()) {
@@ -73,7 +83,8 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
       vertex.color = glm::vec4(color.r, color.g, color.b, color.a);
     }
 
-    if (mesh->mAABB.mMin not_eq aiVector3D(0.f, 0.f, 0.f) and mesh->mAABB.mMax not_eq aiVector3D(0.f, 0.f, 0.f)) {
+    if (mesh->mAABB.mMin not_eq aiVector3D(0.f, 0.f, 0.f) and
+        mesh->mAABB.mMax not_eq aiVector3D(0.f, 0.f, 0.f)) {
       // TODO aabb
     }
 
@@ -101,8 +112,10 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
   // normal: textureNormalN
   // height: textureHeightN
   auto loadAndInsertTextures = [&](aiTextureType t, std::string type) {
-    std::vector<std::shared_ptr<Texture>> loadedTextures = loadMaterialTextures(material, t, type);
-    textures.insert(textures.end(), loadedTextures.begin(), loadedTextures.end()); // Can't be emplace
+    std::vector<std::shared_ptr<Texture>> loadedTextures =
+      loadMaterialTextures(material, t, type);
+    textures.insert(textures.end(), loadedTextures.begin(),
+                    loadedTextures.end()); // Can't be emplace
   };
 
   loadAndInsertTextures(aiTextureType_DIFFUSE, "textureDiffuse");
@@ -112,14 +125,17 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
   if (textures.empty() and materialData.diffuse == glm::vec3(0.f, 0.f, 0.f)) {
     textures.emplace_back(
-        std::make_shared<Texture>("assets/textures/default.jpg", "textureDiffuse")); // TODO: add asset manager?
+      std::make_shared<Texture>("assets/textures/default.jpg",
+                                "textureDiffuse")); // TODO: add asset manager?
   }
   m_materials.emplace_back(std::move(materialData));
 
   return CMesh(std::move(vertices), std::move(indices), std::move(textures));
 }
 
-std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType t, std::string type) {
+std::vector<std::shared_ptr<Texture>>
+Model::loadMaterialTextures(aiMaterial* mat, aiTextureType t,
+                            std::string type) {
   std::vector<std::shared_ptr<Texture>> textures;
   textures.reserve(mat->GetTextureCount(t));
   for (uint32_t i = 0; i < mat->GetTextureCount(t); ++i) {
@@ -129,13 +145,16 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
     std::string filepath = m_directory + "/" + filename;
 
     auto loadedTexture =
-        std::find_if(m_loadedTextures.begin(), m_loadedTextures.end(),
-                     [&](const std::shared_ptr<Texture>& texture) { return texture->getFilepath() == filepath; });
+      std::find_if(m_loadedTextures.begin(), m_loadedTextures.end(),
+                   [&](const std::shared_ptr<Texture>& texture) {
+                     return texture->getFilepath() == filepath;
+                   });
 
     if (loadedTexture not_eq m_loadedTextures.end()) {
       textures.emplace_back(std::make_shared<Texture>(*(*loadedTexture)));
     } else {
-      std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(filepath, type);
+      std::shared_ptr<Texture> newTexture =
+        std::make_shared<Texture>(filepath, type);
       textures.emplace_back(newTexture);
       m_loadedTextures.emplace_back(std::move(newTexture));
     }
@@ -191,12 +210,15 @@ const std::map<std::string, std::string, NumericComparator>& Model::getInfo() {
   return m_info;
 }
 
-const std::map<std::string, std::string, NumericComparator>& Model::getLoadedTextureInfo(std::string_view textureID) {
-  if (not m_loadedTextureInfo.empty() and m_loadedTextureInfo.contains(std::string(textureID))) {
+const std::map<std::string, std::string, NumericComparator>&
+Model::getLoadedTextureInfo(std::string_view textureID) {
+  if (not m_loadedTextureInfo.empty() and
+      m_loadedTextureInfo.contains(std::string(textureID))) {
     return m_loadedTextureInfo.at(std::string(textureID));
   }
 
-  m_loadedTextureInfo[std::string(textureID)] = m_loadedTextures.at(std::stoi(textureID.data()))->getInfo();
+  m_loadedTextureInfo[std::string(textureID)] =
+    m_loadedTextures.at(std::stoi(textureID.data()))->getInfo();
 
   return m_loadedTextureInfo.at(std::string(textureID));
 }

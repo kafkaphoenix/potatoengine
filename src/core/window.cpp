@@ -10,13 +10,14 @@ namespace potatoengine {
 
 Window::Window(WindowProperties&& properties) {
   m_data.name = std::move(properties.name);
-  m_data.width = properties.windowWidth;
-  m_data.height = properties.windowHeight;
-  m_data.lastX = m_data.width / 2.f;
-  m_data.lastY = m_data.height / 2.f;
+  m_data.size = std::move(properties.windowSize);
+  m_data.lastX = m_data.size.x / 2.0f;
+  m_data.lastY = m_data.size.y / 2.0f;
   m_data.windowIconPath = std::move(properties.windowIconPath);
+  m_data.windowInsideImgui = properties.windowInsideImgui;
+  m_data.fitToWindow = properties.fitToWindow;
   ENGINE_TRACE("Creating window for {} app with resolution {}x{}...",
-               m_data.name, m_data.width, m_data.height);
+               m_data.name, m_data.size.x, m_data.size.y);
   if (s_GLFWWindowCount == 0) {
     ENGINE_ASSERT(glfwInit(), "Failed to initialize GLFW!");
     glfwSetErrorCallback([](int error, const char* description) {
@@ -40,18 +41,16 @@ Window::Window(WindowProperties&& properties) {
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
   if (properties.fullscreen) {
     glfwWindowHint(GLFW_REFRESH_RATE, properties.refreshRate);
-    m_data.width = mode->width;
-    m_data.height = mode->height;
-    m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.name.data(),
+    m_data.size.x = mode->width;
+    m_data.size.y = mode->height;
+    m_window = glfwCreateWindow(m_data.size.x, m_data.size.y, m_data.name.data(),
                                 monitor, nullptr);
     m_data.fullscreen = true;
   } else {
-    m_data.width = properties.windowWidth;
-    m_data.height = properties.windowHeight;
-    m_window = glfwCreateWindow(m_data.width, m_data.height, m_data.name.data(),
+    m_window = glfwCreateWindow(m_data.size.x, m_data.size.y, m_data.name.data(),
                                 nullptr, nullptr);
-    int xpos = (mode->width - m_data.width) / 2;
-    int ypos = (mode->height - m_data.height) / 2;
+    int xpos = (mode->width - m_data.size.x) / 2;
+    int ypos = (mode->height - m_data.size.y) / 2;
     setPosition(xpos, ypos);
     m_data.fullscreen = false;
   }
@@ -60,7 +59,7 @@ Window::Window(WindowProperties&& properties) {
 
   m_context = OpenGLContext::Create(m_window);
   m_context->init(); // make context current window
-  glViewport(0, 0, m_data.width, m_data.height);
+  glViewport(0, 0, m_data.size.x, m_data.size.y);
 
   toggleVSync(properties.vSync);
   setWindowIcon(m_data.windowIconPath);
@@ -72,8 +71,8 @@ Window::Window(WindowProperties&& properties) {
     m_window, [](GLFWwindow* window, int width, int height) {
       WindowData& data =
         *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
-      data.width = width;
-      data.height = height;
+      data.size.x = width;
+      data.size.y = height;
 
       WindowResizeEvent event(width, height);
       data.eventCallback(event);
@@ -270,7 +269,7 @@ void Window::restoreWindowIcon() {
 
 void Window::setWindowMonitor(int monitor) {
   glfwSetWindowMonitor(m_window, glfwGetMonitors(nullptr)[monitor], 0, 0,
-                       m_data.width, m_data.height, GLFW_DONT_CARE);
+                       m_data.size.x, m_data.size.y, GLFW_DONT_CARE);
 }
 
 void Window::toggleVSync(bool enabled) {
@@ -322,18 +321,17 @@ void Window::setRefreshRate(int refreshRate) {
     glfwGetMonitors(&monitorCount);
     GLFWmonitor* monitor =
       glfwGetMonitors(&monitorCount)[m_data.primaryMonitor];
-    glfwSetWindowMonitor(m_window, monitor, 0, 0, m_data.width, m_data.height,
+    glfwSetWindowMonitor(m_window, monitor, 0, 0, m_data.size.x, m_data.size.y,
                          refreshRate);
     m_data.refreshRate = refreshRate;
   }
 }
 
-void Window::setSize(int width, int height) {
+void Window::setSize(glm::vec2&& size) {
   // For fullscreen windows it updates the resolution
-  glfwSetWindowSize(m_window, width, height);
-  m_data.width = width;
-  m_data.height = height;
-  glViewport(0, 0, m_data.width, m_data.height);
+  glfwSetWindowSize(m_window, size.x, size.y);
+  m_data.size = std::move(size);
+  glViewport(0, 0, m_data.size.x, m_data.size.y);
 }
 
 void Window::setPosition(int x, int y) {
@@ -383,21 +381,21 @@ void Window::setFullscreen(bool fullscreen) {
   GLFWmonitor* monitor = glfwGetMonitors(&monitorCount)[m_data.primaryMonitor];
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
   if (fullscreen) {
-    m_data.width = mode->width;
-    m_data.height = mode->height;
-    glfwSetWindowMonitor(m_window, monitor, 0, 0, m_data.width, m_data.height,
+    m_data.size.x = mode->width;
+    m_data.size.y = mode->height;
+    glfwSetWindowMonitor(m_window, monitor, 0, 0, m_data.size.x, m_data.size.y,
                          m_data.refreshRate);
   } else {
-    m_data.width = mode->width / 2;
-    m_data.height = mode->height / 2;
-    int xpos = (mode->width - m_data.width) / 2;
-    int ypos = (mode->height - m_data.height) / 2;
-    glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, m_data.width,
-                         m_data.height, GLFW_DONT_CARE);
+    m_data.size.x = mode->width / 2;
+    m_data.size.y = mode->height / 2;
+    int xpos = (mode->width - m_data.size.x) / 2;
+    int ypos = (mode->height - m_data.size.y) / 2;
+    glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, m_data.size.x,
+                         m_data.size.y, GLFW_DONT_CARE);
     restoreWindowIcon();
   }
   m_data.fullscreen = fullscreen;
-  glViewport(0, 0, m_data.width, m_data.height);
+  glViewport(0, 0, m_data.size.x, m_data.size.y);
 }
 
 void Window::setVisible(bool visible) {
@@ -407,6 +405,24 @@ void Window::setVisible(bool visible) {
   } else {
     glfwHideWindow(m_window);
   }
+}
+
+void Window::toggleWindowInsideImgui(bool windowInsideImgui) {
+  if (windowInsideImgui == m_data.windowInsideImgui) {
+    return;
+  }
+
+  m_data.windowInsideImgui = windowInsideImgui;
+}
+
+void Window::toggleWireframe(bool wireframe) { m_data.wireframe = wireframe; }
+
+void Window::toggleFitToWindow(bool fitToWindow) {
+  if (fitToWindow == m_data.fitToWindow) {
+    return;
+  }
+
+  m_data.fitToWindow = fitToWindow;
 }
 
 std::unique_ptr<Window> Window::Create(WindowProperties&& properties) {

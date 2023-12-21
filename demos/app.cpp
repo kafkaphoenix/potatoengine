@@ -67,8 +67,8 @@ engine::Application* engine::CreateApp(engine::CLArgs&& args) {
   Config appConfig = {.name = settings.appName,
                       .root = settings.root,
                       .windowIconPath = settings.windowIconPath,
-                      .windowWidth = settings.windowWidth,
-                      .windowHeight = settings.windowHeight,
+                      .windowSize =
+                        glm::vec2(settings.windowWidth, settings.windowHeight),
                       .depthBits = settings.depthBits,
                       .refreshRate = settings.refreshRate,
                       .fullscreen = settings.fullscreen,
@@ -78,7 +78,9 @@ engine::Application* engine::CreateApp(engine::CLArgs&& args) {
                       .openglMajorVersion = settings.openglMajorVersion,
                       .openglMinorVersion = settings.openglMinorVersion,
                       .cursorIconPath = settings.cursorIconPath,
-                      .cursorMode = cursorMode};
+                      .cursorMode = cursorMode,
+                      .windowInsideImgui = settings.windowInsideImgui,
+                      .fitToWindow = settings.fitToWindow};
 
   APP_INFO("Initializating Demos application");
   return new demos::Demos(std::move(appConfig), std::move(args));

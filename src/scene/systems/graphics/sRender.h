@@ -3,6 +3,7 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include "core/application.h"
 #include "pch.h"
 #include "renderer/renderer.h"
 #include "renderer/rendererAPI.h"
@@ -167,7 +168,14 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
               // depth test.
     auto& cShape = reg.get<CShape>(fbo);
     cfbo.setupProperties(renderer->get("fbo"));
-    renderer->renderFBO(cShape.meshes.at(0).getVAO(), cfbo.fbo);
+    auto& window = Application::Get().getWindow();
+    if (window.isWindowInsideImgui()) {
+      renderer->renderInsideImGui(cShape.meshes.at(0).getVAO(), cfbo.fbo,
+                                  "scene", {0, 0}, {0, 0},
+                                  window.fitToWindow());
+    } else {
+      renderer->renderFBO(cShape.meshes.at(0).getVAO(), cfbo.fbo);
+    }
   }
 
   renderer->endScene();

@@ -2,6 +2,7 @@
 
 #include "assets/texture.h"
 #include "renderer/rendererAPI.h"
+#include "ui/imscene.h"
 
 namespace potatoengine {
 
@@ -54,9 +55,10 @@ void Renderer::renderFBO(const std::shared_ptr<VAO>& vao,
 
   sp->use();
   sp->setInt("screenTexture", 100);
-  getFramebuffers().at(fbo.data())->getColorTexture()->bindSlot(100);
+  m_framebuffers.at(fbo.data())->getColorTexture()->bindSlot(100);
 
   RendererAPI::DrawIndexed(vao);
+
   m_drawCalls++;
   m_triangles += vao->getEBO()->getCount() / 3;
   for (const auto& vbo : vao->getVBOs()) {
@@ -64,6 +66,20 @@ void Renderer::renderFBO(const std::shared_ptr<VAO>& vao,
   }
   m_indices += vao->getEBO()->getCount();
   sp->unuse();
+}
+
+void Renderer::renderInsideImGui(const std::shared_ptr<VAO>& vao,
+                                 std::string_view fbo, std::string_view title, glm::vec2 size, glm::vec2 position,
+                                 bool fitToWindow) {
+  auto& fbo_ = m_framebuffers.at(fbo.data());
+  ui::renderScene(fbo_->getColorTexture()->getID(), title, size, position, fitToWindow);
+
+  m_drawCalls++;
+  m_triangles += vao->getEBO()->getCount() / 3;
+  for (const auto& vbo : vao->getVBOs()) {
+    m_vertices += vbo->getCount();
+  }
+  m_indices += vao->getEBO()->getCount();
 }
 
 void Renderer::render(const std::shared_ptr<VAO>& vao,
@@ -78,6 +94,7 @@ void Renderer::render(const std::shared_ptr<VAO>& vao,
   sp->setMat4("model", transform);
 
   RendererAPI::DrawIndexed(vao);
+
   m_drawCalls++;
   m_triangles += vao->getEBO()->getCount() / 3;
   for (const auto& vbo : vao->getVBOs()) {
@@ -90,8 +107,8 @@ void Renderer::render(const std::shared_ptr<VAO>& vao,
 void Renderer::clear() {
   if (not m_framebuffers.empty()) {
     m_framebuffers.clear();
-    RendererAPI::ToggleDepthTest(
-      true); // to avoid problems after using scenes with fbo
+    // to avoid problems after using scenes with fbo
+    RendererAPI::ToggleDepthTest(true);
   }
   m_shaderPrograms.clear();
 }

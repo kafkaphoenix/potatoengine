@@ -15,8 +15,7 @@ Application::Application(Config&& c, CLArgs&& args)
   WindowProperties windowProperties = {
     .name = m_name,
     .windowIconPath = c.windowIconPath,
-    .windowWidth = c.windowWidth,
-    .windowHeight = c.windowHeight,
+    .windowSize = c.windowSize,
     .depthBits = c.depthBits,
     .refreshRate = c.refreshRate,
     .fullscreen = c.fullscreen,
@@ -26,14 +25,16 @@ Application::Application(Config&& c, CLArgs&& args)
     .openglMajorVersion = c.openglMajorVersion,
     .openglMinorVersion = c.openglMinorVersion,
     .cursorIconPath = c.cursorIconPath,
-    .cursorMode = c.cursorMode};
+    .cursorMode = c.cursorMode,
+    .windowInsideImgui = c.windowInsideImgui,
+    .fitToWindow = c.fitToWindow};
   m_window = Window::Create(std::move(windowProperties));
   m_window->setEventCallback(BIND_EVENT(Application::onEvent));
 
   m_renderer = Renderer::Create(m_assetsManager);
   m_renderer->init();
   ui::ImGuiAPI::Init(m_window->getNativeWindow(), c.openglMajorVersion,
-                 c.openglMinorVersion);
+                     c.openglMinorVersion);
 }
 
 Application::~Application() {
@@ -70,21 +71,18 @@ void Application::run() {
 
     if (not m_paused) [[likely]] {
       while (m_accumulator > ts) {
+        ui::ImGuiAPI::NewFrame();
         for (auto& state : *m_states) {
           state->onUpdate(ts);
+          if (m_debugging) {
+            state->onImguiUpdate();
+          }
         }
+        ui::ImGuiAPI::Render();
         m_accumulator -= ts;
         if (m_accumulator < 0) {
           m_accumulator = 0;
         }
-      }
-
-      if (m_debugging) {
-        ui::ImGuiAPI::NewFrame();
-        for (auto& state : *m_states) {
-          state->onImguiUpdate();
-        }
-        ui::ImGuiAPI::Render();
       }
     }
 

@@ -16,8 +16,7 @@ struct Config {
     std::string name{};
     std::string root{};
     std::string windowIconPath{};
-    int windowWidth{};
-    int windowHeight{};
+    glm::vec2 windowSize{};
     int depthBits{};
     int refreshRate{};
     bool fullscreen{};
@@ -28,6 +27,8 @@ struct Config {
     int openglMinorVersion{};
     std::string cursorIconPath{};
     CursorMode cursorMode{};
+    bool windowInsideImgui{};
+    bool fitToWindow{};
 };
 struct CLArgs {
     std::span<const char*> args{};

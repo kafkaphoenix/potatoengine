@@ -45,6 +45,9 @@ class Renderer {
     void render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform,
                 std::string_view shaderProgram);
     void renderFBO(const std::shared_ptr<VAO>& vao, std::string_view fbo);
+    void renderInsideImGui(const std::shared_ptr<VAO>& vao,
+                           std::string_view fbo, std::string_view title, glm::vec2 size, glm::vec2 position,
+                           bool fitToWindow);
     int getShaderProgramsCount() const { return m_shaderPrograms.size(); }
     int getFramebuffersCount() const { return m_framebuffers.size(); }
     void clear();

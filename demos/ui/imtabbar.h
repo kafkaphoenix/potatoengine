@@ -17,6 +17,7 @@ void drawTabBar(std::weak_ptr<engine::AssetsManager> am, std::weak_ptr<engine::R
     } else {
       selectedAssetTabKey = "";
       selectedAssetTabType = "";
+      selectedFilepath = "";
       textFilterAssets[0] = '\0';
     }
     if (ImGui::BeginTabItem("Entities")) {

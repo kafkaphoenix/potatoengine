@@ -29,6 +29,7 @@ class Texture {
     }
     std::string_view getType() const noexcept { return m_type; }
     const std::map<std::string, std::string, NumericComparator>& getInfo();
+    bool isCubemap() const noexcept { return m_isCubemap; }
 
     bool operator==(const Texture& other) const {
       return m_filepaths == other.m_filepaths;

@@ -7,6 +7,7 @@ namespace engine = potatoengine;
 #include "pch.h"
 
 // core
+#include "core/application.h"
 #include "core/state.h"
 #include "ui/imguiLogSink.h"
 
@@ -28,6 +29,7 @@ namespace engine = potatoengine;
 #include "assets/model.h"
 #include "assets/prefab.h"
 #include "assets/scene.h"
+#include "assets/texture.h"
 
 // events
 #include "events/appEvent.h"

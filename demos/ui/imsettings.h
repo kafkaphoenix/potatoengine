@@ -35,6 +35,7 @@ void drawSettings(Settings& settings) {
   if (not selectedSettingTabKey.empty()) {
     ImGui::SeparatorText("Edit");
     if (selectedSettingTabKey == "Window") {
+      auto& window = engine::Application::Get().getWindow();
       ImGui::InputText("Window icon path", &settings.windowIconPath);
       ImGui::InputInt("Window width", &settings.windowWidth);
       ImGui::InputInt("Window height", &settings.windowHeight);
@@ -46,6 +47,10 @@ void drawSettings(Settings& settings) {
       ImGui::Checkbox("Resizable", &settings.resizable);
       ImGui::InputInt("OpenGL major version", &settings.openglMajorVersion);
       ImGui::InputInt("OpenGL minor version", &settings.openglMinorVersion);
+      ImGui::Checkbox("Window inside Imgui", &settings.windowInsideImgui);
+      window.toggleWindowInsideImgui(settings.windowInsideImgui);
+      ImGui::Checkbox("Keep ratio", &settings.fitToWindow);
+      window.toggleFitToWindow(settings.fitToWindow);
     } else if (selectedSettingTabKey == "Cursor") {
       ImGui::InputText("Cursor icon path", &settings.cursorIconPath);
       if (ImGui::BeginCombo("Cursor mode", settings.cursorMode == 0   ? "Normal"
@@ -71,12 +76,7 @@ void drawSettings(Settings& settings) {
       ImGui::Checkbox("Display FPS", &settings.displayFPS);
     } else if (selectedSettingTabKey == "Logger") {
       ImGui::Checkbox("Enable engine logger", &settings.enableEngineLogger);
-      if (settings.enableEngineLogger and not engine::LogManager::IsEngineLoggerEnabled()) {
-        engine::LogManager::ToggleEngineLogger(true);
-      }
-      if (not settings.enableEngineLogger and engine::LogManager::IsEngineLoggerEnabled()) {
-        engine::LogManager::ToggleEngineLogger(false);
-      }
+      engine::LogManager::ToggleEngineLogger(settings.enableEngineLogger);
       if (ImGui::BeginCombo("Engine log level",
                             settings.engineLogLevel == 0   ? "Trace"
                             : settings.engineLogLevel == 1 ? "Debug"
@@ -124,12 +124,7 @@ void drawSettings(Settings& settings) {
         ImGui::EndCombo();
       }
       ImGui::Checkbox("Enable app logger", &settings.enableAppLogger);
-      if (settings.enableAppLogger and not engine::LogManager::IsAppLoggerEnabled()) {
-        engine::LogManager::ToggleAppLogger(true);
-      }
-      if (not settings.enableAppLogger and engine::LogManager::IsAppLoggerEnabled()) {
-        engine::LogManager::ToggleAppLogger(false);
-      }
+      engine::LogManager::ToggleAppLogger(settings.enableAppLogger);
       if (ImGui::BeginCombo("App log level",
                             settings.appLogLevel == 0   ? "Trace"
                             : settings.appLogLevel == 1 ? "Debug"
@@ -178,20 +173,12 @@ void drawSettings(Settings& settings) {
       }
       ImGui::Checkbox("Enable engine backtrace logger",
                       &settings.enableEngineBacktraceLogger);
-      if (settings.enableEngineBacktraceLogger and not engine::LogManager::IsEngineBacktraceLoggerEnabled()) {
-        engine::LogManager::ToggleAppBacktraceLogger(true);
-      }
-      if (not settings.enableEngineBacktraceLogger and engine::LogManager::IsEngineBacktraceLoggerEnabled()) {
-        engine::LogManager::ToggleEngineBacktraceLogger(false);
-      }
+      engine::LogManager::ToggleEngineBacktraceLogger(
+        settings.enableEngineBacktraceLogger);
       ImGui::Checkbox("Enable app backtrace logger",
                       &settings.enableAppBacktraceLogger);
-      if (settings.enableAppBacktraceLogger and not engine::LogManager::IsAppBacktraceLoggerEnabled()) {
-        engine::LogManager::ToggleAppBacktraceLogger(true);
-      }
-      if (not settings.enableAppBacktraceLogger and engine::LogManager::IsAppBacktraceLoggerEnabled()) {
-        engine::LogManager::ToggleAppBacktraceLogger(false);
-      }
+      engine::LogManager::ToggleAppBacktraceLogger(
+        settings.enableAppBacktraceLogger);
       if (ImGui::Button("Clear all backtrace logger")) {
         engine::LogManager::ClearAllBacktraceLogger();
       }
