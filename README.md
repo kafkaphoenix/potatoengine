@@ -66,4 +66,3 @@ $ .\Debug\potatoengine.exe
 - [assimp](https://github.com/assimp/assimp): model loading
 - [spdlog](https://github.com/gabime/spdlog): structured logging
 - [FastNoiseLite](https://github.com/Auburn/FastNoiseLite): noise generation
-- [date](https://github.com/HowardHinnant/date): date/time processing

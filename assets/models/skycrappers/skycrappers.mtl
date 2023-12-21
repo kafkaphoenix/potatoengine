@@ -1,0 +1,22 @@
+# Blender 3.6.2 MTL File: 'skycrappers.blend'
+# www.blender.org
+
+newmtl 1
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/1.jpeg
+map_Ks textures/2.jpg
+map_Ns textures/3.jpg
+
+newmtl ground
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 1
+map_Kd textures/4.png
+map_d textures/4.png

@@ -155,10 +155,9 @@ const std::map<std::string, std::string, NumericComparator>& VAO::getInfo() {
   m_info["ID"] = std::to_string(m_id);
   m_info["VBO index"] = std::to_string(m_vboIDX);
   for (size_t i = 0; i < m_vbos.size(); ++i) {
-    m_info["VBO " + std::to_string(i)] = std::to_string(m_vbos[i]->getID());
+    m_info["VBO " + std::to_string(i) + " ID"] = std::to_string(m_vbos[i]->getID());
   }
-  m_info["IBO"] = std::to_string(m_ibo->getID());
-  m_info["Binded"] = m_binded ? "true" : "false";
+  m_info["IBO ID"] = std::to_string(m_ibo->getID());
 
   return m_info;
 }

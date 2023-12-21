@@ -53,17 +53,23 @@ struct Settings {
     std::string activeScenePath{"assets/scenes/empty_scene.json"};
     bool reloadScene = false;
 
+    bool renderInsideImGui = true;
+
     std::vector<const char*> scenes{
-      "Sponza",        "Dabrovic Sponza", "Cubes", "Lowpoly City",
-      "Plane Terrain", "Primitives",      "Empty"};
+      "Sponza", "Dabrovic Sponza", "Lowpoly City", "Skycrappers", "Room",
+      "Cubes",  "Plane Terrain",   "Primitives",   "Empty",
+    };
     std::vector<const char*> scenesPaths{
       "assets/scenes/sponza_scene.json",
       "assets/scenes/dabrovic_sponza_scene.json",
-      "assets/scenes/cubes_scene.json",
       "assets/scenes/lowpoly_city_scene.json",
+      "assets/scenes/skycrappers.json",
+      "assets/scenes/room.json",
+      "assets/scenes/cubes_scene.json",
       "assets/scenes/plane_terrain_scene.json",
       "assets/scenes/primitives_scene.json",
-      "assets/scenes/empty_scene.json"};
+      "assets/scenes/empty_scene.json",
+    };
     std::vector<const char*> cursorModes{"Normal", "Hidden", "Disabled"};
     std::vector<const char*> logLevels{"Trace",   "Debug", "Info",
                                        "Warning", "Error", "Critical"};
@@ -75,5 +81,5 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
   cursorMode, debugEnabled, displayFPS, enableEngineLogger, enableAppLogger,
   engineLogLevel, appLogLevel, engineFlushLevel, appFlushLevel,
   enableEngineBacktraceLogger, enableAppBacktraceLogger, clearColor, clearDepth,
-  activeScene, activeScenePath);
+  activeScene, activeScenePath, renderInsideImGui);
 }

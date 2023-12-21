@@ -733,6 +733,8 @@ void SceneManager::clearScene() {
   m_activeScene = "";
   m_metrics.clear();
   m_dirty = false;
+  entt::monostate<"useFog"_hs>{} = 0.f;
+  entt::monostate<"useSkyBlending"_hs>{} = 0.f;
 }
 
 template <typename T> void SceneManager::onComponentAdded(Entity& e, T& c) {
