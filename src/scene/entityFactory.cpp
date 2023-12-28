@@ -182,26 +182,26 @@ void EntityFactory::createPrototypes(std::string_view prefabID, Entity&& e) {
   ENGINE_ASSERT(not m_prefabs.contains(prefabID.data()),
                 "Prototypes for prefab {} already exist", prefabID);
 
-  const auto& manager = m_assetsManager.lock();
-  ENGINE_ASSERT(manager, "AssetsManager is null!");
+  const auto& assetsManager = m_assetsManager.lock();
+  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
 
-  const auto& prefab = manager->get<Prefab>(prefabID);
+  const auto& prefab = assetsManager->get<Prefab>(prefabID);
   auto& sceneManager = e.getSceneManager();
   e.add<CDeleted>();
 
   Prototypes prototypes;
-  for (std::string_view prototypeID : prefab->getTargetedPrototypes()) {
+  for (const auto& [prototypeID, prototypeData] : prefab->getPrototypes()) {
     e = Entity(sceneManager.getRegistry().create(), &sceneManager);
 
-    for (std::string_view cTag : prefab->getCTags(prototypeID)) {
+    for (std::string_view cTag : prototypeData.ctags) {
       processCTag(e, cTag);
     }
 
-    for (const auto& [cPrefab, cValue] : prefab->getComponents(prototypeID)) {
+    for (const auto& [cPrefab, cValue] : prototypeData.components) {
       processComponent(e, cPrefab, cValue);
     }
 
-    prototypes.insert({prototypeID.data(), e});
+    prototypes.insert({prototypeID, e});
   }
   m_prefabs.insert({prefabID.data(), std::move(prototypes)});
   m_dirty = true;
@@ -250,10 +250,10 @@ void EntityFactory::createPrototype(std::string_view prefabID,
                 "Prototype {} for prefab {} already exists", prototypeID,
                 prefabID);
 
-  const auto& manager = m_assetsManager.lock();
-  ENGINE_ASSERT(manager, "AssetsManager is null!");
+  const auto& assetsManager = m_assetsManager.lock();
+  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
 
-  const auto& prefab = manager->get<Prefab>(prefabID);
+  const auto& prefab = assetsManager->get<Prefab>(prefabID);
 
   for (std::string_view cTag : prefab->getCTags(prototypeID)) {
     processCTag(e, cTag);

@@ -1,12 +1,18 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include <imgui.h>
 
-#include "engineAPI.h"
+#include "pch.h"
+#include "scene/sceneManager.h"
+#include "settings.h"
+#include "ui/imutils.h"
+#include "utils/mapJsonSerializer.h"
+#include "utils/numericComparator.h"
 
 using namespace entt::literals;
 
-namespace demos {
+namespace potatoengine::ui {
 
 std::string selectedEntityTabKey;
 char textFilterEntities[128]{}; // TODO: move to class
@@ -16,32 +22,21 @@ bool filterInstances{};
 bool filterComponents{};
 
 void drawChildInfo(
-  const std::map<std::string, std::string, engine::NumericComparator>& infoData,
-  entt::meta_func& getInfoFunc, const entt::meta_type& cType,
-  entt::meta_any& info, const entt::meta_any& cData) {
+  const std::map<std::string, std::string, NumericComparator>& infoData,
+  const std::string& sceneName) {
   for (const auto& [key, value] : infoData) {
     if (key.starts_with("mesh ") or key.starts_with("texture ") or
         key.starts_with("material ") or key.starts_with("transform ") or
         (key.starts_with("vao ") and value != "undefined")) {
-      if (ImGui::TreeNode(key.c_str())) {
-        if (key.starts_with("mesh ")) {
-          getInfoFunc = cType.func("getMeshInfo"_hs); // cShape, cBody, cChunk
-        } else if (key.starts_with("texture ")) {
-          getInfoFunc = cType.func("getTextureInfo"_hs); // cTexture
-        } else if (key.starts_with("material ")) {
-          getInfoFunc = cType.func("getMaterialInfo"_hs); // cBody
-        } else if (key.starts_with("transform ")) {
-          getInfoFunc = cType.func("getTransformInfo"_hs); // cChunk
-        }
-        info = getInfoFunc.invoke(cData, atoi(value.c_str()));
-        auto childInfoData = info.cast<
-          std::map<std::string, std::string, engine::NumericComparator>>();
+      if (ImGui::TreeNode((key + sceneName).c_str(), key.c_str())) {
+        auto childInfoData = JsonToMap(value);
         for (const auto& [key, value] : childInfoData) {
           if (key.starts_with("texture ") or
               (key.starts_with("vao ") and value != "undefined")) {
-            if (ImGui::TreeNode(key.c_str())) {
+            if (ImGui::TreeNode((key + sceneName).c_str(),
+                                key.c_str())) {
               // CBody, CShape, CChunk have a CMesh that has a VAO and CTexture
-              auto rechildInfoData = engine::JsonToMap(value);
+              auto rechildInfoData = JsonToMap(value);
               for (const auto& [key, value] : rechildInfoData) {
                 ImGui::BulletText("%s: %s", key.c_str(), value.c_str());
               }
@@ -59,15 +54,21 @@ void drawChildInfo(
   }
 }
 
-void drawEntities(engine::SceneManager& sm) {
-  entt::registry& registry = sm.getRegistry();
+void drawEntities(std::weak_ptr<SceneManager> sm, std::weak_ptr<Settings> s) {
+  const auto& scene_manager = sm.lock();
+  ENGINE_ASSERT(scene_manager, "SceneManager is null!");
+
+  const auto& settings = s.lock();
+  ENGINE_ASSERT(settings, "Settings is null!");
+
+  entt::registry& registry = scene_manager->getRegistry();
 
   if (registry.storage<entt::entity>().in_use() == 0) {
     ImGui::Text("No entities loaded");
     return;
   }
 
-  int collapsed = engine::ui::collapser();
+  int collapsed = collapser();
 
   ImGui::InputText("##filter", textFilterEntities,
                    IM_ARRAYSIZE(textFilterEntities));
@@ -89,17 +90,20 @@ void drawEntities(engine::SceneManager& sm) {
   ImGui::Separator();
   ImGui::Columns(2);
 
-  if (collapsed not_eq -1)
+  if (collapsed not_eq -1) {
     ImGui::SetNextItemOpen(collapsed not_eq 0);
+  }
 
   if (ImGui::CollapsingHeader("Prefabs")) {
-    for (const auto& [prefabID, prototypes] : sm.getAllPrototypes()) {
+    for (const auto& [prefabID, prototypes] :
+         scene_manager->getAllPrototypes()) {
       std::string prefabName = "Prefab " + prefabID;
       if (filterPrefabs and textFilterEntities[0] not_eq '\0' and
           strstr(prefabName.c_str(), textFilterEntities) == nullptr) {
         continue;
       }
-      if (ImGui::TreeNode(prefabName.c_str())) {
+      if (ImGui::TreeNode((prefabName + settings->activeScene).c_str(),
+                          prefabName.c_str())) {
         for (auto& [prototypeID, entity] : prototypes) {
           if (filterPrototypes and textFilterEntities[0] not_eq '\0' and
               strstr(prototypeID.c_str(), textFilterEntities) == nullptr) {
@@ -114,11 +118,12 @@ void drawEntities(engine::SceneManager& sm) {
     }
   }
 
-  if (collapsed not_eq -1)
+  if (collapsed not_eq -1) {
     ImGui::SetNextItemOpen(collapsed not_eq 0);
+  }
 
   if (ImGui::CollapsingHeader("Instances")) {
-    for (const auto& [name, entity] : sm.getAllNamedEntities()) {
+    for (const auto& [name, entity] : scene_manager->getAllNamedEntities()) {
       if (filterInstances and textFilterEntities[0] not_eq '\0' and
           strstr(name.c_str(), textFilterEntities) == nullptr) {
         continue;
@@ -129,22 +134,21 @@ void drawEntities(engine::SceneManager& sm) {
     }
   }
 
-  if (collapsed == 0) {
-    selectedEntityTabKey = "";
+  if (collapsed == 0 or settings->reloadScene) {
+    selectedEntityTabKey.clear();
   }
 
   ImGui::NextColumn();
   if (not selectedEntityTabKey.empty()) {
     entt::entity entity = entt::entity(std::stoul(selectedEntityTabKey));
     if (registry.valid(entity)) {
-      ImGui::Text("Components:");
-      ImGui::Separator();
+      ImGui::SeparatorText("Components");
       std::string cName;
       entt::meta_type cType;
       entt::meta_any cData;
       entt::meta_func getInfoFunc;
       entt::meta_any info;
-      std::map<std::string, std::string, engine::NumericComparator> infoData;
+      std::map<std::string, std::string, NumericComparator> infoData;
       for (auto&& [id, storage] : registry.storage()) {
         if (storage.contains(entity)) {
           cName = storage.type().name();
@@ -157,25 +161,27 @@ void drawEntities(engine::SceneManager& sm) {
           cData = cType.construct(storage.value(entity));
           getInfoFunc = cType.func("getInfo"_hs);
           if (getInfoFunc) {
-            if (ImGui::TreeNode((selectedEntityTabKey + cName).c_str(), cName.c_str())) {
+            if (ImGui::TreeNode((selectedEntityTabKey + cName + settings->activeScene).c_str(),
+                                cName.c_str())) {
               info = getInfoFunc.invoke(cData);
               if (info) {
-                infoData = info.cast<std::map<std::string, std::string,
-                                              engine::NumericComparator>>();
+                infoData = info.cast<
+                  std::map<std::string, std::string, NumericComparator>>();
                 if (infoData.empty()) {
                   ImGui::Text("no data");
                 } else {
-                  drawChildInfo(infoData, getInfoFunc, cType, info, cData);
+                  drawChildInfo(infoData, settings->activeScene);
                 }
               } else {
-                APP_ERROR("Failed to get info for component {0}", cName);
+                ENGINE_ERROR("Failed to get info for component {0}", cName);
                 ImGui::Text("No info method defined");
               }
               ImGui::TreePop();
             }
           } else {
-            if (ImGui::TreeNode((selectedEntityTabKey + cName).c_str(), cName.c_str())) {
-              APP_ERROR("Failed to get info for component {0}", cName);
+            if (ImGui::TreeNode((selectedEntityTabKey + cName + settings->activeScene).c_str(),
+                                cName.c_str())) {
+              ENGINE_ERROR("Failed to get info for component {0}", cName);
               ImGui::Text("No info method defined");
               ImGui::TreePop();
             }

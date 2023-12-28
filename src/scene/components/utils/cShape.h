@@ -4,6 +4,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "scene/entity.h"
+#include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
 #include "utils/shapeFactory.h"
 
@@ -35,16 +36,15 @@ struct CShape {
       info["type"] = _type;
       info["size"] = glm::to_string(size);
       for (int i = 0; i < meshes.size(); ++i) {
-        info["mesh " + std::to_string(i)] = std::to_string(i);
+        info["mesh " + std::to_string(i)] = getMeshInfo(i);
       }
       info["repeatTexture"] = repeatTexture ? "true" : "false";
 
       return info;
     }
 
-    std::map<std::string, std::string, NumericComparator>
-    getMeshInfo(int index) const {
-      return meshes.at(index).getInfo();
+    std::string getMeshInfo(int index) const {
+      return MapToJson(meshes.at(index).getInfo());
     }
 
     void createMesh() {

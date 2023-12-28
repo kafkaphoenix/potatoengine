@@ -41,6 +41,10 @@ class Prefab {
       return m_targetedPrototypes;
     }
 
+    const std::unordered_map<std::string, Prototype>& getPrototypes() const {
+      return m_prototypes;
+    }
+
     bool operator==(const Prefab& other) const {
       return m_filepath == other.m_filepath;
     }

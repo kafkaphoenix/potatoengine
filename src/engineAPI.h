@@ -5,6 +5,7 @@
 namespace engine = potatoengine;
 
 #include "pch.h"
+#include "settings.h"
 
 // core
 #include "core/application.h"
@@ -21,15 +22,14 @@ namespace engine = potatoengine;
 #include "scene/meta.h"
 #include "scene/sceneManager.h"
 
+// serializers
+#include "serializers/sSettings.h"
+
 // renderer
 #include "renderer/renderer.h"
 
 // assets
 #include "assets/assetsManager.h"
-#include "assets/model.h"
-#include "assets/prefab.h"
-#include "assets/scene.h"
-#include "assets/texture.h"
 
 // events
 #include "events/appEvent.h"
@@ -38,4 +38,3 @@ namespace engine = potatoengine;
 // utils
 #include "utils/timer.h"
 #include "utils/numericComparator.h"
-#include "utils/mapJsonSerializer.h"

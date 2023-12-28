@@ -1,16 +1,16 @@
 #pragma once
-#include <array>
+
 #include <nlohmann/json.hpp>
-#include <string>
-#include <vector>
+
+#include "pch.h"
 
 using json = nlohmann::json;
 
-namespace demos {
+namespace potatoengine {
 struct Settings {
-    std::string appName = "Demos";
+    std::string appName = "potatoengine";
     std::string root = "..";
-    std::string logFilePath = "logs/demos.log";
+    std::string logFilePath = "logs/potatoengine.log";
     std::string backtraceLogFilePath = "logs/backtrace.log";
 
     std::string windowIconPath = "assets/textures/icon.png";
@@ -22,7 +22,7 @@ struct Settings {
     int primaryMonitor = 0;  // 0: primary, 1: secondary
     bool vSync = true;
     bool resizable = true;
-    int openglMajorVersion = 4;
+    int openglMajorVersion = 4; // only 4.5 is supported
     int openglMinorVersion = 5;
     bool windowInsideImgui = true; // it needs an opengl fbo to work
     bool fitToWindow = true;
@@ -77,10 +77,9 @@ struct Settings {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
   Settings, appName, root, logFilePath, backtraceLogFilePath, windowIconPath,
   windowWidth, windowHeight, depthBits, refreshRate, fullscreen, primaryMonitor,
-  vSync, resizable, openglMajorVersion, openglMinorVersion, windowInsideImgui,
-  fitToWindow, cursorIconPath, cursorMode, debugEnabled, displayFPS,
-  enableEngineLogger, enableAppLogger, engineLogLevel, appLogLevel,
-  engineFlushLevel, appFlushLevel, enableEngineBacktraceLogger,
+  vSync, resizable, windowInsideImgui, fitToWindow, cursorIconPath, cursorMode,
+  debugEnabled, displayFPS, enableEngineLogger, enableAppLogger, engineLogLevel,
+  appLogLevel, engineFlushLevel, appFlushLevel, enableEngineBacktraceLogger,
   enableAppBacktraceLogger, clearColor, clearDepth, activeScene,
   activeScenePath);
 }

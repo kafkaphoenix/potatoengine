@@ -163,7 +163,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
     const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
     defaultFBO->unbind(); // go back to default framebuffer
     RendererAPI::ClearColor();
-    engine::RendererAPI::ToggleDepthTest(
+    RendererAPI::ToggleDepthTest(
       false); // disable depth test so screen-space quad isn't discarded due to
               // depth test.
     auto& cShape = reg.get<CShape>(fbo);
@@ -171,8 +171,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
     auto& window = Application::Get().getWindow();
     if (window.isWindowInsideImgui()) {
       renderer->renderInsideImGui(cShape.meshes.at(0).getVAO(), cfbo.fbo,
-                                  "scene", {0, 0}, {0, 0},
-                                  window.fitToWindow());
+                                  "scene", {0, 0}, {0, 0});
     } else {
       renderer->renderFBO(cShape.meshes.at(0).getVAO(), cfbo.fbo);
     }

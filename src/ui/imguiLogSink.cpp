@@ -2,7 +2,6 @@
 
 extern template class spdlog::sinks::base_sink<std::mutex>;
 namespace potatoengine::ui {
-
 void ImGuiLogSink::Clear() {
   std::unique_lock<std::shared_timed_mutex> lock(m_recordsMutex);
   m_records.clear();

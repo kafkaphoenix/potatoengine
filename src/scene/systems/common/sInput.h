@@ -18,7 +18,6 @@ namespace potatoengine {
 
 bool onMouseMoved(MouseMovedEvent& e, entt::registry& r) {
   ImGuiIO& io = ImGui::GetIO();
-  io.ConfigWindowsMoveFromTitleBarOnly = true;
   if (io.WantCaptureMouse and Application::Get().isDebugging()) {
     return true;
   } else {
@@ -101,33 +100,33 @@ bool onMouseButtonReleased(MouseButtonReleasedEvent& e) {
 }
 
 bool onKeyPressed(KeyPressedEvent& e) {
+  auto& window = Application::Get().getWindow();
   if (e.getKeyCode() == Key::F3) {
-    auto& window = Application::Get().getWindow();
     bool isDebugging = Application::Get().isDebugging();
     if (isDebugging) {
       Application::Get().debug(false);
-      window.setCursorMode(CursorMode::Disabled);
-      window.restoreCursor(); // imgui does not restore the custom cursor if any
-                              // is set
-      window.updateCameraPosition(true);
+      window.restoreCursor();
+      window.toggleCameraPositionUpdate(true);
       window.setLastMousePosition(Input::GetMouseX(), Input::GetMouseY());
     } else {
       Application::Get().debug(true);
-      window.setCursorMode(CursorMode::Normal);
-      window.updateCameraPosition(false);
+      window.setCursorMode(CursorMode::Normal, false);
+      window.toggleCameraPositionUpdate(false);
     }
     return true;
   } else if (e.getKeyCode() == Key::Escape) {
+    bool isDebugging = Application::Get().isDebugging();
+    if (isDebugging) {
+      Application::Get().getWindow().restoreCursor();
+    }
     Application::Get().close();
     return true;
   } else if (e.getKeyCode() == Key::F4) {
-    auto& window = Application::Get().getWindow();
+    RendererAPI::ToggleWireframe(not window.isWireframe());
     window.toggleWireframe(not window.isWireframe());
-    RendererAPI::ToggleWireframe(window.isWireframe());
     return true;
   } else if (e.getKeyCode() == Key::F12) {
-    auto& window = Application::Get().getWindow();
-    window.setFullscreen(not window.isFullscreen());
+    window.toggleFullscreen(not window.isFullscreen());
     return true;
   }
 
@@ -141,7 +140,6 @@ bool onKeyPressed(KeyPressedEvent& e) {
   if (e.repeating())
     return false;
 
-  auto& window = Application::Get().getWindow();
   // bool control = Input::IsKeyPressed(Key::LeftControl) or
   // Input::IsKeyPressed(Key::RightControl); bool shift =
   // Input::IsKeyPressed(Key::LeftShift) or
@@ -150,7 +148,7 @@ bool onKeyPressed(KeyPressedEvent& e) {
   switch (e.getKeyCode()) {
   case Key::LeftAlt:
     if (not Application::Get().isDebugging()) {
-      window.updateCameraPosition(false);
+      window.toggleCameraPositionUpdate(false);
       window.setCursorMode(CursorMode::Normal);
     }
     break;
@@ -173,7 +171,7 @@ bool onKeyReleased(KeyReleasedEvent& e) {
   case Key::LeftAlt:
     if (not Application::Get().isDebugging()) {
       window.setLastMousePosition(Input::GetMouseX(), Input::GetMouseY());
-      window.updateCameraPosition(true);
+      window.toggleCameraPositionUpdate(true);
       window.setCursorMode(CursorMode::Disabled);
     }
     break;

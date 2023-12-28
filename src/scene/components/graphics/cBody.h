@@ -4,6 +4,7 @@
 #include "scene/components/graphics/cMaterial.h"
 #include "scene/components/graphics/cMesh.h"
 #include "scene/entity.h"
+#include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -30,34 +31,33 @@ struct CBody {
       std::map<std::string, std::string, NumericComparator> info;
       info["filepath"] = filepath;
       for (int i = 0; i < meshes.size(); ++i) {
-        info["mesh " + std::to_string(i)] = std::to_string(i);
+        info["mesh " + std::to_string(i)] = getMeshInfo(i);
       }
       for (int i = 0; i < materials.size(); ++i) {
-        info["material " + std::to_string(i)] = std::to_string(i);
+        info["material " + std::to_string(i)] = getMaterialInfo(i);
       }
 
       return info;
     }
 
-    std::map<std::string, std::string, NumericComparator>
-    getMeshInfo(int index) const {
-      return meshes.at(index).getInfo();
+    std::string getMeshInfo(int index) const {
+      return MapToJson(meshes.at(index).getInfo());
     }
 
-    std::map<std::string, std::string, NumericComparator>
-    getMaterialInfo(int index) const {
-      return materials.at(index).getInfo();
+    std::string getMaterialInfo(int index) const {
+      return MapToJson(materials.at(index).getInfo());
     }
 };
 }
 
 template <> void engine::SceneManager::onComponentAdded(Entity& e, CBody& c) {
-  const auto& manager = m_assetsManager.lock();
-  ENGINE_ASSERT(manager, "Assets manager is null!")
+  const auto& assetsManager = m_assetsManager.lock();
+  ENGINE_ASSERT(assetsManager, "AssetsManager is null!")
 
   // TODO rethink if add if not empty here and do it as ctag but creating all
   // the fields
-  auto model = *manager->get<Model>(c.filepath); // We need a copy of the model
+  auto model =
+    *assetsManager->get<Model>(c.filepath); // We need a copy of the model
   c.meshes = std::move(model.getMeshes());
   c.materials = std::move(model.getMaterials());
 

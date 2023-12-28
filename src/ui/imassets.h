@@ -1,26 +1,37 @@
 #pragma once
 
-#include "engineAPI.h"
+#include <imgui.h>
 
-namespace demos {
+#include "assets/assetsManager.h"
+#include "assets/model.h"
+#include "assets/prefab.h"
+#include "assets/texture.h"
+#include "pch.h"
+#include "settings.h"
+#include "ui/imutils.h"
+
+namespace potatoengine::ui {
 
 std::string selectedAssetTabKey;
 std::string selectedAssetTabType;
 std::string selectedFilepath;
 char textFilterAssets[128]{}; // TODO: move to class
 
-void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
-  auto manager = am.lock();
-  APP_ASSERT(manager, "AssetsManager is null!");
+void drawAssets(std::weak_ptr<AssetsManager> am, std::weak_ptr<Settings> s) {
+  const auto& assetsManager = am.lock();
+  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
 
-  const auto& assets = manager->getAssetsByType();
+  const auto& settings = s.lock();
+  ENGINE_ASSERT(settings, "Settings is null!");
+
+  const auto& assets = assetsManager->getAssetsByType();
 
   if (assets.empty()) {
     ImGui::Text("No assets loaded");
     return;
   }
 
-  int collapsed = engine::ui::collapser();
+  int collapsed = collapser();
 
   ImGui::InputText("##filter", textFilterAssets,
                    IM_ARRAYSIZE(textFilterAssets));
@@ -37,8 +48,9 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
 
   bool filterOption = false;
   for (const auto& [AssetType, AssetsData] : assets) {
-    if (collapsed not_eq -1)
+    if (collapsed not_eq -1) {
       ImGui::SetNextItemOpen(collapsed not_eq 0);
+    }
 
     if (ImGui::CollapsingHeader(AssetType.c_str())) {
       for (const auto& [AssetName, _] : AssetsData) {
@@ -54,10 +66,10 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
     }
   }
 
-  if (collapsed == 0) {
-    selectedAssetTabKey = "";
-    selectedAssetTabType = "";
-    selectedFilepath = "";
+  if (collapsed == 0 or settings->reloadScene) {
+    selectedAssetTabKey.clear();
+    selectedAssetTabType.clear();
+    selectedFilepath.clear();
   }
 
   ImGui::NextColumn();
@@ -67,12 +79,11 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
       std::visit([](const auto& asset) { return asset->getInfo(); }, asset);
 
     for (const auto& [key, value] : assetInfo) {
-      if (key.starts_with("Targeted Prototype ") and
-          selectedAssetTabType == "Prefab") {
-        const auto& prefab = manager->get<engine::Prefab>(selectedAssetTabKey);
+      if (key.starts_with("Prototype ") and selectedAssetTabType == "Prefab") {
+        const auto& prefab = assetsManager->get<Prefab>(selectedAssetTabKey);
         const auto& prototypeInfo = prefab->getTargetedPrototypeInfo(value);
         if (ImGui::TreeNode(
-              (selectedAssetTabType + selectedAssetTabKey + key).c_str(),
+              (selectedAssetTabType + selectedAssetTabKey + key + settings->activeScene).c_str(),
               key.c_str())) {
           for (const auto& [key, value] : prototypeInfo) {
             ImGui::BulletText("%s: %s", key.c_str(), value.c_str());
@@ -81,10 +92,10 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
         }
       } else if (key.starts_with("Loaded Texture ") and
                  selectedAssetTabType == "Model") {
-        const auto& model = manager->get<engine::Model>(selectedAssetTabKey);
+        const auto& model = assetsManager->get<Model>(selectedAssetTabKey);
         const auto& textureInfo = model->getLoadedTextureInfo(value);
         if (ImGui::TreeNode(
-              (selectedAssetTabType + selectedAssetTabKey + key).c_str(),
+              (selectedAssetTabType + selectedAssetTabKey + key + settings->activeScene).c_str(),
               key.c_str())) {
           for (const auto& [key, value] : textureInfo) {
             ImGui::BulletText("%s: %s", key.c_str(), value.c_str());
@@ -93,8 +104,7 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
         }
       } else if (key.starts_with("Filepath ") and
                  selectedAssetTabType == "Texture") {
-        const auto& texture =
-          manager->get<engine::Texture>(selectedAssetTabKey);
+        const auto& texture = assetsManager->get<Texture>(selectedAssetTabKey);
         if (texture->isCubemap()) {
           ImGui::BulletText("%s: %s", key.c_str(), value.c_str());
         } else {
@@ -102,7 +112,7 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
           if (ImGui::IsItemHovered()) {
             selectedFilepath = value;
           } else {
-            selectedFilepath = "";
+            selectedFilepath.clear();
           }
         }
       } else {
@@ -111,9 +121,11 @@ void drawAssets(std::weak_ptr<engine::AssetsManager> am) {
     }
 
     if (not selectedFilepath.empty()) {
-      const auto& texture = manager->get<engine::Texture>(selectedAssetTabKey);
+      const auto& texture = assetsManager->get<Texture>(selectedAssetTabKey);
       if (not texture->isCubemap()) {
-        ImGui::Image((void*)texture->getID(), ImVec2(64, 64));
+        int maxWidth = texture->getWidth() > 128 ? 128 : texture->getWidth();
+        int maxHeight = texture->getHeight() > 128 ? 128 : texture->getHeight();
+        ImGui::Image((void*)texture->getID(), ImVec2(maxWidth, maxHeight));
       }
     }
   }

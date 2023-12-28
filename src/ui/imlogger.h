@@ -1,8 +1,12 @@
 #pragma once
 
-#include "engineAPI.h"
+#include <imgui.h>
 
-namespace demos {
+#include "core/logManager.h"
+#include "pch.h"
+#include "ui/imguiLogSink.h"
+
+namespace potatoengine::ui {
 
 bool show_tool_logger = false;
 
@@ -15,8 +19,8 @@ void drawLogger() {
   if (not show_tool_logger)
     return;
 
-  auto sink = dynamic_cast<engine::ui::ImGuiLogSink*>(
-    engine::LogManager::GetAppLogger()->sinks()[1].get());
+  auto sink =
+    dynamic_cast<ImGuiLogSink*>(LogManager::GetAppLogger()->sinks()[1].get());
   sink->Draw(&show_tool_logger);
 }
 }

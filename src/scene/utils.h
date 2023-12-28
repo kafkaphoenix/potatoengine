@@ -203,7 +203,6 @@ void RegisterComponents() {
     .data<&CTexture::_drawMode>("drawMode"_hs)
     .func<&CTexture::print>("print"_hs)
     .func<&CTexture::getInfo>("getInfo"_hs)
-    .func<&CTexture::getTextureInfo>("getTextureInfo"_hs)
     .func<&onComponentAdded<CTexture>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CTexture>, entt::as_ref_t>("assign"_hs);
 
@@ -227,8 +226,6 @@ void RegisterComponents() {
     .data<&CBody::materials>("materials"_hs)
     .func<&CBody::print>("print"_hs)
     .func<&CBody::getInfo>("getInfo"_hs)
-    .func<&CBody::getMeshInfo>("getMeshInfo"_hs)
-    .func<&CBody::getMaterialInfo>("getMaterialInfo"_hs)
     .func<&onComponentAdded<CBody>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CBody, std::string>, entt::as_ref_t>("assign"_hs);
 
@@ -395,7 +392,6 @@ void RegisterComponents() {
     .data<&CShape::repeatTexture>("repeatTexture"_hs)
     .func<&CShape::print>("print"_hs)
     .func<&CShape::getInfo>("getInfo"_hs)
-    .func<&CShape::getMeshInfo>("getMeshInfo"_hs)
     .func<&onComponentAdded<CShape>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CShape>, entt::as_ref_t>("assign"_hs);
 
@@ -451,8 +447,6 @@ void RegisterComponents() {
     .data<&CChunk::_biome>("biome"_hs)
     .func<&CChunk::print>("print"_hs)
     .func<&CChunk::getInfo>("getInfo"_hs)
-    .func<&CChunk::getMeshInfo>("getMeshInfo"_hs)
-    .func<&CChunk::getTransformInfo>("getTransformInfo"_hs)
     .func<&onComponentAdded<CChunk>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CChunk>, entt::as_ref_t>("assign"_hs);
 
@@ -511,12 +505,12 @@ void PrintScene(entt::registry& r) {
 template <>
 void engine::SceneManager::onComponentAdded(Entity& e, CTexture& c) {
   c.setDrawMode();
-  const auto& manager = m_assetsManager.lock();
-  ENGINE_ASSERT(manager, "AssetsManager is null!");
+  const auto& assetsManager = m_assetsManager.lock();
+  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
 
   c.textures.reserve(c.filepaths.size());
   for (std::string_view filepath : c.filepaths) {
-    c.textures.emplace_back(manager->get<Texture>(filepath.data()));
+    c.textures.emplace_back(assetsManager->get<Texture>(filepath.data()));
   }
 
   e.update<CTexture>(c);

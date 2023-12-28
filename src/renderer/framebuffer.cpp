@@ -3,12 +3,27 @@
 #include <glad/glad.h>
 
 #include "core/application.h"
+#include "utils/mapJsonSerializer.h"
 
 namespace potatoengine {
 
 FBO::FBO(uint32_t w, uint32_t h, uint32_t t) : m_depthBufferType(t) {
-  m_width = w == 0 ? Application::Get().getWindow().getWidth() : w;
-  m_height = h == 0 ? Application::Get().getWindow().getHeight() : h;
+  auto& window = Application::Get().getWindow();
+  int windowWidth;
+  int windowHeight;
+  if (window.isFullscreen()) {
+    int monitorCount;
+    GLFWmonitor* monitor =
+      (glfwGetMonitors(&monitorCount))[window.getPrimaryMonitor()];
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    windowWidth = mode->width;
+    windowHeight = mode->height;
+  } else {
+    windowWidth = window.getWidth();
+    windowHeight = window.getHeight();
+  }
+  m_width = w == 0 ? windowWidth : w;
+  m_height = h == 0 ? windowHeight : h;
   glCreateFramebuffers(1, &m_id);
   glNamedFramebufferDrawBuffer(m_id, GL_COLOR_ATTACHMENT0);
   attachTexture();
@@ -110,6 +125,12 @@ const std::map<std::string, std::string, NumericComparator>& FBO::getInfo() {
   m_info["Height"] = std::to_string(m_height);
   m_info["Buffer ID"] = std::to_string(getBufferID());
   m_info["Buffer type"] = getBufferType();
+  if (m_colorTexture) {
+    m_info["Color texture"] = MapToJson(m_colorTexture->getInfo());
+  }
+  if (m_depthTexture) {
+    m_info["Depth texture"] = MapToJson(m_depthTexture->getInfo());
+  }
 
   return m_info;
 }
@@ -127,8 +148,16 @@ void FBO::bindToRead() {
 
 void FBO::unbind() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0); // default framebuffer
-  glViewport(0, 0, Application::Get().getWindow().getWidth(),
-             Application::Get().getWindow().getHeight());
+  auto& window = Application::Get().getWindow();
+  if (window.isFullscreen()) {
+    int monitorCount;
+    GLFWmonitor* monitor =
+      (glfwGetMonitors(&monitorCount))[window.getPrimaryMonitor()];
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    glViewport(0, 0, mode->width, mode->height);
+  } else {
+    glViewport(0, 0, window.getWidth(), window.getHeight());
+  }
 }
 
 void FBO::clear(const float color[4], const float depth) {

@@ -31,10 +31,10 @@ namespace potatoengine {
 SceneManager::SceneManager(std::weak_ptr<AssetsManager> am,
                            std::weak_ptr<Renderer> r)
   : m_entityFactory(am), m_assetsManager(am), m_renderer(r) {
-  ENGINE_TRACE("Initializing scene manager...");
+  ENGINE_TRACE("Initializing scene assetsManager...");
   ENGINE_TRACE("Registering engine components...");
   RegisterComponents();
-  ENGINE_TRACE("Scene manager created!");
+  ENGINE_TRACE("Scene assetsManager created!");
 }
 
 void SceneManager::onEvent(Event& e) { eventSystem(std::ref(m_registry), e); }
@@ -141,7 +141,7 @@ SceneManager::getAllNamedEntities() {
 
 void SceneManager::createPrototypes(std::string_view prefabID) {
   // TODO think a better way, we need to create an entity so
-  // we have access to the scene manager and avoid circular
+  // we have access to the scene assetsManager and avoid circular
   // dependency but we discard it afterwards to create one per prototype
   m_entityFactory.createPrototypes(prefabID, Entity(m_registry.create(), this));
   m_dirty = true;
@@ -218,8 +218,8 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
   const auto& renderer = m_renderer.lock();
   ENGINE_ASSERT(renderer, "Renderer is null!");
 
-  const auto& manager = m_assetsManager.lock();
-  ENGINE_ASSERT(manager, "AssetsManager is null!");
+  const auto& assetsManager = m_assetsManager.lock();
+  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
 
   ENGINE_ASSERT(m_activeScene.empty() or reload, "Scene {} already exists!",
                 sceneID);
@@ -237,7 +237,7 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
     ENGINE_TRACE("Creating scene prefabs prototypes...");
     createPrototypes(prefabID);
     ENGINE_TRACE("Creating scene entities...");
-    createEntities(prefabID, loadedScene, manager, renderer);
+    createEntities(prefabID, loadedScene, assetsManager, renderer);
   }
 
   if (reload) {
@@ -253,7 +253,7 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
 
 void SceneManager::createEntities(std::string_view prefabID,
                                   const SceneLoader& loadedScene,
-                                  const std::shared_ptr<AssetsManager>& manager,
+                                  const std::shared_ptr<AssetsManager>& assetsManager,
                                   const std::shared_ptr<Renderer>& renderer) {
   ENGINE_TRACE("Creating scene normal entities...");
   for (const auto& [name, data] :
@@ -330,7 +330,7 @@ void SceneManager::createEntities(std::string_view prefabID,
           cBody.meshes.clear();
           cBody.materials.clear();
           auto model =
-            *manager->get<Model>(filepath); // We need a copy of the model
+            *assetsManager->get<Model>(filepath); // We need a copy of the model
           cBody.meshes = std::move(model.getMeshes());
           cBody.materials = std::move(model.getMaterials());
         }
@@ -355,7 +355,7 @@ void SceneManager::createEntities(std::string_view prefabID,
           c.textures.clear();
           c.textures.reserve(c.filepaths.size());
           for (const auto& filepath : c.filepaths) {
-            c.textures.emplace_back(manager->get<Texture>(filepath));
+            c.textures.emplace_back(assetsManager->get<Texture>(filepath));
           }
         }
       }
@@ -556,7 +556,7 @@ void SceneManager::createEntities(std::string_view prefabID,
           cBody.meshes.clear();
           cBody.materials.clear();
           auto model =
-            *manager->get<Model>(filepath); // We need a copy of the model
+            *assetsManager->get<Model>(filepath); // We need a copy of the model
           cBody.meshes = std::move(model.getMeshes());
           cBody.materials = std::move(model.getMaterials());
         }
@@ -616,7 +616,7 @@ void SceneManager::createEntities(std::string_view prefabID,
           cBody.meshes.clear();
           cBody.materials.clear();
           auto model =
-            *manager->get<Model>(filepath); // We need a copy of the model
+            *assetsManager->get<Model>(filepath); // We need a copy of the model
           cBody.meshes = std::move(model.getMeshes());
           cBody.materials = std::move(model.getMaterials());
         }
@@ -661,13 +661,13 @@ void SceneManager::createEntities(std::string_view prefabID,
     }
     uint32_t attachment;
     if (fbo.attachment == "depth_texture") {
-      attachment = engine::FBO::DEPTH_TEXTURE;
+      attachment = FBO::DEPTH_TEXTURE;
     } else if (fbo.attachment == "depth_renderbuffer") {
-      attachment = engine::FBO::DEPTH_RENDERBUFFER;
+      attachment = FBO::DEPTH_RENDERBUFFER;
     } else if (fbo.attachment == "stencil_renderbuffer") {
-      attachment = engine::FBO::STENCIL_RENDERBUFFER;
+      attachment = FBO::STENCIL_RENDERBUFFER;
     } else if (fbo.attachment == "depth_stencil_renderbuffer") {
-      attachment = engine::FBO::DEPTH_STENCIL_RENDERBUFFER;
+      attachment = FBO::DEPTH_STENCIL_RENDERBUFFER;
     } else {
       ENGINE_ASSERT(false, "Unknown fbo attachment: {}", fbo.attachment);
     }
@@ -709,7 +709,7 @@ void SceneManager::createEntities(std::string_view prefabID,
 void SceneManager::reloadScene() {
   ENGINE_ASSERT(not m_activeScene.empty(), "No scene is active!");
   ENGINE_WARN("Reloading scene {}", m_activeScene);
-  auto renderer = m_renderer.lock();
+  const auto& renderer = m_renderer.lock();
   ENGINE_ASSERT(renderer, "Renderer is null!");
 
   m_registry.clear(); // delete instances and prototypes but reusing them later
@@ -722,7 +722,7 @@ void SceneManager::reloadScene() {
 void SceneManager::clearScene() {
   ENGINE_ASSERT(not m_activeScene.empty(), "No scene is active!");
   ENGINE_WARN("Clearing scene {}", m_activeScene);
-  auto renderer = m_renderer.lock();
+  const auto& renderer = m_renderer.lock();
   ENGINE_ASSERT(renderer, "Renderer is null!");
 
   m_loadedScenes.erase(m_activeScene);
@@ -730,7 +730,7 @@ void SceneManager::clearScene() {
                       // does not invoke signals/mixin methods
   m_entityFactory.clear();
   renderer->clear();
-  m_activeScene = "";
+  m_activeScene.clear();
   m_metrics.clear();
   m_dirty = false;
   entt::monostate<"useFog"_hs>{} = 0.f;
@@ -749,4 +749,9 @@ template <typename T> void SceneManager::onComponentCloned(Entity& e, T& c) {
                 entt::type_id<T>().name());
 }
 
+std::shared_ptr<SceneManager>
+SceneManager::Create(std::weak_ptr<AssetsManager> am,
+                     std::weak_ptr<Renderer> r) {
+  return std::make_shared<SceneManager>(am, r);
+}
 }

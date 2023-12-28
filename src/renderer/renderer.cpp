@@ -29,12 +29,12 @@ void Renderer::endScene() {
 }
 
 void Renderer::addShader(std::string&& name) {
-  const auto& manager = m_assetsManager.lock();
-  ENGINE_ASSERT(manager, "AssetsManager is null!");
+  const auto& assetsManager = m_assetsManager.lock();
+  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
 
   auto newShaderProgram = ShaderProgram::Create(std::string(name));
-  const auto& vs = manager->get<Shader>("v" + name);
-  const auto& fs = manager->get<Shader>("f" + name);
+  const auto& vs = assetsManager->get<Shader>("v" + name);
+  const auto& fs = assetsManager->get<Shader>("f" + name);
   newShaderProgram->attach(*vs);
   newShaderProgram->attach(*fs);
   newShaderProgram->link();
@@ -69,10 +69,10 @@ void Renderer::renderFBO(const std::shared_ptr<VAO>& vao,
 }
 
 void Renderer::renderInsideImGui(const std::shared_ptr<VAO>& vao,
-                                 std::string_view fbo, std::string_view title, glm::vec2 size, glm::vec2 position,
-                                 bool fitToWindow) {
+                                 std::string_view fbo, std::string_view title,
+                                 glm::vec2 size, glm::vec2 position) {
   auto& fbo_ = m_framebuffers.at(fbo.data());
-  ui::renderScene(fbo_->getColorTexture()->getID(), title, size, position, fitToWindow);
+  ui::renderScene(fbo_->getColorTexture()->getID(), title, size, position);
 
   m_drawCalls++;
   m_triangles += vao->getEBO()->getCount() / 3;
@@ -113,8 +113,8 @@ void Renderer::clear() {
   m_shaderPrograms.clear();
 }
 
-std::unique_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) {
-  return std::make_unique<Renderer>(am);
+std::shared_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) {
+  return std::make_shared<Renderer>(am);
 }
 
 std::unique_ptr<ShaderProgram>& Renderer::get(std::string_view name) {

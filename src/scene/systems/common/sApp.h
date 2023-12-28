@@ -11,19 +11,16 @@ namespace potatoengine {
 
 bool onWindowClosed(WindowCloseEvent& e) {
   Application::Get().close();
-
   return true;
 }
 
 bool onWindowRestored(WindowRestoredEvent& e) {
   Application::Get().pause(false);
-
   return true;
 }
 
 bool onWindowMinimized(WindowMinimizedEvent& e) {
   Application::Get().pause(true);
-
   return true;
 }
 
@@ -35,8 +32,13 @@ bool onWindowMoved(WindowMovedEvent& e) { return true; }
 
 bool onWindowResized(WindowResizeEvent& e) {
   RendererAPI::SetViewport(0, 0, e.getWidth(), e.getHeight());
+  if (not Application::Get()
+            .getWindow()
+            .isFullscreen()) { // when resizing with the mouse
+    Application::Get().getSettings()->windowWidth = e.getWidth();
+    Application::Get().getSettings()->windowHeight = e.getHeight();
+  }
   ImGuiIO& io = ImGui::GetIO();
-  io.ConfigWindowsMoveFromTitleBarOnly = true;
 
   return true;
 }
@@ -52,8 +54,10 @@ void appSystem(Event& e) {
 
   dispatcher.dispatch<WindowCloseEvent>(BIND_STATIC_EVENT(onWindowClosed));
   dispatcher.dispatch<WindowRestoredEvent>(BIND_STATIC_EVENT(onWindowRestored));
-  dispatcher.dispatch<WindowMinimizedEvent>(BIND_STATIC_EVENT(onWindowMinimized));
-  dispatcher.dispatch<WindowMaximizedEvent>(BIND_STATIC_EVENT(onWindowMaximized));
+  dispatcher.dispatch<WindowMinimizedEvent>(
+    BIND_STATIC_EVENT(onWindowMinimized));
+  dispatcher.dispatch<WindowMaximizedEvent>(
+    BIND_STATIC_EVENT(onWindowMaximized));
   dispatcher.dispatch<WindowResizeEvent>(BIND_STATIC_EVENT(onWindowResized));
   dispatcher.dispatch<WindowFocusEvent>(BIND_STATIC_EVENT(onWindowFocus));
   dispatcher.dispatch<WindowMovedEvent>(BIND_STATIC_EVENT(onWindowMoved));

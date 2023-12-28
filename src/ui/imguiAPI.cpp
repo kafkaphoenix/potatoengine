@@ -1,14 +1,17 @@
 #include "ui/imguiAPI.h"
 
 namespace potatoengine::ui {
-void ImGuiAPI::Init(GLFWwindow* window, int openglMajorVersion, int openglMinorVersion) {
+void ImGuiAPI::Init(GLFWwindow* window, int openglMajorVersion,
+                    int openglMinorVersion) {
   ENGINE_TRACE("Initializing ImGuiAPI");
-  std::string glsl_version = std::format("#version {}{}0", openglMajorVersion, openglMinorVersion);
+  std::string glsl_version =
+    std::format("#version {}{}0", openglMajorVersion, openglMinorVersion);
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
   (void)io;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigWindowsMoveFromTitleBarOnly = true;
 
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL(window, true);

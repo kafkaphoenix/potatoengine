@@ -17,7 +17,8 @@ Prefab::Prefab(std::filesystem::path&& fp,
   f.close();
 
   for (const auto& [name, prototypeData] : data.items()) {
-    if (not m_targetedPrototypes.contains(name)) {
+    if (not m_targetedPrototypes.contains(name) and
+        m_targetedPrototypes not_eq std::unordered_set<std::string>{"*"}) {
       continue;
     }
     std::unordered_set<std::string> inherits;
@@ -75,9 +76,8 @@ const std::map<std::string, std::string, NumericComparator>& Prefab::getInfo() {
 
   m_info["Type"] = "Prefab";
   m_info["Filepath"] = m_filepath;
-  for (int i = 0; i < m_targetedPrototypes.size(); ++i) {
-    m_info["Targeted Prototype " + std::to_string(i)] =
-      *std::next(m_targetedPrototypes.begin(), i);
+  for (const auto& [prototype_id, prototype_data] : m_prototypes) {
+    m_info["Prototype " + prototype_id] = prototype_id;
   }
 
   return m_info;

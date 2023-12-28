@@ -30,25 +30,34 @@ class SceneManager {
     void removeEntity(Entity&& e);
     Entity getEntity(std::string_view name);
     Entity getEntity(UUID& uuid);
-    const std::map<std::string, entt::entity, NumericComparator>& getAllNamedEntities();
+    const std::map<std::string, entt::entity, NumericComparator>&
+    getAllNamedEntities();
 
     void createPrototypes(std::string_view prefabID);
     void updatePrototypes(std::string_view prefabID);
     void destroyPrototypes(std::string_view prefabID);
     const EntityFactory::Prototypes& getPrototypes(std::string_view prefabID);
-    const std::map<std::string, EntityFactory::Prototypes, NumericComparator>& getAllPrototypes();
+    const std::map<std::string, EntityFactory::Prototypes, NumericComparator>&
+    getAllPrototypes();
     bool containsPrototypes(std::string_view prefabID) const;
-    void createPrototype(std::string_view prefabID, std::string_view prototypeID);
-    void updatePrototype(std::string_view prefabID, std::string_view prototypeID);
-    void destroyPrototype(std::string_view prefabID, std::string_view prototypeID);
-    Entity getPrototype(std::string_view prefabID, std::string_view prototypeID);
-    bool containsPrototype(std::string_view prefabID, std::string_view prototypeID) const;
+    void createPrototype(std::string_view prefabID,
+                         std::string_view prototypeID);
+    void updatePrototype(std::string_view prefabID,
+                         std::string_view prototypeID);
+    void destroyPrototype(std::string_view prefabID,
+                          std::string_view prototypeID);
+    Entity getPrototype(std::string_view prefabID,
+                        std::string_view prototypeID);
+    bool containsPrototype(std::string_view prefabID,
+                           std::string_view prototypeID) const;
 
     // TODO: move to scene creator if I fix the circular dependency
     void loadScene(std::string_view sceneID);
     void createScene(std::string sceneID, bool reload = false);
-    void createEntities(std::string_view prefabID, const SceneLoader& loadedScene,
-                        const std::shared_ptr<AssetsManager>& am, const std::shared_ptr<Renderer>& r);
+    void createEntities(std::string_view prefabID,
+                        const SceneLoader& loadedScene,
+                        const std::shared_ptr<AssetsManager>& am,
+                        const std::shared_ptr<Renderer>& r);
     void reloadScene();
     void clearScene();
     std::string_view getActiveScene() const noexcept { return m_activeScene; }
@@ -56,6 +65,9 @@ class SceneManager {
     template <typename T> void onComponentAdded(Entity& e, T& c);
 
     template <typename T> void onComponentCloned(Entity& e, T& c);
+
+    static std::shared_ptr<SceneManager> Create(std::weak_ptr<AssetsManager> am,
+                                                std::weak_ptr<Renderer> r);
 
   private:
     std::weak_ptr<AssetsManager> m_assetsManager;

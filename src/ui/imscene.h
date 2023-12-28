@@ -3,26 +3,26 @@
 #include <imgui.h>
 
 #include "core/application.h"
+#include "pch.h"
 
 namespace potatoengine::ui {
-
 inline void renderScene(uint32_t fboTextureID, std::string_view title,
-                        glm::vec2 size, glm::vec2 position, bool fitToWindow) {
+                        glm::vec2 size, glm::vec2 position) {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
   ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
-  auto& window = Application::Get().getWindow();
-  int windowWidth = size.x != 0 ? size.x : window.getWidth();
-  int windowHeight = size.y != 0 ? size.y : window.getHeight();
+  const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+  int windowWidth = size.x != 0 ? size.x : main_viewport->Size.x;
+  int windowHeight = size.y != 0 ? size.y : main_viewport->Size.y;
   windowWidth *= 0.75f;
   windowHeight *= 0.75f;
   ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight));
   int w, h;
-  if (fitToWindow) {
+  if (Application::Get().getWindow().shouldFitToWindow()) {
     w = windowWidth;
     h = windowHeight;
   } else {
-    w = window.getWidth();
-    h = window.getHeight();
+    w = main_viewport->Size.x;
+    h = main_viewport->Size.y;
   }
   ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoBringToFrontOnFocus |
                                   ImGuiWindowFlags_NoResize |

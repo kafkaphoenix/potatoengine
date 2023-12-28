@@ -2,34 +2,46 @@
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-#define GLM_FORCE_CTOR_INIT
-#include <glm/glm.hpp>
 
 #include "events/event.h"
 #include "pch.h"
 #include "renderer/openGLContext.h"
+#include "settings.h"
 
 namespace potatoengine {
+using EventCallbackFn = std::function<void(Event&)>;
 
-enum class CursorMode {
-  Normal = GLFW_CURSOR_NORMAL,
-  Hidden = GLFW_CURSOR_HIDDEN,
-  Disabled = GLFW_CURSOR_DISABLED
-};
-struct WindowProperties {
-    std::string name{};
-    std::string windowIconPath{};
-    glm::vec2 windowSize{};
-    int depthBits{};
-    int refreshRate{};
-    bool fullscreen{};
-    int primaryMonitor{};
+enum class CursorMode { Normal = 0, Hidden, Disabled };
+
+struct WindowData {
+    int positionX;
+    int positionY;
+    float mouseX;
+    float mouseY;
+    float debugMouseX;
+    float debugMouseY;
+    bool firstMouse{true};
+    bool toggleCameraPositionUpdate{true};
+    bool minimized{};
+    bool maximized{};
+    bool focused{};
+    bool visible{};
+    bool wireframe{};
+    EventCallbackFn eventCallback;
+
+    // settings
+    std::string windowTitle;
+    std::string windowIconPath;
+    int width;
+    int height;
+    int primaryMonitor;
     bool vSync{};
+    std::string cursorIconPath;
+    GLFWcursor* cursor;
+    CursorMode cursorMode;
     bool resizable{};
-    int openglMajorVersion{};
-    int openglMinorVersion{};
-    std::string cursorIconPath{};
-    CursorMode cursorMode{};
+    int refreshRate;
+    bool fullscreen{};
     bool windowInsideImgui{};
     bool fitToWindow{};
 };
@@ -38,9 +50,7 @@ static int s_GLFWWindowCount = 0;
 
 class Window {
   public:
-    using EventCallbackFn = std::function<void(Event&)>;
-
-    Window(WindowProperties&& properties);
+    Window(std::weak_ptr<Settings> settings);
     ~Window();
 
     void shutdown();
@@ -48,78 +58,48 @@ class Window {
     void onEvent();
 
     GLFWwindow* getNativeWindow() const noexcept { return m_window; }
-    int getWidth() const { return m_data.size.x; }
-    int getHeight() const { return m_data.size.y; }
-    bool isVSync() const { return m_data.vSync; }
+    const WindowData& getWindowData() const noexcept { return m_data; }
+    int getWidth() const { return m_data.width; }
+    int getHeight() const { return m_data.height; }
     bool isFullscreen() const { return m_data.fullscreen; }
-    bool isMaximized() const { return m_data.maximized; }
-    bool isMinimized() const { return m_data.minimized; }
     bool isWireframe() const { return m_data.wireframe; }
     bool isWindowInsideImgui() const { return m_data.windowInsideImgui; }
-    bool fitToWindow() const { return m_data.fitToWindow; }
+    bool shouldFitToWindow() const { return m_data.fitToWindow; }
+    int getPrimaryMonitor() const { return m_data.primaryMonitor; }
 
-    void setEventCallback(const EventCallbackFn& cb) {
-      m_data.eventCallback = cb;
-    }
-    void setWindowTitle(const std::string& title);
-    void setWindowIcon(const std::string& path);
-    void restoreWindowIcon();
-    void setWindowMonitor(int monitor);
-    void toggleVSync(bool enabled);
-    void setCursorIcon(const std::string& path);
-    void setCursorMode(CursorMode mode);
-    void restoreCursor();
-    void setResizable(bool resizable);
-    void setRefreshRate(int refreshRate);
-    void setSize(glm::vec2&& size);
     void setPosition(int x, int y);
+    void setLastMousePosition(float x, float y);
+    void toggleCameraPositionUpdate(bool enable);
     void minimize(bool minimize);
     void maximize(bool maximize);
-    void setFocus(bool focused);
-    void setFullscreen(bool fullscreen);
-    void setVisible(bool visible);
-    void updateCameraPosition(bool update) {
-      m_data.updateCameraPosition = update;
-    }
-    void setLastMousePosition(float x, float y) {
-      m_data.lastX = x;
-      m_data.lastY = y;
-    }
-    void toggleWindowInsideImgui(bool windowInsideImgui);
+    void toggleFocus(bool focused);
+    void toggleVisibility(bool visible);
     void toggleWireframe(bool wireframe);
+    void setEventCallback(const EventCallbackFn& cb);
+
+    void setWindowTitle(std::string title);
+    void setWindowIcon(std::string path);
+    void restoreWindowIcon();
+    void setCursorIcon(std::string path);
+    void setCursorMode(CursorMode mode, bool update = true);
+    void restoreCursor();
+    void resize(int width, int height);
+    void toggleResizable(bool resizable);
+    void setRefreshRate(int refreshRate);
+    void toggleVSync(bool enabled);
+    void setWindowMonitor(int monitor);
+    void toggleFullscreen(bool fullscreen);
+    void toggleWindowInsideImgui(bool windowInsideImgui);
     void toggleFitToWindow(bool fitToWindow);
 
-    static std::unique_ptr<Window> Create(WindowProperties&& properties);
+    static std::unique_ptr<Window> Create(std::weak_ptr<Settings> settings);
 
   private:
     GLFWwindow* m_window{}; // TODO: this class should be a window manager, and
                             // this should be a vector of windows
     std::unique_ptr<OpenGLContext> m_context;
-
-    struct WindowData {
-        std::string name{};
-        glm::vec2 size{};
-        std::string windowIconPath{};
-        int primaryMonitor{};
-        int refreshRate{};
-        bool maximized{};
-        bool minimized{};
-        float lastX{};
-        float lastY{};
-        bool firstMouse = true;
-        bool vSync{};
-        bool fullscreen{};
-        CursorMode cursorMode = CursorMode::Disabled;
-        GLFWcursor* cursor;
-        bool updateCameraPosition = true;
-        bool wireframe{};
-        bool windowInsideImgui{};
-        bool fitToWindow{};
-
-        EventCallbackFn eventCallback;
-    };
-
     WindowData m_data{};
+    std::weak_ptr<Settings> m_settings;
 };
 
 }

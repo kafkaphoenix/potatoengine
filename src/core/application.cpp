@@ -1,40 +1,30 @@
 #include "core/application.h"
 
 #include "core/time.h"
+#include "ui/imdebugger.h"
 #include "ui/imguiAPI.h"
 
 namespace potatoengine {
 
-Application::Application(Config&& c, CLArgs&& args)
-  : m_name(std::move(c.name)), m_clargs(std::move(args)) {
+Application::Application(std::shared_ptr<Settings>&& s, CLArgs&& args)
+  : m_clargs(std::move(args)) {
   s_instance = this;
+  m_settings = std::move(s);
 
-  std::filesystem::current_path(c.root);
+  m_name = m_settings->appName;
+  std::filesystem::current_path(m_settings->root);
   m_states = StateStack::Create();
   m_assetsManager = AssetsManager::Create();
-  WindowProperties windowProperties = {
-    .name = m_name,
-    .windowIconPath = c.windowIconPath,
-    .windowSize = c.windowSize,
-    .depthBits = c.depthBits,
-    .refreshRate = c.refreshRate,
-    .fullscreen = c.fullscreen,
-    .primaryMonitor = c.primaryMonitor,
-    .vSync = c.vSync,
-    .resizable = c.resizable,
-    .openglMajorVersion = c.openglMajorVersion,
-    .openglMinorVersion = c.openglMinorVersion,
-    .cursorIconPath = c.cursorIconPath,
-    .cursorMode = c.cursorMode,
-    .windowInsideImgui = c.windowInsideImgui,
-    .fitToWindow = c.fitToWindow};
-  m_window = Window::Create(std::move(windowProperties));
+
+  m_window = Window::Create(std::weak_ptr<Settings>(m_settings));
   m_window->setEventCallback(BIND_EVENT(Application::onEvent));
 
   m_renderer = Renderer::Create(m_assetsManager);
   m_renderer->init();
-  ui::ImGuiAPI::Init(m_window->getNativeWindow(), c.openglMajorVersion,
-                     c.openglMinorVersion);
+  ui::ImGuiAPI::Init(m_window->getNativeWindow(),
+                     m_settings->openglMajorVersion,
+                     m_settings->openglMinorVersion);
+  m_sceneManager = SceneManager::Create(m_assetsManager, m_renderer);
 }
 
 Application::~Application() {
@@ -75,8 +65,10 @@ void Application::run() {
         for (auto& state : *m_states) {
           state->onUpdate(ts);
           if (m_debugging) {
-            state->onImguiUpdate();
+            ui::drawDebugger(m_assetsManager, m_renderer, m_sceneManager,
+                             m_settings);
           }
+          state->onImguiUpdate();
         }
         ui::ImGuiAPI::Render();
         m_accumulator -= ts;

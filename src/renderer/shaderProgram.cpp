@@ -131,24 +131,24 @@ void ShaderProgram::resetActiveUniforms() {
 }
 
 void ShaderProgram::printActiveUniforms() {
-  ENGINE_BACKTRACE("===================Active Uniforms===================");
+  ENGINE_BACKTRACE("===================Uniforms===================");
   for (const auto& [type, name] : m_activeUniforms) {
     if (type == GL_INT) {
-      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "int");
+      ENGINE_BACKTRACE("Uniform {} type: {}", name, "int");
     } else if (type == GL_FLOAT) {
-      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "float");
+      ENGINE_BACKTRACE("Uniform {} type: {}", name, "float");
     } else if (type == GL_FLOAT_VEC2) {
-      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "vec2");
+      ENGINE_BACKTRACE("Uniform {} type: {}", name, "vec2");
     } else if (type == GL_FLOAT_VEC3) {
-      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "vec3");
+      ENGINE_BACKTRACE("Uniform {} type: {}", name, "vec3");
     } else if (type == GL_FLOAT_VEC4) {
-      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "vec4");
+      ENGINE_BACKTRACE("Uniform {} type: {}", name, "vec4");
     } else if (type == GL_FLOAT_MAT4) {
-      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "mat4");
+      ENGINE_BACKTRACE("Uniform {} type: {}", name, "mat4");
     } else if (type == GL_SAMPLER_2D) {
-      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "sampler2D");
+      ENGINE_BACKTRACE("Uniform {} type: {}", name, "sampler2D");
     } else if (type == GL_SAMPLER_CUBE) {
-      ENGINE_BACKTRACE("Active uniform {} type: {}", name, "samplerCube");
+      ENGINE_BACKTRACE("Uniform {} type: {}", name, "samplerCube");
     } else {
       ENGINE_ASSERT(false, "Unknown uniform type {} for uniform {}", type,
                     name);
@@ -166,21 +166,21 @@ const std::map<std::string, std::string, NumericComparator>& ShaderProgram::getI
   m_info["ID"] = std::to_string(m_id);
   for (const auto& [type, name] : m_activeUniforms) {
     if (type == GL_INT) {
-      m_info["Active uniform " + name] = "int";
+      m_info["Uniform " + name] = "int";
     } else if (type == GL_FLOAT) {
-      m_info["Active uniform " + name] = "float";
+      m_info["Uniform " + name] = "float";
     } else if (type == GL_FLOAT_VEC2) {
-      m_info["Active uniform " + name] = "vec2";
+      m_info["Uniform " + name] = "vec2";
     } else if (type == GL_FLOAT_VEC3) {
-      m_info["Active uniform " + name] = "vec3";
+      m_info["Uniform " + name] = "vec3";
     } else if (type == GL_FLOAT_VEC4) {
-      m_info["Active uniform " + name] = "vec4";
+      m_info["Uniform " + name] = "vec4";
     } else if (type == GL_FLOAT_MAT4) {
-      m_info["Active uniform " + name] = "mat4";
+      m_info["Uniform " + name] = "mat4";
     } else if (type == GL_SAMPLER_2D) {
-      m_info["Active uniform " + name] = "sampler2D";
+      m_info["Uniform " + name] = "sampler2D";
     } else if (type == GL_SAMPLER_CUBE) {
-      m_info["Active uniform " + name] = "samplerCube";
+      m_info["Uniform " + name] = "samplerCube";
     } else {
       ENGINE_ASSERT(false, "Unknown uniform type {} for uniform {}", type,
                     name);

@@ -3,6 +3,7 @@
 #include "scene/components/graphics/cMesh.h"
 #include "scene/components/physics/cTransform.h"
 #include "scene/components/world/cBlock.h"
+#include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -39,20 +40,19 @@ struct CChunk {
     std::map<std::string, std::string, NumericComparator> getInfo() const {
       std::map<std::string, std::string, NumericComparator> info;
       info["biome"] = _biome;
-      info["mesh 0"] = "0";
-      info["transform 0"] = "0";
+      info["mesh 0"] = getMeshInfo(0);
+      info["transform 0"] = getTransformInfo(0);
 
       return info;
     }
 
-    std::map<std::string, std::string, NumericComparator>
-    getMeshInfo(int index) const {
-      return terrainMesh.getInfo();
+    std::string getMeshInfo(int index) const {
+      return MapToJson(terrainMesh.getInfo());
     }
 
-    std::map<std::string, std::string, NumericComparator>
+    std::string
     getTransformInfo(int index) const {
-      return transform.getInfo();
+      return MapToJson(transform.getInfo());
     }
 
     void setBiome() {

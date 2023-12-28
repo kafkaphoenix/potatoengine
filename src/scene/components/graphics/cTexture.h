@@ -7,6 +7,7 @@
 
 #include "assets/texture.h"
 #include "pch.h"
+#include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -71,21 +72,20 @@ struct CTexture {
       info["reflectivity"] = std::to_string(reflectivity);
       info["refractiveIndex"] = std::to_string(refractiveIndex);
       info["hasTransparency"] = hasTransparency ? "true" : "false";
-      info["useLighting"] = useLighting ? "true" : "false"; 
+      info["useLighting"] = useLighting ? "true" : "false";
       info["useReflection"] = useReflection ? "true" : "false";
       info["useRefraction"] = useRefraction ? "true" : "false";
       info["drawMode"] = _drawMode;
 
       for (int i = 0; i < textures.size(); ++i) {
-        info["texture " + std::to_string(i)] = std::to_string(i);
+        info["texture " + std::to_string(i)] = getTextureInfo(i);
       }
 
       return info;
     }
 
-    std::map<std::string, std::string, NumericComparator>
-    getTextureInfo(int index) const {
-      return textures.at(index)->getInfo();
+    std::string getTextureInfo(int index) const {
+      return MapToJson(textures.at(index)->getInfo());
     }
 
     void setDrawMode() { // TODO maybe send assets manager to this function?

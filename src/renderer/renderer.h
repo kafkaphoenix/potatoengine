@@ -46,14 +46,14 @@ class Renderer {
                 std::string_view shaderProgram);
     void renderFBO(const std::shared_ptr<VAO>& vao, std::string_view fbo);
     void renderInsideImGui(const std::shared_ptr<VAO>& vao,
-                           std::string_view fbo, std::string_view title, glm::vec2 size, glm::vec2 position,
-                           bool fitToWindow);
+                           std::string_view fbo, std::string_view title,
+                           glm::vec2 size, glm::vec2 position);
     int getShaderProgramsCount() const { return m_shaderPrograms.size(); }
     int getFramebuffersCount() const { return m_framebuffers.size(); }
     void clear();
     void resetMetrics();
     const std::map<std::string, std::string, NumericComparator>& getMetrics();
-    static std::unique_ptr<Renderer> Create(std::weak_ptr<AssetsManager> am);
+    static std::shared_ptr<Renderer> Create(std::weak_ptr<AssetsManager> am);
 
   private:
     glm::mat4 m_view{};

@@ -7,29 +7,13 @@
 #include "events/event.h"
 #include "pch.h"
 #include "renderer/renderer.h"
+#include "scene/sceneManager.h"
+#include "settings.h"
 
 int main(int argc, char** argv);
 
 namespace potatoengine {
 
-struct Config {
-    std::string name{};
-    std::string root{};
-    std::string windowIconPath{};
-    glm::vec2 windowSize{};
-    int depthBits{};
-    int refreshRate{};
-    bool fullscreen{};
-    int primaryMonitor{};
-    bool vSync{};
-    bool resizable{};
-    int openglMajorVersion{};
-    int openglMinorVersion{};
-    std::string cursorIconPath{};
-    CursorMode cursorMode{};
-    bool windowInsideImgui{};
-    bool fitToWindow{};
-};
 struct CLArgs {
     std::span<const char*> args{};
 
@@ -38,7 +22,7 @@ struct CLArgs {
 
 class Application {
   public:
-    Application(Config&& c, CLArgs&& args);
+    Application(std::shared_ptr<Settings>&& settings, CLArgs&& args);
     virtual ~Application();
 
     void onEvent(Event& e);
@@ -48,6 +32,14 @@ class Application {
     Window& getWindow() const {
       return *m_window;
     } // todo rename to getActiveWindow when multi-window support is added
+    const std::shared_ptr<SceneManager>& getSceneManager() const {
+      return m_sceneManager;
+    }
+    const std::shared_ptr<AssetsManager>& getAssetsManager() const {
+      return m_assetsManager;
+    }
+    const std::shared_ptr<Renderer>& getRenderer() const { return m_renderer; }
+    const std::shared_ptr<Settings>& getSettings() const { return m_settings; }
 
     void close() noexcept { m_running = false; }
     void pause(bool paused) noexcept { m_paused = paused; }
@@ -59,8 +51,10 @@ class Application {
     static Application& Get() { return *s_instance; }
 
   protected:
+    std::shared_ptr<SceneManager> m_sceneManager;
     std::shared_ptr<AssetsManager> m_assetsManager;
     std::shared_ptr<Renderer> m_renderer;
+    std::shared_ptr<Settings> m_settings;
 
   private:
     void run();
