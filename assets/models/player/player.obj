@@ -1,6 +1,3 @@
-# Blender 3.6.2
-# www.blender.org
-mtllib player.mtl
 o Cube
 v 0.338634 2.531399 0.134442
 v 0.499571 3.847958 -0.001987

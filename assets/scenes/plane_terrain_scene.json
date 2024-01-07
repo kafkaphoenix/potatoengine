@@ -74,8 +74,7 @@
                 "prototype": "player",
                 "options": {
                     "position": {"x": 180, "y": 30, "z": 180},
-                    "type": "perspective",
-                    "isActive": true
+                    "type": "perspective"
                 }
             },
             "skybox": {

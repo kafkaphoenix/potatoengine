@@ -177,6 +177,7 @@
                     "position": {"x": 1, "y": 1, "z": 5},
                     "type": "perspective",
                     "isActive": true,
+                    "hasInput": true,
                     "isKinematic": true
                 }
             }

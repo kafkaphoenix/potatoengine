@@ -41,9 +41,11 @@
                 "prefab": "objects",
                 "prototype": "camera",
                 "options": {
-                    "position": {"x": 8, "y": 6, "z": 3},
+                    "position": {"x": 8, "y": 6.8, "z": 3},
                     "type": "perspective",
-                    "isActive": true
+                    "isActive": true,
+                    "hasInput": true,
+                    "isKinematic": false
                 }
             }
         }

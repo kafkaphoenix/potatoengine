@@ -16,10 +16,14 @@ struct CCamera {
       _4_3,
     };
 
+    enum class Mode { _None, _3D, _2D };
+
     std::string _type = "perspective";
     CameraType type = CameraType::Perspective;
     std::string _aspectRatio = "16:9";
     AspectRatio aspectRatio = AspectRatio::_16_9;
+    std::string _mode;
+    Mode mode;
     float aspectRatioValue = 16.f / 9.f;
     float fov = 90.f;
     float zoomFactor = 1.f;
@@ -27,49 +31,39 @@ struct CCamera {
     float zoomMax = 4.f;
     float nearClip = 0.1f;
     float farClip = 1000.f;
-    float mouseSensitivity = 0.1f;
-    float translationSpeed = 20.f;
-    float verticalSpeed = 45.f;
-    float rotationSpeed = 180.f;
     glm::mat4 view{};
     glm::mat4 projection{};
     float rightAngle{};
     float upAngle{};
 
     CCamera() = default;
-    explicit CCamera(std::string&& t, float f, float zf, float zm, float zM,
-                     float ms, float nc, float fc, float ts, float vs, float rs)
-      : _type(std::move(t)), fov(f), zoomFactor(zf), zoomMin(zm), zoomMax(zM),
-        mouseSensitivity(ms), nearClip(nc), farClip(fc), translationSpeed(ts),
-        verticalSpeed(vs), rotationSpeed(rs) {}
+    explicit CCamera(std::string&& t, std::string&& ar, std::string&& m,
+                     float f, float zf, float zm, float nc, float fc)
+      : _type(std::move(t)), _aspectRatio(std::move(ar)), _mode(std::move(m)),
+        fov(f), zoomFactor(zf), zoomMin(zm), zoomMax(zm), nearClip(nc),
+        farClip(fc) {}
 
     void print() const {
       ENGINE_BACKTRACE(
-        "\t\ttype: {0}\n\t\t\t\taspectRatio: {1}\n\t\t\t\tfov: "
-        "{2}\n\t\t\t\tzoomFactor: {3}\n\t\t\t\tzoomMin: "
-        "{4}\n\t\t\t\tzoomMax: {5}\n\t\t\t\tnearClip: {6}\n\t\t\t\tfarClip: "
-        "{7}\n\t\t\t\tmouseSensitivity: "
-        "{8}\n\t\t\t\ttranslationSpeed: {9}\n\t\t\t\tverticalSpeed: "
-        "{10}\n\t\t\t\trotationSpeed: {11}",
-        _type, _aspectRatio, fov, zoomFactor, zoomMin, zoomMax, nearClip,
-        farClip, mouseSensitivity, translationSpeed, verticalSpeed,
-        rotationSpeed);
+        "\t\ttype: {0}\n\t\t\t\taspectRatio: {1}\n\t\t\t\tmode: "
+        "{2}\n\t\t\t\tfov: {3}\n\t\t\t\tzoomFactor: {4}\n\t\t\t\tzoomMin: "
+        "{5}\n\t\t\t\tzoomMax: {6}\n\t\t\t\tnearClip: {7}\n\t\t\t\tfarClip: "
+        "{8}",
+        _type, _aspectRatio, _mode, fov, zoomFactor, zoomMin, zoomMax, nearClip,
+        farClip);
     }
 
     std::map<std::string, std::string, NumericComparator> getInfo() const {
       std::map<std::string, std::string, NumericComparator> info;
       info["type"] = _type;
       info["aspectRatio"] = _aspectRatio;
+      info["mode"] = _mode;
       info["fov"] = std::to_string(fov);
       info["zoomFactor"] = std::to_string(zoomFactor);
       info["zoomMin"] = std::to_string(zoomMin);
       info["zoomMax"] = std::to_string(zoomMax);
       info["nearClip"] = std::to_string(nearClip);
       info["farClip"] = std::to_string(farClip);
-      info["mouseSensitivity"] = std::to_string(mouseSensitivity);
-      info["translationSpeed"] = std::to_string(translationSpeed);
-      info["verticalSpeed"] = std::to_string(verticalSpeed);
-      info["rotationSpeed"] = std::to_string(rotationSpeed);
 
       return info;
     }
@@ -89,6 +83,18 @@ struct CCamera {
       } else if (_aspectRatio == "4:3") {
         aspectRatio = AspectRatio::_4_3;
         aspectRatioValue = 4.f / 3.f;
+      }
+    }
+
+    void setMode() {
+      if (_mode == "3D") {
+        mode = Mode::_3D;
+      } else if (_mode == "2D") {
+        mode = Mode::_2D;
+      } else if (_mode == "none") {
+        mode = Mode::_None;
+      } else {
+        ENGINE_ASSERT(false, "Invalid camera mode!");
       }
     }
 

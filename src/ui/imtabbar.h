@@ -50,7 +50,7 @@ void drawTabBar(std::weak_ptr<engine::AssetsManager> am,
       filterShaderInfo = false;
     }
     if (ImGui::BeginTabItem("Settings")) {
-      drawSettings(s);
+      drawSettings(s, r);
       ImGui::EndTabItem();
     } else {
       selectedSettingTabKey.clear();

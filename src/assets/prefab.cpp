@@ -25,8 +25,8 @@ Prefab::Prefab(std::filesystem::path&& fp,
     std::unordered_set<std::string> ctags;
     std::unordered_map<std::string, json> components;
 
-    if (prototypeData.contains("inherit")) {
-      prototypeData.at("inherit").get_to(inherits);
+    if (prototypeData.contains("inherits")) {
+      prototypeData.at("inherits").get_to(inherits);
       for (std::string_view father : inherits) {
         read(data.at(father), inherits, ctags, components);
       }

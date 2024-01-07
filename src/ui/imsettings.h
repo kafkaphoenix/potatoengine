@@ -13,9 +13,12 @@ namespace potatoengine::ui {
 
 std::string selectedSettingTabKey;
 
-void drawSettings(std::weak_ptr<Settings> s) {
+void drawSettings(std::weak_ptr<Settings> s, std::weak_ptr<Renderer> r) {
   const auto& settings = s.lock();
   ENGINE_ASSERT(settings, "Settings is null!");
+
+  const auto& renderer = r.lock();
+  ENGINE_ASSERT(renderer, "Renderer is null!");
 
   ImGui::Columns(2);
 
@@ -44,9 +47,26 @@ void drawSettings(std::weak_ptr<Settings> s) {
       auto& window = Application::Get().getWindow();
       ImGui::Checkbox("Fullscreen", &settings->fullscreen);
       window.toggleFullscreen(settings->fullscreen);
+
+      if (renderer->getFramebuffersCount() == 0) {
+        ImGui::BeginDisabled();
+      }
       ImGui::Checkbox("Window inside Imgui", &settings->windowInsideImgui);
+      if (renderer->getFramebuffersCount() == 0) {
+        ImGui::EndDisabled();
+      }
+      ImGui::SameLine();
+      helpMark("Only works with a framebuffer");
       window.toggleWindowInsideImgui(settings->windowInsideImgui);
+      if (renderer->getFramebuffersCount() == 0) {
+        ImGui::BeginDisabled();
+      }
       ImGui::Checkbox("Keep ratio", &settings->fitToWindow);
+      if (renderer->getFramebuffersCount() == 0) {
+        ImGui::EndDisabled();
+      }
+      ImGui::SameLine();
+      helpMark("Only works with a framebuffer");
       window.toggleFitToWindow(settings->fitToWindow);
 
       if (window.isFullscreen()) {

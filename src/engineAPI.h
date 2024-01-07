@@ -27,6 +27,7 @@ namespace engine = potatoengine;
 
 // renderer
 #include "renderer/renderer.h"
+#include "renderer/rendererAPI.h"
 
 // assets
 #include "assets/assetsManager.h"
@@ -36,5 +37,5 @@ namespace engine = potatoengine;
 #include "events/event.h"
 
 // utils
-#include "utils/timer.h"
 #include "utils/numericComparator.h"
+#include "utils/timer.h"

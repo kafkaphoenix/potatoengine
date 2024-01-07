@@ -20,7 +20,10 @@
 #include "scene/components/graphics/cText.h"
 #include "scene/components/graphics/cTexture.h"
 #include "scene/components/graphics/cTextureAtlas.h"
+#include "scene/components/input/cActiveInput.h"
+#include "scene/components/input/cInput.h"
 #include "scene/components/physics/cCollider.h"
+#include "scene/components/physics/cGravity.h"
 #include "scene/components/physics/cRigidBody.h"
 #include "scene/components/physics/cTransform.h"
 #include "scene/components/utils/cDeleted.h"
@@ -68,6 +71,8 @@ CMesh& CastCMesh(void* other) { return *static_cast<CMesh*>(other); }
 
 CBody& CastCBody(void* other) { return *static_cast<CBody*>(other); }
 
+CGravity& CastCGravity(void* other) { return *static_cast<CGravity*>(other); }
+
 CRigidBody& CastCRigidBody(void* other) {
   return *static_cast<CRigidBody*>(other);
 }
@@ -84,6 +89,12 @@ CDistanceFromCamera& CastCDistanceFromCamera(void* other) {
 
 CActiveCamera& CastCActiveCamera(void* other) {
   return *static_cast<CActiveCamera*>(other);
+}
+
+CInput& CastCInput(void* other) { return *static_cast<CInput*>(other); }
+
+CActiveInput& CastCActiveInput(void* other) {
+  return *static_cast<CActiveInput*>(other);
 }
 
 CSkybox& CastCSkybox(void* other) { return *static_cast<CSkybox*>(other); }
@@ -229,6 +240,14 @@ void RegisterComponents() {
     .func<&onComponentAdded<CBody>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CBody, std::string>, entt::as_ref_t>("assign"_hs);
 
+  entt::meta<CGravity>()
+    .type("gravity"_hs)
+    .ctor<&CastCGravity, entt::as_ref_t>()
+    .data<&CGravity::acceleration>("acceleration"_hs)
+    .func<&CGravity::print>("print"_hs)
+    .func<&CGravity::getInfo>("getInfo"_hs)
+    .func<&assign<CGravity>, entt::as_ref_t>("assign"_hs);
+
   entt::meta<CRigidBody>()
     .type("rigidBody"_hs)
     .ctor<&CastCRigidBody, entt::as_ref_t>()
@@ -255,16 +274,13 @@ void RegisterComponents() {
     .ctor<&CastCCamera, entt::as_ref_t>()
     .data<&CCamera::_type>("type"_hs)
     .data<&CCamera::_aspectRatio>("aspectRatio"_hs)
+    .data<&CCamera::_mode>("mode"_hs)
     .data<&CCamera::fov>("fov"_hs)
     .data<&CCamera::zoomFactor>("zoomFactor"_hs)
     .data<&CCamera::zoomMin>("zoomMin"_hs)
     .data<&CCamera::zoomMax>("zoomMax"_hs)
     .data<&CCamera::nearClip>("nearClip"_hs)
     .data<&CCamera::farClip>("farClip"_hs)
-    .data<&CCamera::mouseSensitivity>("mouseSensitivity"_hs)
-    .data<&CCamera::translationSpeed>("translationSpeed"_hs)
-    .data<&CCamera::verticalSpeed>("verticalSpeed"_hs)
-    .data<&CCamera::rotationSpeed>("rotationSpeed"_hs)
     .func<&CCamera::print>("print"_hs)
     .func<&CCamera::getInfo>("getInfo"_hs)
     .func<&onComponentAdded<CCamera>, entt::as_ref_t>("onComponentAdded"_hs)
@@ -284,6 +300,25 @@ void RegisterComponents() {
     .func<&CActiveCamera::print>("print"_hs)
     .func<&CActiveCamera::getInfo>("getInfo"_hs)
     .func<&assign<CActiveCamera>, entt::as_ref_t>("assign"_hs);
+
+  entt::meta<CInput>()
+    .type("input"_hs)
+    .ctor<&CastCInput, entt::as_ref_t>()
+    .data<&CInput::_mode>("mode"_hs)
+    .data<&CInput::mouseSensitivity>("mouseSensitivity"_hs)
+    .data<&CInput::translationSpeed>("translationSpeed"_hs)
+    .data<&CInput::verticalSpeed>("verticalSpeed"_hs)
+    .data<&CInput::rotationSpeed>("rotationSpeed"_hs)
+    .func<&CInput::print>("print"_hs)
+    .func<&CInput::getInfo>("getInfo"_hs)
+    .func<&assign<CInput>, entt::as_ref_t>("assign"_hs);
+
+  entt::meta<CActiveInput>()
+    .type("activeInput"_hs)
+    .ctor<&CastCActiveInput, entt::as_ref_t>()
+    .func<&CActiveInput::print>("print"_hs)
+    .func<&CActiveInput::getInfo>("getInfo"_hs)
+    .func<&assign<CActiveInput>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CSkybox>()
     .type("skybox"_hs)
@@ -547,6 +582,7 @@ template <> void engine::SceneManager::onComponentAdded(Entity& e, CBlock& c) {
 template <> void engine::SceneManager::onComponentAdded(Entity& e, CCamera& c) {
   c.setCameraType();
   c.setAspectRatio();
+  c.setMode();
   c.calculateProjection();
 
   e.update<CCamera>(c);

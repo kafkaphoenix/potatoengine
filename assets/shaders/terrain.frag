@@ -87,4 +87,7 @@ void main()
     }
 
     fragColor = mix(vec4(fogColor, 1.f), base, fogVisibility);
+    if (fragColor.a < 0.1) {
+        discard;
+    }
 }

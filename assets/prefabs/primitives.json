@@ -14,7 +14,7 @@
         }
     },
     "triangle": {
-        "inherit": ["shape"],
+        "inherits": ["shape"],
         "components": {
             "shape": {
                 "type": "triangle"
@@ -22,7 +22,7 @@
         }
     },
     "rectangle": {
-        "inherit": ["shape"],
+        "inherits": ["shape"],
         "components": {
             "shape": {
                 "type": "rectangle"
@@ -30,7 +30,7 @@
         }
     },
     "circle": {
-        "inherit": ["shape"],
+        "inherits": ["shape"],
         "components": {
             "shape": {
                 "type": "circle",
@@ -39,7 +39,7 @@
         }
     },
     "cube": {
-        "inherit": ["shape"],
+        "inherits": ["shape"],
         "components": {
             "shape": {
                 "type": "cube"

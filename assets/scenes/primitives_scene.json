@@ -200,7 +200,9 @@
                 "options": {
                     "position": {"x": 0, "y": 5, "z": 20},
                     "type": "perspective",
-                    "isActive": true
+                    "isActive": true,
+                    "hasInput": true,
+                    "isKinematic": false
                 }
             }
         }

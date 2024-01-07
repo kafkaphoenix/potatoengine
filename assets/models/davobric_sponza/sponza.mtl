@@ -1,6 +1,3 @@
-# Blender 3.6.2 MTL File: 'Sponza'
-# www.blender.org
-
 newmtl sp_00_luk_mal1
 Ns 50.000011
 Ka 1.000000 1.000000 1.000000
@@ -9,8 +6,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd 01_St_kp.jpg
-map_Bump 01_St_kp-bump.jpg
+map_Kd textures/01_St_kp.jpg
+map_Bump textures/01_St_kp-bump.jpg
 
 newmtl sp_00_luk_mali
 Ns 50.000011
@@ -20,8 +17,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd sp_luk.jpg
-map_Bump sp_luk-bump.jpg
+map_Kd textures/sp_luk.jpg
+map_Bump textures/sp_luk-bump.jpg
 
 newmtl sp_00_pod
 Ns 50.000011
@@ -31,8 +28,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd KAMEN.jpg
-map_Bump KAMEN-bump.jpg
+map_Kd textures/KAMEN.jpg
+map_Bump textures/KAMEN-bump.jpg
 
 newmtl sp_00_prozor
 Ns 50.000011
@@ -42,8 +39,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd prozor1.jpg
-map_Bump prozor1.jpg
+map_Kd textures/prozor1.jpg
+map_Bump textures/prozor1.jpg
 
 newmtl sp_00_stup
 Ns 50.000011
@@ -53,8 +50,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd 01_STUB.jpg
-map_Bump 01_STUB-bump.jpg
+map_Kd textures/01_STUB.jpg
+map_Bump textures/01_STUB-bump.jpg
 
 newmtl sp_00_svod
 Ns 0.999999
@@ -64,8 +61,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd KAMEN-stup.jpg
-map_Bump KAMEN-stup.jpg
+map_Kd textures/KAMEN-stup.jpg
+map_Bump textures/KAMEN-stup.jpg
 
 newmtl sp_00_vrata_kock
 Ns 19.999990
@@ -75,8 +72,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd vrata_ko.jpg
-map_Bump vrata_ko.jpg
+map_Kd textures/vrata_ko.jpg
+map_Bump textures/vrata_ko.jpg
 
 newmtl sp_00_vrata_krug
 Ns 19.999990
@@ -86,8 +83,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd vrata_kr.jpg
-map_Bump vrata_kr.jpg
+map_Kd textures/vrata_kr.jpg
+map_Bump textures/vrata_kr.jpg
 
 newmtl sp_00_zid
 Ns 50.000011
@@ -97,8 +94,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd KAMEN.jpg
-map_Bump KAMEN-bump.jpg
+map_Kd textures/KAMEN.jpg
+map_Bump textures/KAMEN-bump.jpg
 
 newmtl sp_01_luk_a
 Ns 50.000011
@@ -108,8 +105,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd sp_luk.jpg
-map_Bump sp_luk-bump.jpg
+map_Kd textures/sp_luk.jpg
+map_Bump textures/sp_luk-bump.jpg
 
 newmtl sp_01_stub
 Ns 50.000011
@@ -119,8 +116,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd 01_STUB.jpg
-map_Bump 01_STUB-bump.jpg
+map_Kd textures/01_STUB.jpg
+map_Bump textures/01_STUB-bump.jpg
 
 newmtl sp_01_stub_baza
 Ns 50.000011
@@ -130,8 +127,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd 01_S_ba.jpg
-map_Bump 01_S_ba.jpg
+map_Kd textures/01_S_ba.jpg
+map_Bump textures/01_S_ba.jpg
 
 newmtl sp_01_stub_baza_
 Ns 19.999990
@@ -151,8 +148,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd 01_STUB.jpg
-map_Bump 01_STUB-bump.jpg
+map_Kd textures/01_STUB.jpg
+map_Bump textures/01_STUB-bump.jpg
 
 newmtl sp_01_stup
 Ns 50.000011
@@ -162,7 +159,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd x01_st.jpg
+map_Kd textures/x01_st.jpg
 
 newmtl sp_01_stup_baza
 Ns 50.000011
@@ -172,8 +169,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd 01_S_ba.jpg
-map_Bump 01_S_ba.jpg
+map_Kd textures/01_S_ba.jpg
+map_Bump textures/01_S_ba.jpg
 
 newmtl sp_02_reljef
 Ns 50.000011
@@ -183,8 +180,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd reljef.jpg
-map_Bump reljef-bump.jpg
+map_Kd textures/reljef.jpg
+map_Bump textures/reljef-bump.jpg
 
 newmtl sp_svod_kapitel
 Ns 50.000011
@@ -194,8 +191,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd 00_skap.jpg
-map_Bump 00_skap.jpg
+map_Kd textures/00_skap.jpg
+map_Bump textures/00_skap.jpg
 
 newmtl sp_vijenac
 Ns 50.000011
@@ -205,8 +202,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd 00_skap.jpg
-map_Bump 00_skap.jpg
+map_Kd textures/00_skap.jpg
+map_Bump textures/00_skap.jpg
 
 newmtl sp_zid_vani
 Ns 50.000011
@@ -216,5 +213,5 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 1
-map_Kd KAMEN.jpg
-map_Bump KAMEN-bump.jpg
+map_Kd textures/KAMEN.jpg
+map_Bump textures/KAMEN-bump.jpg

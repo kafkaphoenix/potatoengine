@@ -1,5 +1,3 @@
-# Blender 3.6.2
-# www.blender.org
 mtllib camera.mtl
 o Camera
 v 0.000000 2.052328 1.408262

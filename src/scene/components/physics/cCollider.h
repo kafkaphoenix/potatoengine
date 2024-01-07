@@ -14,6 +14,7 @@ struct CCollider {
       Capsule,
       Mesh,
       Sphere,
+      Rectangle
     };
 
     std::string _type{};
@@ -39,7 +40,7 @@ struct CCollider {
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity& e, CCollider& c) {
+inline void engine::SceneManager::onComponentAdded(Entity& e, CCollider& c) {
   if (c._type == "box") {
     c.type = CCollider::Type::Box;
   } else if (c._type == "capsule") {
@@ -48,6 +49,8 @@ void engine::SceneManager::onComponentAdded(Entity& e, CCollider& c) {
     c.type = CCollider::Type::Mesh;
   } else if (c._type == "sphere") {
     c.type = CCollider::Type::Sphere;
+  } else if (c._type == "rectangle") {
+    c.type = CCollider::Type::Rectangle;
   } else {
     ENGINE_ASSERT(false, "Unknown collider type {}", c._type);
   }

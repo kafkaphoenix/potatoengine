@@ -1,0 +1,56 @@
+{
+    "assets": {
+        "shaders": {
+            "basic": {
+                "vbasic": "assets/shaders/basic.vert",
+                "fbasic": "assets/shaders/basic.frag"
+            }
+        },
+        "models": {
+            "building": "assets/models/trailer_park/trailer_park.obj",
+            "camera": "assets/models/camera/camera.obj"
+        },
+        "prefabs": {
+            "structures": {
+                "filepath": "assets/prefabs/structures.json",
+                "targeted_prototypes": [
+                    "building"
+                ]
+            },
+            "objects": {
+                "filepath": "assets/prefabs/objects.json",
+                "targeted_prototypes": [
+                    "camera"
+                ]
+            }
+        }
+    },
+    "entities": {
+        "normals": {
+            "lowpoly_city": {
+                "prefab": "structures",
+                "prototype": "building",
+                "options": {
+                    "position": {"x": 0, "y": 0, "z": 0},
+                    "scale": {"x": 100,"y": 100,"z": 100}
+                }
+            }
+        },
+        "cameras": {
+            "scene_camera": {
+                "prefab": "objects",
+                "prototype": "camera",
+                "options": {
+                    "position": {"x": 118, "y": 137, "z": 649},
+                    "type": "perspective",
+                    "isActive": true,
+                    "hasInput": true,
+                    "isKinematic": true,
+                    "farClip": 10000,
+                    "translationSpeed": 100,
+                    "verticalSpeed": 100
+                }
+            }
+        }
+    }
+}

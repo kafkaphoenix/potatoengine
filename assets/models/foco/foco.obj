@@ -1,5 +1,3 @@
-# Blender 3.6.2
-# www.blender.org
 mtllib foco.mtl
 o g_Scaffolding_Light:pCube5_Scaffolding_Light:polySurface1
 v -0.527543 -0.669744 0.169120

@@ -68,8 +68,9 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
   entt::entity camera =
     reg.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
   ENGINE_ASSERT(camera not_eq entt::null, "No camera found!");
-  const CCamera& cCamera = reg.get<CCamera>(camera);
+  CCamera& cCamera = reg.get<CCamera>(camera);
   const CTransform& cCameraTransform = reg.get<CTransform>(camera);
+  cCamera.calculateView(cCameraTransform.position, cCameraTransform.rotation);
   renderer->beginScene(cCamera, cCameraTransform);
 
   entt::entity sky =

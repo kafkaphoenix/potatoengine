@@ -20,7 +20,13 @@
         "ctags": ["transform", "distanceFromCamera", "rigidBody"],
         "components": {
             "camera": {
-                "type": "perspective"
+                "type": "perspective",
+                "mode": "3D"
+            },
+            "input": {
+                "mode": "3D",
+                "translationSpeed": 40,
+                "verticalSpeed": 50
             },
             "body": "camera",
             "shaderProgram": {

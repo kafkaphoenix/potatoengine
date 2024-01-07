@@ -12,6 +12,8 @@
 #include "scene/components/camera/cActiveCamera.h"
 #include "scene/components/camera/cCamera.h"
 #include "scene/components/common/cUUID.h"
+#include "scene/components/input/cActiveInput.h"
+#include "scene/components/input/cInput.h"
 #include "scene/components/physics/cTransform.h"
 
 namespace potatoengine {
@@ -33,8 +35,16 @@ bool onMouseMoved(MouseMovedEvent& e, entt::registry& r) {
   CCamera& cCamera = r.get<CCamera>(camera);
   CTransform& cTransform = r.get<CTransform>(camera);
 
-  cCamera.rightAngle += e.getX() * cCamera.mouseSensitivity;
-  cCamera.upAngle += e.getY() * cCamera.mouseSensitivity;
+  if (cCamera.mode == CCamera::Mode::_2D)
+    return true;
+
+  entt::entity movable =
+    r.view<CInput, CActiveInput, CTransform, CUUID>().front();
+  ENGINE_ASSERT(movable not_eq entt::null, "No movable found!");
+  CInput& cInput = r.get<CInput>(movable);
+
+  cCamera.rightAngle += e.getX() * cInput.mouseSensitivity;
+  cCamera.upAngle += e.getY() * cInput.mouseSensitivity;
 
   cCamera.rightAngle = std::fmod(cCamera.rightAngle, 360.f);
   cCamera.upAngle = std::clamp(cCamera.upAngle, -89.f, 89.f);
@@ -51,8 +61,6 @@ bool onMouseMoved(MouseMovedEvent& e, entt::registry& r) {
   // Normalize the rotation quaternion to prevent drift
   cTransform.rotation = glm::normalize(cTransform.rotation);
 
-  cCamera.calculateView(cTransform.position, cTransform.rotation);
-
   return true;
 }
 
@@ -68,6 +76,10 @@ bool onMouseScrolled(MouseScrolledEvent& e, entt::registry& r) {
     r.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
   ENGINE_ASSERT(camera not_eq entt::null, "No camera found!");
   CCamera& cCamera = r.get<CCamera>(camera);
+
+  if (cCamera.mode == CCamera::Mode::_2D)
+    return true;
+
   CTransform& cTransform = r.get<CTransform>(camera);
 
   cCamera.zoomFactor = std::clamp(cCamera.zoomFactor + float(e.getY()),
@@ -100,26 +112,27 @@ bool onMouseButtonReleased(MouseButtonReleasedEvent& e) {
 }
 
 bool onKeyPressed(KeyPressedEvent& e) {
-  auto& window = Application::Get().getWindow();
+  auto& app = Application::Get();
+  auto& window = app.getWindow();
+  bool isDebugging = app.isDebugging();
+
   if (e.getKeyCode() == Key::F3) {
-    bool isDebugging = Application::Get().isDebugging();
     if (isDebugging) {
-      Application::Get().debug(false);
+      app.debug(false);
       window.restoreCursor();
       window.toggleCameraPositionUpdate(true);
       window.setLastMousePosition(Input::GetMouseX(), Input::GetMouseY());
     } else {
-      Application::Get().debug(true);
+      app.debug(true);
       window.setCursorMode(CursorMode::Normal, false);
       window.toggleCameraPositionUpdate(false);
     }
     return true;
   } else if (e.getKeyCode() == Key::Escape) {
-    bool isDebugging = Application::Get().isDebugging();
     if (isDebugging) {
-      Application::Get().getWindow().restoreCursor();
+      window.restoreCursor();
     }
-    Application::Get().close();
+    app.close();
     return true;
   } else if (e.getKeyCode() == Key::F4) {
     RendererAPI::ToggleWireframe(not window.isWireframe());
@@ -131,7 +144,7 @@ bool onKeyPressed(KeyPressedEvent& e) {
   }
 
   ImGuiIO& io = ImGui::GetIO();
-  if (io.WantCaptureKeyboard and Application::Get().isDebugging()) {
+  if (io.WantCaptureKeyboard and isDebugging) {
     return true;
   } else {
     io.ClearEventsQueue();
@@ -147,7 +160,7 @@ bool onKeyPressed(KeyPressedEvent& e) {
 
   switch (e.getKeyCode()) {
   case Key::LeftAlt:
-    if (not Application::Get().isDebugging()) {
+    if (not isDebugging) {
       window.toggleCameraPositionUpdate(false);
       window.setCursorMode(CursorMode::Normal);
     }
@@ -159,17 +172,19 @@ bool onKeyPressed(KeyPressedEvent& e) {
 
 bool onKeyReleased(KeyReleasedEvent& e) {
   ImGuiIO& io = ImGui::GetIO();
-  if (io.WantCaptureKeyboard and Application::Get().isDebugging()) {
+  auto& app = Application::Get();
+
+  if (io.WantCaptureKeyboard and app.isDebugging()) {
     return true;
   } else {
     io.ClearEventsQueue();
   }
 
-  auto& window = Application::Get().getWindow();
+  auto& window = app.getWindow();
 
   switch (e.getKeyCode()) {
   case Key::LeftAlt:
-    if (not Application::Get().isDebugging()) {
+    if (not app.isDebugging()) {
       window.setLastMousePosition(Input::GetMouseX(), Input::GetMouseY());
       window.toggleCameraPositionUpdate(true);
       window.setCursorMode(CursorMode::Disabled);

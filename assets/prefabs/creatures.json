@@ -18,13 +18,17 @@
         }
     },
     "player": {
-        "inherit": ["creature"],
-        "ctags": ["equipment", "inventory", "activeCamera"],
+        "inherits": ["creature"],
+        "ctags": ["equipment", "inventory", "activeCamera", "activeInput"],
         "components": {
             "body": "player",
             "camera": {
                 "type": "perspective",
                 "fov": 90,
+                "mode": "3D"
+            },
+            "input": {
+                "mode": "3D",
                 "translationSpeed": 40,
                 "verticalSpeed": 50
             },
@@ -72,6 +76,6 @@
         }
     },
     "chicken": {
-        "inherit": ["creature"]
+        "inherits": ["creature"]
     }
 }

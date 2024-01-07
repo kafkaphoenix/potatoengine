@@ -17,6 +17,10 @@ void deserializeCamera(CCamera& cCamera, const json& options) {
     cCamera._aspectRatio = options.at("aspectRatio").get<std::string>();
     cCamera.setAspectRatio();
   }
+  if (options.contains("mode")) {
+    cCamera._mode = options.at("mode").get<std::string>();
+    cCamera.setMode();
+  }
   if (options.contains("fov")) {
     cCamera.fov = options.at("fov").get<float>();
   }
@@ -35,17 +39,9 @@ void deserializeCamera(CCamera& cCamera, const json& options) {
   if (options.contains("farClip")) {
     cCamera.farClip = options.at("farClip").get<float>();
   }
-  if (options.contains("mouseSensitivity")) {
-    cCamera.mouseSensitivity = options.at("mouseSensitivity").get<float>();
-  }
-  if (options.contains("translationSpeed")) {
-    cCamera.translationSpeed = options.at("translationSpeed").get<float>();
-  }
-  if (options.contains("verticalSpeed")) {
-    cCamera.verticalSpeed = options.at("verticalSpeed").get<float>();
-  }
-  if (options.contains("rotationSpeed")) {
-    cCamera.rotationSpeed = options.at("rotationSpeed").get<float>();
+  if (options.contains("cameraMode")) {
+    cCamera._mode = options.at("cameraMode").get<std::string>();
+    cCamera.setMode();
   }
 }
 }

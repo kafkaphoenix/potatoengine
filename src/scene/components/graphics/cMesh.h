@@ -111,7 +111,8 @@ struct CMesh {
             cTexture->drawMode ==
               CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
           if (sp->getName() ==
-              "basic") { // terrain shader get texture atlas data from vertex
+              "basic" or sp->getName() ==
+              "shape") { // terrain shader get texture atlas data from vertex
             sp->setFloat("useTextureAtlas", 1.f);
             int index = cTextureAtlas->index;
             int rows = cTextureAtlas->rows;

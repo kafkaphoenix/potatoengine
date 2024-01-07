@@ -27,7 +27,7 @@
         }
     },
     "brick_block": {
-        "inherit": ["block"],
+        "inherits": ["block"],
         "components": {
             "textureAtlas": {
                 "index": 0
@@ -35,7 +35,7 @@
         }
     },
     "stone_block": {
-        "inherit": ["block"],
+        "inherits": ["block"],
         "components": {
             "textureAtlas": {
                 "index": 1
@@ -43,7 +43,7 @@
         }
     },
     "glass_block": {
-        "inherit": ["block"],
+        "inherits": ["block"],
         "components": {
             "texture": {
                 "color": {"r": 0.1, "g": 0.3, "b": 0.2, "a": 0.4},
@@ -68,7 +68,7 @@
         }
     },
     "wood_block": {
-        "inherit": ["block"],
+        "inherits": ["block"],
         "components": {
             "textureAtlas": {
                 "index": 3

@@ -72,7 +72,8 @@
                     "position": {"x": 16, "y": 2, "z": 38},
                     "type": "perspective",
                     "isActive": true,
-                    "isKinematic": true
+                    "hasInput": true,
+                    "isKinematic": false
                 }
             }
         }

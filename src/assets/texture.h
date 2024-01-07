@@ -6,7 +6,7 @@
 namespace potatoengine {
 class Texture {
   public:
-    Texture() = default;
+    Texture() = default; // TODO revisit is for std::vector in Model class
     Texture(uint32_t width, uint32_t height, GLenum glFormat,
             std::optional<bool> wrap = std::nullopt);
     Texture(std::filesystem::path&& fp,

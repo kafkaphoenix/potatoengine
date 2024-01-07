@@ -10,6 +10,7 @@
 #include "scene/components/common/cUUID.h"
 #include "scene/components/graphics/cFBO.h"
 #include "scene/components/graphics/cTextureAtlas.h"
+#include "scene/components/input/cActiveInput.h"
 #include "scene/components/physics/cTransform.h"
 #include "scene/components/utils/cDeleted.h"
 #include "scene/components/utils/cNoise.h"
@@ -251,10 +252,10 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
   PrintScene(std::ref(m_registry));
 }
 
-void SceneManager::createEntities(std::string_view prefabID,
-                                  const SceneLoader& loadedScene,
-                                  const std::shared_ptr<AssetsManager>& assetsManager,
-                                  const std::shared_ptr<Renderer>& renderer) {
+void SceneManager::createEntities(
+  std::string_view prefabID, const SceneLoader& loadedScene,
+  const std::shared_ptr<AssetsManager>& assetsManager,
+  const std::shared_ptr<Renderer>& renderer) {
   ENGINE_TRACE("Creating scene normal entities...");
   for (const auto& [name, data] :
        loadedScene.getLoadedNormalEntities(prefabID)) {
@@ -294,6 +295,19 @@ void SceneManager::createEntities(std::string_view prefabID,
         } else if (not isActiveCamera and e.has_all<CActiveCamera>()) {
           e.remove<CActiveCamera>();
         }
+      }
+      if (options.contains("hasInput")) {
+        bool hasInput = options.at("hasInput").get<bool>();
+        if (hasInput and not e.has_all<CActiveInput>()) {
+          e.add<CActiveInput>();
+        } else if (not hasInput and e.has_all<CActiveInput>()) {
+          e.remove<CActiveInput>();
+        }
+      }
+      if (options.contains("inputMode")) {
+        CInput& cInput = e.get<CInput>();
+        cInput._mode = options.at("inputMode").get<std::string>();
+        cInput.setMode();
       }
       if (options.contains("size")) {
         CShape& shape = e.get<CShape>();
@@ -594,7 +608,6 @@ void SceneManager::createEntities(std::string_view prefabID,
       }
       deserializeCamera(cCamera, options);
       cCamera.calculateProjection();
-      cCamera.calculateView(cTransform.position, cTransform.rotation);
       if (options.contains("isActive")) {
         bool isActiveCamera = options.at("isActive").get<bool>();
         if (isActiveCamera and not e.has_all<CActiveCamera>()) {
@@ -602,6 +615,19 @@ void SceneManager::createEntities(std::string_view prefabID,
         } else if (not isActiveCamera and e.has_all<CActiveCamera>()) {
           e.remove<CActiveCamera>();
         }
+      }
+      if (options.contains("hasInput")) {
+        bool hasInput = options.at("hasInput").get<bool>();
+        if (hasInput and not e.has_all<CActiveInput>()) {
+          e.add<CActiveInput>();
+        } else if (not hasInput and e.has_all<CActiveInput>()) {
+          e.remove<CActiveInput>();
+        }
+      }
+      if (options.contains("inputMode")) {
+        CInput& cInput = e.get<CInput>();
+        cInput._mode = options.at("inputMode").get<std::string>();
+        cInput.setMode();
       }
       if (options.contains("isVisible")) {
         e.get<CShaderProgram>().isVisible = options.at("isVisible").get<bool>();
