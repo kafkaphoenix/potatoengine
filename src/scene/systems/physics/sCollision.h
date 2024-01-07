@@ -3,6 +3,7 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include "core/application.h"
 #include "core/time.h"
 #include "scene/components/common/cUUID.h"
 #include "scene/components/physics/cCollider.h"
@@ -12,14 +13,14 @@
 
 namespace potatoengine {
 
-void collisionSystem(entt::registry& r, Time ts) {
-  r.view<CTransform, CRigidBody, CCollider, CUUID>().each(
+void collisionSystem(entt::registry& registry, const Time& ts) {
+  registry.view<CTransform, CRigidBody, CCollider, CUUID>().each(
     [&](entt::entity e, CTransform& cTransform, const CRigidBody& cRigidBody,
         const CCollider& cCollider, const CUUID& cUUID) {
       if (cRigidBody.isKinematic) {
         bool collided = false;
 
-        r.view<CTransform, CRigidBody, CCollider, CUUID>().each(
+        registry.view<CTransform, CRigidBody, CCollider, CUUID>().each(
           [&](entt::entity e2, CTransform& cTransform2,
               const CRigidBody& cRigidBody2, const CCollider& cCollider2,
               const CUUID& cUUID2) {
@@ -45,9 +46,8 @@ void collisionSystem(entt::registry& r, Time ts) {
           });
 
         if (collided) {
-          CGravity* cGravity = r.try_get<CGravity>(e);
-          float contraspeed = cGravity->acceleration * ts;
-          cTransform.position.y -= contraspeed;
+          CGravity* cGravity = registry.try_get<CGravity>(e);
+          cTransform.position.y -= cGravity->acceleration * ts;
 
           if (cTransform.position.y < 0) {
             cTransform.position.y = 0.5;

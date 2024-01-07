@@ -2,8 +2,11 @@
 
 #include <entt/entt.hpp>
 
+#include "core/application.h"
 #include "scene/components/common/cUUID.h"
 #include "scene/components/graphics/cTexture.h"
+#include "scene/components/physics/cRigidBody.h"
+#include "scene/components/physics/cTransform.h"
 #include "scene/components/world/cSkybox.h"
 #include "scene/components/world/cTime.h"
 
@@ -11,9 +14,10 @@ using namespace entt::literals;
 
 namespace potatoengine {
 
-void skyboxSystem(entt::registry& reg) {
-  reg.view<CSkybox, CTime, CTexture, CUUID>().each(
-    [&](const CSkybox& cSkybox, const CTime& cTime, CTexture& cTexture,
+void skyboxSystem(entt::registry& registry) {
+  registry.view<CSkybox, CTransform, CRigidBody, CTime, CTexture, CUUID>().each(
+    [&](const CSkybox& cSkybox, CTransform& cTransform,
+        const CRigidBody& cRigidBody, const CTime& cTime, CTexture& cTexture,
         const CUUID& cUUID) {
       if (cTexture.drawMode == CTexture::DrawMode::TEXTURES_BLEND) {
         float blendFactor = 0.f;
@@ -51,6 +55,23 @@ void skyboxSystem(entt::registry& reg) {
         entt::monostate<"fogColor"_hs>{} = cSkybox.fogColor;
       } else {
         entt::monostate<"useFog"_hs>{} = 0.f;
+      }
+
+      if (cRigidBody.isKinematic) {
+        // TODO cActiveSkybox so we can set different ones in different planets
+        float rotation = 0.f;
+        if (cSkybox.rotationSpeed > 0.f) {
+          rotation = cSkybox.rotationSpeed;
+        } else {
+          // to avoid rotating fps frames per second instead of one we need to
+          // divide by fps
+          float rotationAnglePerSecond =
+            (360.f / (cTime.dayLength * 3600.f)) / cTime.fps;
+          rotation = rotationAnglePerSecond * cTime.acceleration;
+        }
+        cTransform.rotation =
+          glm::angleAxis(glm::radians(rotation), glm::vec3(0.f, 1.f, 0.f)) *
+          cTransform.rotation;
       }
     });
 }

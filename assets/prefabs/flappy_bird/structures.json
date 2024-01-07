@@ -1,0 +1,77 @@
+{
+    "sprite": {
+        "ctags": ["transform"],
+        "components": {
+            "shaderProgram": {
+                "name": "shape"
+            },
+            "shape": {
+                "type": "rectangle"
+            },
+            "texture": {
+                "drawMode": "texture"
+            }
+        }
+    },
+    "background": {
+        "inherits": ["sprite"],
+        "components": {
+            "distanceFromCamera": {
+                "distance": 5
+            },
+            "texture": {
+                "filepaths": ["background"]
+            },
+            "shape": {
+                "size": {"x": 2, "y": 2, "z": 0}
+            },
+            "transform": {
+                "position": {"x": 0, "y": 0.5, "z": 0}
+            }
+        }
+    },
+    "ground": {
+        "inherits": ["sprite"],
+        "ctags": ["rigidBody"],
+        "components": {
+            "distanceFromCamera": {
+                "distance": 4
+            },
+            "texture": {
+                "filepaths": ["ground"]
+            },
+            "shape": {
+                "size": {"x": 3, "y": 0.5, "z": 0}
+            },
+            "transform": {
+                "position": {"x": -1, "y": -1, "z": 0}
+            },
+            "collider": {
+                "type": "rectangle",
+                "size": {"x": 3, "y": 0.5, "z": 0}
+            }
+        }
+    },
+    "pipe": {
+        "inherits": ["sprite"],
+        "components": {
+            "distanceFromCamera": {
+                "distance": 3
+            },
+            "shape": {
+                "size": {"x": 0.1, "y": 0.4, "z": 0}
+            }
+        }
+    },
+    "numbers": {
+        "inherits": ["sprite"],
+        "components": {
+            "distanceFromCamera": {
+                "distance": 1
+            },
+            "texture": {
+                "filepaths": ["numbers"]
+            }
+        }
+    }
+}

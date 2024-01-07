@@ -1,0 +1,13 @@
+{
+    "camera": {
+        "ctags": ["activeCamera"],
+        "components": {
+            "camera": {
+                "mode": "2D"
+            },
+            "transform": {
+                "position": {"x": 0, "y": 0, "z": 1}
+            }
+        }
+    }
+}

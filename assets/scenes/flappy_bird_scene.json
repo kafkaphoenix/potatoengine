@@ -1,0 +1,134 @@
+{
+    "assets": {
+        "shaders": {
+            "shape": {
+                "vshape": "assets/shaders/flappy_bird/shape.vert",
+                "fshape": "assets/shaders/flappy_bird/shape.frag"
+            }
+        },
+        "textures" : {
+            "bird": {
+                "filepath": "assets/textures/flappy_bird/bird.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "green_pipe_top": {
+                "filepath": "assets/textures/flappy_bird/green_pipe.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "green_pipe_bottom": {
+                "filepath": "assets/textures/flappy_bird/green_pipe.png",
+                "type": "textureDiffuse",
+                "flip_vertically": false
+            },
+            "red_pipe_top": {
+                "filepath": "assets/textures/flappy_bird/red_pipe.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "red_pipe_bottom": {
+                "filepath": "assets/textures/flappy_bird/red_pipe.png",
+                "type": "textureDiffuse",
+                "flip_vertically": false
+            },
+            "background": {
+                "filepath": "assets/textures/flappy_bird/background.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "ground": {
+                "filepath": "assets/textures/flappy_bird/ground.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "numbers": {
+                "filepath": "assets/textures/flappy_bird/numbers.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            }
+        },
+        "prefabs": {
+            "creatures": {
+                "filepath": "assets/prefabs/flappy_bird/creatures.json",
+                "targeted_prototypes": [
+                    "*"
+                ]
+            },
+            "objects": {
+                "filepath": "assets/prefabs/flappy_bird/objects.json",
+                "targeted_prototypes": [
+                    "*"
+                ]
+            },
+            "structures": {
+                "filepath": "assets/prefabs/flappy_bird/structures.json",
+                "targeted_prototypes": [
+                    "*"
+                ]
+            }
+        }
+    },
+    "entities": {
+        "normals": {
+            "background": {
+                "prefab": "structures",
+                "prototype": "background"
+            },
+            "ground": {
+                "prefab": "structures",
+                "prototype": "ground"
+            },
+            "bird": {
+                "prefab": "creatures",
+                "prototype": "bird"
+            },
+            "green_pipe_top": {
+                "prefab": "structures",
+                "prototype": "pipe",
+                "options": {
+                    "filepaths": [
+                        "green_pipe_top"
+                    ],
+                    "isVisible": false
+                }
+            },
+            "green_pipe_bottom": {
+                "prefab": "structures",
+                "prototype": "pipe",
+                "options": {
+                    "filepaths": [
+                        "green_pipe_bottom"
+                    ],
+                    "isVisible": false
+                }
+            },
+            "red_pipe_top": {
+                "prefab": "structures",
+                "prototype": "pipe",
+                "options": {
+                    "filepaths": [
+                        "red_pipe_top"
+                    ],
+                    "isVisible": false
+                }
+            },
+            "red_pipe_bottom": {
+                "prefab": "structures",
+                "prototype": "pipe",
+                "options": {
+                    "filepaths": [
+                        "red_pipe_bottom"
+                    ],
+                    "isVisible": false
+                }
+            }
+        },
+        "cameras": {
+            "scene_camera": {
+                "prefab": "objects",
+                "prototype": "camera"
+            }
+        }
+    }
+}

@@ -33,7 +33,7 @@ get_default_roaming_path(std::string_view projectName) {
   return path;
 }
 
-inline void save_settings(const std::shared_ptr<Settings>& settings,
+inline void save_settings(const std::unique_ptr<Settings>& settings,
                           std::filesystem::path path) {
   json data = *settings;
 
@@ -44,8 +44,8 @@ inline void save_settings(const std::shared_ptr<Settings>& settings,
   file.close();
 }
 
-inline std::shared_ptr<Settings> load_settings(std::string_view projectName) {
-  std::shared_ptr<Settings> settings = std::make_shared<Settings>();
+inline std::unique_ptr<Settings> load_settings(std::string_view projectName) {
+  std::unique_ptr<Settings> settings = std::make_unique<Settings>();
   auto path = get_default_roaming_path(projectName);
 
   if (!std::filesystem::exists(path)) {

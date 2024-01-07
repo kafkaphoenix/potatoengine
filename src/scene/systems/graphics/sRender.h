@@ -16,10 +16,10 @@
 #include "scene/components/graphics/cMaterial.h"
 #include "scene/components/graphics/cMesh.h"
 #include "scene/components/graphics/cShaderProgram.h"
+#include "scene/components/graphics/cShape.h"
 #include "scene/components/graphics/cTexture.h"
 #include "scene/components/graphics/cTextureAtlas.h"
 #include "scene/components/physics/cTransform.h"
-#include "scene/components/utils/cShape.h"
 #include "scene/components/world/cChunk.h"
 #include "scene/components/world/cChunkManager.h"
 #include "scene/components/world/cSkybox.h"
@@ -29,16 +29,17 @@ namespace potatoengine {
 void render(CTexture* cTexture, CTextureAtlas* cTextureAtlas, CSkybox* cSkybox,
             CMaterial* cMaterial, CMesh* cMesh, const CTransform& cTransform,
             const CShaderProgram& cShaderProgram, CTexture* cSkyboxTexture,
-            const std::shared_ptr<Renderer>& r) {
+            const std::unique_ptr<Renderer>& renderer) {
   if (cTexture and cTexture->hasTransparency) {
     RendererAPI::ToggleCulling(false);
   }
   if (cSkybox) {
     RendererAPI::SetDepthLEqual();
   }
-  cMesh->bindTextures(r->get(cShaderProgram.name), cTexture, cTextureAtlas,
-                      cSkyboxTexture, cMaterial);
-  r->render(cMesh->getVAO(), cTransform.calculate(), cShaderProgram.name);
+  cMesh->bindTextures(renderer->getShaderProgram(cShaderProgram.name), cTexture,
+                      cTextureAtlas, cSkyboxTexture, cMaterial);
+  renderer->render(cMesh->getVAO(), cTransform.calculate(),
+                   cShaderProgram.name);
   cMesh->unbindTextures(cTexture);
   if (cTexture and cTexture->hasTransparency) {
     RendererAPI::ToggleCulling(true);
@@ -48,14 +49,13 @@ void render(CTexture* cTexture, CTextureAtlas* cTextureAtlas, CSkybox* cSkybox,
   }
 }
 
-void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
-  const auto& renderer = r.lock();
-  ENGINE_ASSERT(renderer, "Renderer is null!")
+void renderSystem(entt::registry& registry) {
+  const auto& renderer = Application::Get().getRenderer();
 
   entt::entity fbo =
-    reg.view<CFBO, CUUID>().front(); // TODO: support more than one?
+    registry.view<CFBO, CUUID>().front(); // TODO: support more than one?
   if (fbo not_eq entt::null) {
-    CFBO& cfbo = reg.get<CFBO>(fbo);
+    CFBO& cfbo = registry.get<CFBO>(fbo);
     const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
     defaultFBO->bindToDraw();
     RendererAPI::ToggleDepthTest(true);
@@ -66,36 +66,36 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
   renderer->resetMetrics();
 
   entt::entity camera =
-    reg.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
-  ENGINE_ASSERT(camera not_eq entt::null, "No camera found!");
-  CCamera& cCamera = reg.get<CCamera>(camera);
-  const CTransform& cCameraTransform = reg.get<CTransform>(camera);
+    registry.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
+  ENGINE_ASSERT(camera not_eq entt::null, "No active camera found!");
+  CCamera& cCamera = registry.get<CCamera>(camera);
+  const CTransform& cCameraTransform = registry.get<CTransform>(camera);
   cCamera.calculateView(cCameraTransform.position, cCameraTransform.rotation);
   renderer->beginScene(cCamera, cCameraTransform);
 
   entt::entity sky =
-    reg.view<CSkybox, CUUID>().front(); // TODO: support more than one?
+    registry.view<CSkybox, CUUID>().front(); // TODO: support more than one?
   CTexture* cSkyboxTexture;
   if (sky not_eq entt::null) {
-    cSkyboxTexture = reg.try_get<CTexture>(sky);
+    cSkyboxTexture = registry.try_get<CTexture>(sky);
   }
 
-  reg.view<CTransform, CShaderProgram, CUUID>().each(
+  registry.view<CTransform, CShaderProgram, CUUID>().each(
     [&](entt::entity e, const CTransform& cTransform,
         const CShaderProgram& cShaderProgram, const CUUID& cUUID) {
-      CTexture* cTexture = reg.try_get<CTexture>(e);
-      CTextureAtlas* cTextureAtlas = reg.try_get<CTextureAtlas>(e);
-      CSkybox* cSkybox = reg.try_get<CSkybox>(e);
-      CMaterial* cMaterial = reg.try_get<CMaterial>(e);
-      CBody* cBody = reg.try_get<CBody>(e);
-      CMesh* cMesh = reg.try_get<CMesh>(e);
-      CShape* cShape = reg.try_get<CShape>(e);
-      CChunkManager* cChunkManager = reg.try_get<CChunkManager>(e);
+      CTexture* cTexture = registry.try_get<CTexture>(e);
+      CTextureAtlas* cTextureAtlas = registry.try_get<CTextureAtlas>(e);
+      CSkybox* cSkybox = registry.try_get<CSkybox>(e);
+      CMaterial* cMaterial = registry.try_get<CMaterial>(e);
+      CBody* cBody = registry.try_get<CBody>(e);
+      CMesh* cMesh = registry.try_get<CMesh>(e);
+      CShape* cShape = registry.try_get<CShape>(e);
+      CChunkManager* cChunkManager = registry.try_get<CChunkManager>(e);
 
       if (cShaderProgram.isVisible) {
         if (cMesh) { // TODO objects with one mesh unused
           if (not cTexture) {
-            CName* cName = reg.try_get<CName>(e);
+            CName* cName = registry.try_get<CName>(e);
             if (cName) {
               ENGINE_ASSERT(false, "No texture found for entity {} {}",
                             cUUID.uuid, cName->name);
@@ -116,7 +116,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
           }
         } else if (cShape) { // primitives
           if (not cTexture) {
-            CName* cName = reg.try_get<CName>(e);
+            CName* cName = registry.try_get<CName>(e);
             if (cName) {
               ENGINE_ASSERT(false, "No texture found for entity {} {}",
                             cUUID.uuid, cName->name);
@@ -132,7 +132,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
           }
         } else if (cChunkManager) { // terrain
           if (not cTexture) {
-            CName* cName = reg.try_get<CName>(e);
+            CName* cName = registry.try_get<CName>(e);
             if (cName) {
               ENGINE_ASSERT(false, "No texture found for entity {} {}",
                             cUUID.uuid, cName->name);
@@ -148,7 +148,7 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
                    cSkyboxTexture, renderer);
           }
         } else {
-          CName* cName = reg.try_get<CName>(e);
+          CName* cName = registry.try_get<CName>(e);
           if (cName) {
             ENGINE_ASSERT(false, "No mesh found for entity {} {}", cUUID.uuid,
                           cName->name);
@@ -160,19 +160,20 @@ void renderSystem(entt::registry& reg, std::weak_ptr<Renderer> r) {
     });
 
   if (fbo not_eq entt::null) {
-    CFBO& cfbo = reg.get<CFBO>(fbo);
+    CFBO& cfbo = registry.get<CFBO>(fbo);
     const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
     defaultFBO->unbind(); // go back to default framebuffer
     RendererAPI::ClearColor();
     RendererAPI::ToggleDepthTest(
       false); // disable depth test so screen-space quad isn't discarded due to
               // depth test.
-    auto& cShape = reg.get<CShape>(fbo);
-    cfbo.setupProperties(renderer->get("fbo"));
-    auto& window = Application::Get().getWindow();
-    if (window.isWindowInsideImgui()) {
+    auto& cShape = registry.get<CShape>(fbo);
+    cfbo.setupProperties(renderer->getShaderProgram("fbo"));
+    const auto& settings = Application::Get().getSettings();
+    if (settings->windowInsideImgui) {
       renderer->renderInsideImGui(cShape.meshes.at(0).getVAO(), cfbo.fbo,
-                                  "scene", {0, 0}, {0, 0});
+                                  "scene", {0, 0}, {0, 0},
+                                  settings->fitToWindow);
     } else {
       renderer->renderFBO(cShape.meshes.at(0).getVAO(), cfbo.fbo);
     }

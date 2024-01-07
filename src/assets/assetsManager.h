@@ -66,8 +66,8 @@ class AssetsManager {
       m_dirty = false;
     }
 
-    static std::shared_ptr<AssetsManager> Create() {
-      return std::make_shared<AssetsManager>();
+    static std::unique_ptr<AssetsManager> Create() {
+      return std::make_unique<AssetsManager>();
     }
 
     using AssetTypes =

@@ -8,19 +8,19 @@
 namespace potatoengine {
 
 FBO::FBO(uint32_t w, uint32_t h, uint32_t t) : m_depthBufferType(t) {
-  auto& window = Application::Get().getWindow();
+  const auto& settings = Application::Get().getSettings();
   int windowWidth;
   int windowHeight;
-  if (window.isFullscreen()) {
+  if (settings->fullscreen) {
     int monitorCount;
     GLFWmonitor* monitor =
-      (glfwGetMonitors(&monitorCount))[window.getPrimaryMonitor()];
+      (glfwGetMonitors(&monitorCount))[settings->primaryMonitor];
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     windowWidth = mode->width;
     windowHeight = mode->height;
   } else {
-    windowWidth = window.getWidth();
-    windowHeight = window.getHeight();
+    windowWidth = settings->windowWidth;
+    windowHeight = settings->windowHeight;
   }
   m_width = w == 0 ? windowWidth : w;
   m_height = h == 0 ? windowHeight : h;
@@ -148,15 +148,15 @@ void FBO::bindToRead() {
 
 void FBO::unbind() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0); // default framebuffer
-  auto& window = Application::Get().getWindow();
-  if (window.isFullscreen()) {
+  const auto& settings = Application::Get().getSettings();
+  if (settings->fullscreen) {
     int monitorCount;
     GLFWmonitor* monitor =
-      (glfwGetMonitors(&monitorCount))[window.getPrimaryMonitor()];
+      (glfwGetMonitors(&monitorCount))[settings->primaryMonitor];
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     glViewport(0, 0, mode->width, mode->height);
   } else {
-    glViewport(0, 0, window.getWidth(), window.getHeight());
+    glViewport(0, 0, settings->windowWidth, settings->windowHeight);
   }
 }
 

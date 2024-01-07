@@ -73,11 +73,10 @@ if(NOT entt_POPULATED)
 endif()
 
 FetchContent_Declare(
-  json
-  GIT_REPOSITORY https://github.com/fabio-polystream/nlohmann_json_cmake_fetchcontent.git
+  json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
   GIT_PROGRESS TRUE
   GIT_SHALLOW TRUE
-  GIT_TAG v3.11.2
+  GIT_TAG v3.11.3
 )
 
 FetchContent_MakeAvailable(json)

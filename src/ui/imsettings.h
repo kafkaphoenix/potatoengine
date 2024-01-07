@@ -11,39 +11,34 @@
 
 namespace potatoengine::ui {
 
-std::string selectedSettingTabKey;
+std::string selectedSettingsManagerTabKey;
 
-void drawSettings(std::weak_ptr<Settings> s, std::weak_ptr<Renderer> r) {
-  const auto& settings = s.lock();
-  ENGINE_ASSERT(settings, "Settings is null!");
-
-  const auto& renderer = r.lock();
-  ENGINE_ASSERT(renderer, "Renderer is null!");
-
+void drawSettingsManager(const std::unique_ptr<Settings>& settings,
+                         const std::unique_ptr<Renderer>& renderer) {
   ImGui::Columns(2);
 
   ImGui::SeparatorText("Engine");
   if (ImGui::Selectable("Window")) {
-    selectedSettingTabKey = "Window";
+    selectedSettingsManagerTabKey = "Window";
   }
   if (ImGui::Selectable("Debug")) {
-    selectedSettingTabKey = "Debug";
+    selectedSettingsManagerTabKey = "Debug";
   }
   if (ImGui::Selectable("Logger")) {
-    selectedSettingTabKey = "Logger";
+    selectedSettingsManagerTabKey = "Logger";
   }
   ImGui::SeparatorText("App");
   if (ImGui::Selectable("Renderer")) {
-    selectedSettingTabKey = "Renderer";
+    selectedSettingsManagerTabKey = "Renderer";
   }
   if (ImGui::Selectable("Scene")) {
-    selectedSettingTabKey = "Scene";
+    selectedSettingsManagerTabKey = "Scene";
   }
 
   ImGui::NextColumn();
-  if (not selectedSettingTabKey.empty()) {
+  if (not selectedSettingsManagerTabKey.empty()) {
     ImGui::SeparatorText("Edit");
-    if (selectedSettingTabKey == "Window") {
+    if (selectedSettingsManagerTabKey == "Window") {
       auto& window = Application::Get().getWindow();
       ImGui::Checkbox("Fullscreen", &settings->fullscreen);
       window.toggleFullscreen(settings->fullscreen);
@@ -69,41 +64,42 @@ void drawSettings(std::weak_ptr<Settings> s, std::weak_ptr<Renderer> r) {
       helpMark("Only works with a framebuffer");
       window.toggleFitToWindow(settings->fitToWindow);
 
-      if (window.isFullscreen()) {
+      bool isFullscreen = settings->fullscreen;
+      if (isFullscreen) {
         ImGui::BeginDisabled();
       }
       ImGui::InputInt("Window width", &settings->windowWidth);
-      if (window.isFullscreen()) {
+      if (isFullscreen) {
         ImGui::EndDisabled();
       }
       ImGui::SameLine();
       helpMark("Only works in windowed mode");
-      if (window.isFullscreen()) {
+      if (isFullscreen) {
         ImGui::BeginDisabled();
       }
       ImGui::InputInt("Window height", &settings->windowHeight);
-      if (window.isFullscreen()) {
+      if (isFullscreen) {
         ImGui::EndDisabled();
       }
       ImGui::SameLine();
       helpMark("Only works in windowed mode");
       window.resize(settings->windowWidth, settings->windowHeight);
-      if (window.isFullscreen()) {
+      if (isFullscreen) {
         ImGui::BeginDisabled();
       }
       ImGui::Checkbox("Resizable", &settings->resizable);
-      if (window.isFullscreen()) {
+      if (isFullscreen) {
         ImGui::EndDisabled();
       }
       ImGui::SameLine();
       helpMark("Only works in windowed mode");
       window.toggleResizable(settings->resizable);
 
-      if (not window.isFullscreen()) {
+      if (not isFullscreen) {
         ImGui::BeginDisabled();
       }
       ImGui::InputInt("Refresh rate", &settings->refreshRate);
-      if (not window.isFullscreen()) {
+      if (not isFullscreen) {
         ImGui::EndDisabled();
       }
       ImGui::SameLine();
@@ -131,10 +127,11 @@ void drawSettings(std::weak_ptr<Settings> s, std::weak_ptr<Renderer> r) {
                               windowData.debugMouseX, windowData.debugMouseY)
                     .c_str());
 
-    } else if (selectedSettingTabKey == "Debug") { // TODO use for something
+    } else if (selectedSettingsManagerTabKey ==
+               "Debug") { // TODO use for something
       ImGui::Checkbox("Debug enabled", &settings->debugEnabled);
       ImGui::Checkbox("Display FPS", &settings->displayFPS);
-    } else if (selectedSettingTabKey == "Logger") {
+    } else if (selectedSettingsManagerTabKey == "Logger") {
       ImGui::Checkbox("Enable engine logger", &settings->enableEngineLogger);
       LogManager::ToggleEngineLogger(settings->enableEngineLogger);
       if (ImGui::BeginCombo("Engine log level",
@@ -250,10 +247,10 @@ void drawSettings(std::weak_ptr<Settings> s, std::weak_ptr<Renderer> r) {
       if (ImGui::Button("Dump backtrace")) {
         LogManager::DumpBacktrace();
       }
-    } else if (selectedSettingTabKey == "Renderer") {
+    } else if (selectedSettingsManagerTabKey == "Renderer") {
       ImGui::ColorEdit4("Clear color", settings->clearColor.data());
       ImGui::SliderFloat("Clear depth", &settings->clearDepth, 0.f, 1.f);
-    } else if (selectedSettingTabKey == "Scene") {
+    } else if (selectedSettingsManagerTabKey == "Scene") {
       ImGui::Text("Name: %s", settings->activeScene.c_str());
       ImGui::Text("Filepath: %s ", settings->activeScenePath.c_str());
       if (ImGui::BeginCombo("Active scene", settings->activeScene.c_str())) {

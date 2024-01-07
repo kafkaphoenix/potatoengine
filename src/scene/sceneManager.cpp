@@ -2,6 +2,7 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include "core/application.h"
 #include "scene/components/camera/cActiveCamera.h"
 #include "scene/components/camera/cCamera.h"
 #include "scene/components/camera/serializer.h"
@@ -29,19 +30,17 @@ using namespace entt::literals;
 
 namespace potatoengine {
 
-SceneManager::SceneManager(std::weak_ptr<AssetsManager> am,
-                           std::weak_ptr<Renderer> r)
-  : m_entityFactory(am), m_assetsManager(am), m_renderer(r) {
-  ENGINE_TRACE("Initializing scene assetsManager...");
+SceneManager::SceneManager() {
+  ENGINE_TRACE("Initializing scene manager...");
   ENGINE_TRACE("Registering engine components...");
   RegisterComponents();
-  ENGINE_TRACE("Scene assetsManager created!");
+  ENGINE_TRACE("Scene manager created!");
 }
 
 void SceneManager::onEvent(Event& e) { eventSystem(std::ref(m_registry), e); }
 
-void SceneManager::onUpdate(Time ts, std::weak_ptr<Renderer> r) {
-  updateSystem(std::ref(m_registry), r, ts);
+void SceneManager::onUpdate(const Time& ts) {
+  updateSystem(std::ref(m_registry), ts);
 }
 
 void SceneManager::print() { PrintScene(std::ref(m_registry)); }
@@ -142,7 +141,7 @@ SceneManager::getAllNamedEntities() {
 
 void SceneManager::createPrototypes(std::string_view prefabID) {
   // TODO think a better way, we need to create an entity so
-  // we have access to the scene assetsManager and avoid circular
+  // we have access to the scene manager and avoid circular
   // dependency but we discard it afterwards to create one per prototype
   m_entityFactory.createPrototypes(prefabID, Entity(m_registry.create(), this));
   m_dirty = true;
@@ -200,27 +199,25 @@ bool SceneManager::containsPrototype(std::string_view prefabID,
   return m_entityFactory.containsPrototype(prefabID, prototypeID);
 }
 
-void SceneManager::loadScene(std::string_view sceneID) {
+void SceneManager::loadScene(
+  std::string_view sceneID,
+  const std::unique_ptr<AssetsManager>& assetsManager) {
   ENGINE_TRACE("Loading scene elements...");
-  SceneLoader loadedScene(m_assetsManager);
-  loadedScene.load(sceneID);
+  SceneLoader loadedScene;
+  loadedScene.load(sceneID, assetsManager);
   m_loadedScenes.emplace(sceneID, std::move(loadedScene));
   ENGINE_TRACE("Scene elements loaded!");
 }
 
-void SceneManager::createScene(std::string sceneID, bool reload) {
+void SceneManager::createScene(
+  std::string sceneID, const std::unique_ptr<AssetsManager>& assetsManager,
+  const std::unique_ptr<Renderer>& renderer, bool reload) {
+  Timer timer;
   if (reload) {
     ENGINE_INFO("Reloading scene...");
   } else {
     ENGINE_INFO("Creating scene...");
   }
-  Timer timer;
-
-  const auto& renderer = m_renderer.lock();
-  ENGINE_ASSERT(renderer, "Renderer is null!");
-
-  const auto& assetsManager = m_assetsManager.lock();
-  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
 
   ENGINE_ASSERT(m_activeScene.empty() or reload, "Scene {} already exists!",
                 sceneID);
@@ -230,7 +227,7 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
   ENGINE_TRACE("Linking scene shaders...");
   const auto& loadedScene = m_loadedScenes.at(sceneID);
   for (std::string id : loadedScene.getLoadedShaders()) {
-    renderer->addShader(std::move(id));
+    renderer->addShaderProgram(std::move(id), assetsManager);
   }
 
   // A Prefab asset is a json file that contains a list of entity prototypes
@@ -254,8 +251,8 @@ void SceneManager::createScene(std::string sceneID, bool reload) {
 
 void SceneManager::createEntities(
   std::string_view prefabID, const SceneLoader& loadedScene,
-  const std::shared_ptr<AssetsManager>& assetsManager,
-  const std::shared_ptr<Renderer>& renderer) {
+  const std::unique_ptr<AssetsManager>& assetsManager,
+  const std::unique_ptr<Renderer>& renderer) {
   ENGINE_TRACE("Creating scene normal entities...");
   for (const auto& [name, data] :
        loadedScene.getLoadedNormalEntities(prefabID)) {
@@ -308,6 +305,22 @@ void SceneManager::createEntities(
         CInput& cInput = e.get<CInput>();
         cInput._mode = options.at("inputMode").get<std::string>();
         cInput.setMode();
+      }
+      if (options.contains("translationSpeed")) {
+        e.get<CInput>().translationSpeed =
+          options.at("translationSpeed").get<float>();
+      }
+      if (options.contains("verticalSpeed")) {
+        e.get<CInput>().verticalSpeed =
+          options.at("verticalSpeed").get<float>();
+      }
+      if (options.contains("mouseSensitivity")) {
+        e.get<CInput>().mouseSensitivity =
+          options.at("mouseSensitivity").get<float>();
+      }
+      if (options.contains("rotationSpeed")) {
+        e.get<CInput>().rotationSpeed =
+          options.at("rotationSpeed").get<float>();
       }
       if (options.contains("size")) {
         CShape& shape = e.get<CShape>();
@@ -629,6 +642,22 @@ void SceneManager::createEntities(
         cInput._mode = options.at("inputMode").get<std::string>();
         cInput.setMode();
       }
+      if (options.contains("translationSpeed")) {
+        e.get<CInput>().translationSpeed =
+          options.at("translationSpeed").get<float>();
+      }
+      if (options.contains("verticalSpeed")) {
+        e.get<CInput>().verticalSpeed =
+          options.at("verticalSpeed").get<float>();
+      }
+      if (options.contains("mouseSensitivity")) {
+        e.get<CInput>().mouseSensitivity =
+          options.at("mouseSensitivity").get<float>();
+      }
+      if (options.contains("rotationSpeed")) {
+        e.get<CInput>().rotationSpeed =
+          options.at("rotationSpeed").get<float>();
+      }
       if (options.contains("isVisible")) {
         e.get<CShaderProgram>().isVisible = options.at("isVisible").get<bool>();
       }
@@ -732,24 +761,22 @@ void SceneManager::createEntities(
   m_dirty = true;
 }
 
-void SceneManager::reloadScene() {
+void SceneManager::reloadScene(
+  const std::unique_ptr<AssetsManager>& assetsManager,
+  const std::unique_ptr<Renderer>& renderer) {
   ENGINE_ASSERT(not m_activeScene.empty(), "No scene is active!");
   ENGINE_WARN("Reloading scene {}", m_activeScene);
-  const auto& renderer = m_renderer.lock();
-  ENGINE_ASSERT(renderer, "Renderer is null!");
 
   m_registry.clear(); // delete instances and prototypes but reusing them later
   m_entityFactory.clear();
   renderer->clear();
-  createScene(m_activeScene, true);
+  createScene(m_activeScene, assetsManager, renderer, true);
   m_dirty = true;
 }
 
-void SceneManager::clearScene() {
+void SceneManager::clearScene(const std::unique_ptr<Renderer>& renderer) {
   ENGINE_ASSERT(not m_activeScene.empty(), "No scene is active!");
   ENGINE_WARN("Clearing scene {}", m_activeScene);
-  const auto& renderer = m_renderer.lock();
-  ENGINE_ASSERT(renderer, "Renderer is null!");
 
   m_loadedScenes.erase(m_activeScene);
   m_registry.clear(); // soft delete / = {};  would delete them completely but
@@ -775,9 +802,7 @@ template <typename T> void SceneManager::onComponentCloned(Entity& e, T& c) {
                 entt::type_id<T>().name());
 }
 
-std::shared_ptr<SceneManager>
-SceneManager::Create(std::weak_ptr<AssetsManager> am,
-                     std::weak_ptr<Renderer> r) {
-  return std::make_shared<SceneManager>(am, r);
+std::unique_ptr<SceneManager> SceneManager::Create() {
+  return std::make_unique<SceneManager>();
 }
 }

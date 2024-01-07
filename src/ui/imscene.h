@@ -7,7 +7,7 @@
 
 namespace potatoengine::ui {
 inline void renderScene(uint32_t fboTextureID, std::string_view title,
-                        glm::vec2 size, glm::vec2 position) {
+                        glm::vec2 size, glm::vec2 position, bool fitToWindow) {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
   ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
   const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
@@ -17,7 +17,7 @@ inline void renderScene(uint32_t fboTextureID, std::string_view title,
   windowHeight *= 0.75f;
   ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight));
   int w, h;
-  if (Application::Get().getWindow().shouldFitToWindow()) {
+  if (fitToWindow) {
     w = windowWidth;
     h = windowHeight;
   } else {

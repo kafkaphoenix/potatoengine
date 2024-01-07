@@ -6,8 +6,8 @@
 #include "assets/assetsManager.h"
 #include "pch.h"
 #include "renderer/framebuffer.h"
-#include "renderer/rendererAPI.h"
 #include "renderer/shaderProgram.h"
+#include "renderer/vao.h"
 #include "scene/components/camera/cCamera.h"
 #include "scene/components/physics/cTransform.h"
 #include "utils/numericComparator.h"
@@ -16,8 +16,6 @@ namespace potatoengine {
 
 class Renderer {
   public:
-    Renderer(std::weak_ptr<AssetsManager> am);
-
     void init() const;
     void shutdown();
 
@@ -26,7 +24,8 @@ class Renderer {
     void beginScene(const CCamera& c, const CTransform& t);
     void endScene();
 
-    void addShader(std::string&& shaderProgram);
+    void addShaderProgram(std::string&& name,
+                          const std::unique_ptr<AssetsManager>& assetsManager);
     void addFramebuffer(std::string&& framebuffer, uint32_t width,
                         uint32_t height, uint32_t bufferType);
     const std::unordered_map<std::string, std::unique_ptr<ShaderProgram>>&
@@ -37,23 +36,21 @@ class Renderer {
     getFramebuffers() const noexcept {
       return m_framebuffers;
     }
-    bool contains(std::string_view shaderProgram) const {
-      return m_shaderPrograms.contains(shaderProgram.data());
-    }
-    std::unique_ptr<ShaderProgram>& get(std::string_view shaderProgram);
+    const std::unique_ptr<ShaderProgram>& getShaderProgram(std::string_view shaderProgram);
 
     void render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform,
                 std::string_view shaderProgram);
     void renderFBO(const std::shared_ptr<VAO>& vao, std::string_view fbo);
     void renderInsideImGui(const std::shared_ptr<VAO>& vao,
                            std::string_view fbo, std::string_view title,
-                           glm::vec2 size, glm::vec2 position);
+                           glm::vec2 size, glm::vec2 position,
+                           bool fitToWindow);
     int getShaderProgramsCount() const { return m_shaderPrograms.size(); }
     int getFramebuffersCount() const { return m_framebuffers.size(); }
     void clear();
     void resetMetrics();
     const std::map<std::string, std::string, NumericComparator>& getMetrics();
-    static std::shared_ptr<Renderer> Create(std::weak_ptr<AssetsManager> am);
+    static std::unique_ptr<Renderer> Create();
 
   private:
     glm::mat4 m_view{};
@@ -62,7 +59,6 @@ class Renderer {
     std::unordered_map<std::string, std::unique_ptr<ShaderProgram>>
       m_shaderPrograms;
     std::unordered_map<std::string, std::unique_ptr<FBO>> m_framebuffers;
-    std::weak_ptr<AssetsManager> m_assetsManager;
     std::map<std::string, std::string, NumericComparator> m_metrics{};
     int m_drawCalls{};
     int m_triangles{};

@@ -70,7 +70,7 @@ struct CMesh {
     }
 
     // TODO rethink this method
-    void bindTextures(std::unique_ptr<ShaderProgram>& sp, CTexture* cTexture,
+    void bindTextures(const std::unique_ptr<ShaderProgram>& sp, CTexture* cTexture,
                       CTextureAtlas* cTextureAtlas, CTexture* cSkyboxTexture,
                       CMaterial* cMaterial) {
       sp->resetActiveUniforms();

@@ -10,16 +10,12 @@ namespace demos {
 
 class Demos : public engine::Application {
   public:
-    Demos(std::shared_ptr<engine::Settings>&& s, engine::CLArgs&& args)
+    Demos(std::unique_ptr<engine::Settings>&& s, engine::CLArgs&& args)
       : engine::Application(std::move(s), std::move(args)) {
       APP_TRACE("Registering app components...");
       RegisterComponents();
       APP_TRACE("Loading initial state...");
-      pushState(
-        GameState::Create(std::weak_ptr<engine::AssetsManager>(m_assetsManager),
-                          std::weak_ptr<engine::Renderer>(m_renderer),
-                          std::weak_ptr<engine::Settings>(m_settings),
-                          std::weak_ptr<engine::SceneManager>(m_sceneManager)));
+      pushState(GameState::Create(m_settings));
       APP_TRACE("State loaded!");
     }
 
@@ -50,7 +46,8 @@ engine::Application* engine::CreateApp(engine::CLArgs&& args) {
                                       settings->enableEngineBacktraceLogger,
                                       settings->enableAppBacktraceLogger);
   }
-  LogManager::ToggleEngineBacktraceLogger(settings->enableEngineBacktraceLogger);
+  LogManager::ToggleEngineBacktraceLogger(
+    settings->enableEngineBacktraceLogger);
   LogManager::ToggleAppBacktraceLogger(settings->enableAppBacktraceLogger);
 
   APP_INFO("Loading settings...");

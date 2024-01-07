@@ -2,6 +2,7 @@
 
 #include <entt/entt.hpp>
 
+#include "core/application.h"
 #include "scene/components/ai/cAI.h"
 #include "scene/components/audio/cAudio.h"
 #include "scene/components/camera/cActiveCamera.h"
@@ -17,6 +18,7 @@
 #include "scene/components/graphics/cMaterial.h"
 #include "scene/components/graphics/cMesh.h"
 #include "scene/components/graphics/cShaderProgram.h"
+#include "scene/components/graphics/cShape.h"
 #include "scene/components/graphics/cText.h"
 #include "scene/components/graphics/cTexture.h"
 #include "scene/components/graphics/cTextureAtlas.h"
@@ -29,7 +31,6 @@
 #include "scene/components/utils/cDeleted.h"
 #include "scene/components/utils/cNoise.h"
 #include "scene/components/utils/cRelationship.h"
-#include "scene/components/utils/cShape.h"
 #include "scene/components/world/cBlock.h"
 #include "scene/components/world/cChunk.h"
 #include "scene/components/world/cChunkManager.h"
@@ -311,6 +312,7 @@ void RegisterComponents() {
     .data<&CInput::rotationSpeed>("rotationSpeed"_hs)
     .func<&CInput::print>("print"_hs)
     .func<&CInput::getInfo>("getInfo"_hs)
+    .func<&onComponentAdded<CInput>, entt::as_ref_t>("onComponentAdded"_hs)
     .func<&assign<CInput>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CActiveInput>()
@@ -495,11 +497,11 @@ void RegisterComponents() {
     .func<&assign<CBlock>, entt::as_ref_t>("assign"_hs);
 }
 
-void PrintScene(entt::registry& r) {
+void PrintScene(entt::registry& registry) {
+  auto entities = registry.view<CUUID>();
   entt::meta_type cType;
   entt::meta_any cData;
   entt::meta_func printFunc;
-  auto entities = r.view<CUUID>();
   std::string_view cName;
   if (entities.empty()) {
     ENGINE_BACKTRACE("===================Entities===================");
@@ -511,7 +513,7 @@ void PrintScene(entt::registry& r) {
   ENGINE_BACKTRACE("===================Entities===================");
   for (auto&& e : entities) {
     ENGINE_BACKTRACE("Entity UUID: {}", entt::to_integral(e));
-    for (auto&& [id, storage] : r.storage()) {
+    for (auto&& [id, storage] : registry.storage()) {
       if (storage.contains(e)) {
         cType = entt::resolve(storage.type());
         cData = cType.construct(storage.value(e));
@@ -540,8 +542,7 @@ void PrintScene(entt::registry& r) {
 template <>
 void engine::SceneManager::onComponentAdded(Entity& e, CTexture& c) {
   c.setDrawMode();
-  const auto& assetsManager = m_assetsManager.lock();
-  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
+  const auto& assetsManager = Application::Get().getAssetsManager();
 
   c.textures.reserve(c.filepaths.size());
   for (std::string_view filepath : c.filepaths) {

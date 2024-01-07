@@ -1,0 +1,43 @@
+{
+    "bird": {
+        "ctags": ["activeInput"],
+        "components": {
+            "shaderProgram": {
+                "name": "shape"
+            },
+            "shape": {
+                "type": "rectangle",
+                "size": {"x": 0.1, "y": 0.1, "z": 0}
+            },
+            "rigidBody": {
+                "isKinematic": true
+            },
+            "texture": {
+                "filepaths": ["bird"],
+                "drawMode": "textureAtlas"
+            },
+            "textureAtlas": {
+                "rows": 2,
+                "index": 3
+            },
+            "distanceFromCamera": {
+                "distance": 2
+            },
+            "input": {
+                "mode": "2D",
+                "translationSpeed": 4,
+                "verticalSpeed": 5
+            },
+            "collider": {
+                "type": "rectangle",
+                "size": {"x": 0.1, "y": 0.1, "z": 0}
+            },
+            "gravity": {
+                "acceleration": 0.65
+            },
+            "transform": {
+                "position": {"x": 0, "y": 0.5, "z": 0}
+            }
+        }
+    }
+}

@@ -3,11 +3,12 @@
 #include <entt/core/hashed_string.hpp>
 #include <entt/meta/meta.hpp>
 #define GLM_FORCE_CTOR_INIT
-
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <nlohmann/json.hpp>
 
 #include "pch.h"
+#include "core/application.h"
 #include "scene/components/utils/cDeleted.h"
 #include "scene/entity.h"
 
@@ -55,9 +56,6 @@ glm::quat quatFromJson(const json& data) {
   quat.w = data.at("w").get<float>();
   return quat;
 }
-
-EntityFactory::EntityFactory(std::weak_ptr<AssetsManager> am)
-  : m_assetsManager(am) {}
 
 void processCTag(Entity& e, std::string_view cTag) {
   entt::meta_type cType = entt::resolve(entt::hashed_string{cTag.data()});
@@ -182,9 +180,7 @@ void EntityFactory::createPrototypes(std::string_view prefabID, Entity&& e) {
   ENGINE_ASSERT(not m_prefabs.contains(prefabID.data()),
                 "Prototypes for prefab {} already exist", prefabID);
 
-  const auto& assetsManager = m_assetsManager.lock();
-  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
-
+  const auto& assetsManager = Application::Get().getAssetsManager();
   const auto& prefab = assetsManager->get<Prefab>(prefabID);
   auto& sceneManager = e.getSceneManager();
   e.add<CDeleted>();
@@ -250,9 +246,7 @@ void EntityFactory::createPrototype(std::string_view prefabID,
                 "Prototype {} for prefab {} already exists", prototypeID,
                 prefabID);
 
-  const auto& assetsManager = m_assetsManager.lock();
-  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
-
+  const auto& assetsManager = Application::Get().getAssetsManager();
   const auto& prefab = assetsManager->get<Prefab>(prefabID);
 
   for (std::string_view cTag : prefab->getCTags(prototypeID)) {

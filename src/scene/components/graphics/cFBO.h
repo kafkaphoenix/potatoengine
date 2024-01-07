@@ -49,7 +49,7 @@ struct CFBO {
       return info;
     }
 
-    void setupProperties(std::unique_ptr<ShaderProgram>& sp) {
+    void setupProperties(const std::unique_ptr<ShaderProgram>& sp) {
       sp->resetActiveUniforms();
       sp->use();
       if (mode == Mode::Normal) {

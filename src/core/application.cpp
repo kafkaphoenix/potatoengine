@@ -6,7 +6,7 @@
 
 namespace potatoengine {
 
-Application::Application(std::shared_ptr<Settings>&& s, CLArgs&& args)
+Application::Application(std::unique_ptr<Settings>&& s, CLArgs&& args)
   : m_clargs(std::move(args)) {
   s_instance = this;
   m_settings = std::move(s);
@@ -16,15 +16,15 @@ Application::Application(std::shared_ptr<Settings>&& s, CLArgs&& args)
   m_states = StateStack::Create();
   m_assetsManager = AssetsManager::Create();
 
-  m_window = Window::Create(std::weak_ptr<Settings>(m_settings));
+  m_window = Window::Create(m_settings);
   m_window->setEventCallback(BIND_EVENT(Application::onEvent));
 
-  m_renderer = Renderer::Create(m_assetsManager);
+  m_renderer = Renderer::Create();
   m_renderer->init();
   ui::ImGuiAPI::Init(m_window->getNativeWindow(),
                      m_settings->openglMajorVersion,
                      m_settings->openglMinorVersion);
-  m_sceneManager = SceneManager::Create(m_assetsManager, m_renderer);
+  m_sceneManager = SceneManager::Create();
 }
 
 Application::~Application() {
@@ -65,8 +65,7 @@ void Application::run() {
         for (auto& state : *m_states) {
           state->onUpdate(ts);
           if (m_debugging) {
-            ui::drawDebugger(m_assetsManager, m_renderer, m_sceneManager,
-                             m_settings);
+            ui::drawDebugger(m_settings, m_assetsManager, m_renderer, m_sceneManager);
           }
           state->onImguiUpdate();
         }

@@ -14,8 +14,8 @@ using namespace entt::literals;
 
 namespace potatoengine::ui {
 
-std::string selectedEntityTabKey;
-char textFilterEntities[128]{}; // TODO: move to class
+std::string selectedSceneManagerTabKey;
+char scene_objects_text_filter[128]{}; // TODO: move to class
 bool filterPrefabs{};
 bool filterPrototypes{};
 bool filterInstances{};
@@ -33,8 +33,7 @@ void drawChildInfo(
         for (const auto& [key, value] : childInfoData) {
           if (key.starts_with("texture ") or
               (key.starts_with("vao ") and value != "undefined")) {
-            if (ImGui::TreeNode((key + sceneName).c_str(),
-                                key.c_str())) {
+            if (ImGui::TreeNode((key + sceneName).c_str(), key.c_str())) {
               // CBody, CShape, CChunk have a CMesh that has a VAO and CTexture
               auto rechildInfoData = JsonToMap(value);
               for (const auto& [key, value] : rechildInfoData) {
@@ -54,13 +53,8 @@ void drawChildInfo(
   }
 }
 
-void drawEntities(std::weak_ptr<SceneManager> sm, std::weak_ptr<Settings> s) {
-  const auto& scene_manager = sm.lock();
-  ENGINE_ASSERT(scene_manager, "SceneManager is null!");
-
-  const auto& settings = s.lock();
-  ENGINE_ASSERT(settings, "Settings is null!");
-
+void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
+                      const std::unique_ptr<Settings>& settings) {
   entt::registry& registry = scene_manager->getRegistry();
 
   if (registry.storage<entt::entity>().in_use() == 0) {
@@ -70,14 +64,14 @@ void drawEntities(std::weak_ptr<SceneManager> sm, std::weak_ptr<Settings> s) {
 
   int collapsed = collapser();
 
-  ImGui::InputText("##filter", textFilterEntities,
-                   IM_ARRAYSIZE(textFilterEntities));
+  ImGui::InputText("##filter", scene_objects_text_filter,
+                   IM_ARRAYSIZE(scene_objects_text_filter));
   if (ImGui::IsItemHovered()) {
     ImGui::SetTooltip("Filter entities or components by name");
   }
   ImGui::SameLine();
   if (ImGui::Button("Clear Filter")) {
-    textFilterEntities[0] = '\0';
+    scene_objects_text_filter[0] = '\0';
   }
   ImGui::Checkbox("Prefabs", &filterPrefabs);
   ImGui::SameLine();
@@ -98,19 +92,21 @@ void drawEntities(std::weak_ptr<SceneManager> sm, std::weak_ptr<Settings> s) {
     for (const auto& [prefabID, prototypes] :
          scene_manager->getAllPrototypes()) {
       std::string prefabName = "Prefab " + prefabID;
-      if (filterPrefabs and textFilterEntities[0] not_eq '\0' and
-          strstr(prefabName.c_str(), textFilterEntities) == nullptr) {
+      if (filterPrefabs and scene_objects_text_filter[0] not_eq '\0' and
+          strstr(prefabName.c_str(), scene_objects_text_filter) == nullptr) {
         continue;
       }
       if (ImGui::TreeNode((prefabName + settings->activeScene).c_str(),
                           prefabName.c_str())) {
         for (auto& [prototypeID, entity] : prototypes) {
-          if (filterPrototypes and textFilterEntities[0] not_eq '\0' and
-              strstr(prototypeID.c_str(), textFilterEntities) == nullptr) {
+          if (filterPrototypes and scene_objects_text_filter[0] not_eq '\0' and
+              strstr(prototypeID.c_str(), scene_objects_text_filter) ==
+                nullptr) {
             continue;
           }
           if (ImGui::Selectable(prototypeID.c_str())) {
-            selectedEntityTabKey = std::to_string(entt::to_integral(entity));
+            selectedSceneManagerTabKey =
+              std::to_string(entt::to_integral(entity));
           }
         }
         ImGui::TreePop();
@@ -124,23 +120,23 @@ void drawEntities(std::weak_ptr<SceneManager> sm, std::weak_ptr<Settings> s) {
 
   if (ImGui::CollapsingHeader("Instances")) {
     for (const auto& [name, entity] : scene_manager->getAllNamedEntities()) {
-      if (filterInstances and textFilterEntities[0] not_eq '\0' and
-          strstr(name.c_str(), textFilterEntities) == nullptr) {
+      if (filterInstances and scene_objects_text_filter[0] not_eq '\0' and
+          strstr(name.c_str(), scene_objects_text_filter) == nullptr) {
         continue;
       }
       if (ImGui::Selectable(name.c_str())) {
-        selectedEntityTabKey = std::to_string(entt::to_integral(entity));
+        selectedSceneManagerTabKey = std::to_string(entt::to_integral(entity));
       }
     }
   }
 
   if (collapsed == 0 or settings->reloadScene) {
-    selectedEntityTabKey.clear();
+    selectedSceneManagerTabKey.clear();
   }
 
   ImGui::NextColumn();
-  if (not selectedEntityTabKey.empty()) {
-    entt::entity entity = entt::entity(std::stoul(selectedEntityTabKey));
+  if (not selectedSceneManagerTabKey.empty()) {
+    entt::entity entity = entt::entity(std::stoul(selectedSceneManagerTabKey));
     if (registry.valid(entity)) {
       ImGui::SeparatorText("Components");
       std::string cName;
@@ -153,16 +149,18 @@ void drawEntities(std::weak_ptr<SceneManager> sm, std::weak_ptr<Settings> s) {
         if (storage.contains(entity)) {
           cName = storage.type().name();
           cName = cName.substr(cName.find_last_of(':') + 1);
-          if (filterComponents and textFilterEntities[0] not_eq '\0' and
-              strstr(cName.c_str(), textFilterEntities) == nullptr) {
+          if (filterComponents and scene_objects_text_filter[0] not_eq '\0' and
+              strstr(cName.c_str(), scene_objects_text_filter) == nullptr) {
             continue;
           }
           cType = entt::resolve(storage.type());
           cData = cType.construct(storage.value(entity));
           getInfoFunc = cType.func("getInfo"_hs);
           if (getInfoFunc) {
-            if (ImGui::TreeNode((selectedEntityTabKey + cName + settings->activeScene).c_str(),
-                                cName.c_str())) {
+            if (ImGui::TreeNode(
+                  (selectedSceneManagerTabKey + cName + settings->activeScene)
+                    .c_str(),
+                  cName.c_str())) {
               info = getInfoFunc.invoke(cData);
               if (info) {
                 infoData = info.cast<
@@ -179,8 +177,10 @@ void drawEntities(std::weak_ptr<SceneManager> sm, std::weak_ptr<Settings> s) {
               ImGui::TreePop();
             }
           } else {
-            if (ImGui::TreeNode((selectedEntityTabKey + cName + settings->activeScene).c_str(),
-                                cName.c_str())) {
+            if (ImGui::TreeNode(
+                  (selectedSceneManagerTabKey + cName + settings->activeScene)
+                    .c_str(),
+                  cName.c_str())) {
               ENGINE_ERROR("Failed to get info for component {0}", cName);
               ImGui::Text("No info method defined");
               ImGui::TreePop();

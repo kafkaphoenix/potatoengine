@@ -113,6 +113,7 @@ bool onMouseButtonReleased(MouseButtonReleasedEvent& e) {
 
 bool onKeyPressed(KeyPressedEvent& e) {
   auto& app = Application::Get();
+  const auto& settings = app.getSettings();
   auto& window = app.getWindow();
   bool isDebugging = app.isDebugging();
 
@@ -135,11 +136,12 @@ bool onKeyPressed(KeyPressedEvent& e) {
     app.close();
     return true;
   } else if (e.getKeyCode() == Key::F4) {
-    RendererAPI::ToggleWireframe(not window.isWireframe());
-    window.toggleWireframe(not window.isWireframe());
+    const auto& windowData = window.getWindowData();
+    RendererAPI::ToggleWireframe(not windowData.wireframe);
+    window.toggleWireframe(not windowData.wireframe);
     return true;
   } else if (e.getKeyCode() == Key::F12) {
-    window.toggleFullscreen(not window.isFullscreen());
+    window.toggleFullscreen(not settings->fullscreen);
     return true;
   }
 
@@ -206,12 +208,12 @@ bool onKeyTyped(KeyTypedEvent& e) {
   return true;
 }
 
-void inputSystem(entt::registry& r, Event& e) {
+void inputSystem(entt::registry& registry, Event& e) {
   EventDispatcher dispatcher(e);
 
-  dispatcher.dispatch<MouseMovedEvent>(BIND_STATIC_EVENT(onMouseMoved, r));
+  dispatcher.dispatch<MouseMovedEvent>(BIND_STATIC_EVENT(onMouseMoved, registry));
   dispatcher.dispatch<MouseScrolledEvent>(
-    BIND_STATIC_EVENT(onMouseScrolled, r));
+    BIND_STATIC_EVENT(onMouseScrolled, registry));
   dispatcher.dispatch<MouseButtonPressedEvent>(
     BIND_STATIC_EVENT(onMouseButtonPressed));
   dispatcher.dispatch<MouseButtonReleasedEvent>(

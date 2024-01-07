@@ -22,7 +22,7 @@ struct CLArgs {
 
 class Application {
   public:
-    Application(std::shared_ptr<Settings>&& settings, CLArgs&& args);
+    Application(std::unique_ptr<Settings>&& settings, CLArgs&& args);
     virtual ~Application();
 
     void onEvent(Event& e);
@@ -32,14 +32,14 @@ class Application {
     Window& getWindow() const {
       return *m_window;
     } // todo rename to getActiveWindow when multi-window support is added
-    const std::shared_ptr<SceneManager>& getSceneManager() const {
+    const std::unique_ptr<SceneManager>& getSceneManager() const {
       return m_sceneManager;
     }
-    const std::shared_ptr<AssetsManager>& getAssetsManager() const {
+    const std::unique_ptr<AssetsManager>& getAssetsManager() const {
       return m_assetsManager;
     }
-    const std::shared_ptr<Renderer>& getRenderer() const { return m_renderer; }
-    const std::shared_ptr<Settings>& getSettings() const { return m_settings; }
+    const std::unique_ptr<Renderer>& getRenderer() const { return m_renderer; }
+    const std::unique_ptr<Settings>& getSettings() const { return m_settings; }
 
     void close() noexcept { m_running = false; }
     void pause(bool paused) noexcept { m_paused = paused; }
@@ -51,10 +51,10 @@ class Application {
     static Application& Get() { return *s_instance; }
 
   protected:
-    std::shared_ptr<SceneManager> m_sceneManager;
-    std::shared_ptr<AssetsManager> m_assetsManager;
-    std::shared_ptr<Renderer> m_renderer;
-    std::shared_ptr<Settings> m_settings;
+    std::unique_ptr<SceneManager> m_sceneManager;
+    std::unique_ptr<AssetsManager> m_assetsManager;
+    std::unique_ptr<Renderer> m_renderer;
+    std::unique_ptr<Settings> m_settings;
 
   private:
     void run();

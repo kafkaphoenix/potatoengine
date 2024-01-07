@@ -6,8 +6,6 @@
 
 namespace potatoengine {
 
-Renderer::Renderer(std::weak_ptr<AssetsManager> am) : m_assetsManager(am) {}
-
 void Renderer::init() const { RendererAPI::Init(); }
 
 void Renderer::shutdown() {
@@ -24,14 +22,10 @@ void Renderer::beginScene(const CCamera& c, const CTransform& t) {
   m_cameraPosition = t.position;
 }
 
-void Renderer::endScene() {
-  // TODO renderer metrics
-}
+void Renderer::endScene() {}
 
-void Renderer::addShader(std::string&& name) {
-  const auto& assetsManager = m_assetsManager.lock();
-  ENGINE_ASSERT(assetsManager, "AssetsManager is null!");
-
+void Renderer::addShaderProgram(
+  std::string&& name, const std::unique_ptr<AssetsManager>& assetsManager) {
   auto newShaderProgram = ShaderProgram::Create(std::string(name));
   const auto& vs = assetsManager->get<Shader>("v" + name);
   const auto& fs = assetsManager->get<Shader>("f" + name);
@@ -51,7 +45,7 @@ void Renderer::addFramebuffer(std::string&& name, uint32_t w, uint32_t h,
 
 void Renderer::renderFBO(const std::shared_ptr<VAO>& vao,
                          std::string_view fbo) {
-  auto& sp = get("fbo");
+  auto& sp = getShaderProgram("fbo");
 
   sp->use();
   sp->setInt("screenTexture", 100);
@@ -70,9 +64,11 @@ void Renderer::renderFBO(const std::shared_ptr<VAO>& vao,
 
 void Renderer::renderInsideImGui(const std::shared_ptr<VAO>& vao,
                                  std::string_view fbo, std::string_view title,
-                                 glm::vec2 size, glm::vec2 position) {
+                                 glm::vec2 size, glm::vec2 position,
+                                 bool fitToWindow) {
   auto& fbo_ = m_framebuffers.at(fbo.data());
-  ui::renderScene(fbo_->getColorTexture()->getID(), title, size, position);
+  ui::renderScene(fbo_->getColorTexture()->getID(), title, size, position,
+                  fitToWindow);
 
   m_drawCalls++;
   m_triangles += vao->getEBO()->getCount() / 3;
@@ -85,7 +81,7 @@ void Renderer::renderInsideImGui(const std::shared_ptr<VAO>& vao,
 void Renderer::render(const std::shared_ptr<VAO>& vao,
                       const glm::mat4& transform,
                       std::string_view shaderProgram) {
-  auto& sp = get(shaderProgram);
+  auto& sp = getShaderProgram(shaderProgram);
 
   sp->use();
   sp->setMat4("projection", m_projection);
@@ -113,11 +109,11 @@ void Renderer::clear() {
   m_shaderPrograms.clear();
 }
 
-std::shared_ptr<Renderer> Renderer::Create(std::weak_ptr<AssetsManager> am) {
-  return std::make_shared<Renderer>(am);
+std::unique_ptr<Renderer> Renderer::Create() {
+  return std::make_unique<Renderer>();
 }
 
-std::unique_ptr<ShaderProgram>& Renderer::get(std::string_view name) {
+const std::unique_ptr<ShaderProgram>& Renderer::getShaderProgram(std::string_view name) {
   ENGINE_ASSERT(m_shaderPrograms.contains(name.data()),
                 "Shader program {} not found!", name);
   return m_shaderPrograms.at(name.data());

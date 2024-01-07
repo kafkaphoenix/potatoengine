@@ -50,7 +50,7 @@ static int s_GLFWWindowCount = 0;
 
 class Window {
   public:
-    Window(std::weak_ptr<Settings> settings);
+    Window(const std::unique_ptr<Settings>& settings);
     ~Window();
 
     void shutdown();
@@ -59,13 +59,6 @@ class Window {
 
     GLFWwindow* getNativeWindow() const noexcept { return m_window; }
     const WindowData& getWindowData() const noexcept { return m_data; }
-    int getWidth() const { return m_data.width; }
-    int getHeight() const { return m_data.height; }
-    bool isFullscreen() const { return m_data.fullscreen; }
-    bool isWireframe() const { return m_data.wireframe; }
-    bool isWindowInsideImgui() const { return m_data.windowInsideImgui; }
-    bool shouldFitToWindow() const { return m_data.fitToWindow; }
-    int getPrimaryMonitor() const { return m_data.primaryMonitor; }
 
     void setPosition(int x, int y);
     void setLastMousePosition(float x, float y);
@@ -92,14 +85,13 @@ class Window {
     void toggleWindowInsideImgui(bool windowInsideImgui);
     void toggleFitToWindow(bool fitToWindow);
 
-    static std::unique_ptr<Window> Create(std::weak_ptr<Settings> settings);
+    static std::unique_ptr<Window> Create(const std::unique_ptr<Settings>& settings);
 
   private:
     GLFWwindow* m_window{}; // TODO: this class should be a window manager, and
                             // this should be a vector of windows
     std::unique_ptr<OpenGLContext> m_context;
     WindowData m_data{};
-    std::weak_ptr<Settings> m_settings;
 };
 
 }

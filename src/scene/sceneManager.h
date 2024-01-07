@@ -16,9 +16,9 @@ class Entity;
 
 class SceneManager {
   public:
-    SceneManager(std::weak_ptr<AssetsManager> am, std::weak_ptr<Renderer> r);
+    SceneManager();
     void onEvent(Event& e);
-    void onUpdate(Time ts, std::weak_ptr<Renderer> r);
+    void onUpdate(const Time& ts);
     void print();
     const std::map<std::string, std::string, NumericComparator>& getMetrics();
     entt::registry& getRegistry() noexcept { return m_registry; }
@@ -52,27 +52,26 @@ class SceneManager {
                            std::string_view prototypeID) const;
 
     // TODO: move to scene creator if I fix the circular dependency
-    void loadScene(std::string_view sceneID);
-    void createScene(std::string sceneID, bool reload = false);
+    void loadScene(std::string_view sceneID, const std::unique_ptr<AssetsManager>& asset_manager);
+    void createScene(std::string sceneID, const std::unique_ptr<AssetsManager>& asset_manager,
+                     const std::unique_ptr<Renderer>& renderer, bool reload);
     void createEntities(std::string_view prefabID,
                         const SceneLoader& loadedScene,
-                        const std::shared_ptr<AssetsManager>& am,
-                        const std::shared_ptr<Renderer>& r);
-    void reloadScene();
-    void clearScene();
+                        const std::unique_ptr<AssetsManager>& asset_manager,
+                        const std::unique_ptr<Renderer>& renderer);
+    void reloadScene(const std::unique_ptr<AssetsManager>& asset_manager,
+                     const std::unique_ptr<Renderer>& renderer);
+    void clearScene(const std::unique_ptr<Renderer>& renderer);
     std::string_view getActiveScene() const noexcept { return m_activeScene; }
 
     template <typename T> void onComponentAdded(Entity& e, T& c);
 
     template <typename T> void onComponentCloned(Entity& e, T& c);
 
-    static std::shared_ptr<SceneManager> Create(std::weak_ptr<AssetsManager> am,
-                                                std::weak_ptr<Renderer> r);
+    static std::unique_ptr<SceneManager> Create();
 
   private:
-    std::weak_ptr<AssetsManager> m_assetsManager;
-    std::weak_ptr<Renderer> m_renderer;
-    EntityFactory m_entityFactory;
+    EntityFactory m_entityFactory{};
     entt::registry m_registry;
     std::string m_activeScene{};
     std::unordered_map<std::string, SceneLoader> m_loadedScenes{};

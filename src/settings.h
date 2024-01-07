@@ -56,20 +56,19 @@ struct Settings {
     bool reloadScene = false;
 
     std::vector<const char*> scenes{
-      "Sponza", "Dabrovic Sponza", "Lowpoly City", "Skycrappers", "Room",
-      "Cubes",  "Plane Terrain",   "Primitives",   "Empty",
-    };
+      "Sponza", "Dabrovic Sponza", "Lowpoly City", "Skycrapers", "Trailer park",
+      "Cubes",  "Plane terrain",   "Primitives",   "Empty",      "Flappy Bird"};
     std::vector<const char*> scenesPaths{
       "assets/scenes/sponza_scene.json",
       "assets/scenes/dabrovic_sponza_scene.json",
       "assets/scenes/lowpoly_city_scene.json",
-      "assets/scenes/skycrappers.json",
-      "assets/scenes/room.json",
+      "assets/scenes/skycrapers_scene.json",
+      "assets/scenes/trailer_park_scene.json",
       "assets/scenes/cubes_scene.json",
       "assets/scenes/plane_terrain_scene.json",
       "assets/scenes/primitives_scene.json",
       "assets/scenes/empty_scene.json",
-    };
+      "assets/scenes/flappy_bird_scene.json"};
     std::vector<const char*> cursorModes{"Normal", "Hidden", "Disabled"};
     std::vector<const char*> logLevels{"Trace",   "Debug", "Info",
                                        "Warning", "Error", "Critical"};

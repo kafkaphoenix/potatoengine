@@ -2,7 +2,6 @@
 
 #include <entt/entt.hpp>
 
-#include "assets/assetsManager.h"
 #include "assets/prefab.h"
 #include "utils/numericComparator.h"
 
@@ -12,7 +11,7 @@ class Entity;
 class EntityFactory {
   public:
     using Prototypes = std::map<std::string, entt::entity, NumericComparator>;
-    EntityFactory(std::weak_ptr<AssetsManager> am);
+
     void createPrototypes(std::string_view prefabID, Entity&& e);
     void updatePrototypes(std::string_view prefabID, Entity&& e);
     void destroyPrototypes(std::string_view prefabID, entt::registry& r);
@@ -34,13 +33,11 @@ class EntityFactory {
 
     const std::map<std::string, std::string, NumericComparator>&
     getPrototypesCountByPrefab();
-    // does not destroy entt::entities, just clears the map
+    // does not destroy entt entities, just clears the map
     void clear();
 
   private:
     std::map<std::string, Prototypes, NumericComparator> m_prefabs;
-    std::weak_ptr<AssetsManager> m_assetsManager;
-
     std::map<std::string, std::string, NumericComparator>
       m_prototypesCountByPrefab;
     bool m_dirty{};

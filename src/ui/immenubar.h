@@ -12,14 +12,13 @@
 #include "ui/immetrics.h"
 
 namespace potatoengine::ui {
-void drawMenuBar(std::weak_ptr<AssetsManager> am, std::weak_ptr<Renderer> r,
-                 std::weak_ptr<SceneManager> sm, std::weak_ptr<Settings> s) {
-  drawMetrics(am, r, sm);
+void drawMenuBar(const std::unique_ptr<AssetsManager>& assets_manager,
+                 const std::unique_ptr<Renderer>& renderer,
+                  const std::unique_ptr<SceneManager>& scene_manager,
+                  const std::unique_ptr<Settings>& settings) {
+  drawMetrics(assets_manager, renderer, scene_manager);
   drawLogger();
   drawAbout();
-
-  const auto& settings = s.lock();
-  ENGINE_ASSERT(settings, "Settings is null!");
 
   if (ImGui::BeginMenuBar()) {
     if (ImGui::BeginMenu("Scenes")) {

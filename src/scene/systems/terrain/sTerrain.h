@@ -3,6 +3,7 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include "core/application.h"
 #include "pch.h"
 #include "scene/components/common/cUUID.h"
 #include "scene/components/graphics/cMesh.h"
@@ -425,15 +426,15 @@ CMesh generateTerrain(
   return CMesh{};
 }
 
-void terrainSystem(entt::registry& reg) { // TODO transform
-  reg.view<CChunkManager, CTexture, CNoise, CUUID>().each(
+void terrainSystem(entt::registry& registry) {
+  registry.view<CChunkManager, CTexture, CNoise, CUUID>().each(
     [&](entt::entity e, CChunkManager& cChunkManager, const CTexture& cTexture,
         const CNoise& cNoise, const CUUID& cUUID) {
       CTextureAtlas* cTextureAtlas = nullptr;
       if (cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS or
           cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND or
           cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
-        cTextureAtlas = reg.try_get<CTextureAtlas>(e);
+        cTextureAtlas = registry.try_get<CTextureAtlas>(e);
         ENGINE_ASSERT(cTextureAtlas, "Texture atlas not found for entity: {}",
                       cUUID.uuid);
       }

@@ -3,19 +3,19 @@
 #include <imgui.h>
 
 #include "assets/assetsManager.h"
+#include "core/application.h"
 #include "pch.h"
 #include "renderer/renderer.h"
 #include "scene/sceneManager.h"
 #include "settings.h"
+#include "ui/immanagersbar.h"
 #include "ui/immenubar.h"
-#include "ui/imtabbar.h"
 
 namespace potatoengine::ui {
-void drawDebugger(std::weak_ptr<AssetsManager> am, std::weak_ptr<Renderer> r,
-                  std::weak_ptr<SceneManager> sm, std::weak_ptr<Settings> s) {
-  const auto& settings = s.lock();
-  ENGINE_ASSERT(settings, "Settings is null!");
-
+void drawDebugger(const std::unique_ptr<Settings>& settings,
+                  const std::unique_ptr<AssetsManager>& assets_manager,
+                  const std::unique_ptr<Renderer>& renderer,
+                  const std::unique_ptr<SceneManager>& scene_manager) {
   ImGui::SetNextWindowPos(ImVec2(settings->windowWidth / 2.f, 20.f),
                           ImGuiCond_FirstUseEver);
 
@@ -23,8 +23,8 @@ void drawDebugger(std::weak_ptr<AssetsManager> am, std::weak_ptr<Renderer> r,
 
   ImGui::SetNextWindowSize(ImVec2(500, 600), ImGuiCond_FirstUseEver);
   if (ImGui::Begin("Debugger", nullptr, window_flags)) {
-    drawMenuBar(am, r, sm, s);
-    drawTabBar(am, r, sm, s);
+    drawMenuBar(assets_manager, renderer, scene_manager, settings);
+    drawManagersBar(assets_manager, renderer, scene_manager, settings);
   }
   ImGui::End();
 }

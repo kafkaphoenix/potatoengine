@@ -33,9 +33,8 @@ bool onWindowMoved(WindowMovedEvent& e) { return true; }
 
 bool onWindowResized(WindowResizeEvent& e) {
   RendererAPI::SetViewport(0, 0, e.getWidth(), e.getHeight());
-  auto& app = Application::Get();
-  const auto& settings = app.getSettings();
-  if (not app.getWindow().isFullscreen()) { // when resizing with the mouse
+  const auto& settings = Application::Get().getSettings();
+  if (not settings->fullscreen) { // when resizing with the mouse
     settings->windowWidth = e.getWidth();
     settings->windowHeight = e.getHeight();
   }

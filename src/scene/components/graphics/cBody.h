@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/application.h"
 #include "pch.h"
 #include "scene/components/graphics/cMaterial.h"
 #include "scene/components/graphics/cMesh.h"
@@ -51,8 +52,7 @@ struct CBody {
 }
 
 template <> void engine::SceneManager::onComponentAdded(Entity& e, CBody& c) {
-  const auto& assetsManager = m_assetsManager.lock();
-  ENGINE_ASSERT(assetsManager, "AssetsManager is null!")
+  const auto& assetsManager = Application::Get().getAssetsManager();
 
   // TODO rethink if add if not empty here and do it as ctag but creating all
   // the fields
