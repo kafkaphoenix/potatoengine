@@ -126,7 +126,7 @@ class AssetsManager {
         return m_metrics;
       }
 
-      getAssetsByType();
+      getAssetsByType(); // same logic
 
       return m_metrics;
     }

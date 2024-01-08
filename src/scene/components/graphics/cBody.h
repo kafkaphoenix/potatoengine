@@ -4,7 +4,6 @@
 #include "pch.h"
 #include "scene/components/graphics/cMaterial.h"
 #include "scene/components/graphics/cMesh.h"
-#include "scene/entity.h"
 #include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
 
@@ -51,7 +50,8 @@ struct CBody {
 };
 }
 
-template <> void engine::SceneManager::onComponentAdded(Entity& e, CBody& c) {
+template <>
+void engine::SceneManager::onComponentAdded(entt::entity e, CBody& c) {
   const auto& assetsManager = Application::Get().getAssetsManager();
 
   // TODO rethink if add if not empty here and do it as ctag but creating all
@@ -61,5 +61,5 @@ template <> void engine::SceneManager::onComponentAdded(Entity& e, CBody& c) {
   c.meshes = std::move(model.getMeshes());
   c.materials = std::move(model.getMaterials());
 
-  e.update<CBody>(c);
+  m_registry.replace<CBody>(e, c);
 }

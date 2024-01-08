@@ -15,7 +15,7 @@ class Demos : public engine::Application {
       APP_TRACE("Registering app components...");
       RegisterComponents();
       APP_TRACE("Loading initial state...");
-      pushState(GameState::Create(m_settings));
+      pushState(GameState::Create());
       APP_TRACE("State loaded!");
     }
 
@@ -46,9 +46,6 @@ engine::Application* engine::CreateApp(engine::CLArgs&& args) {
                                       settings->enableEngineBacktraceLogger,
                                       settings->enableAppBacktraceLogger);
   }
-  LogManager::ToggleEngineBacktraceLogger(
-    settings->enableEngineBacktraceLogger);
-  LogManager::ToggleAppBacktraceLogger(settings->enableAppBacktraceLogger);
 
   APP_INFO("Loading settings...");
   APP_INFO("Initializating Demos application");

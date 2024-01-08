@@ -1,21 +1,14 @@
 #pragma once
 
-#include "scene/entity.h"
-#include "utils/numericComparator.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
+
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 
 struct CCollider {
-    enum class Type {
-      Box,
-      Capsule,
-      Mesh,
-      Sphere,
-      Rectangle
-    };
+    enum class Type { Box, Capsule, Mesh, Sphere, Rectangle };
 
     std::string _type{};
     Type type;
@@ -40,7 +33,8 @@ struct CCollider {
 }
 
 template <>
-inline void engine::SceneManager::onComponentAdded(Entity& e, CCollider& c) {
+inline void engine::SceneManager::onComponentAdded(entt::entity e,
+                                                   CCollider& c) {
   if (c._type == "box") {
     c.type = CCollider::Type::Box;
   } else if (c._type == "capsule") {
@@ -55,5 +49,5 @@ inline void engine::SceneManager::onComponentAdded(Entity& e, CCollider& c) {
     ENGINE_ASSERT(false, "Unknown collider type {}", c._type);
   }
 
-  e.update<CCollider>(c);
+  m_registry.replace<CCollider>(e, c);
 }

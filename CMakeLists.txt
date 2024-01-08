@@ -65,7 +65,7 @@ add_custom_target(copy_assets
 )
 add_dependencies(${PROJECT_NAME} copy_assets)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog date::date ${CMAKE_DL_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog ${CMAKE_DL_LIBS})
 
 # Linters (Needs compilation database sadly no MSVC support yet, change to GCC to use)
 # https://stackoverflow.com/questions/65544093/no-compile-commands-json-file-using-cmake-with-vs-code-on-windows

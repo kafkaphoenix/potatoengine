@@ -18,7 +18,7 @@
 
 namespace potatoengine {
 
-bool onMouseMoved(MouseMovedEvent& e, entt::registry& r) {
+bool onMouseMoved(MouseMovedEvent& e, entt::registry& registry) {
   ImGuiIO& io = ImGui::GetIO();
   if (io.WantCaptureMouse and Application::Get().isDebugging()) {
     return true;
@@ -30,41 +30,45 @@ bool onMouseMoved(MouseMovedEvent& e, entt::registry& r) {
   // yaw (rotate around y in radians)
   // roll (rotate around z in radians)
   entt::entity camera =
-    r.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
-  ENGINE_ASSERT(camera not_eq entt::null, "No camera found!");
-  CCamera& cCamera = r.get<CCamera>(camera);
-  CTransform& cTransform = r.get<CTransform>(camera);
+    registry.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
+  ENGINE_ASSERT(camera not_eq entt::null, "No active camera found!");
+  CCamera& cCamera = registry.get<CCamera>(camera);
+  CTransform& cTransform = registry.get<CTransform>(camera);
 
   if (cCamera.mode == CCamera::Mode::_2D)
     return true;
 
-  entt::entity movable =
-    r.view<CInput, CActiveInput, CTransform, CUUID>().front();
-  ENGINE_ASSERT(movable not_eq entt::null, "No movable found!");
-  CInput& cInput = r.get<CInput>(movable);
+  if (registry.all_of<CActiveInput>(camera)) {
+    CInput& cInput = registry.get<CInput>(camera);
+    cCamera.rightAngle += e.getX() * cInput.mouseSensitivity;
+    cCamera.upAngle += e.getY() * cInput.mouseSensitivity;
 
-  cCamera.rightAngle += e.getX() * cInput.mouseSensitivity;
-  cCamera.upAngle += e.getY() * cInput.mouseSensitivity;
+    cCamera.rightAngle = std::fmod(cCamera.rightAngle, 360.f);
+    cCamera.upAngle = std::clamp(cCamera.upAngle, -89.f, 89.f);
 
-  cCamera.rightAngle = std::fmod(cCamera.rightAngle, 360.f);
-  cCamera.upAngle = std::clamp(cCamera.upAngle, -89.f, 89.f);
+    // yaw mouse movement in x-direction
+    glm::quat rotY =
+      glm::angleAxis(glm::radians(-cCamera.rightAngle), glm::vec3(0, 1, 0));
+    // pitch mouse movement in y-direction
+    glm::quat rotX =
+      glm::angleAxis(glm::radians(cCamera.upAngle), glm::vec3(1, 0, 0));
 
-  // yaw mouse movement in x-direction
-  glm::quat rotY =
-    glm::angleAxis(glm::radians(-cCamera.rightAngle), glm::vec3(0, 1, 0));
-  // pitch mouse movement in y-direction
-  glm::quat rotX =
-    glm::angleAxis(glm::radians(cCamera.upAngle), glm::vec3(1, 0, 0));
+    cTransform.rotation = rotY * rotX;
 
-  cTransform.rotation = rotY * rotX;
-
-  // Normalize the rotation quaternion to prevent drift
-  cTransform.rotation = glm::normalize(cTransform.rotation);
+    // Normalize the rotation quaternion to prevent drift
+    cTransform.rotation = glm::normalize(cTransform.rotation);
+  } else {
+    ENGINE_ASSERT(false, "THIRD PERSON CAMERA NOT IMPLEMENTED");
+    entt::entity movable =
+      registry.view<CInput, CActiveInput, CTransform, CUUID>().front();
+    ENGINE_ASSERT(movable not_eq entt::null, "No movable found!");
+    CInput& cInput = registry.get<CInput>(movable);
+  }
 
   return true;
 }
 
-bool onMouseScrolled(MouseScrolledEvent& e, entt::registry& r) {
+bool onMouseScrolled(MouseScrolledEvent& e, entt::registry& registry) {
   ImGuiIO& io = ImGui::GetIO();
   if (io.WantCaptureMouse and Application::Get().isDebugging()) {
     return true;
@@ -73,14 +77,14 @@ bool onMouseScrolled(MouseScrolledEvent& e, entt::registry& r) {
   }
 
   entt::entity camera =
-    r.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
-  ENGINE_ASSERT(camera not_eq entt::null, "No camera found!");
-  CCamera& cCamera = r.get<CCamera>(camera);
+    registry.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
+  ENGINE_ASSERT(camera not_eq entt::null, "No active camera found!");
+  CCamera& cCamera = registry.get<CCamera>(camera);
 
   if (cCamera.mode == CCamera::Mode::_2D)
     return true;
 
-  CTransform& cTransform = r.get<CTransform>(camera);
+  CTransform& cTransform = registry.get<CTransform>(camera);
 
   cCamera.zoomFactor = std::clamp(cCamera.zoomFactor + float(e.getY()),
                                   cCamera.zoomMin, cCamera.zoomMax);
@@ -125,6 +129,7 @@ bool onKeyPressed(KeyPressedEvent& e) {
       window.setLastMousePosition(Input::GetMouseX(), Input::GetMouseY());
     } else {
       app.debug(true);
+      glfwSetCursor(window.getNativeWindow(), nullptr);
       window.setCursorMode(CursorMode::Normal, false);
       window.toggleCameraPositionUpdate(false);
     }
@@ -164,7 +169,7 @@ bool onKeyPressed(KeyPressedEvent& e) {
   case Key::LeftAlt:
     if (not isDebugging) {
       window.toggleCameraPositionUpdate(false);
-      window.setCursorMode(CursorMode::Normal);
+      window.setCursorMode(CursorMode::Normal, false);
     }
     break;
   }
@@ -189,7 +194,7 @@ bool onKeyReleased(KeyReleasedEvent& e) {
     if (not app.isDebugging()) {
       window.setLastMousePosition(Input::GetMouseX(), Input::GetMouseY());
       window.toggleCameraPositionUpdate(true);
-      window.setCursorMode(CursorMode::Disabled);
+      window.restoreCursor();
     }
     break;
   }
@@ -211,7 +216,8 @@ bool onKeyTyped(KeyTypedEvent& e) {
 void inputSystem(entt::registry& registry, Event& e) {
   EventDispatcher dispatcher(e);
 
-  dispatcher.dispatch<MouseMovedEvent>(BIND_STATIC_EVENT(onMouseMoved, registry));
+  dispatcher.dispatch<MouseMovedEvent>(
+    BIND_STATIC_EVENT(onMouseMoved, registry));
   dispatcher.dispatch<MouseScrolledEvent>(
     BIND_STATIC_EVENT(onMouseScrolled, registry));
   dispatcher.dispatch<MouseButtonPressedEvent>(
@@ -223,5 +229,4 @@ void inputSystem(entt::registry& registry, Event& e) {
   dispatcher.dispatch<KeyReleasedEvent>(BIND_STATIC_EVENT(onKeyReleased));
   dispatcher.dispatch<KeyTypedEvent>(BIND_STATIC_EVENT(onKeyTyped));
 }
-
 }

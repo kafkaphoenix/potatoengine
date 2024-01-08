@@ -18,8 +18,6 @@ class State {
 
     std::string_view getName() const noexcept { return m_name; }
 
-    static std::unique_ptr<State> Create();
-
   protected:
     std::string m_name{};
 };

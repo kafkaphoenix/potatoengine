@@ -4,11 +4,7 @@
 
 namespace demos {
 
-GameState::GameState(const std::unique_ptr<engine::Settings>& settings)
-  : State("GameState") {
-  engine::RendererAPI::SetClearColor(settings->clearColor);
-  engine::RendererAPI::SetClearDepth(settings->clearDepth);
-}
+GameState::GameState() : State("GameState") {}
 
 void GameState::onAttach() {
   auto& app = engine::Application::Get();
@@ -16,7 +12,10 @@ void GameState::onAttach() {
   const auto& scene_manager = app.getSceneManager();
   const auto& asset_manager = app.getAssetsManager();
   const auto& renderer = app.getRenderer();
+  engine::RendererAPI::SetClearColor(settings->clearColor);
+  engine::RendererAPI::SetClearDepth(settings->clearDepth);
 
+  // TODO revisit this with multiple states
   if (not settings->activeScene.empty()) {
     asset_manager->load<engine::Scene>(settings->activeScene,
                                        settings->activeScenePath);
@@ -72,8 +71,7 @@ void GameState::onEvent(engine::Event& e) {
   scene_manager->onEvent(e);
 }
 
-std::unique_ptr<engine::State>
-GameState::Create(const std::unique_ptr<engine::Settings>& settings) {
-  return std::make_unique<GameState>(settings);
+std::unique_ptr<engine::State> GameState::Create() {
+  return std::make_unique<GameState>();
 }
 }

@@ -12,24 +12,20 @@
 #include "utils/uuid.h"
 
 namespace potatoengine {
-class Entity;
-
 class SceneManager {
   public:
     SceneManager();
     void onEvent(Event& e);
     void onUpdate(const Time& ts);
-    void print();
     const std::map<std::string, std::string, NumericComparator>& getMetrics();
     entt::registry& getRegistry() noexcept { return m_registry; }
 
-    // Entity is a wrapper around entt::entity without persistency
-    Entity createEntity(std::string_view prefabID, std::string_view prototypeID,
+    entt::entity createEntity(std::string_view prefabID, std::string_view prototypeID,
                         const std::optional<uint32_t>& uuid = std::nullopt);
-    Entity cloneEntity(Entity&& e, uint32_t uuid);
-    void removeEntity(Entity&& e);
-    Entity getEntity(std::string_view name);
-    Entity getEntity(UUID& uuid);
+    entt::entity cloneEntity(const entt::entity& e, uint32_t uuid);
+    void removeEntity(entt::entity& e);
+    entt::entity getEntity(std::string_view name);
+    entt::entity getEntity(UUID& uuid);
     const std::map<std::string, entt::entity, NumericComparator>&
     getAllNamedEntities();
 
@@ -46,7 +42,7 @@ class SceneManager {
                          std::string_view prototypeID);
     void destroyPrototype(std::string_view prefabID,
                           std::string_view prototypeID);
-    Entity getPrototype(std::string_view prefabID,
+    entt::entity getPrototype(std::string_view prefabID,
                         std::string_view prototypeID);
     bool containsPrototype(std::string_view prefabID,
                            std::string_view prototypeID) const;
@@ -64,9 +60,9 @@ class SceneManager {
     void clearScene(const std::unique_ptr<Renderer>& renderer);
     std::string_view getActiveScene() const noexcept { return m_activeScene; }
 
-    template <typename T> void onComponentAdded(Entity& e, T& c);
+    template <typename Component> void onComponentAdded(entt::entity e, Component& c);
 
-    template <typename T> void onComponentCloned(Entity& e, T& c);
+    template <typename Component> void onComponentCloned(entt::entity e, Component& c);
 
     static std::unique_ptr<SceneManager> Create();
 
@@ -78,8 +74,7 @@ class SceneManager {
 
     std::map<std::string, std::string, NumericComparator> m_metrics{};
     std::map<std::string, entt::entity, NumericComparator> m_namedEntities{};
-    bool m_dirty{};
-
-    friend class Entity;
+    bool m_dirtyMetrics{};
+    bool m_dirtyNamedEntities{};
 };
 }

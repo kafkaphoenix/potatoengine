@@ -7,10 +7,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <nlohmann/json.hpp>
 
-#include "pch.h"
 #include "core/application.h"
+#include "pch.h"
 #include "scene/components/utils/cDeleted.h"
-#include "scene/entity.h"
 
 using json = nlohmann::json;
 using namespace entt::literals;
@@ -57,7 +56,7 @@ glm::quat quatFromJson(const json& data) {
   return quat;
 }
 
-void processCTag(Entity& e, std::string_view cTag) {
+void processCTag(entt::entity& e, std::string_view cTag) {
   entt::meta_type cType = entt::resolve(entt::hashed_string{cTag.data()});
   ENGINE_ASSERT(cType, "No component type found for component tag {}", cTag)
 
@@ -72,7 +71,7 @@ void processCTag(Entity& e, std::string_view cTag) {
   }
 }
 
-void processComponent(Entity& e, const std::string& cPrefab,
+void processComponent(entt::entity e, const std::string& cPrefab,
                       const json& cValue) {
   entt::meta_type cType = entt::resolve(entt::hashed_string{cPrefab.data()});
   ENGINE_ASSERT(cType, "No component type found for component {}", cPrefab)
@@ -176,18 +175,17 @@ void processComponent(Entity& e, const std::string& cPrefab,
   }
 }
 
-void EntityFactory::createPrototypes(std::string_view prefabID, Entity&& e) {
+void EntityFactory::createPrototypes(std::string_view prefabID,
+                                     entt::registry& registry) {
   ENGINE_ASSERT(not m_prefabs.contains(prefabID.data()),
                 "Prototypes for prefab {} already exist", prefabID);
 
   const auto& assetsManager = Application::Get().getAssetsManager();
   const auto& prefab = assetsManager->get<Prefab>(prefabID);
-  auto& sceneManager = e.getSceneManager();
-  e.add<CDeleted>();
 
   Prototypes prototypes;
   for (const auto& [prototypeID, prototypeData] : prefab->getPrototypes()) {
-    e = Entity(sceneManager.getRegistry().create(), &sceneManager);
+    entt::entity e = registry.create();
 
     for (std::string_view cTag : prototypeData.ctags) {
       processCTag(e, cTag);
@@ -203,20 +201,21 @@ void EntityFactory::createPrototypes(std::string_view prefabID, Entity&& e) {
   m_dirty = true;
 }
 
-void EntityFactory::updatePrototypes(std::string_view prefabID, Entity&& e) {
+void EntityFactory::updatePrototypes(std::string_view prefabID,
+                                     entt::registry& registry) {
   ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}",
                 prefabID);
-  destroyPrototypes(prefabID, e.getSceneManager().getRegistry());
-  createPrototypes(prefabID, std::move(e));
+  destroyPrototypes(prefabID, registry);
+  createPrototypes(prefabID, registry);
   m_dirty = true;
 }
 
 void EntityFactory::destroyPrototypes(std::string_view prefabID,
-                                      entt::registry& r) {
+                                      entt::registry& registry) {
   ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}",
                 prefabID);
   for (auto& [prototypeID, prototype] : m_prefabs.at(prefabID.data())) {
-    r.emplace<CDeleted>(prototype);
+    registry.emplace<CDeleted>(prototype);
   }
   m_prefabs.erase(prefabID.data());
   m_dirty = true;
@@ -239,7 +238,8 @@ bool EntityFactory::containsPrototypes(std::string_view prefabID) const {
 }
 
 void EntityFactory::createPrototype(std::string_view prefabID,
-                                    std::string_view prototypeID, Entity&& e) {
+                                    std::string_view prototypeID,
+                                    entt::registry& registry) {
   ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}",
                 prefabID);
   ENGINE_ASSERT(not m_prefabs.at(prefabID.data()).contains(prototypeID.data()),
@@ -248,6 +248,7 @@ void EntityFactory::createPrototype(std::string_view prefabID,
 
   const auto& assetsManager = Application::Get().getAssetsManager();
   const auto& prefab = assetsManager->get<Prefab>(prefabID);
+  entt::entity e = registry.create();
 
   for (std::string_view cTag : prefab->getCTags(prototypeID)) {
     processCTag(e, cTag);
@@ -262,24 +263,26 @@ void EntityFactory::createPrototype(std::string_view prefabID,
 }
 
 void EntityFactory::updatePrototype(std::string_view prefabID,
-                                    std::string_view prototypeID, Entity&& e) {
+                                    std::string_view prototypeID,
+                                    entt::registry& registry) {
   ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}",
                 prefabID);
   ENGINE_ASSERT(m_prefabs.at(prefabID.data()).contains(prototypeID.data()),
                 "Unknown prototype {} for prefab {}", prototypeID, prefabID);
-  destroyPrototype(prefabID, prototypeID, e.getSceneManager().getRegistry());
-  createPrototype(prefabID, prototypeID, std::move(e));
+  destroyPrototype(prefabID, prototypeID, registry);
+  createPrototype(prefabID, prototypeID, registry);
   m_dirty = true;
 }
 
 void EntityFactory::destroyPrototype(std::string_view prefabID,
                                      std::string_view prototypeID,
-                                     entt::registry& r) {
+                                     entt::registry& registry) {
   ENGINE_ASSERT(m_prefabs.contains(prefabID.data()), "Unknown prefab {}",
                 prefabID);
   ENGINE_ASSERT(m_prefabs.at(prefabID.data()).contains(prototypeID.data()),
                 "Unknown prototype {} for prefab {}", prototypeID, prefabID);
-  r.emplace<CDeleted>(m_prefabs.at(prefabID.data()).at(prototypeID.data()));
+  registry.emplace<CDeleted>(
+    m_prefabs.at(prefabID.data()).at(prototypeID.data()));
   m_prefabs.at(prefabID.data()).erase(prototypeID.data());
   m_dirty = true;
 }

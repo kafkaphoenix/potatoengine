@@ -28,6 +28,7 @@ class Renderer {
                           const std::unique_ptr<AssetsManager>& assetsManager);
     void addFramebuffer(std::string&& framebuffer, uint32_t width,
                         uint32_t height, uint32_t bufferType);
+    void deleteFramebuffer(std::string_view framebuffer);
     const std::unordered_map<std::string, std::unique_ptr<ShaderProgram>>&
     getShaderPrograms() const noexcept {
       return m_shaderPrograms;

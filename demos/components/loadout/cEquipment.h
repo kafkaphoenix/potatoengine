@@ -38,7 +38,8 @@ struct CEquipment {
         feet);
     }
 
-    std::map<std::string, std::string, engine::NumericComparator> getInfo() const {
+    std::map<std::string, std::string, engine::NumericComparator>
+    getInfo() const {
       std::map<std::string, std::string, engine::NumericComparator> info;
       info["head"] = head;
       info["neck"] = neck;
@@ -55,10 +56,4 @@ struct CEquipment {
       return info;
     }
 };
-}
-
-template <>
-void engine::SceneManager::onComponentAdded<demos::CEquipment>(
-  engine::Entity& e, demos::CEquipment& c) { // TODO finish
-  e.update<demos::CEquipment>(c);
 }

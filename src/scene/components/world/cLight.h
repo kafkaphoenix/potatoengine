@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "scene/entity.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -56,7 +55,8 @@ struct CLight {
 };
 }
 
-template <> void engine::SceneManager::onComponentAdded(Entity& e, CLight& c) {
+template <>
+void engine::SceneManager::onComponentAdded(entt::entity e, CLight& c) {
   if (c._type == "directional") {
     c.type = CLight::Type::Directional;
   } else if (c._type == "point") {
@@ -69,5 +69,5 @@ template <> void engine::SceneManager::onComponentAdded(Entity& e, CLight& c) {
     ENGINE_ASSERT(false, "Unknown light type {}", c._type);
   }
 
-  e.update<CLight>(c);
+  m_registry.replace<CLight>(e, c);
 }

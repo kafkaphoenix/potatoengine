@@ -8,10 +8,11 @@ namespace potatoengine::ui {
 inline void helpMark(std::string_view helpText) {
   ImGui::TextDisabled("(?)");
   if (ImGui::IsItemHovered()) {
-    ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.f);
-    ImGui::TextUnformatted(helpText.data());
-    ImGui::PopTextWrapPos();
+    if (ImGui::BeginTooltip()) {
+      ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.f);
+      ImGui::TextUnformatted(helpText.data());
+      ImGui::PopTextWrapPos();
+    }
     ImGui::EndTooltip();
   }
 }

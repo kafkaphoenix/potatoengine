@@ -37,7 +37,6 @@
 #include "scene/components/world/cLight.h"
 #include "scene/components/world/cSkybox.h"
 #include "scene/components/world/cTime.h"
-#include "scene/entity.h"
 #include "scene/meta.h"
 
 using namespace entt::literals;
@@ -437,7 +436,7 @@ void RegisterComponents() {
     .ctor<&CastCFBO, entt::as_ref_t>()
     .data<&CFBO::fbo>("fbo"_hs)
     .data<&CFBO::_mode>("mode"_hs)
-    .data<&CFBO::attachment>("attachment"_hs)
+    .data<&CFBO::_attachment>("attachment"_hs)
     .data<&CFBO::width>("width"_hs)
     .data<&CFBO::height>("height"_hs)
     .func<&CFBO::print>("print"_hs)
@@ -511,9 +510,10 @@ void PrintScene(entt::registry& registry) {
   }
 
   ENGINE_BACKTRACE("===================Entities===================");
-  for (auto&& e : entities) {
+  ENGINE_BACKTRACE("Entities in scene: {}", entities.size());
+  for (const auto& e : entities) {
     ENGINE_BACKTRACE("Entity UUID: {}", entt::to_integral(e));
-    for (auto&& [id, storage] : registry.storage()) {
+    for (const auto& [id, storage] : registry.storage()) {
       if (storage.contains(e)) {
         cType = entt::resolve(storage.type());
         cData = cType.construct(storage.value(e));
@@ -536,11 +536,8 @@ void PrintScene(entt::registry& registry) {
 }
 }
 
-// TODO: fix this, they are here because in their components they would add an
-// import to entity again and it would be a circular dependency as sceneManager
-// already includes entity.h
 template <>
-void engine::SceneManager::onComponentAdded(Entity& e, CTexture& c) {
+void engine::SceneManager::onComponentAdded(entt::entity e, CTexture& c) {
   c.setDrawMode();
   const auto& assetsManager = Application::Get().getAssetsManager();
 
@@ -549,22 +546,26 @@ void engine::SceneManager::onComponentAdded(Entity& e, CTexture& c) {
     c.textures.emplace_back(assetsManager->get<Texture>(filepath.data()));
   }
 
-  e.update<CTexture>(c);
+  m_registry.replace<CTexture>(e, c);
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(Entity& e, CChunkManager& c) {
+void engine::SceneManager::onComponentAdded(entt::entity e, CChunkManager& c) {
   c.setMeshType();
   c.setMeshAlgorithm();
-  e.update<CChunkManager>(c);
+
+  m_registry.replace<CChunkManager>(e, c);
 }
 
-template <> void engine::SceneManager::onComponentAdded(Entity& e, CChunk& c) {
+template <>
+void engine::SceneManager::onComponentAdded(entt::entity e, CChunk& c) {
   c.setBiome();
-  e.update<CChunk>(c);
+
+  m_registry.replace<CChunk>(e, c);
 }
 
-template <> void engine::SceneManager::onComponentAdded(Entity& e, CNoise& c) {
+template <>
+void engine::SceneManager::onComponentAdded(entt::entity e, CNoise& c) {
   c.setNoiseType();
   c.setSeed();
   c.setOctaves();
@@ -572,19 +573,22 @@ template <> void engine::SceneManager::onComponentAdded(Entity& e, CNoise& c) {
   c.setPersistence();
   c.setLacunarity();
 
-  e.update<CNoise>(c);
+  m_registry.replace<CNoise>(e, c);
 }
 
-template <> void engine::SceneManager::onComponentAdded(Entity& e, CBlock& c) {
+template <>
+void engine::SceneManager::onComponentAdded(entt::entity e, CBlock& c) {
   c.setBlockType();
-  e.update<CBlock>(c);
+
+  m_registry.replace<CBlock>(e, c);
 }
 
-template <> void engine::SceneManager::onComponentAdded(Entity& e, CCamera& c) {
+template <>
+void engine::SceneManager::onComponentAdded(entt::entity e, CCamera& c) {
   c.setCameraType();
   c.setAspectRatio();
   c.setMode();
   c.calculateProjection();
 
-  e.update<CCamera>(c);
+  m_registry.replace<CCamera>(e, c);
 }

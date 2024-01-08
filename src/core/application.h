@@ -31,7 +31,7 @@ class Application {
 
     Window& getWindow() const {
       return *m_window;
-    } // todo rename to getActiveWindow when multi-window support is added
+    } // TODO rename to getActiveWindow when multi-window support is added
     const std::unique_ptr<SceneManager>& getSceneManager() const {
       return m_sceneManager;
     }
@@ -75,6 +75,6 @@ class Application {
     friend int ::main(int argc, char** argv);
 };
 
-// To be defined in CLIENT
+// to be defined in user app
 Application* CreateApp(CLArgs&& args);
 }

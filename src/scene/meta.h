@@ -2,24 +2,25 @@
 
 #include <entt/entt.hpp>
 
-#include "scene/entity.h"
-
 namespace potatoengine {
 
 template <typename Component, typename... Args>
-Component& assign(Entity& e, Args... args) {
-  return e.add<Component>(std::forward<Args>(args)...);
+Component& assign(entt::entity e, Args... args) {
+  auto& registry = Application::Get().getSceneManager()->getRegistry();
+  ENGINE_ASSERT(not registry.all_of<Component>(e), "Entity already has component {}",
+                typeid(Component).name());
+  return registry.emplace<Component>(e, std::forward<Args>(args)...);
 }
 
 template <typename Component>
-Component& onComponentAdded(Entity& e, Component& c) {
-  e.getSceneManager().onComponentAdded<Component>(e, c);
+Component& onComponentAdded(entt::entity e, Component& c) {
+  Application::Get().getSceneManager()->onComponentAdded<Component>(e, c);
   return c;
 }
 
 template <typename Component>
-Component& onComponentCloned(Entity& e, Component& c) {
-  e.getSceneManager().onComponentCloned<Component>(e, c);
+Component& onComponentCloned(entt::entity e, Component& c) {
+  Application::Get().getSceneManager()->onComponentCloned<Component>(e, c);
   return c;
 }
 }

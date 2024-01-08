@@ -43,6 +43,10 @@ void Renderer::addFramebuffer(std::string&& name, uint32_t w, uint32_t h,
   m_framebuffers.emplace(std::move(name), FBO::Create(w, h, t));
 }
 
+void Renderer::deleteFramebuffer(std::string_view name) {
+  m_framebuffers.erase(name.data());
+}
+
 void Renderer::renderFBO(const std::shared_ptr<VAO>& vao,
                          std::string_view fbo) {
   auto& sp = getShaderProgram("fbo");
@@ -113,7 +117,8 @@ std::unique_ptr<Renderer> Renderer::Create() {
   return std::make_unique<Renderer>();
 }
 
-const std::unique_ptr<ShaderProgram>& Renderer::getShaderProgram(std::string_view name) {
+const std::unique_ptr<ShaderProgram>&
+Renderer::getShaderProgram(std::string_view name) {
   ENGINE_ASSERT(m_shaderPrograms.contains(name.data()),
                 "Shader program {} not found!", name);
   return m_shaderPrograms.at(name.data());

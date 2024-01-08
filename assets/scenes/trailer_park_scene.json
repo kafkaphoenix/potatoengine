@@ -27,7 +27,7 @@
     },
     "entities": {
         "normals": {
-            "lowpoly_city": {
+            "trailer_park": {
                 "prefab": "structures",
                 "prototype": "building",
                 "options": {

@@ -13,7 +13,7 @@ FetchContent_MakeAvailable(glad)
 FetchContent_Declare(
   glfw
   GIT_REPOSITORY https://github.com/glfw/glfw.git
-  GIT_TAG 3.3.8
+  GIT_TAG 3.3.9
 )
 
 FetchContent_GetProperties(glfw)
@@ -115,11 +115,3 @@ if(NOT spdlog_POPULATED)
   set(SPDLOG_USE_STD_FORMAT ON CACHE INTERNAL "" FORCE)
   add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
-
-FetchContent_Declare(
-  date_src
-  GIT_REPOSITORY https://github.com/HowardHinnant/date.git
-  GIT_TAG        v3.0.1
-)
-
-FetchContent_MakeAvailable(date_src)

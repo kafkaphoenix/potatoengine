@@ -48,17 +48,20 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
   }
   const GLFWvidmode* mode =
     glfwGetVideoMode(monitors[settings->primaryMonitor]);
+  int xpos = (mode->width - m_data.width) / 2;
+  int ypos = (mode->height - m_data.height) / 2;
   if (settings->fullscreen) {
     m_data.fullscreen = true;
     m_window =
       glfwCreateWindow(mode->width, mode->height, m_data.windowTitle.c_str(),
                        monitors[settings->primaryMonitor], nullptr);
+    // center of the screen to avoid 0 0 when windowed first time
+    m_data.positionX = xpos;
+    m_data.positionY = ypos;
   } else {
     m_data.fullscreen = false;
     m_window = glfwCreateWindow(m_data.width, m_data.height,
                                 m_data.windowTitle.c_str(), nullptr, nullptr);
-    int xpos = (mode->width - m_data.width) / 2;
-    int ypos = (mode->height - m_data.height) / 2;
     setPosition(xpos, ypos);
   }
 
@@ -66,10 +69,14 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
 
   m_context = OpenGLContext::Create(m_window);
   m_context->init(); // make context current window
-  glViewport(0, 0, m_data.width, m_data.height);
+  if (m_data.fullscreen) {
+    glViewport(0, 0, mode->width, mode->height);
+  } else {
+    glViewport(0, 0, m_data.width, m_data.height);
+  }
 
   setWindowIcon(settings->windowIconPath);
-  setCursorMode(static_cast<CursorMode>(settings->cursorMode));
+  setCursorMode(static_cast<CursorMode>(settings->cursorMode), true);
   setCursorIcon(settings->cursorIconPath);
   toggleVSync(settings->vSync);
   glfwSetWindowUserPointer(m_window, &m_data);
@@ -84,6 +91,7 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
         data.height = height;
       }
 
+      // for fullscreen it will update the resolution
       WindowResizeEvent event(width, height);
       data.eventCallback(event);
     });
@@ -96,10 +104,9 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
       if (not data.fullscreen) {
         data.positionX = xpos;
         data.positionY = ypos;
+        WindowMovedEvent event(xpos, ypos);
+        data.eventCallback(event);
       }
-
-      WindowMovedEvent event(xpos, ypos);
-      data.eventCallback(event);
     });
 
   glfwSetWindowCloseCallback(m_window, [](GLFWwindow* window) {
@@ -468,19 +475,17 @@ void Window::restoreCursor() {
     return;
   }
 
-  if (m_data.cursor) { // imgui does not restore the custom cursor
+  if (m_data.cursor) { // restore cursor icon
     glfwSetCursor(m_window, m_data.cursor);
   }
 }
 
 void Window::resize(int width, int height) {
-
-  // For fullscreen windows it updates the resolution
+  // for fullscreen windows it updates the resolution
+  // m_data is updated in the callback
+  // and settings in the event
   if (width not_eq m_data.width or height not_eq m_data.height) {
-    const auto& settings = Application::Get().getSettings();
     glfwSetWindowSize(m_window, width, height);
-    settings->windowWidth = m_data.width;
-    settings->windowHeight = m_data.height;
   }
 }
 

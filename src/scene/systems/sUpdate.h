@@ -10,7 +10,6 @@
 #include "scene/systems/physics/sGravity.h"
 #include "scene/systems/physics/sMovement.h"
 #include "scene/systems/utils/sDelete.h"
-#include "scene/systems/utils/sPrint.h"
 #include "scene/systems/world/sLight.h"
 #include "scene/systems/world/sSkybox.h"
 #include "scene/systems/terrain/sTerrain.h"
@@ -23,7 +22,7 @@ void updateSystem(entt::registry& registry, const Time& ts) {
   deleteSystem(registry);
   timeSystem(registry, ts);
   terrainSystem(registry);
-  pipesSystem();
+  pipesSystem(registry);
   skyboxSystem(registry);
   lightSystem(registry);
   collisionSystem(registry, ts);
@@ -31,6 +30,5 @@ void updateSystem(entt::registry& registry, const Time& ts) {
   animationSystem(registry, ts);
   movementSystem(registry, ts);
   renderSystem(registry);
-  // printSystem(registry); only for debugging purposes
 }
 }

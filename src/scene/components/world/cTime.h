@@ -1,6 +1,5 @@
 #pragma once
 
-#include "scene/entity.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -81,9 +80,10 @@ struct CTime {
 };
 }
 
-template <> void engine::SceneManager::onComponentAdded(Entity& e, CTime& c) {
+template <>
+void engine::SceneManager::onComponentAdded(entt::entity e, CTime& c) {
   c.validate();
   c.setTime(c.startingTime);
 
-  e.update<CTime>(c);
+  m_registry.replace<CTime>(e, c);
 }

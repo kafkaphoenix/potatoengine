@@ -7,8 +7,8 @@
 
 namespace potatoengine {
 
-void eventSystem(entt::registry& reg, Event& e) {
-  inputSystem(reg, e);
-  appSystem(e);
+void eventSystem(entt::registry& registry, Event& e) {
+  inputSystem(registry, e);
+  appSystem(registry, e);
 }
 }

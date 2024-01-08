@@ -48,6 +48,22 @@ void LogManager::CreateBacktraceLogger(std::string_view filepath,
   s_engineBacktraceLogger =
     std::make_shared<spdlog::logger>("ENGINE", backtraceSink);
   s_appBacktraceLogger = std::make_shared<spdlog::logger>("APP", backtraceSink);
+
+  if (enableEngineBacktraceLogger) {
+    s_engineBacktraceLogger->set_level(spdlog::level::debug);
+    s_engineBacktraceLogger->flush_on(spdlog::level::debug);
+  } else {
+    s_engineBacktraceLogger->set_level(spdlog::level::off);
+    s_engineBacktraceLogger->flush_on(spdlog::level::off);
+  }
+
+  if (enableAppBacktraceLogger) {
+    s_appBacktraceLogger->set_level(spdlog::level::debug);
+    s_appBacktraceLogger->flush_on(spdlog::level::debug);
+  } else {
+    s_appBacktraceLogger->set_level(spdlog::level::off);
+    s_appBacktraceLogger->flush_on(spdlog::level::off);
+  }
 }
 
 void LogManager::ClearAllBacktraceLogger() {
@@ -116,8 +132,8 @@ void LogManager::ToggleAppLogger(bool enable) {
 
 void LogManager::ToggleEngineBacktraceLogger(bool enable) {
   if (enable and not IsEngineBacktraceLoggerEnabled()) {
-    s_engineBacktraceLogger->set_level(s_engineLogLevel);
-    s_engineBacktraceLogger->flush_on(s_engineFlushLevel);
+    s_engineBacktraceLogger->set_level(spdlog::level::debug);
+    s_engineBacktraceLogger->flush_on(spdlog::level::debug);
   } else if (not enable and IsEngineBacktraceLoggerEnabled()) {
     s_engineBacktraceLogger->set_level(spdlog::level::off);
     s_engineBacktraceLogger->flush_on(spdlog::level::off);
@@ -126,8 +142,8 @@ void LogManager::ToggleEngineBacktraceLogger(bool enable) {
 
 void LogManager::ToggleAppBacktraceLogger(bool enable) {
   if (enable and not IsAppBacktraceLoggerEnabled()) {
-    s_appBacktraceLogger->set_level(s_appLogLevel);
-    s_appBacktraceLogger->flush_on(s_appFlushLevel);
+    s_appBacktraceLogger->set_level(spdlog::level::debug);
+    s_appBacktraceLogger->flush_on(spdlog::level::debug);
   } else if (not enable and IsAppBacktraceLoggerEnabled()) {
     s_appBacktraceLogger->set_level(spdlog::level::off);
     s_appBacktraceLogger->flush_on(spdlog::level::off);

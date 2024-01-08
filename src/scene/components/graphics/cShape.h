@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "scene/entity.h"
 #include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
 #include "utils/shapeFactory.h"
@@ -78,8 +77,9 @@ struct CShape {
 };
 }
 
-template <> inline void engine::SceneManager::onComponentAdded(Entity& e, CShape& c) {
+template <>
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CShape& c) {
   c.createMesh();
 
-  e.update<CShape>(c);
+  m_registry.replace<CShape>(e, c);
 }

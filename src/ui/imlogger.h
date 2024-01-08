@@ -20,7 +20,7 @@ void drawLogger() {
     return;
 
   auto sink =
-    dynamic_cast<ImGuiLogSink*>(LogManager::GetAppLogger()->sinks()[1].get());
+    dynamic_cast<ImGuiLogSink*>(LogManager::GetEngineLogger()->sinks()[1].get());
   sink->Draw(&show_tool_logger);
 }
 }

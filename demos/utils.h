@@ -117,8 +117,6 @@ void RegisterComponents() {
     .data<&CEquipment::feet>("feet"_hs)
     .func<&CEquipment::print>("print"_hs)
     .func<&CEquipment::getInfo>("getInfo"_hs)
-    .func<&engine::onComponentAdded<CEquipment>, entt::as_ref_t>(
-      "onComponentAdded"_hs)
     .func<&engine::assign<CEquipment>, entt::as_ref_t>("assign"_hs);
 
   entt::meta<CStats>()

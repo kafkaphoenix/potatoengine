@@ -19,7 +19,6 @@
 #include "scene/components/world/cLight.h"
 #include "scene/components/world/cSkybox.h"
 #include "scene/components/world/cTime.h"
-#include "scene/entity.h"
 #include "scene/systems/sEvent.h"
 #include "scene/systems/sUpdate.h"
 #include "scene/utils.h"
@@ -37,17 +36,13 @@ SceneManager::SceneManager() {
   ENGINE_TRACE("Scene manager created!");
 }
 
-void SceneManager::onEvent(Event& e) { eventSystem(std::ref(m_registry), e); }
+void SceneManager::onEvent(Event& e) { eventSystem(m_registry, e); }
 
-void SceneManager::onUpdate(const Time& ts) {
-  updateSystem(std::ref(m_registry), ts);
-}
-
-void SceneManager::print() { PrintScene(std::ref(m_registry)); }
+void SceneManager::onUpdate(const Time& ts) { updateSystem(m_registry, ts); }
 
 const std::map<std::string, std::string, NumericComparator>&
 SceneManager::getMetrics() {
-  if (not m_dirty) {
+  if (not m_dirtyMetrics) {
     return m_metrics;
   }
 
@@ -66,25 +61,23 @@ SceneManager::getMetrics() {
   m_metrics["Entities Total Alive"] = std::to_string(total);
   m_metrics["Entities Total Created"] = std::to_string(created);
   m_metrics["Entities Total Released"] = std::to_string(created - total);
-  m_dirty = false;
+  m_dirtyMetrics = false;
 
   return m_metrics;
 }
 
-Entity SceneManager::createEntity(std::string_view prefabID,
-                                  std::string_view prototypeID,
-                                  const std::optional<uint32_t>& uuid) {
+entt::entity SceneManager::createEntity(std::string_view prefabID,
+                                        std::string_view prototypeID,
+                                        const std::optional<uint32_t>& uuid) {
   UUID _uuid = uuid.has_value() ? UUID(uuid.value()) : UUID();
-  Entity e = cloneEntity(getPrototype(prefabID, prototypeID), _uuid);
-  e.add<CUUID>(_uuid);
-  m_dirty = true;
+  entt::entity e = cloneEntity(getPrototype(prefabID, prototypeID), _uuid);
   return e;
 }
 
-Entity SceneManager::cloneEntity(Entity&& e, uint32_t uuid) {
-  Entity cloned = Entity(m_registry.create(), this);
+entt::entity SceneManager::cloneEntity(const entt::entity& e, uint32_t uuid) {
+  entt::entity cloned = m_registry.create();
 
-  for (auto&& curr : m_registry.storage()) {
+  for (const auto& curr : m_registry.storage()) {
     if (auto& storage = curr.second; storage.contains(e)) {
       storage.push(cloned, storage.value(e));
       entt::meta_type cType = entt::resolve(storage.type());
@@ -96,28 +89,32 @@ Entity SceneManager::cloneEntity(Entity&& e, uint32_t uuid) {
     }
   }
 
-  m_dirty = true;
+  m_registry.emplace<CUUID>(cloned,
+                            uuid); // TODO if not uuid provided get from entity
+  m_dirtyMetrics = true;
+  m_dirtyNamedEntities = true;
   return cloned;
 }
 
-void SceneManager::removeEntity(Entity&& e) {
-  e.add<CDeleted>();
-  m_dirty = true;
+void SceneManager::removeEntity(entt::entity& e) {
+  m_registry.emplace<CDeleted>(e);
+  m_dirtyMetrics = true;
+  m_dirtyNamedEntities = true;
 }
 
-Entity SceneManager::getEntity(std::string_view name) {
+entt::entity SceneManager::getEntity(std::string_view name) {
   for (const auto& [e, cName, _] : m_registry.view<CName, CUUID>().each()) {
     if (cName.name == name) {
-      return Entity(e, this);
+      return e;
     }
   }
   ENGINE_ASSERT(false, "Entity not found");
 }
 
-Entity SceneManager::getEntity(UUID& uuid) {
+entt::entity SceneManager::getEntity(UUID& uuid) {
   for (const auto& [e, cUUID] : m_registry.view<CUUID>().each()) {
     if (cUUID.uuid == uuid) {
-      return Entity(e, this);
+      return e;
     }
   }
   ENGINE_ASSERT(false, "Entity not found");
@@ -125,7 +122,7 @@ Entity SceneManager::getEntity(UUID& uuid) {
 
 const std::map<std::string, entt::entity, NumericComparator>&
 SceneManager::getAllNamedEntities() {
-  if (not m_dirty) {
+  if (not m_dirtyNamedEntities) {
     return m_namedEntities;
   }
 
@@ -134,26 +131,25 @@ SceneManager::getAllNamedEntities() {
     [&](entt::entity e, const CName& cName, const CUUID& cUUID) {
       m_namedEntities.emplace(cName.name, e);
     });
-  getMetrics();
+  m_dirtyNamedEntities = false;
 
   return m_namedEntities;
 }
 
 void SceneManager::createPrototypes(std::string_view prefabID) {
-  // TODO think a better way, we need to create an entity so
-  // we have access to the scene manager and avoid circular
-  // dependency but we discard it afterwards to create one per prototype
-  m_entityFactory.createPrototypes(prefabID, Entity(m_registry.create(), this));
-  m_dirty = true;
+  m_entityFactory.createPrototypes(prefabID, m_registry);
+  m_dirtyMetrics = true;
+  m_dirtyNamedEntities = true;
 }
 
 void SceneManager::updatePrototypes(std::string_view prefabID) {
-  m_entityFactory.updatePrototypes(prefabID, Entity(m_registry.create(), this));
+  m_entityFactory.updatePrototypes(prefabID, m_registry);
 }
 
 void SceneManager::destroyPrototypes(std::string_view prefabID) {
-  m_entityFactory.destroyPrototypes(prefabID, std::ref(m_registry));
-  m_dirty = true;
+  m_entityFactory.destroyPrototypes(prefabID, m_registry);
+  m_dirtyMetrics = true;
+  m_dirtyNamedEntities = true;
 }
 
 const EntityFactory::Prototypes&
@@ -172,26 +168,26 @@ bool SceneManager::containsPrototypes(std::string_view prefabID) const {
 
 void SceneManager::createPrototype(std::string_view prefabID,
                                    std::string_view prototypeID) {
-  m_entityFactory.createPrototype(prefabID, prototypeID,
-                                  Entity(m_registry.create(), this));
-  m_dirty = true;
+  m_entityFactory.createPrototype(prefabID, prototypeID, m_registry);
+  m_dirtyMetrics = true;
+  m_dirtyNamedEntities = true;
 }
 
 void SceneManager::updatePrototype(std::string_view prefabID,
                                    std::string_view prototypeID) {
-  m_entityFactory.updatePrototype(prefabID, prototypeID,
-                                  Entity(m_registry.create(), this));
+  m_entityFactory.updatePrototype(prefabID, prototypeID, m_registry);
 }
 
 void SceneManager::destroyPrototype(std::string_view prefabID,
                                     std::string_view prototypeID) {
-  m_entityFactory.destroyPrototype(prefabID, prototypeID, std::ref(m_registry));
-  m_dirty = true;
+  m_entityFactory.destroyPrototype(prefabID, prototypeID, m_registry);
+  m_dirtyMetrics = true;
+  m_dirtyNamedEntities = true;
 }
 
-Entity SceneManager::getPrototype(std::string_view prefabID,
-                                  std::string_view prototypeID) {
-  return Entity(m_entityFactory.getPrototype(prefabID, prototypeID), this);
+entt::entity SceneManager::getPrototype(std::string_view prefabID,
+                                        std::string_view prototypeID) {
+  return m_entityFactory.getPrototype(prefabID, prototypeID);
 }
 
 bool SceneManager::containsPrototype(std::string_view prefabID,
@@ -245,8 +241,9 @@ void SceneManager::createScene(
     ENGINE_INFO("Scene {} creation TIME: {:.6f}s", sceneID, timer.getSeconds());
     m_activeScene = std::move(sceneID);
   }
-  m_dirty = true;
-  PrintScene(std::ref(m_registry));
+  m_dirtyMetrics = true;
+  m_dirtyNamedEntities = true;
+  PrintScene(m_registry);
 }
 
 void SceneManager::createEntities(
@@ -257,102 +254,105 @@ void SceneManager::createEntities(
   for (const auto& [name, data] :
        loadedScene.getLoadedNormalEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
-    Entity e = createEntity(prefabID, prototypeID);
-    e.add<CName>(std::string(name));
-    e.add<CTag>(prototypeID.data());
+    entt::entity e = createEntity(prefabID, prototypeID);
+    m_registry.emplace<CName>(e, std::string(name));
+    m_registry.emplace<CTag>(e, prototypeID.data());
     if (data.contains("options")) {
       json options = data.at("options");
       if (options.contains("isKinematic")) {
-        e.get<CRigidBody>().isKinematic = options.at("isKinematic").get<bool>();
+        m_registry.get<CRigidBody>(e).isKinematic =
+          options.at("isKinematic").get<bool>();
       }
       if (options.contains("position")) {
         json position = options.at("position");
-        e.get<CTransform>().position = {position.at("x").get<float>(),
-                                        position.at("y").get<float>(),
-                                        position.at("z").get<float>()};
+        m_registry.get<CTransform>(e).position = {
+          position.at("x").get<float>(), position.at("y").get<float>(),
+          position.at("z").get<float>()};
       }
       if (options.contains("rotation")) {
         json rotation = options.at("rotation");
         glm::vec3 rot = {rotation.at("x").get<float>(),
                          rotation.at("y").get<float>(),
                          rotation.at("z").get<float>()};
-        e.get<CTransform>().rotate(glm::quat(glm::radians(rot)));
+        m_registry.get<CTransform>(e).rotate(glm::quat(glm::radians(rot)));
       }
-      if (e.has_all<CCamera, CTransform>()) {
-        CCamera& cCamera = e.get<CCamera>();
-        CTransform& cTransform = e.get<CTransform>();
+      if (m_registry.all_of<CCamera, CTransform>(e)) {
+        CCamera& cCamera = m_registry.get<CCamera>(e);
+        CTransform& cTransform = m_registry.get<CTransform>(e);
         deserializeCamera(cCamera, options);
         cCamera.calculateProjection();
         cCamera.calculateView(cTransform.position, cTransform.rotation);
       }
       if (options.contains("isActive")) {
         bool isActiveCamera = options.at("isActive").get<bool>();
-        if (isActiveCamera and not e.has_all<CActiveCamera>()) {
-          e.add<CActiveCamera>();
-        } else if (not isActiveCamera and e.has_all<CActiveCamera>()) {
-          e.remove<CActiveCamera>();
+        if (isActiveCamera and not m_registry.all_of<CActiveCamera>(e)) {
+          m_registry.emplace<CActiveCamera>(e);
+        } else if (not isActiveCamera and m_registry.all_of<CActiveCamera>(e)) {
+          m_registry.remove<CActiveCamera>(e);
         }
       }
       if (options.contains("hasInput")) {
         bool hasInput = options.at("hasInput").get<bool>();
-        if (hasInput and not e.has_all<CActiveInput>()) {
-          e.add<CActiveInput>();
-        } else if (not hasInput and e.has_all<CActiveInput>()) {
-          e.remove<CActiveInput>();
+        if (hasInput and not m_registry.all_of<CActiveInput>(e)) {
+          m_registry.emplace<CActiveInput>(e);
+        } else if (not hasInput and m_registry.all_of<CActiveInput>(e)) {
+          m_registry.remove<CActiveInput>(e);
         }
       }
       if (options.contains("inputMode")) {
-        CInput& cInput = e.get<CInput>();
+        CInput& cInput = m_registry.get<CInput>(e);
         cInput._mode = options.at("inputMode").get<std::string>();
         cInput.setMode();
       }
       if (options.contains("translationSpeed")) {
-        e.get<CInput>().translationSpeed =
+        m_registry.get<CInput>(e).translationSpeed =
           options.at("translationSpeed").get<float>();
       }
       if (options.contains("verticalSpeed")) {
-        e.get<CInput>().verticalSpeed =
+        m_registry.get<CInput>(e).verticalSpeed =
           options.at("verticalSpeed").get<float>();
       }
       if (options.contains("mouseSensitivity")) {
-        e.get<CInput>().mouseSensitivity =
+        m_registry.get<CInput>(e).mouseSensitivity =
           options.at("mouseSensitivity").get<float>();
       }
       if (options.contains("rotationSpeed")) {
-        e.get<CInput>().rotationSpeed =
+        m_registry.get<CInput>(e).rotationSpeed =
           options.at("rotationSpeed").get<float>();
       }
       if (options.contains("size")) {
-        CShape& shape = e.get<CShape>();
+        CShape& shape = m_registry.get<CShape>(e);
         json size = options.at("size");
         glm::vec3 sizeVec = {size.at("x").get<float>(),
                              size.at("y").get<float>(),
                              size.at("z").get<float>()};
         if (shape.size not_eq sizeVec) {
-          ENGINE_TRACE("Changing shape size from {0} to {1}",
-                       glm::to_string(shape.size), glm::to_string(sizeVec));
+          ENGINE_TRACE("Changing shape size from {0} to {1} for entity {2}",
+                       glm::to_string(shape.size), glm::to_string(sizeVec),
+                       name);
           shape.size = sizeVec;
           shape.meshes.clear();
           shape.createMesh();
         }
       }
       if (options.contains("repeatTexture")) {
-        CShape& cShape = e.get<CShape>();
+        CShape& cShape = m_registry.get<CShape>(e);
         bool repeatTexture = options.at("repeatTexture").get<bool>();
         if (cShape.repeatTexture not_eq repeatTexture) {
-          ENGINE_TRACE("Changing shape repeatTexture from {0} to {1}",
-                       cShape.repeatTexture, repeatTexture);
+          ENGINE_TRACE(
+            "Changing shape repeatTexture from {0} to {1} for entity {2}",
+            cShape.repeatTexture, repeatTexture, name);
           cShape.repeatTexture = repeatTexture;
           cShape.meshes.clear();
           cShape.createMesh();
         }
       }
       if (options.contains("body")) {
-        CBody& cBody = e.get<CBody>();
+        CBody& cBody = m_registry.get<CBody>(e);
         std::string filepath = options.at("body").get<std::string>();
         if (cBody.filepath not_eq filepath) {
-          ENGINE_TRACE("Changing body filepath from {0} to {1}", cBody.filepath,
-                       filepath);
+          ENGINE_TRACE("Changing body filepath from {0} to {1} for entity {2}",
+                       cBody.filepath, filepath, name);
           cBody.filepath = filepath;
           cBody.meshes.clear();
           cBody.materials.clear();
@@ -363,7 +363,7 @@ void SceneManager::createEntities(
         }
       }
       if (options.contains("filepaths")) {
-        CTexture& c = e.get<CTexture>();
+        CTexture& c = m_registry.get<CTexture>(e);
         json filepaths = options.at("filepaths");
         std::vector<std::string> newFilepaths =
           filepaths.get<std::vector<std::string>>();
@@ -376,8 +376,8 @@ void SceneManager::createEntities(
           for (const auto& filepath : newFilepaths) {
             newPaths += filepath + " ";
           }
-          ENGINE_TRACE("Changing texture filepaths from {} to {}", oldPaths,
-                       newPaths);
+          ENGINE_TRACE("Changing texture filepaths from {} to {} for entity {}",
+                       oldPaths, newPaths, name);
           c.filepaths = std::move(newFilepaths);
           c.textures.clear();
           c.textures.reserve(c.filepaths.size());
@@ -388,45 +388,49 @@ void SceneManager::createEntities(
       }
       if (options.contains("color")) {
         json color = options.at("color");
-        e.get<CTexture>().color = {
+        m_registry.get<CTexture>(e).color = {
           color.at("r").get<float>(), color.at("g").get<float>(),
           color.at("b").get<float>(), color.at("a").get<float>()};
       }
       if (options.contains("blendFactor")) {
-        e.get<CTexture>().blendFactor = options.at("blendFactor").get<float>();
+        m_registry.get<CTexture>(e).blendFactor =
+          options.at("blendFactor").get<float>();
       }
       if (options.contains("reflectivity")) {
-        e.get<CTexture>().reflectivity =
+        m_registry.get<CTexture>(e).reflectivity =
           options.at("reflectivity").get<float>();
       }
       if (options.contains("refractiveIndex")) {
-        e.get<CTexture>().refractiveIndex =
+        m_registry.get<CTexture>(e).refractiveIndex =
           options.at("refractiveIndex").get<float>();
       }
       if (options.contains("hasTransparency")) {
-        e.get<CTexture>().hasTransparency =
+        m_registry.get<CTexture>(e).hasTransparency =
           options.at("hasTransparency").get<bool>();
       }
       if (options.contains("useLighting")) {
-        e.get<CTexture>().useLighting = options.at("useLighting").get<bool>();
+        m_registry.get<CTexture>(e).useLighting =
+          options.at("useLighting").get<bool>();
       }
       if (options.contains("useReflection")) {
-        e.get<CTexture>().useReflection =
+        m_registry.get<CTexture>(e).useReflection =
           options.at("useReflection").get<bool>();
       }
       if (options.contains("useRefraction")) {
-        e.get<CTexture>().useRefraction =
+        m_registry.get<CTexture>(e).useRefraction =
           options.at("useRefraction").get<bool>();
       }
       if (options.contains("isVisible")) {
-        e.get<CShaderProgram>().isVisible = options.at("isVisible").get<bool>();
+        m_registry.get<CShaderProgram>(e).isVisible =
+          options.at("isVisible").get<bool>();
       }
       if (options.contains("drawMode")) {
-        e.get<CTexture>()._drawMode = options.at("drawMode").get<std::string>();
-        e.get<CTexture>().setDrawMode();
+        m_registry.get<CTexture>(e)._drawMode =
+          options.at("drawMode").get<std::string>();
+        m_registry.get<CTexture>(e).setDrawMode();
       }
       if (options.contains("textureAtlas")) {
-        CTextureAtlas& cTextureAtlas = e.get<CTextureAtlas>();
+        CTextureAtlas& cTextureAtlas = m_registry.get<CTextureAtlas>(e);
         json textureAtlasOptions = options.at("textureAtlas");
         if (textureAtlasOptions.contains("index")) {
           cTextureAtlas.index = textureAtlasOptions.at("index").get<int>();
@@ -437,12 +441,12 @@ void SceneManager::createEntities(
       }
       if (options.contains("scale")) {
         json scale = options.at("scale");
-        e.get<CTransform>().scale = {scale.at("x").get<float>(),
-                                     scale.at("y").get<float>(),
-                                     scale.at("z").get<float>()};
+        m_registry.get<CTransform>(e).scale = {scale.at("x").get<float>(),
+                                               scale.at("y").get<float>(),
+                                               scale.at("z").get<float>()};
       }
       if (prototypeID == "chunk_config") {
-        CChunkManager& cChunkManager = e.get<CChunkManager>();
+        CChunkManager& cChunkManager = m_registry.get<CChunkManager>(e);
         if (options.contains("chunkSize")) {
           cChunkManager.chunkSize = options.at("chunkSize").get<int>();
         }
@@ -469,7 +473,7 @@ void SceneManager::createEntities(
         }
       }
       if (options.contains("noise")) {
-        CNoise& noise = e.get<CNoise>();
+        CNoise& noise = m_registry.get<CNoise>(e);
         json noiseOptions = options.at("noise");
         if (noiseOptions.contains("type")) {
           noise._type = noiseOptions.at("type").get<std::string>();
@@ -503,7 +507,7 @@ void SceneManager::createEntities(
         }
       }
       if (prototypeID == "skybox") {
-        CTime& cTime = e.get<CTime>();
+        CTime& cTime = m_registry.get<CTime>(e);
         if (options.contains("time")) {
           cTime.setTime(options.at("time").get<float>());
         }
@@ -511,19 +515,21 @@ void SceneManager::createEntities(
           cTime.acceleration = options.at("acceleration").get<float>();
         }
         if (options.contains("useFog")) {
-          e.get<CSkybox>().useFog = options.at("useFog").get<bool>();
+          m_registry.get<CSkybox>(e).useFog = options.at("useFog").get<bool>();
         }
         if (options.contains("fogColor")) {
           json fogColor = options.at("fogColor");
-          e.get<CSkybox>().fogColor = {fogColor.at("r").get<float>(),
-                                       fogColor.at("g").get<float>(),
-                                       fogColor.at("b").get<float>()};
+          m_registry.get<CSkybox>(e).fogColor = {fogColor.at("r").get<float>(),
+                                                 fogColor.at("g").get<float>(),
+                                                 fogColor.at("b").get<float>()};
         }
         if (options.contains("fogDensity")) {
-          e.get<CSkybox>().fogDensity = options.at("fogDensity").get<float>();
+          m_registry.get<CSkybox>(e).fogDensity =
+            options.at("fogDensity").get<float>();
         }
         if (options.contains("fogGradient")) {
-          e.get<CSkybox>().fogGradient = options.at("fogGradient").get<float>();
+          m_registry.get<CSkybox>(e).fogGradient =
+            options.at("fogGradient").get<float>();
         }
       }
     }
@@ -533,15 +539,16 @@ void SceneManager::createEntities(
   for (const auto& [name, data] :
        loadedScene.getLoadedLightEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
-    Entity e = createEntity(prefabID, prototypeID);
-    e.add<CName>(std::string(name));
-    e.add<CTag>(prototypeID.data());
+    entt::entity e = createEntity(prefabID, prototypeID);
+    m_registry.emplace<CName>(e, std::string(name));
+    m_registry.emplace<CTag>(e, prototypeID.data());
     if (data.contains("options")) {
-      CTransform& cTransform = e.get<CTransform>();
-      CLight& cLight = e.get<CLight>();
+      CTransform& cTransform = m_registry.get<CTransform>(e);
+      CLight& cLight = m_registry.get<CLight>(e);
       json options = data.at("options");
       if (options.contains("isKinematic")) {
-        e.get<CRigidBody>().isKinematic = options.at("isKinematic").get<bool>();
+        m_registry.get<CRigidBody>(e).isKinematic =
+          options.at("isKinematic").get<bool>();
       }
       if (options.contains("position")) {
         json position = options.at("position");
@@ -571,14 +578,15 @@ void SceneManager::createEntities(
                         color.at("b").get<float>()};
       }
       if (options.contains("isVisible")) {
-        e.get<CShaderProgram>().isVisible = options.at("isVisible").get<bool>();
+        m_registry.get<CShaderProgram>(e).isVisible =
+          options.at("isVisible").get<bool>();
       }
       if (options.contains("body")) {
-        CBody& cBody = e.get<CBody>();
+        CBody& cBody = m_registry.get<CBody>(e);
         std::string filepath = options.at("body").get<std::string>();
         if (cBody.filepath not_eq filepath) {
-          ENGINE_TRACE("Changing body filepath from {0} to {1}", cBody.filepath,
-                       filepath);
+          ENGINE_TRACE("Changing body filepath from {0} to {1} for entity {2}",
+                       cBody.filepath, filepath, name);
           cBody.filepath = filepath;
           cBody.meshes.clear();
           cBody.materials.clear();
@@ -595,15 +603,16 @@ void SceneManager::createEntities(
   for (const auto& [name, data] :
        loadedScene.getLoadedCameraEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
-    Entity e = createEntity(prefabID, prototypeID);
-    e.add<CName>(std::string(name));
-    e.add<CTag>(prototypeID.data());
+    entt::entity e = createEntity(prefabID, prototypeID);
+    m_registry.emplace<CName>(e, std::string(name));
+    m_registry.emplace<CTag>(e, prototypeID.data());
     if (data.contains("options")) {
-      CCamera& cCamera = e.get<CCamera>();
-      CTransform& cTransform = e.get<CTransform>();
+      CCamera& cCamera = m_registry.get<CCamera>(e);
+      CTransform& cTransform = m_registry.get<CTransform>(e);
       json options = data.at("options");
       if (options.contains("isKinematic")) {
-        e.get<CRigidBody>().isKinematic = options.at("isKinematic").get<bool>();
+        m_registry.get<CRigidBody>(e).isKinematic =
+          options.at("isKinematic").get<bool>();
       }
       if (options.contains("position")) {
         json position = options.at("position");
@@ -623,50 +632,51 @@ void SceneManager::createEntities(
       cCamera.calculateProjection();
       if (options.contains("isActive")) {
         bool isActiveCamera = options.at("isActive").get<bool>();
-        if (isActiveCamera and not e.has_all<CActiveCamera>()) {
-          e.add<CActiveCamera>();
-        } else if (not isActiveCamera and e.has_all<CActiveCamera>()) {
-          e.remove<CActiveCamera>();
+        if (isActiveCamera and not m_registry.all_of<CActiveCamera>(e)) {
+          m_registry.emplace<CActiveCamera>(e);
+        } else if (not isActiveCamera and m_registry.all_of<CActiveCamera>(e)) {
+          m_registry.remove<CActiveCamera>(e);
         }
       }
       if (options.contains("hasInput")) {
         bool hasInput = options.at("hasInput").get<bool>();
-        if (hasInput and not e.has_all<CActiveInput>()) {
-          e.add<CActiveInput>();
-        } else if (not hasInput and e.has_all<CActiveInput>()) {
-          e.remove<CActiveInput>();
+        if (hasInput and not m_registry.all_of<CActiveInput>(e)) {
+          m_registry.emplace<CActiveInput>(e);
+        } else if (not hasInput and m_registry.all_of<CActiveInput>(e)) {
+          m_registry.remove<CActiveInput>(e);
         }
       }
       if (options.contains("inputMode")) {
-        CInput& cInput = e.get<CInput>();
+        CInput& cInput = m_registry.get<CInput>(e);
         cInput._mode = options.at("inputMode").get<std::string>();
         cInput.setMode();
       }
       if (options.contains("translationSpeed")) {
-        e.get<CInput>().translationSpeed =
+        m_registry.get<CInput>(e).translationSpeed =
           options.at("translationSpeed").get<float>();
       }
       if (options.contains("verticalSpeed")) {
-        e.get<CInput>().verticalSpeed =
+        m_registry.get<CInput>(e).verticalSpeed =
           options.at("verticalSpeed").get<float>();
       }
       if (options.contains("mouseSensitivity")) {
-        e.get<CInput>().mouseSensitivity =
+        m_registry.get<CInput>(e).mouseSensitivity =
           options.at("mouseSensitivity").get<float>();
       }
       if (options.contains("rotationSpeed")) {
-        e.get<CInput>().rotationSpeed =
+        m_registry.get<CInput>(e).rotationSpeed =
           options.at("rotationSpeed").get<float>();
       }
       if (options.contains("isVisible")) {
-        e.get<CShaderProgram>().isVisible = options.at("isVisible").get<bool>();
+        m_registry.get<CShaderProgram>(e).isVisible =
+          options.at("isVisible").get<bool>();
       }
       if (options.contains("body")) {
-        CBody& cBody = e.get<CBody>();
+        CBody& cBody = m_registry.get<CBody>(e);
         std::string filepath = options.at("body").get<std::string>();
         if (cBody.filepath not_eq filepath) {
-          ENGINE_TRACE("Changing body filepath from {0} to {1}", cBody.filepath,
-                       filepath);
+          ENGINE_TRACE("Changing body filepath from {0} to {1} for entity {2}",
+                       cBody.filepath, filepath, name);
           cBody.filepath = filepath;
           cBody.meshes.clear();
           cBody.materials.clear();
@@ -683,9 +693,9 @@ void SceneManager::createEntities(
   for (const auto& [name, data] :
        loadedScene.getLoadedSystemEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
-    Entity e = createEntity(prefabID, prototypeID);
-    e.add<CName>(std::string(name));
-    e.add<CTag>(prototypeID.data());
+    entt::entity e = createEntity(prefabID, prototypeID);
+    m_registry.emplace<CName>(e, std::string(name));
+    m_registry.emplace<CTag>(e, prototypeID.data());
     if (data.contains("options")) {
       json options = data.at("options");
       // TODO: implement
@@ -695,10 +705,10 @@ void SceneManager::createEntities(
   ENGINE_TRACE("Creating scene FBO entities...");
   for (const auto& [name, data] : loadedScene.getLoadedFBOEntities(prefabID)) {
     std::string_view prototypeID = data.at("prototype").get<std::string_view>();
-    Entity e = createEntity(prefabID, prototypeID);
-    e.add<CName>(std::string(name));
-    e.add<CTag>(prototypeID.data());
-    CFBO& fbo = e.get<CFBO>();
+    entt::entity e = createEntity(prefabID, prototypeID);
+    m_registry.emplace<CName>(e, std::string(name));
+    m_registry.emplace<CTag>(e, prototypeID.data());
+    CFBO& fbo = m_registry.get<CFBO>(e);
     if (data.contains("options")) {
       json options = data.at("options");
       if (options.contains("width")) {
@@ -708,48 +718,16 @@ void SceneManager::createEntities(
         fbo.height = options.at("height").get<int>();
       }
       if (options.contains("attachment")) {
-        fbo.attachment = std::move(options.at("attachment").get<std::string>());
+        fbo._attachment = std::move(options.at("attachment").get<std::string>());
+        fbo.setAttachment();
       }
       if (options.contains("mode")) {
         fbo._mode = std::move(options.at("mode").get<std::string>());
+        fbo.setMode();
       }
     }
-    uint32_t attachment;
-    if (fbo.attachment == "depth_texture") {
-      attachment = FBO::DEPTH_TEXTURE;
-    } else if (fbo.attachment == "depth_renderbuffer") {
-      attachment = FBO::DEPTH_RENDERBUFFER;
-    } else if (fbo.attachment == "stencil_renderbuffer") {
-      attachment = FBO::STENCIL_RENDERBUFFER;
-    } else if (fbo.attachment == "depth_stencil_renderbuffer") {
-      attachment = FBO::DEPTH_STENCIL_RENDERBUFFER;
-    } else {
-      ENGINE_ASSERT(false, "Unknown fbo attachment: {}", fbo.attachment);
-    }
-    CFBO::Mode mode;
-    if (fbo._mode == "normal") {
-      mode = CFBO::Mode::Normal;
-    } else if (fbo._mode == "inverse") {
-      mode = CFBO::Mode::Inverse;
-    } else if (fbo._mode == "greyscale") {
-      mode = CFBO::Mode::Greyscale;
-    } else if (fbo._mode == "blur") {
-      mode = CFBO::Mode::Blur;
-    } else if (fbo._mode == "edge") {
-      mode = CFBO::Mode::Edge;
-    } else if (fbo._mode == "sharpen") {
-      mode = CFBO::Mode::Sharpen;
-    } else if (fbo._mode == "night_vision") {
-      mode = CFBO::Mode::NightVision;
-    } else if (fbo._mode == "emboss") {
-      mode = CFBO::Mode::Emboss;
-    } else {
-      ENGINE_ASSERT(false, "Unknown fbo mode: {}", fbo._mode);
-    }
-    fbo.mode = mode;
-
     renderer->addFramebuffer(std::string(fbo.fbo), fbo.width, fbo.height,
-                             attachment);
+                             fbo.attachment);
   }
 
   m_registry.sort<CDistanceFromCamera>(
@@ -758,7 +736,8 @@ void SceneManager::createEntities(
     });
 
   m_registry.sort<CUUID, CDistanceFromCamera>();
-  m_dirty = true;
+  m_dirtyMetrics = true;
+  m_dirtyNamedEntities = true;
 }
 
 void SceneManager::reloadScene(
@@ -771,7 +750,8 @@ void SceneManager::reloadScene(
   m_entityFactory.clear();
   renderer->clear();
   createScene(m_activeScene, assetsManager, renderer, true);
-  m_dirty = true;
+  m_dirtyMetrics = true;
+  m_dirtyNamedEntities = true;
 }
 
 void SceneManager::clearScene(const std::unique_ptr<Renderer>& renderer) {
@@ -785,21 +765,26 @@ void SceneManager::clearScene(const std::unique_ptr<Renderer>& renderer) {
   renderer->clear();
   m_activeScene.clear();
   m_metrics.clear();
-  m_dirty = false;
+  m_metrics.clear();
+  m_namedEntities.clear();
+  m_dirtyMetrics = false;
+  m_dirtyNamedEntities = false;
   entt::monostate<"useFog"_hs>{} = 0.f;
   entt::monostate<"useSkyBlending"_hs>{} = 0.f;
 }
 
-template <typename T> void SceneManager::onComponentAdded(Entity& e, T& c) {
+template <typename Component>
+void SceneManager::onComponentAdded(entt::entity e, Component& c) {
   ENGINE_ASSERT(false,
                 "Unsupported onComponentAdded method for component type {}",
-                entt::type_id<T>().name());
+                entt::type_id<Component>().name());
 }
 
-template <typename T> void SceneManager::onComponentCloned(Entity& e, T& c) {
+template <typename Component>
+void SceneManager::onComponentCloned(entt::entity e, Component& c) {
   ENGINE_ASSERT(false,
                 "Unsupported onComponentCloned method for component type {}",
-                entt::type_id<T>().name());
+                entt::type_id<Component>().name());
 }
 
 std::unique_ptr<SceneManager> SceneManager::Create() {

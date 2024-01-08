@@ -64,6 +64,7 @@
         "components": {
             "fbo": {
                 "fbo": "postprocess",
+                "attachment": "depth_texture",
                 "mode": "normal"
             },
             "shaderProgram": {

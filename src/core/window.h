@@ -74,7 +74,7 @@ class Window {
     void setWindowIcon(std::string path);
     void restoreWindowIcon();
     void setCursorIcon(std::string path);
-    void setCursorMode(CursorMode mode, bool update = true);
+    void setCursorMode(CursorMode mode, bool update);
     void restoreCursor();
     void resize(int width, int height);
     void toggleResizable(bool resizable);

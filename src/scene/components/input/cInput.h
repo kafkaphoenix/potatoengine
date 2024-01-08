@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "scene/entity.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -60,8 +59,8 @@ struct CInput {
 }
 
 template <>
-inline void engine::SceneManager::onComponentAdded(Entity& e, CInput& c) {
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CInput& c) {
   c.setMode();
 
-  e.update<CInput>(c);
+  m_registry.replace<CInput>(e, c);
 }
