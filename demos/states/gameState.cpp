@@ -23,6 +23,34 @@ void GameState::onAttach() {
     scene_manager->createScene(settings->activeScene, asset_manager, renderer,
                                false);
   }
+
+  if (settings->activeScene == "Flappy Bird") {
+    const auto& scene_manager = app.getSceneManager();
+    auto& registry = scene_manager->getRegistry();
+    auto pipe = scene_manager->getEntity("green_pipe_top");
+    auto& ptransform = registry.get<engine::CTransform>(pipe);
+    ptransform.position = {1.5f, -0.1f, 0.0f};
+    auto& ptexture = registry.get<engine::CShaderProgram>(pipe); // rename
+    ptexture.isVisible = true;
+
+    auto pipe2 = scene_manager->getEntity("green_pipe_bottom");
+    auto& ptransform2 = registry.get<engine::CTransform>(pipe2);
+    ptransform2.position = {1.f, 1.f, 0.0f};
+    auto& ptexture2 = registry.get<engine::CShaderProgram>(pipe2);
+    ptexture2.isVisible = true;
+
+    auto pipe3 = scene_manager->getEntity("red_pipe_top");
+    auto& ptransform3 = registry.get<engine::CTransform>(pipe3);
+    ptransform3.position = {-0.5f, -0.1f, 0.0f};
+    auto& ptexture3 = registry.get<engine::CShaderProgram>(pipe3);
+    ptexture3.isVisible = true;
+
+    auto pipe4 = scene_manager->getEntity("red_pipe_bottom");
+    auto& ptransform4 = registry.get<engine::CTransform>(pipe4);
+    ptransform4.position = {-1.5f, 0.75f, 0.0f};
+    auto& ptexture4 = registry.get<engine::CShaderProgram>(pipe4);
+    ptexture4.isVisible = true;
+  }
 }
 
 void GameState::onDetach() {
@@ -56,9 +84,63 @@ void GameState::onUpdate(engine::Time ts) {
     scene_manager->createScene(settings->activeScene, asset_manager, renderer,
                                false);
     settings->reloadScene = false;
+    if (settings->activeScene == "Flappy Bird") { // TODO remove this
+      const auto& scene_manager = app.getSceneManager();
+      auto& registry = scene_manager->getRegistry();
+      auto pipe = scene_manager->getEntity("green_pipe_top");
+      auto& ptransform = registry.get<engine::CTransform>(pipe);
+      ptransform.position = {1.5f, -0.1f, 0.0f};
+      auto& ptexture = registry.get<engine::CShaderProgram>(pipe); // rename
+      ptexture.isVisible = true;
+
+      auto pipe2 = scene_manager->getEntity("green_pipe_bottom");
+      auto& ptransform2 = registry.get<engine::CTransform>(pipe2);
+      ptransform2.position = {1.f, 1.f, 0.0f};
+      auto& ptexture2 = registry.get<engine::CShaderProgram>(pipe2);
+      ptexture2.isVisible = true;
+
+      auto pipe3 = scene_manager->getEntity("red_pipe_top");
+      auto& ptransform3 = registry.get<engine::CTransform>(pipe3);
+      ptransform3.position = {-0.5f, -0.1f, 0.0f};
+      auto& ptexture3 = registry.get<engine::CShaderProgram>(pipe3);
+      ptexture3.isVisible = true;
+
+      auto pipe4 = scene_manager->getEntity("red_pipe_bottom");
+      auto& ptransform4 = registry.get<engine::CTransform>(pipe4);
+      ptransform4.position = {-1.5f, 0.75f, 0.0f};
+      auto& ptexture4 = registry.get<engine::CShaderProgram>(pipe4);
+      ptexture4.isVisible = true;
+    }
   } else if (settings->reloadScene) {
     scene_manager->reloadScene(asset_manager, renderer);
     settings->reloadScene = false;
+    if (settings->activeScene == "Flappy Bird") { // TODO remove this
+      const auto& scene_manager = app.getSceneManager();
+      auto& registry = scene_manager->getRegistry();
+      auto pipe = scene_manager->getEntity("green_pipe_top");
+      auto& ptransform = registry.get<engine::CTransform>(pipe);
+      ptransform.position = {1.5f, -0.1f, 0.0f};
+      auto& ptexture = registry.get<engine::CShaderProgram>(pipe); // rename
+      ptexture.isVisible = true;
+
+      auto pipe2 = scene_manager->getEntity("green_pipe_bottom");
+      auto& ptransform2 = registry.get<engine::CTransform>(pipe2);
+      ptransform2.position = {1.f, 1.f, 0.0f};
+      auto& ptexture2 = registry.get<engine::CShaderProgram>(pipe2);
+      ptexture2.isVisible = true;
+
+      auto pipe3 = scene_manager->getEntity("red_pipe_top");
+      auto& ptransform3 = registry.get<engine::CTransform>(pipe3);
+      ptransform3.position = {-0.5f, -0.1f, 0.0f};
+      auto& ptexture3 = registry.get<engine::CShaderProgram>(pipe3);
+      ptexture3.isVisible = true;
+
+      auto pipe4 = scene_manager->getEntity("red_pipe_bottom");
+      auto& ptransform4 = registry.get<engine::CTransform>(pipe4);
+      ptransform4.position = {-1.5f, 0.75f, 0.0f};
+      auto& ptexture4 = registry.get<engine::CShaderProgram>(pipe4);
+      ptexture4.isVisible = true;
+    }
   }
 
   scene_manager->onUpdate(ts);

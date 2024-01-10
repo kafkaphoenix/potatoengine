@@ -18,6 +18,8 @@ namespace engine = potatoengine;
 // scene
 #include "scene/components/common/cName.h"
 #include "scene/components/common/cUUID.h"
+#include "scene/components/graphics/cShaderProgram.h"
+#include "scene/components/physics/cTransform.h"
 #include "scene/meta.h"
 #include "scene/sceneManager.h"
 

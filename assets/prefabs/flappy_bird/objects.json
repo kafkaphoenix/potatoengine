@@ -1,6 +1,6 @@
 {
     "camera": {
-        "ctags": ["activeCamera"],
+        "ctags": ["activeCamera", "time"],
         "components": {
             "camera": {
                 "mode": "2D"

@@ -46,12 +46,12 @@ void collisionSystem(entt::registry& registry, const Time& ts) {
           });
 
         if (collided) {
-          CGravity* cGravity = registry.try_get<CGravity>(e);
-          cTransform.position.y -= cGravity->acceleration * ts;
+          Application::Get().getSettings()->reloadScene = true;
+        }
 
-          if (cTransform.position.y < 0) {
-            cTransform.position.y = 0.5;
-          }
+        // top off screen check
+        if (cTransform.position.y > 0.9) {
+          cTransform.position.y = 0.9;
         }
       }
     });

@@ -83,6 +83,54 @@
                 "prefab": "creatures",
                 "prototype": "bird"
             },
+            "time1": {
+                "prefab": "structures",
+                "prototype": "numbers",
+                "options": {
+                    "isVisible": true,
+                    "position": {
+                        "x": -1.6,
+                        "y": 0.8,
+                        "z": 0.0
+                    }
+                }
+            },
+            "time2": {
+                "prefab": "structures",
+                "prototype": "numbers",
+                "options": {
+                    "isVisible": true,
+                    "position": {
+                        "x": -1.45,
+                        "y": 0.8,
+                        "z": 0.0
+                    }
+                }
+            },
+            "score1": {
+                "prefab": "structures",
+                "prototype": "numbers",
+                "options": {
+                    "isVisible": true,
+                    "position": {
+                        "x": 1.45,
+                        "y": 0.8,
+                        "z": 0.0
+                    }
+                }
+            },
+            "score2": {
+                "prefab": "structures",
+                "prototype": "numbers",
+                "options": {
+                    "isVisible": true,
+                    "position": {
+                        "x": 1.6,
+                        "y": 0.8,
+                        "z": 0.0
+                    }
+                }
+            },
             "green_pipe_top": {
                 "prefab": "structures",
                 "prototype": "pipe",

@@ -50,6 +50,14 @@ void Application::pushOverlay(std::unique_ptr<State>&& s) {
   m_states->pushOverlay(std::move(s));
 }
 
+void Application::togglePauseGame(bool pause) noexcept {
+  if (pause and not m_gamePaused) {
+    m_gamePaused = true;
+  } else if (not pause and m_gamePaused) {
+    m_gamePaused = false;
+  }
+}
+
 void Application::run() {
   while (m_running) {
     m_window->onEvent();
@@ -65,7 +73,8 @@ void Application::run() {
         for (auto& state : *m_states) {
           state->onUpdate(ts);
           if (m_debugging) {
-            ui::drawDebugger(m_settings, m_assetsManager, m_renderer, m_sceneManager);
+            ui::drawDebugger(m_settings, m_assetsManager, m_renderer,
+                             m_sceneManager);
           }
           state->onImguiUpdate();
         }

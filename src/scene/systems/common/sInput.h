@@ -120,6 +120,7 @@ bool onKeyPressed(KeyPressedEvent& e) {
   const auto& settings = app.getSettings();
   auto& window = app.getWindow();
   bool isDebugging = app.isDebugging();
+  bool isGamePaused = app.isGamePaused();
 
   if (e.getKeyCode() == Key::F3) {
     if (isDebugging) {
@@ -148,6 +149,8 @@ bool onKeyPressed(KeyPressedEvent& e) {
   } else if (e.getKeyCode() == Key::F12) {
     window.toggleFullscreen(not settings->fullscreen);
     return true;
+  } else if (e.getKeyCode() == Key::P) {
+    app.togglePauseGame(not isGamePaused);
   }
 
   ImGuiIO& io = ImGui::GetIO();

@@ -43,9 +43,11 @@ class Application {
 
     void close() noexcept { m_running = false; }
     void pause(bool paused) noexcept { m_paused = paused; }
+    void togglePauseGame(bool pause) noexcept;
     void debug(bool debugging) noexcept { m_debugging = debugging; }
 
     bool isPaused() const noexcept { return m_paused; }
+    bool isGamePaused() const noexcept { return m_gamePaused; }
     bool isDebugging() const noexcept { return m_debugging; }
 
     static Application& Get() { return *s_instance; }
@@ -65,6 +67,7 @@ class Application {
     std::string m_name{};
     bool m_running{true};
     bool m_paused{};
+    bool m_gamePaused{};
     bool m_debugging{};
     float m_lastFrame{};
     float m_accumulator{};

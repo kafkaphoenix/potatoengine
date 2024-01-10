@@ -35,7 +35,7 @@
         "ctags": ["rigidBody"],
         "components": {
             "distanceFromCamera": {
-                "distance": 4
+                "distance": 3
             },
             "texture": {
                 "filepaths": ["ground"]
@@ -54,12 +54,27 @@
     },
     "pipe": {
         "inherits": ["sprite"],
+        "ctags": ["rigidBody"],
         "components": {
             "distanceFromCamera": {
-                "distance": 3
+                "distance": 4
             },
             "shape": {
                 "size": {"x": 0.1, "y": 0.4, "z": 0}
+            },
+            "collider": {
+                "type": "rectangle",
+                "size": {"x": 0.1, "y": 0.4, "z": 0}
+            },
+            "noise": {
+                "type": "simplex",
+                "seed": 0,
+                "octaves": 4,
+                "frequency": 0.01,
+                "persistence": 0.6,
+                "lacunarity": 2.0,
+                "amplitude": 1,
+                "positive": false
             }
         }
     },
@@ -69,8 +84,16 @@
             "distanceFromCamera": {
                 "distance": 1
             },
+            "shape": {
+                "size": {"x": 0.1, "y": 0.1, "z": 0}
+            },
             "texture": {
-                "filepaths": ["numbers"]
+                "filepaths": ["numbers"],
+                "drawMode": "textureAtlas"
+            },
+            "textureAtlas": {
+                "rows": 4,
+                "index": 12
             }
         }
     }

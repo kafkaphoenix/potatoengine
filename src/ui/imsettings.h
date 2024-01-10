@@ -35,6 +35,9 @@ void drawSettingsManager(const std::unique_ptr<Settings>& settings,
     selectedSettingsManagerTabKey = "Scene";
   }
 
+  auto& app = Application::Get();
+  bool isGamePaused = app.isGamePaused();
+
   ImGui::NextColumn();
   if (not selectedSettingsManagerTabKey.empty()) {
     ImGui::SeparatorText("Edit");
@@ -129,6 +132,8 @@ void drawSettingsManager(const std::unique_ptr<Settings>& settings,
 
     } else if (selectedSettingsManagerTabKey ==
                "Debug") { // TODO use for something
+      ImGui::Checkbox("Game paused", &isGamePaused);
+      app.togglePauseGame(isGamePaused);
       ImGui::Checkbox("Debug enabled", &settings->debugEnabled);
       ImGui::Checkbox("Display FPS", &settings->displayFPS);
     } else if (selectedSettingsManagerTabKey == "Logger") {

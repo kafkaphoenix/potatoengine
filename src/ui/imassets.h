@@ -127,7 +127,8 @@ void drawAssetsManager(const std::unique_ptr<AssetsManager>& assets_manager,
       if (not texture->isCubemap()) {
         int maxWidth = texture->getWidth() > 128 ? 128 : texture->getWidth();
         int maxHeight = texture->getHeight() > 128 ? 128 : texture->getHeight();
-        ImGui::Image((void*)texture->getID(), ImVec2(maxWidth, maxHeight));
+        ImGui::Image((void*)texture->getID(), ImVec2(maxWidth, maxHeight), ImVec2(0, 1),
+                     ImVec2(1, 0));
       }
     }
   }
