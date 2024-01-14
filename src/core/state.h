@@ -12,7 +12,7 @@ class State {
 
     virtual void onAttach() {}
     virtual void onDetach() {}
-    virtual void onUpdate(Time) {}
+    virtual void onUpdate(const Time&) {}
     virtual void onImguiUpdate() {}
     virtual void onEvent(Event&) {}
 

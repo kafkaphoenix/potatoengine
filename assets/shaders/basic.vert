@@ -26,8 +26,23 @@ uniform float useFog;
 uniform float fogDensity;
 uniform float fogGradient;
 
-void main()
-{
+void calculateReflection() {
+    surfaceNormal = (model * vec4(normal, 0.f)).xyz;
+    directionToLight = lightPosition - worldPosition.xyz;
+    directionToCamera = (inverse(view) * vec4(0.f, 0.f, 0.f, 1.f)).xyz - worldPosition.xyz;
+}
+
+void calculateFogVisibility(vec4 viewPosition) {
+    if (int(useFog) == 0) {
+        fogVisibility = 1.f;
+    } else {
+        float distanceRelativeToCamera = length(viewPosition.xyz);
+        fogVisibility = exp(-pow((distanceRelativeToCamera * fogDensity), fogGradient));
+        fogVisibility = clamp(fogVisibility, 0.f, 1.f);
+    }
+}
+
+void main() {
     worldPosition = model * vec4(position, 1.f);
     worldNormal = mat3(transpose(inverse(model))) * normal;
     vec4 viewPosition = view * worldPosition;
@@ -36,15 +51,6 @@ void main()
     vTextureCoords = textureCoords;
     vColor = color;
 
-    surfaceNormal = (model * vec4(normal, 0.f)).xyz;
-    directionToLight = lightPosition - worldPosition.xyz;
-    directionToCamera = (inverse(view) * vec4(0.f, 0.f, 0.f, 1.f)).xyz - worldPosition.xyz;
-
-    if (int(useFog) == 0) {
-        fogVisibility = 1.f;
-    } else {
-        float distanceRelativeToCamera = length(viewPosition.xyz);
-        fogVisibility = exp(-pow((distanceRelativeToCamera * fogDensity), fogGradient));
-        fogVisibility = clamp(fogVisibility, 0.f, 1.f);
-    }
+    calculateReflection();
+    calculateFogVisibility(viewPosition);
 }

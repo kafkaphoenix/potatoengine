@@ -43,11 +43,9 @@ uniform float shininess;
 uniform float noTexture;
 uniform vec3 materialColor;
 
-void main()
-{
-    vec4 base = vec4(0.f);
+void loadTexture() {
     if (int(noTexture) == 1) {
-        base = vec4(materialColor, 1.f);
+        fragColor = vec4(materialColor, 1.f);
     } else {
         vec2 offsetTexture = vTextureCoords;
         if (int(useTextureAtlas) == 1) {
@@ -61,20 +59,28 @@ void main()
 
         if (int(useColor) == 1) {
             if (int(useBlending) == 1) {
-                base = mix(texture1, texture2, blendFactor);
-                base = vec4(base.rgb * color.rgb, color.a);
+                fragColor = mix(texture1, texture2, blendFactor);
+                fragColor = vec4(fragColor.rgb * color.rgb, color.a);
             } else {
-                base = color;
+                fragColor = color;
             }
         } else {
             if (int(useBlending) == 1) {
-                base = mix(texture1, texture2, blendFactor);
+                fragColor = mix(texture1, texture2, blendFactor);
             } else {
-                base = texture1;
+                fragColor = texture1;
             }
         }
     }
+}
 
+void calculateTransparency() {
+    if (fragColor.a < 0.1) {
+        discard;
+    }
+}
+
+void calculateReflection() {
     if (int(useReflection) == 1) {
         vec3 I = normalize(worldPosition.rgb - cameraPosition);
         vec3 R = reflect(I, normalize(worldNormal));
@@ -84,11 +90,11 @@ void main()
             vec4 skyTexture2 = texture(textureDiffuseSky10, R);
             reflectedSkyColor = mix(skyTexture2, skyTexture1, skyBlendFactor);
         }
-        fragColor = mix(base, reflectedSkyColor, reflectivity);
-    } else {
-        fragColor = base;
+        fragColor = mix(fragColor, reflectedSkyColor, reflectivity);
     }
+}
 
+void calculateRefraction() {
     if (int(useRefraction) == 1) {
         float ratio = 1.f / refractiveIndex;
         vec3 I = normalize(worldPosition.rgb - cameraPosition);
@@ -101,7 +107,9 @@ void main()
         }
         fragColor = mix(fragColor, refractedSkyColor, 0.5);
     }
+}
 
+void calculateLighting() {
     if (int(useLighting) == 1) {
         // ambient
         vec3 ambient_ = lightColor * ambient;
@@ -119,9 +127,17 @@ void main()
         vec3 result = ambient_ + diffuse_; //+ specular;
         fragColor = vec4(fragColor.rgb * result, fragColor.a);
     }
+}
 
+void calculateFogVisibility() {
     fragColor = mix(vec4(fogColor, 1.f), fragColor, fogVisibility);
-    if (fragColor.a < 0.1) {
-        discard;
-    }
+}
+
+void main() {
+    loadTexture();
+    calculateTransparency();
+    calculateReflection();
+    calculateRefraction();
+    calculateLighting();
+    calculateFogVisibility();
 }

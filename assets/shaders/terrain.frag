@@ -33,16 +33,21 @@ uniform vec3 diffuse;
 uniform vec3 specular;
 uniform float shininess;
 
-void main()
-{
-
-    vec4 base = vec4(0.f);
+void loadTexture() {
     if (int(useColor) == 1) {
-        base = vec4(vColor, 1.f);
+        fragColor = vec4(vColor, 1.f);
     } else {
-        base = texture(textureDiffuse1, vTextureCoords);
+        fragColor = texture(textureDiffuse1, vTextureCoords);
     }
+}
 
+void calculateTransparency() {
+    if (fragColor.a < 0.1) {
+        discard;
+    }
+}
+
+void calculateReflection() {
     if (int(useReflection) == 1) {
         vec3 I = normalize(worldPosition.rgb - cameraPosition);
         vec3 R = reflect(I, normalize(worldNormal));
@@ -52,9 +57,11 @@ void main()
             vec4 skyTexture2 = texture(textureDiffuseSky10, R);
             reflectedSkyColor = mix(skyTexture2, skyTexture1, skyBlendFactor);
         }
-        base = mix(base, reflectedSkyColor, reflectivity);
+        fragColor = mix(fragColor, reflectedSkyColor, reflectivity);
     }
+}
 
+void calculateRefraction() {
     if (int(useRefraction) == 1) {
         float ratio = 1.f / refractiveIndex;
         vec3 I = normalize(worldPosition.rgb - cameraPosition);
@@ -65,9 +72,11 @@ void main()
             vec4 skyTexture2 = texture(textureDiffuseSky10, R);
             refractedSkyColor = mix(skyTexture2, skyTexture1, skyBlendFactor);
         }
-        base = mix(base, refractedSkyColor, 0.5);
+        fragColor = mix(fragColor, refractedSkyColor, 0.5);
     }
+}
 
+void calculateLighting() {
     if (int(useLighting) == 1) {
         // ambient
         vec3 ambient_ = lightColor * ambient;
@@ -83,11 +92,19 @@ void main()
         vec3 specular_ = lightColor * (spec * specular);
 
         vec3 result = ambient_ + diffuse_; //+ specular;
-        base = vec4(base.rgb * result, base.a);
+        fragColor = vec4(fragColor.rgb * result, fragColor.a);
     }
+}
 
-    fragColor = mix(vec4(fogColor, 1.f), base, fogVisibility);
-    if (fragColor.a < 0.1) {
-        discard;
-    }
+void calculateFogVisibility() {
+    fragColor = mix(vec4(fogColor, 1.f), fragColor, fogVisibility);
+}
+
+void main() {
+    loadTexture();
+    calculateTransparency();
+    calculateReflection();
+    calculateRefraction();
+    calculateLighting();
+    calculateFogVisibility();
 }

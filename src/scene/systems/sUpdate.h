@@ -4,7 +4,6 @@
 
 #include "core/application.h"
 #include "core/time.h"
-#include "pch.h"
 #include "scene/systems/animation/sAnimation.h"
 #include "scene/systems/graphics/sRender.h"
 #include "scene/systems/physics/sCollision.h"

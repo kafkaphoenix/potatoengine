@@ -13,14 +13,7 @@ uniform float useFog;
 uniform float fogDensity;
 uniform float fogGradient;
 
-void main()
-{
-    vec4 worldPosition = model * vec4(position.x, position.y, position.z, 1.f);
-    vec4 viewPosition = view * worldPosition;
-    vec4 clipPosition = projection * viewPosition;
-    gl_Position = clipPosition;
-    vTextureCoords = textureCoords;
-
+void calculateFogVisibility(vec4 viewPosition) {
     if (int(useFog) == 0) {
         fogVisibility = 1.f;
     } else {
@@ -28,4 +21,14 @@ void main()
         fogVisibility = exp(-pow((distanceRelativeToCamera * fogDensity), fogGradient));
         fogVisibility = clamp(fogVisibility, 0.f, 1.f);
     }
+}
+
+void main() {
+    vec4 worldPosition = model * vec4(position.x, position.y, position.z, 1.f);
+    vec4 viewPosition = view * worldPosition;
+    vec4 clipPosition = projection * viewPosition;
+    gl_Position = clipPosition;
+    vTextureCoords = textureCoords;
+
+    calculateFogVisibility(viewPosition);
 }

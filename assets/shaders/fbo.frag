@@ -87,8 +87,7 @@ void emboss_mode() {
     use_kernel(emboss_kernel);
 }
 
-void main()
-{
+void main() {
     switch (int(mode)) {
         case 0:
             normal_mode();

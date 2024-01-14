@@ -368,8 +368,8 @@ void Window::toggleWireframe(bool wireframe) {
   }
 }
 
-void Window::setEventCallback(const EventCallbackFn& cb) {
-  m_data.eventCallback = cb;
+void Window::setEventCallback(EventCallbackFn&& cb) {
+  m_data.eventCallback = std::move(cb);
 }
 
 void Window::setWindowTitle(std::string title) {

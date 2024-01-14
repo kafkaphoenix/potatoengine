@@ -9,7 +9,7 @@ class GameState : public engine::State {
 
     virtual void onAttach() override final;
     virtual void onDetach() override final;
-    virtual void onUpdate(engine::Time ts) override final;
+    virtual void onUpdate(const engine::Time& ts) override final;
     virtual void onImguiUpdate() override final;
     virtual void onEvent(engine::Event& e) override final;
 

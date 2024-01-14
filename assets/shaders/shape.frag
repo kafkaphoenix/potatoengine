@@ -13,21 +13,30 @@ uniform vec3 fogColor;
 uniform float useColor;
 uniform vec4 color;
 
-void main()
-{
-    vec4 texture1;
+void loadTexture() {
     if (int(useColor) == 0) {
         vec2 offsetTexture = vTextureCoords;
         if (int(useTextureAtlas) == 1) {
             offsetTexture = vTextureCoords / numRows + offset;
         }
-        texture1 = texture(textureDiffuse1, offsetTexture);
+        fragColor = texture(textureDiffuse1, offsetTexture);
     } else {
-        texture1 = color;
+        fragColor = color;
     }
+}
 
-    fragColor = mix(vec4(fogColor, 1.f), texture1, fogVisibility);
+void calculateTransparency() {
     if (fragColor.a < 0.1) {
         discard;
     }
+}
+
+void calculateFogVisibility() {
+    fragColor = mix(vec4(fogColor, 1.f), fragColor, fogVisibility);
+}
+
+void main() {
+    loadTexture();
+    calculateTransparency();
+    calculateFogVisibility();
 }

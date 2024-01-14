@@ -68,7 +68,7 @@ class Window {
     void toggleFocus(bool focused);
     void toggleVisibility(bool visible);
     void toggleWireframe(bool wireframe);
-    void setEventCallback(const EventCallbackFn& cb);
+    void setEventCallback(EventCallbackFn&& cb);
 
     void setWindowTitle(std::string title);
     void setWindowIcon(std::string path);

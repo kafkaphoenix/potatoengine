@@ -66,7 +66,7 @@ void GameState::onDetach() {
   asset_manager->clear();
 }
 
-void GameState::onUpdate(engine::Time ts) {
+void GameState::onUpdate(const engine::Time& ts) {
   auto& app = engine::Application::Get();
   const auto& settings = app.getSettings();
   const auto& scene_manager = app.getSceneManager();
