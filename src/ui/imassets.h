@@ -10,6 +10,8 @@
 #include "settings.h"
 #include "ui/imutils.h"
 
+using namespace potatoengine::assets;
+
 namespace potatoengine::ui {
 
 std::string selectedAssetManagerTabKey;
@@ -19,7 +21,7 @@ char assets_text_filter[128]{}; // TODO: move to class
 
 void drawAssetsManager(const std::unique_ptr<AssetsManager>& assets_manager,
                        const std::unique_ptr<Settings>& settings) {
-  const auto& assets = assets_manager->getAssetsByType();
+  const auto& assets = assets_manager->getAssets();
 
   if (assets.empty()) {
     ImGui::Text("No assets loaded");
@@ -42,20 +44,20 @@ void drawAssetsManager(const std::unique_ptr<AssetsManager>& assets_manager,
   ImGui::Columns(2);
 
   bool filterOption = false;
-  for (const auto& [AssetType, AssetsData] : assets) {
+  for (const auto& [type, value] : assets) {
     if (collapsed not_eq -1) {
       ImGui::SetNextItemOpen(collapsed not_eq 0);
     }
 
-    if (ImGui::CollapsingHeader(AssetType.c_str())) {
-      for (const auto& [AssetName, _] : AssetsData) {
+    if (ImGui::CollapsingHeader(type.c_str())) {
+      for (const auto& [name, _] : value) {
         if (assets_text_filter[0] not_eq '\0' and
-            strstr(AssetName.c_str(), assets_text_filter) == nullptr) {
+            strstr(name.c_str(), assets_text_filter) == nullptr) {
           continue;
         }
-        if (ImGui::Selectable(AssetName.c_str())) {
-          selectedAssetManagerTabKey = AssetName;
-          selectedAssetTabType = AssetType;
+        if (ImGui::Selectable(name.c_str())) {
+          selectedAssetManagerTabKey = name;
+          selectedAssetTabType = type;
         }
       }
     }
@@ -71,8 +73,7 @@ void drawAssetsManager(const std::unique_ptr<AssetsManager>& assets_manager,
   if (not selectedAssetManagerTabKey.empty()) {
     const auto& asset =
       assets.at(selectedAssetTabType).at(selectedAssetManagerTabKey);
-    const auto& assetInfo =
-      std::visit([](const auto& asset) { return asset->getInfo(); }, asset);
+    const auto& assetInfo = asset->getInfo();
 
     for (const auto& [key, value] : assetInfo) {
       if (key.starts_with("Prototype ") and selectedAssetTabType == "Prefab") {

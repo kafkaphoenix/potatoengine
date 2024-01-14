@@ -1,5 +1,8 @@
 #pragma once
 
+#include <entt/entt.hpp>
+
+#include "assets/model.h"
 #include "core/application.h"
 #include "pch.h"
 #include "scene/components/graphics/cMaterial.h"
@@ -56,8 +59,8 @@ void engine::SceneManager::onComponentAdded(entt::entity e, CBody& c) {
 
   // TODO rethink if add if not empty here and do it as ctag but creating all
   // the fields
-  auto model =
-    *assetsManager->get<Model>(c.filepath); // We need a copy of the model
+  auto model = *assetsManager->get<assets::Model>(
+    c.filepath); // We need a copy of the model
   c.meshes = std::move(model.getMeshes());
   c.materials = std::move(model.getMaterials());
 

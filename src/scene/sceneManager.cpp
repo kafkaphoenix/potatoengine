@@ -136,14 +136,14 @@ SceneManager::getAllNamedEntities() {
   return m_namedEntities;
 }
 
-void SceneManager::createPrototypes(std::string_view prefabID) {
-  m_entityFactory.createPrototypes(prefabID, m_registry);
+void SceneManager::createPrototypes(std::string_view prefabID, const std::unique_ptr<assets::AssetsManager>& assets_manager) {
+  m_entityFactory.createPrototypes(prefabID, m_registry, assets_manager);
   m_dirtyMetrics = true;
   m_dirtyNamedEntities = true;
 }
 
-void SceneManager::updatePrototypes(std::string_view prefabID) {
-  m_entityFactory.updatePrototypes(prefabID, m_registry);
+void SceneManager::updatePrototypes(std::string_view prefabID, const std::unique_ptr<assets::AssetsManager>& assets_manager) {
+  m_entityFactory.updatePrototypes(prefabID, m_registry, assets_manager);
 }
 
 void SceneManager::destroyPrototypes(std::string_view prefabID) {
@@ -167,15 +167,15 @@ bool SceneManager::containsPrototypes(std::string_view prefabID) const {
 }
 
 void SceneManager::createPrototype(std::string_view prefabID,
-                                   std::string_view prototypeID) {
-  m_entityFactory.createPrototype(prefabID, prototypeID, m_registry);
+                                   std::string_view prototypeID, const std::unique_ptr<assets::AssetsManager>& assets_manager) {
+  m_entityFactory.createPrototype(prefabID, prototypeID, m_registry, assets_manager);
   m_dirtyMetrics = true;
   m_dirtyNamedEntities = true;
 }
 
 void SceneManager::updatePrototype(std::string_view prefabID,
-                                   std::string_view prototypeID) {
-  m_entityFactory.updatePrototype(prefabID, prototypeID, m_registry);
+                                   std::string_view prototypeID, const std::unique_ptr<assets::AssetsManager>& assets_manager) {
+  m_entityFactory.updatePrototype(prefabID, prototypeID, m_registry, assets_manager);
 }
 
 void SceneManager::destroyPrototype(std::string_view prefabID,
@@ -197,7 +197,7 @@ bool SceneManager::containsPrototype(std::string_view prefabID,
 
 void SceneManager::loadScene(
   std::string_view sceneID,
-  const std::unique_ptr<AssetsManager>& assetsManager) {
+  const std::unique_ptr<assets::AssetsManager>& assetsManager) {
   ENGINE_TRACE("Loading scene elements...");
   SceneLoader loadedScene;
   loadedScene.load(sceneID, assetsManager);
@@ -206,7 +206,7 @@ void SceneManager::loadScene(
 }
 
 void SceneManager::createScene(
-  std::string sceneID, const std::unique_ptr<AssetsManager>& assetsManager,
+  std::string sceneID, const std::unique_ptr<assets::AssetsManager>& assetsManager,
   const std::unique_ptr<Renderer>& renderer, bool reload) {
   Timer timer;
   if (reload) {
@@ -229,7 +229,7 @@ void SceneManager::createScene(
   // A Prefab asset is a json file that contains a list of entity prototypes
   for (std::string_view prefabID : loadedScene.getLoadedPrefabs()) {
     ENGINE_TRACE("Creating scene prefabs prototypes...");
-    createPrototypes(prefabID);
+    createPrototypes(prefabID, assetsManager);
     ENGINE_TRACE("Creating scene entities...");
     createEntities(prefabID, loadedScene, assetsManager, renderer);
   }
@@ -248,7 +248,7 @@ void SceneManager::createScene(
 
 void SceneManager::createEntities(
   std::string_view prefabID, const SceneLoader& loadedScene,
-  const std::unique_ptr<AssetsManager>& assetsManager,
+  const std::unique_ptr<assets::AssetsManager>& assetsManager,
   const std::unique_ptr<Renderer>& renderer) {
   ENGINE_TRACE("Creating scene normal entities...");
   for (const auto& [name, data] :
@@ -357,7 +357,7 @@ void SceneManager::createEntities(
           cBody.meshes.clear();
           cBody.materials.clear();
           auto model =
-            *assetsManager->get<Model>(filepath); // We need a copy of the model
+            *assetsManager->get<assets::Model>(filepath); // We need a copy of the model
           cBody.meshes = std::move(model.getMeshes());
           cBody.materials = std::move(model.getMaterials());
         }
@@ -382,7 +382,7 @@ void SceneManager::createEntities(
           c.textures.clear();
           c.textures.reserve(c.filepaths.size());
           for (const auto& filepath : c.filepaths) {
-            c.textures.emplace_back(assetsManager->get<Texture>(filepath));
+            c.textures.emplace_back(assetsManager->get<assets::Texture>(filepath));
           }
         }
       }
@@ -591,7 +591,7 @@ void SceneManager::createEntities(
           cBody.meshes.clear();
           cBody.materials.clear();
           auto model =
-            *assetsManager->get<Model>(filepath); // We need a copy of the model
+            *assetsManager->get<assets::Model>(filepath); // We need a copy of the model
           cBody.meshes = std::move(model.getMeshes());
           cBody.materials = std::move(model.getMaterials());
         }
@@ -681,7 +681,7 @@ void SceneManager::createEntities(
           cBody.meshes.clear();
           cBody.materials.clear();
           auto model =
-            *assetsManager->get<Model>(filepath); // We need a copy of the model
+            *assetsManager->get<assets::Model>(filepath); // We need a copy of the model
           cBody.meshes = std::move(model.getMeshes());
           cBody.materials = std::move(model.getMaterials());
         }
@@ -741,7 +741,7 @@ void SceneManager::createEntities(
 }
 
 void SceneManager::reloadScene(
-  const std::unique_ptr<AssetsManager>& assetsManager,
+  const std::unique_ptr<assets::AssetsManager>& assetsManager,
   const std::unique_ptr<Renderer>& renderer) {
   ENGINE_ASSERT(not m_activeScene.empty(), "No scene is active!");
   ENGINE_WARN("Reloading scene {}", m_activeScene);

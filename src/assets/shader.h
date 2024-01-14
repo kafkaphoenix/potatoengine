@@ -1,22 +1,22 @@
 #pragma once
 
-#include "pch.h"
-#include "utils/numericComparator.h"
 #include <glad/glad.h>
 
-namespace potatoengine {
+#include "assets/asset.h"
+#include "pch.h"
+#include "utils/numericComparator.h"
 
-class Shader {
+namespace potatoengine::assets {
+
+class Shader : public Asset {
   public:
     Shader(std::filesystem::path&& fp);
-    ~Shader();
-    Shader& operator=(const Shader&) = delete;
+    virtual ~Shader() override final;
 
-    const std::map<std::string, std::string, NumericComparator>& getInfo();
+    virtual const std::map<std::string, std::string, NumericComparator>&
+    getInfo() override final;
 
-    bool operator==(const Shader& other) const {
-      return m_filepath == other.m_filepath;
-    }
+    virtual bool operator==(const Asset& other) const override final;
     operator GLuint() const noexcept { return m_id; }
 
   private:

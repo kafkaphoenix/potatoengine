@@ -22,10 +22,10 @@ class FBO {
     void clear(const float color[4], const float depth);
 
     void resize(uint32_t width, uint32_t height);
-    const std::unique_ptr<Texture>& getColorTexture() const noexcept {
+    const std::unique_ptr<assets::Texture>& getColorTexture() const noexcept {
       return m_colorTexture;
     }
-    const std::unique_ptr<Texture>& getDepthTexture() const noexcept {
+    const std::unique_ptr<assets::Texture>& getDepthTexture() const noexcept {
       return m_depthTexture;
     }
     uint32_t getBufferID() const;
@@ -45,8 +45,8 @@ class FBO {
     uint32_t m_width{};
     uint32_t m_height{};
     uint32_t m_depthBufferType{};
-    std::unique_ptr<Texture> m_colorTexture{};
-    std::unique_ptr<Texture> m_depthTexture{};
+    std::unique_ptr<assets::Texture> m_colorTexture{};
+    std::unique_ptr<assets::Texture> m_depthTexture{};
     uint32_t m_depthRenderBuffer{};
     uint32_t m_stencilRenderBuffer{};
     uint32_t m_depthStencilRenderBuffer{};

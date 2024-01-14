@@ -2,7 +2,7 @@
 
 #include <entt/entt.hpp>
 
-#include "assets/prefab.h"
+#include "assets/assetsManager.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -11,8 +11,8 @@ class EntityFactory {
   public:
     using Prototypes = std::map<std::string, entt::entity, NumericComparator>;
 
-    void createPrototypes(std::string_view prefabID, entt::registry& registry);
-    void updatePrototypes(std::string_view prefabID, entt::registry& registry);
+    void createPrototypes(std::string_view prefabID, entt::registry& registry, const std::unique_ptr<assets::AssetsManager>& assets_manager);
+    void updatePrototypes(std::string_view prefabID, entt::registry& registry, const std::unique_ptr<assets::AssetsManager>& assets_manager);
     void destroyPrototypes(std::string_view prefabID, entt::registry& registry);
     const Prototypes& getPrototypes(std::string_view prefabID);
     const std::map<std::string, Prototypes, NumericComparator>&
@@ -21,10 +21,10 @@ class EntityFactory {
 
     void createPrototype(std::string_view prefabID,
                          std::string_view prototypeID,
-                         entt::registry& registry);
+                         entt::registry& registry, const std::unique_ptr<assets::AssetsManager>& assets_manager);
     void updatePrototype(std::string_view prefabID,
                          std::string_view prototypeID,
-                         entt::registry& registry);
+                         entt::registry& registry, const std::unique_ptr<assets::AssetsManager>& assets_manager);
     void destroyPrototype(std::string_view prefabID,
                           std::string_view prototypeID,
                           entt::registry& registry);

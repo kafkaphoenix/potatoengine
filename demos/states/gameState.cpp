@@ -17,7 +17,7 @@ void GameState::onAttach() {
 
   // TODO revisit this with multiple states
   if (not settings->activeScene.empty()) {
-    asset_manager->load<engine::Scene>(settings->activeScene,
+    asset_manager->load<engine::assets::Scene>(settings->activeScene,
                                        settings->activeScenePath);
     scene_manager->loadScene(settings->activeScene, asset_manager);
     scene_manager->createScene(settings->activeScene, asset_manager, renderer,
@@ -25,7 +25,6 @@ void GameState::onAttach() {
   }
 
   if (settings->activeScene == "Flappy Bird") {
-    const auto& scene_manager = app.getSceneManager();
     auto& registry = scene_manager->getRegistry();
     auto pipe = scene_manager->getEntity("green_pipe_top");
     auto& ptransform = registry.get<engine::CTransform>(pipe);
@@ -77,7 +76,7 @@ void GameState::onUpdate(engine::Time ts) {
   if (settings->reloadScene and
       scene_manager->getActiveScene() not_eq settings->activeScene) {
     asset_manager->clear();
-    asset_manager->load<engine::Scene>(settings->activeScene,
+    asset_manager->load<engine::assets::Scene>(settings->activeScene,
                                        settings->activeScenePath);
     scene_manager->clearScene(renderer);
     scene_manager->loadScene(settings->activeScene, asset_manager);
@@ -85,7 +84,6 @@ void GameState::onUpdate(engine::Time ts) {
                                false);
     settings->reloadScene = false;
     if (settings->activeScene == "Flappy Bird") { // TODO remove this
-      const auto& scene_manager = app.getSceneManager();
       auto& registry = scene_manager->getRegistry();
       auto pipe = scene_manager->getEntity("green_pipe_top");
       auto& ptransform = registry.get<engine::CTransform>(pipe);
@@ -115,7 +113,6 @@ void GameState::onUpdate(engine::Time ts) {
     scene_manager->reloadScene(asset_manager, renderer);
     settings->reloadScene = false;
     if (settings->activeScene == "Flappy Bird") { // TODO remove this
-      const auto& scene_manager = app.getSceneManager();
       auto& registry = scene_manager->getRegistry();
       auto pipe = scene_manager->getEntity("green_pipe_top");
       auto& ptransform = registry.get<engine::CTransform>(pipe);

@@ -543,7 +543,7 @@ void engine::SceneManager::onComponentAdded(entt::entity e, CTexture& c) {
 
   c.textures.reserve(c.filepaths.size());
   for (std::string_view filepath : c.filepaths) {
-    c.textures.emplace_back(assetsManager->get<Texture>(filepath.data()));
+    c.textures.emplace_back(assetsManager->get<assets::Texture>(filepath.data()));
   }
 
   m_registry.replace<CTexture>(e, c);

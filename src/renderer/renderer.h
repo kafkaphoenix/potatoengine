@@ -25,7 +25,7 @@ class Renderer {
     void endScene();
 
     void addShaderProgram(std::string&& name,
-                          const std::unique_ptr<AssetsManager>& assetsManager);
+                          const std::unique_ptr<assets::AssetsManager>& assetsManager);
     void addFramebuffer(std::string&& framebuffer, uint32_t width,
                         uint32_t height, uint32_t bufferType);
     void deleteFramebuffer(std::string_view framebuffer);

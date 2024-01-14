@@ -2,7 +2,7 @@
 
 #include "utils/timer.h"
 
-namespace potatoengine {
+namespace potatoengine::assets {
 Prefab::Prefab(std::filesystem::path&& fp,
                std::unordered_set<std::string>&& targetedPrototypes)
   : m_filepath(std::move(fp.string())),
@@ -109,5 +109,13 @@ Prefab::getTargetedPrototypeInfo(std::string_view prototypeID) {
   m_prototypeInfo[prototypeID.data()] = m_info;
 
   return m_prototypeInfo.at(prototypeID.data());
+}
+
+bool Prefab::operator==(const Asset& other) const {
+  if (typeid(*this) not_eq typeid(other)) {
+    ENGINE_ASSERT(false, "Cannot compare prefab with other asset type!");
+  }
+  const Prefab& otherPrefab = static_cast<const Prefab&>(other);
+  return m_filepath == otherPrefab.m_filepath;
 }
 }

@@ -3,13 +3,17 @@
 #include <nlohmann/json.hpp>
 
 #include "assets/assetsManager.h"
+#include "assets/scene.h"
 #include "pch.h"
+
+using json = nlohmann::json;
 
 namespace potatoengine {
 
 class SceneLoader {
   public:
-    void load(std::string_view sceneID, const std::unique_ptr<AssetsManager>& assets_manager);
+    void load(std::string_view sceneID,
+              const std::unique_ptr<assets::AssetsManager>& assets_manager);
 
     const std::unordered_set<std::string>& getLoadedShaders() const noexcept {
       return m_loadedShaders;
@@ -67,31 +71,36 @@ class SceneLoader {
     std::unordered_map<std::string, std::unordered_map<std::string, json>>
       m_loadedFBOEntities;
 
-    void loadShaders(const std::shared_ptr<Scene>& scene,
-                     const std::unique_ptr<AssetsManager>& assets_manager);
-    void loadTextures(const std::shared_ptr<Scene>& scene,
-                      const std::unique_ptr<AssetsManager>& assets_manager);
-    void loadModels(const std::shared_ptr<Scene>& scene,
-                    const std::unique_ptr<AssetsManager>& assets_manager);
-    void loadPrefabs(const std::shared_ptr<Scene>& scene,
-                     const std::unique_ptr<AssetsManager>& assets_manager);
     void
-    loadChildrenScenes(const std::shared_ptr<Scene>& scene,
-                       const std::unique_ptr<AssetsManager>& assets_manager);
+    loadShaders(const std::shared_ptr<assets::Scene>& scene,
+                const std::unique_ptr<assets::AssetsManager>& assets_manager);
+    void
+    loadTextures(const std::shared_ptr<assets::Scene>& scene,
+                 const std::unique_ptr<assets::AssetsManager>& assets_manager);
+    void
+    loadModels(const std::shared_ptr<assets::Scene>& scene,
+               const std::unique_ptr<assets::AssetsManager>& assets_manager);
+    void
+    loadPrefabs(const std::shared_ptr<assets::Scene>& scene,
+                const std::unique_ptr<assets::AssetsManager>& assets_manager);
+    void loadChildrenScenes(
+      const std::shared_ptr<assets::Scene>& scene,
+      const std::unique_ptr<assets::AssetsManager>& assets_manager);
 
-    void
-    loadNormalEntities(const std::shared_ptr<Scene>& scene,
-                       const std::unique_ptr<AssetsManager>& assets_manager);
-    void
-    loadLightEntities(const std::shared_ptr<Scene>& scene,
-                      const std::unique_ptr<AssetsManager>& assets_manager);
-    void
-    loadCameraEntities(const std::shared_ptr<Scene>& scene,
-                       const std::unique_ptr<AssetsManager>& assets_manager);
-    void
-    loadSystemEntities(const std::shared_ptr<Scene>& scene,
-                       const std::unique_ptr<AssetsManager>& assets_manager);
-    void loadFBOEntities(const std::shared_ptr<Scene>& scene,
-                         const std::unique_ptr<AssetsManager>& assets_manager);
+    void loadNormalEntities(
+      const std::shared_ptr<assets::Scene>& scene,
+      const std::unique_ptr<assets::AssetsManager>& assets_manager);
+    void loadLightEntities(
+      const std::shared_ptr<assets::Scene>& scene,
+      const std::unique_ptr<assets::AssetsManager>& assets_manager);
+    void loadCameraEntities(
+      const std::shared_ptr<assets::Scene>& scene,
+      const std::unique_ptr<assets::AssetsManager>& assets_manager);
+    void loadSystemEntities(
+      const std::shared_ptr<assets::Scene>& scene,
+      const std::unique_ptr<assets::AssetsManager>& assets_manager);
+    void loadFBOEntities(
+      const std::shared_ptr<assets::Scene>& scene,
+      const std::unique_ptr<assets::AssetsManager>& assets_manager);
 };
 }

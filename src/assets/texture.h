@@ -1,10 +1,13 @@
 #pragma once
 
+#include <glad/glad.h>
+
+#include "assets/asset.h"
 #include "pch.h"
 #include "utils/numericComparator.h"
-#include <glad/glad.h>
-namespace potatoengine {
-class Texture {
+
+namespace potatoengine::assets {
+class Texture : public Asset {
   public:
     Texture() = default; // TODO revisit is for std::vector in Model class
     Texture(uint32_t width, uint32_t height, GLenum glFormat,
@@ -14,8 +17,7 @@ class Texture {
             std::optional<bool> flipVertically = std::nullopt,
             std::optional<uint32_t> mipmap_level = std::nullopt,
             std::optional<bool> gammaCorrection = std::nullopt);
-    ~Texture();
-    Texture& operator=(const Texture&) = delete;
+    virtual ~Texture() override final;
 
     void bindSlot(uint32_t slot);
     void rebindSlot();
@@ -28,12 +30,11 @@ class Texture {
       return (m_filepaths.size() == 1) ? m_filepaths[0] : m_directory;
     }
     std::string_view getType() const noexcept { return m_type; }
-    const std::map<std::string, std::string, NumericComparator>& getInfo();
+    virtual const std::map<std::string, std::string, NumericComparator>&
+    getInfo() override final;
     bool isCubemap() const noexcept { return m_isCubemap; }
 
-    bool operator==(const Texture& other) const {
-      return m_filepaths == other.m_filepaths;
-    }
+    virtual bool operator==(const Asset& other) const override final;
 
     static constexpr bool FLIP_VERTICALLY = true;
     static constexpr bool DONT_FLIP_VERTICALLY = false;

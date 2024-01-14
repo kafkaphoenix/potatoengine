@@ -2,7 +2,7 @@
 
 #include "pch.h"
 
-namespace potatoengine {
+namespace potatoengine::assets {
 Shader::Shader(std::filesystem::path&& fp)
   : m_filepath(std::move(fp.string())) {
   std::ifstream f(fp);
@@ -65,5 +65,14 @@ const std::map<std::string, std::string, NumericComparator>& Shader::getInfo() {
   }
 
   return m_info;
+}
+
+bool Shader::operator==(const Asset& other) const {
+  if (typeid(*this) not_eq typeid(other)) {
+    ENGINE_ASSERT(false, "Cannot compare shader with other asset type!");
+  }
+  const Shader& otherShader = static_cast<const Shader&>(other);
+  return m_filepath == otherShader.m_filepath and
+         m_type == otherShader.m_type and m_id == otherShader.m_id;
 }
 }

@@ -2,7 +2,7 @@
 
 #include "utils/timer.h"
 
-namespace potatoengine {
+namespace potatoengine::assets {
 Scene::Scene(std::filesystem::path&& fp) : m_filepath(std::move(fp.string())) {
   std::ifstream f(fp);
   ENGINE_ASSERT(f.is_open(), "Failed to open scene file!");
@@ -95,5 +95,13 @@ const std::map<std::string, std::string, NumericComparator>& Scene::getInfo() {
   m_info["FBO entities"] = std::to_string(m_fboEntities.size());
 
   return m_info;
+}
+
+bool Scene::operator==(const Asset& other) const {
+  if (typeid(*this) not_eq typeid(other)) {
+    ENGINE_ASSERT(false, "Cannot compare scene with other asset type!");
+  }
+  const Scene& otherScene = static_cast<const Scene&>(other);
+  return m_filepath == otherScene.m_filepath;
 }
 }

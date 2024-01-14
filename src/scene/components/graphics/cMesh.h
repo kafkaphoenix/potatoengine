@@ -20,7 +20,7 @@ using namespace entt::literals;
 namespace potatoengine {
 
 struct CMesh {
-    std::vector<std::shared_ptr<Texture>> textures;
+    std::vector<std::shared_ptr<assets::Texture>> textures;
     std::shared_ptr<VAO> vao;
     std::vector<Vertex> vertices; // TODO: remove this
     std::shared_ptr<VBO> vbo;
@@ -29,7 +29,7 @@ struct CMesh {
 
     CMesh() = default;
     explicit CMesh(std::vector<Vertex>&& v, std::vector<uint32_t>&& i,
-                   std::vector<std::shared_ptr<engine::Texture>>&& t,
+                   std::vector<std::shared_ptr<assets::Texture>>&& t,
                    std::string&& vt = "basic")
       : vertices(std::move(v)), indices(std::move(i)), textures(std::move(t)),
         vertexType(std::move(vt)) {}
@@ -70,9 +70,9 @@ struct CMesh {
     }
 
     // TODO rethink this method
-    void bindTextures(const std::unique_ptr<ShaderProgram>& sp, CTexture* cTexture,
-                      CTextureAtlas* cTextureAtlas, CTexture* cSkyboxTexture,
-                      CMaterial* cMaterial) {
+    void bindTextures(const std::unique_ptr<ShaderProgram>& sp,
+                      CTexture* cTexture, CTextureAtlas* cTextureAtlas,
+                      CTexture* cSkyboxTexture, CMaterial* cMaterial) {
       sp->resetActiveUniforms();
       sp->use();
       sp->setFloat("useFog",
@@ -110,9 +110,9 @@ struct CMesh {
             cTexture->drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND or
             cTexture->drawMode ==
               CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
-          if (sp->getName() ==
-              "basic" or sp->getName() ==
-              "shape") { // terrain shader get texture atlas data from vertex
+          if (sp->getName() == "basic" or
+              sp->getName() ==
+                "shape") { // terrain shader get texture atlas data from vertex
             sp->setFloat("useTextureAtlas", 1.f);
             int index = cTextureAtlas->index;
             int rows = cTextureAtlas->rows;

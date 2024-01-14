@@ -24,7 +24,7 @@ struct CTexture {
     };
 
     std::vector<std::string> filepaths;
-    std::vector<std::shared_ptr<Texture>> textures;
+    std::vector<std::shared_ptr<assets::Texture>> textures;
     glm::vec4 color{};
     float blendFactor{};
     float reflectivity{};

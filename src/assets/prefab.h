@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "assets/asset.h"
 #include "pch.h"
 #include "utils/numericComparator.h"
 
@@ -13,14 +14,14 @@ struct Prototype {
     std::unordered_map<std::string, json> components{};
 };
 
-namespace potatoengine {
-class Prefab {
+namespace potatoengine::assets {
+class Prefab : public Asset {
   public:
     Prefab(std::filesystem::path&& fp,
            std::unordered_set<std::string>&& targetedPrototypes);
-    Prefab& operator=(const Prefab&) = delete;
 
-    const std::map<std::string, std::string, NumericComparator>& getInfo();
+    virtual const std::map<std::string, std::string, NumericComparator>&
+    getInfo() override final;
     const std::map<std::string, std::string, NumericComparator>&
     getTargetedPrototypeInfo(std::string_view prototypeID);
 
@@ -45,9 +46,7 @@ class Prefab {
       return m_prototypes;
     }
 
-    bool operator==(const Prefab& other) const {
-      return m_filepath == other.m_filepath;
-    }
+    virtual bool operator==(const Asset& other) const override final;
 
   private:
     std::string m_filepath{};

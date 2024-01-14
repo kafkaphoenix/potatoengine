@@ -35,7 +35,7 @@ class Application {
     const std::unique_ptr<SceneManager>& getSceneManager() const {
       return m_sceneManager;
     }
-    const std::unique_ptr<AssetsManager>& getAssetsManager() const {
+    const std::unique_ptr<assets::AssetsManager>& getAssetsManager() const {
       return m_assetsManager;
     }
     const std::unique_ptr<Renderer>& getRenderer() const { return m_renderer; }
@@ -54,7 +54,7 @@ class Application {
 
   protected:
     std::unique_ptr<SceneManager> m_sceneManager;
-    std::unique_ptr<AssetsManager> m_assetsManager;
+    std::unique_ptr<assets::AssetsManager> m_assetsManager;
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<Settings> m_settings;
 

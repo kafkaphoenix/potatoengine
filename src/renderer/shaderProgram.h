@@ -18,8 +18,8 @@ class ShaderProgram {
     ShaderProgram(std::string&& name);
     ~ShaderProgram();
 
-    void attach(const Shader& s);
-    void detach(const Shader& s);
+    void attach(const assets::Shader& s);
+    void detach(const assets::Shader& s);
     void link();
     void use();
     void unuse();

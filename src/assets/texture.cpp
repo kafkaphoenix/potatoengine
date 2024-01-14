@@ -6,7 +6,7 @@
 
 #include "pch.h"
 
-namespace potatoengine {
+namespace potatoengine::assets {
 
 Texture::Texture(uint32_t width, uint32_t height, GLenum glFormat,
                  std::optional<bool> wrap)
@@ -199,6 +199,21 @@ Texture::getInfo() {
   m_info["Gamma Correction"] = m_gammaCorrection ? "true" : "false";
 
   return m_info;
+}
+
+bool Texture::operator==(const Asset& other) const {
+  if (typeid(*this) != typeid(other)) {
+    ENGINE_ASSERT(false, "Cannot compare texture with other asset type!");
+  }
+  const Texture& otherTexture = static_cast<const Texture&>(other);
+  for (const std::string& filepath : m_filepaths) {
+    if (std::find(otherTexture.m_filepaths.begin(),
+                  otherTexture.m_filepaths.end(),
+                  filepath) == otherTexture.m_filepaths.end()) {
+      return false;
+    }
+  }
+  return m_id == otherTexture.m_id;
 }
 
 std::unique_ptr<Texture> Texture::Create(uint32_t width, uint32_t height,

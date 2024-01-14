@@ -1,8 +1,10 @@
 #pragma once
 
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include "pch.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {

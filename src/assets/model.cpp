@@ -6,7 +6,7 @@
 
 #include "renderer/buffer.h"
 
-namespace potatoengine {
+namespace potatoengine::assets {
 
 Model::Model(std::filesystem::path&& fp, std::optional<bool> gammaCorrection)
   : m_filepath(std::move(fp.string())),
@@ -221,6 +221,14 @@ Model::getLoadedTextureInfo(std::string_view textureID) {
     m_loadedTextures.at(std::stoi(textureID.data()))->getInfo();
 
   return m_loadedTextureInfo.at(std::string(textureID));
+}
+
+bool Model::operator==(const Asset& other) const {
+  if (typeid(other) not_eq typeid(Model)) {
+    ENGINE_ASSERT(false, "Cannot compare model with other asset type!");
+  }
+  const Model& otherModel = static_cast<const Model&>(other);
+  return m_filepath == otherModel.m_filepath;
 }
 
 }

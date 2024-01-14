@@ -1,8 +1,11 @@
 #pragma once
 
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include "pch.h"
+#include "scene/components/graphics/cMesh.h"
 #include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
 #include "utils/shapeFactory.h"

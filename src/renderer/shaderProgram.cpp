@@ -13,9 +13,9 @@ ShaderProgram::~ShaderProgram() {
 
 ShaderProgram::operator GLuint() const { return static_cast<GLuint>(m_id); }
 
-void ShaderProgram::attach(const Shader& s) { glAttachShader(m_id, s); }
+void ShaderProgram::attach(const assets::Shader& s) { glAttachShader(m_id, s); }
 
-void ShaderProgram::detach(const Shader& s) { glDetachShader(m_id, s); }
+void ShaderProgram::detach(const assets::Shader& s) { glDetachShader(m_id, s); }
 
 void ShaderProgram::link() {
   glLinkProgram(m_id);

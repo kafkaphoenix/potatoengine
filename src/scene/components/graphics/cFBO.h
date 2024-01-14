@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <entt/entt.hpp>
+
 #include "pch.h"
 #include "utils/numericComparator.h"
 

@@ -2,18 +2,19 @@
 
 #include <nlohmann/json.hpp>
 
+#include "assets/asset.h"
 #include "pch.h"
 #include "utils/numericComparator.h"
 
 using json = nlohmann::json;
 
-namespace potatoengine {
-class Scene {
+namespace potatoengine::assets {
+class Scene : public Asset {
   public:
     Scene(std::filesystem::path&& fp);
-    Scene& operator=(const Scene&) = delete;
 
-    const std::map<std::string, std::string, NumericComparator>& getInfo();
+    virtual const std::map<std::string, std::string, NumericComparator>&
+    getInfo() override final;
 
     const std::unordered_map<std::string, json>& getShaders() const noexcept {
       return m_shaders;
@@ -52,9 +53,7 @@ class Scene {
       return m_fboEntities;
     }
 
-    bool operator==(const Scene& other) const noexcept {
-      return m_filepath == other.m_filepath;
-    }
+    virtual bool operator==(const Asset& other) const override final;
 
   private:
     std::string m_filepath{};
