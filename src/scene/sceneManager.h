@@ -5,10 +5,7 @@
 #include "assets/assetsManager.h"
 #include "core/time.h"
 #include "events/event.h"
-#include "renderer/renderer.h"
-#include "scene/entityFactory.h"
-#include "scene/sceneLoader.h"
-#include "utils/numericComparator.h"
+#include "scene/sceneFactory.h"
 #include "utils/uuid.h"
 
 namespace potatoengine {
@@ -17,64 +14,55 @@ class SceneManager {
     SceneManager();
     void onEvent(Event& e);
     void onUpdate(const Time& ts);
-    const std::map<std::string, std::string, NumericComparator>& getMetrics();
-    entt::registry& getRegistry() noexcept { return m_registry; }
-
-    entt::entity createEntity(std::string_view prefabID, std::string_view prototypeID,
-                        const std::optional<uint32_t>& uuid = std::nullopt);
-    entt::entity cloneEntity(const entt::entity& e, uint32_t uuid);
-    void removeEntity(entt::entity& e);
+    entt::registry& getRegistry() noexcept;
     entt::entity getEntity(std::string_view name);
     entt::entity getEntity(UUID& uuid);
-    const std::map<std::string, entt::entity, NumericComparator>&
-    getAllNamedEntities();
 
-    void createPrototypes(std::string_view prefabID, const std::unique_ptr<assets::AssetsManager>& asset_manager);
-    void updatePrototypes(std::string_view prefabID, const std::unique_ptr<assets::AssetsManager>& asset_manager);
-    void destroyPrototypes(std::string_view prefabID);
-    const EntityFactory::Prototypes& getPrototypes(std::string_view prefabID);
-    const std::map<std::string, EntityFactory::Prototypes, NumericComparator>&
-    getAllPrototypes();
-    bool containsPrototypes(std::string_view prefabID) const;
-    void createPrototype(std::string_view prefabID,
-                         std::string_view prototypeID, const std::unique_ptr<assets::AssetsManager>& asset_manager);
-    void updatePrototype(std::string_view prefabID,
-                         std::string_view prototypeID, const std::unique_ptr<assets::AssetsManager>& asset_manager);
-    void destroyPrototype(std::string_view prefabID,
-                          std::string_view prototypeID);
-    entt::entity getPrototype(std::string_view prefabID,
-                        std::string_view prototypeID);
-    bool containsPrototype(std::string_view prefabID,
-                           std::string_view prototypeID) const;
-
-    // TODO: move to scene creator if I fix the circular dependency
-    void loadScene(std::string_view sceneID, const std::unique_ptr<assets::AssetsManager>& asset_manager);
-    void createScene(std::string sceneID, const std::unique_ptr<assets::AssetsManager>& asset_manager,
-                     const std::unique_ptr<Renderer>& renderer, bool reload);
-    void createEntities(std::string_view prefabID,
-                        const SceneLoader& loadedScene,
-                        const std::unique_ptr<assets::AssetsManager>& asset_manager,
-                        const std::unique_ptr<Renderer>& renderer);
-    void reloadScene(const std::unique_ptr<assets::AssetsManager>& asset_manager,
-                     const std::unique_ptr<Renderer>& renderer);
-    void clearScene(const std::unique_ptr<Renderer>& renderer);
-    std::string_view getActiveScene() const noexcept { return m_activeScene; }
-
-    template <typename Component> void onComponentAdded(entt::entity e, Component& c);
-
-    template <typename Component> void onComponentCloned(entt::entity e, Component& c);
+    template <typename Component>
+    void onComponentAdded(entt::entity e, Component& c);
+    template <typename Component>
+    void onComponentCloned(entt::entity e, Component& c);
 
     static std::unique_ptr<SceneManager> Create();
 
-  private:
-    EntityFactory m_entityFactory{};
-    entt::registry m_registry;
-    std::string m_activeScene{};
-    std::unordered_map<std::string, SceneLoader> m_loadedScenes{};
+    // scene factory methods
+    entt::entity
+    createEntity(std::string_view prefabID, std::string&& prototypeID, std::string&& name,
+                 const std::optional<uint32_t>& uuid = std::nullopt);
+    entt::entity cloneEntity(const entt::entity& e);
+    void removeEntity(entt::entity& e);
 
-    std::map<std::string, std::string, NumericComparator> m_metrics{};
-    std::map<std::string, entt::entity, NumericComparator> m_namedEntities{};
-    bool m_dirtyMetrics{};
-    bool m_dirtyNamedEntities{};
+    void createScene(std::string scene_name, std::string scene_path);
+    void reloadScene(bool reload_prototypes);
+    void clearScene();
+    std::string getActiveScene() const;
+    const std::map<std::string, entt::entity, NumericComparator>&
+    getNamedEntities();
+    const std::map<std::string, std::string, NumericComparator>& getMetrics();
+
+    // entity factory methods
+    void createPrototypes(
+      std::string_view prefab_name,
+      const std::unordered_set<std::string>& prototypeIDs);
+    void updatePrototypes(
+      std::string_view prefab_name,
+      const std::unordered_set<std::string>& prototypeIDs);
+    void destroyPrototypes(std::string_view prefab_name,
+                           const std::unordered_set<std::string>& prototypeIDs);
+    EntityFactory::Prototypes
+    getPrototypes(std::string_view prefab_name,
+                  const std::unordered_set<std::string>& prototypeIDs);
+    bool containsPrototypes(std::string_view prefab_name,
+                            const std::unordered_set<std::string>& prototypeIDs);
+    const std::map<std::string, EntityFactory::Prototypes, NumericComparator>&
+    getAllPrototypes();
+    const std::map<std::string, std::string, NumericComparator>&
+    getPrototypesCountByPrefab();
+    // does not destroy entt entities, just clears the map
+    void clearPrototypes();
+
+  private:
+    entt::registry m_registry;
+    SceneFactory m_sceneFactory;
 };
 }

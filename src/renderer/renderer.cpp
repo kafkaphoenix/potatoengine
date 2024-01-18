@@ -25,10 +25,10 @@ void Renderer::beginScene(const CCamera& c, const CTransform& t) {
 void Renderer::endScene() {}
 
 void Renderer::addShaderProgram(
-  std::string&& name, const std::unique_ptr<assets::AssetsManager>& assetsManager) {
+  std::string&& name, const std::unique_ptr<assets::AssetsManager>& assets_manager) {
   auto newShaderProgram = ShaderProgram::Create(std::string(name));
-  const auto& vs = assetsManager->get<assets::Shader>("v" + name);
-  const auto& fs = assetsManager->get<assets::Shader>("f" + name);
+  const auto& vs = assets_manager->get<assets::Shader>("v" + name);
+  const auto& fs = assets_manager->get<assets::Shader>("f" + name);
   newShaderProgram->attach(*vs);
   newShaderProgram->attach(*fs);
   newShaderProgram->link();

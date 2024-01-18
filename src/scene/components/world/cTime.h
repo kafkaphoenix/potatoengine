@@ -84,7 +84,7 @@ struct CTime {
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CTime& c) {
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CTime& c) {
   c.validate();
   c.setTime(c.startingTime);
 

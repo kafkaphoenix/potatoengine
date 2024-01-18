@@ -1,6 +1,8 @@
 #pragma once
 
+#include <entt/entt.hpp>
 #include "FastNoiseLite.h"
+
 #include "pch.h"
 #include "utils/numericComparator.h"
 
@@ -86,4 +88,16 @@ struct CNoise {
 
     void setLacunarity() { noise.SetFractalLacunarity(lacunarity); }
 };
+}
+
+template <>
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CNoise& c) {
+  c.setNoiseType();
+  c.setSeed();
+  c.setOctaves();
+  c.setFrequency();
+  c.setPersistence();
+  c.setLacunarity();
+
+  m_registry.replace<CNoise>(e, c);
 }

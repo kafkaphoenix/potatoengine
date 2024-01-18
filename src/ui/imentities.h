@@ -119,7 +119,7 @@ void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
   }
 
   if (ImGui::CollapsingHeader("Instances")) {
-    for (const auto& [name, entity] : scene_manager->getAllNamedEntities()) {
+    for (const auto& [name, entity] : scene_manager->getNamedEntities()) {
       if (filterInstances and scene_objects_text_filter[0] not_eq '\0' and
           strstr(name.c_str(), scene_objects_text_filter) == nullptr) {
         continue;

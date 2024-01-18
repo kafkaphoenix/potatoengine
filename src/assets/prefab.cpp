@@ -3,9 +3,31 @@
 #include "utils/timer.h"
 
 namespace potatoengine::assets {
+
+void Prefab::process_prototype(const std::string& name, const json& prototypeData,
+                       const json& data) {
+  std::unordered_set<std::string> inherits;
+  std::unordered_set<std::string> ctags;
+  std::unordered_map<std::string, json> components;
+
+  if (prototypeData.contains("inherits")) {
+    prototypeData.at("inherits").get_to(inherits);
+    for (std::string_view father : inherits) {
+      read(data.at(father), inherits, ctags, components);
+    }
+  }
+  read(prototypeData, inherits, ctags,
+       components); // child overrides parent if common definition exists
+
+  m_prototypes.emplace(name, Prototype{.inherits = std::move(inherits),
+                                       .ctags = std::move(ctags),
+                                       .components = std::move(components)});
+}
+
 Prefab::Prefab(std::filesystem::path&& fp,
                std::unordered_set<std::string>&& targetedPrototypes)
-  : m_filepath(std::move(fp.string())),
+  : m_name(std::move(fp.filename().string())),
+    m_filepath(std::move(fp.string())),
     m_targetedPrototypes(std::move(targetedPrototypes)) {
   // One prefab file can contain multiple prototypes and we target only a subset
   // of them
@@ -16,27 +38,19 @@ Prefab::Prefab(std::filesystem::path&& fp,
   json data = json::parse(f);
   f.close();
 
-  for (const auto& [name, prototypeData] : data.items()) {
-    if (not m_targetedPrototypes.contains(name) and
-        m_targetedPrototypes not_eq std::unordered_set<std::string>{"*"}) {
-      continue;
+  if (m_targetedPrototypes == std::unordered_set<std::string>{"*"}) {
+    m_targetedPrototypes.clear();
+    for (const auto& [name, prototypeData] : data.items()) {
+      m_targetedPrototypes.emplace(name);
+      process_prototype(name, prototypeData, data);
     }
-    std::unordered_set<std::string> inherits;
-    std::unordered_set<std::string> ctags;
-    std::unordered_map<std::string, json> components;
-
-    if (prototypeData.contains("inherits")) {
-      prototypeData.at("inherits").get_to(inherits);
-      for (std::string_view father : inherits) {
-        read(data.at(father), inherits, ctags, components);
+  } else {
+    for (const auto& [name, prototypeData] : data.items()) {
+      if (not m_targetedPrototypes.contains(name)) {
+        continue;
       }
+      process_prototype(name, prototypeData, data);
     }
-    read(prototypeData, inherits, ctags,
-         components); // child overrides parent if common definition exists
-
-    m_prototypes.emplace(name, Prototype{.inherits = std::move(inherits),
-                                         .ctags = std::move(ctags),
-                                         .components = std::move(components)});
   }
 }
 

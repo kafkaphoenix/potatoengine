@@ -8,6 +8,7 @@
 #include "scene/components/camera/cActiveCamera.h"
 #include "scene/components/camera/cCamera.h"
 #include "scene/components/camera/cDistanceFromCamera.h"
+#include "scene/components/common/cDeleted.h"
 #include "scene/components/common/cName.h"
 #include "scene/components/common/cTag.h"
 #include "scene/components/common/cUUID.h"
@@ -28,7 +29,6 @@
 #include "scene/components/physics/cGravity.h"
 #include "scene/components/physics/cRigidBody.h"
 #include "scene/components/physics/cTransform.h"
-#include "scene/components/utils/cDeleted.h"
 #include "scene/components/utils/cNoise.h"
 #include "scene/components/utils/cRelationship.h"
 #include "scene/components/world/cBlock.h"
@@ -537,58 +537,20 @@ void PrintScene(entt::registry& registry) {
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CTexture& c) {
-  c.setDrawMode();
-  const auto& assetsManager = Application::Get().getAssetsManager();
-
-  c.textures.reserve(c.filepaths.size());
-  for (std::string_view filepath : c.filepaths) {
-    c.textures.emplace_back(assetsManager->get<assets::Texture>(filepath.data()));
-  }
-
-  m_registry.replace<CTexture>(e, c);
-}
-
-template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CChunkManager& c) {
-  c.setMeshType();
-  c.setMeshAlgorithm();
-
-  m_registry.replace<CChunkManager>(e, c);
-}
-
-template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CChunk& c) {
-  c.setBiome();
-
-  m_registry.replace<CChunk>(e, c);
-}
-
-template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CNoise& c) {
-  c.setNoiseType();
-  c.setSeed();
-  c.setOctaves();
-  c.setFrequency();
-  c.setPersistence();
-  c.setLacunarity();
-
-  m_registry.replace<CNoise>(e, c);
-}
-
-template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CBlock& c) {
-  c.setBlockType();
-
-  m_registry.replace<CBlock>(e, c);
-}
-
-template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CCamera& c) {
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CCamera& c) {
   c.setCameraType();
   c.setAspectRatio();
   c.setMode();
   c.calculateProjection();
 
   m_registry.replace<CCamera>(e, c);
+}
+
+template <>
+inline void engine::SceneManager::onComponentAdded(entt::entity e,
+                                                   CTexture& c) {
+  c.setDrawMode();
+  c.setTextures();
+
+  m_registry.replace<CTexture>(e, c);
 }

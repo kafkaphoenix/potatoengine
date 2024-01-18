@@ -6,6 +6,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "assets/texture.h"
+#include "core/application.h"
 #include "pch.h"
 #include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
@@ -111,6 +112,25 @@ struct CTexture {
       } else {
         ENGINE_ASSERT(false, "Unknown draw mode {}", _drawMode);
       }
+    }
+
+    void setTextures() {
+      if (filepaths.size() == 0) {
+        return;
+      }
+      const auto& assets_manager = Application::Get().getAssetsManager();
+
+      textures.reserve(filepaths.size());
+      for (std::string_view filepath : filepaths) {
+        textures.emplace_back(assets_manager->get<assets::Texture>(filepath));
+      }
+    }
+
+    void reloadTextures(std::vector<std::string>&& fps) {
+      ENGINE_ASSERT(fps != filepaths, "Texture filepaths are the same");
+      filepaths = std::move(fps);
+      textures.clear();
+      setTextures();
     }
 };
 }

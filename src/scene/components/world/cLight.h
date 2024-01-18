@@ -54,22 +54,26 @@ struct CLight {
 
       return info;
     }
+
+    void setLightType() {
+      if (_type == "directional") {
+        type = Type::Directional;
+      } else if (_type == "point") {
+        type = Type::Point;
+      } else if (_type == "spot") {
+        type = Type::Spot;
+      } else if (_type == "area") {
+        type = Type::Area;
+      } else {
+        ENGINE_ASSERT(false, "Unknown light type {}", _type);
+      }
+    }
 };
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CLight& c) {
-  if (c._type == "directional") {
-    c.type = CLight::Type::Directional;
-  } else if (c._type == "point") {
-    c.type = CLight::Type::Point;
-  } else if (c._type == "spot") {
-    c.type = CLight::Type::Spot;
-  } else if (c._type == "area") {
-    c.type = CLight::Type::Area;
-  } else {
-    ENGINE_ASSERT(false, "Unknown light type {}", c._type);
-  }
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CLight& c) {
+  c.setLightType();
 
   m_registry.replace<CLight>(e, c);
 }

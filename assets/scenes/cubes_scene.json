@@ -29,10 +29,6 @@
                 "filepath": "assets/textures/skybox_night1",
                 "type": "textureDiffuse",
                 "flip_vertically": false
-            },
-            "default": {
-                "filepath": "assets/textures/default.jpg",
-                "type": "textureDiffuse"
             }
         },
         "models": {

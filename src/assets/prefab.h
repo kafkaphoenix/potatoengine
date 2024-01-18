@@ -29,18 +29,23 @@ class Prefab : public Asset {
     getInherits(std::string_view prototypeID) const {
       return m_prototypes.at(prototypeID.data()).inherits;
     }
+
     const std::unordered_set<std::string>&
     getCTags(std::string_view prototypeID) const {
       return m_prototypes.at(prototypeID.data()).ctags;
     }
+
     const std::unordered_map<std::string, json>&
     getComponents(std::string_view prototypeID) const {
       return m_prototypes.at(prototypeID.data()).components;
     }
+
     const std::unordered_set<std::string>&
     getTargetedPrototypes() const noexcept {
       return m_targetedPrototypes;
     }
+
+    std::string_view getName() const noexcept { return m_name; }
 
     const std::unordered_map<std::string, Prototype>& getPrototypes() const {
       return m_prototypes;
@@ -49,6 +54,7 @@ class Prefab : public Asset {
     virtual bool operator==(const Asset& other) const override final;
 
   private:
+    std::string m_name{};
     std::string m_filepath{};
     std::unordered_set<std::string> m_targetedPrototypes{};
     std::unordered_map<std::string, Prototype> m_prototypes{};
@@ -61,5 +67,8 @@ class Prefab : public Asset {
     void read(const json& j, std::unordered_set<std::string>& inherits,
               std::unordered_set<std::string>& ctags,
               std::unordered_map<std::string, json>& components);
+
+    void process_prototype(const std::string& name, const json& prototypeData,
+                       const json& data);
 };
 }

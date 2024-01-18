@@ -15,10 +15,6 @@
             }
         },
         "textures": {
-            "default": {
-                "filepath": "assets/textures/default.jpg",
-                "type": "textureDiffuse"
-            },
             "block_atlas": {
                 "filepath": "assets/textures/block_atlas2.jpg",
                 "type": "textureDiffuse",

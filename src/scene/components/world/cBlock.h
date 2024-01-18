@@ -1,5 +1,7 @@
 #pragma once
 
+#include <entt/entt.hpp>
+
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -74,4 +76,11 @@ struct CBlock {
       }
     }
 };
+}
+
+template <>
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CBlock& c) {
+  c.setBlockType();
+
+  m_registry.replace<CBlock>(e, c);
 }

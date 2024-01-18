@@ -18,16 +18,15 @@ class AssetsManager {
       m_dirty = true;
     }
 
-    template <typename Type> bool contains(std::string_view id) const {
+    template <typename Type> bool contains(std::string_view id) {
       std::string_view type = typeid(Type).name();
       type = type.substr(type.find_last_of(':') + 1);
-      ENGINE_ASSERT(m_assets.contains(type.data()),
-                    "Type {} not found in assets manager!", type);
-      return m_assets.at(type.data()).contains(id.data());
+      auto& asset_map = m_assets[type.data()];
+      return asset_map.contains(id.data());
     }
 
     template <typename Type>
-    std::shared_ptr<Type> get(std::string_view id) const {
+    std::shared_ptr<Type> get(std::string_view id) {
       std::string_view type = typeid(Type).name();
       type = type.substr(type.find_last_of(':') + 1);
       ENGINE_ASSERT(contains<Type>(id), "Asset {} not found for type {}!", id,

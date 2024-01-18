@@ -4,6 +4,8 @@
 #include <entt/entt.hpp>
 
 #include "pch.h"
+#include "renderer/shaderProgram.h"
+#include "renderer/framebuffer.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -113,7 +115,7 @@ struct CFBO {
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CFBO& c) {
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CFBO& c) {
   c.setMode();
   c.setAttachment();
 

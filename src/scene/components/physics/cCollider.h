@@ -31,25 +31,29 @@ struct CCollider {
 
       return info;
     }
+
+    void setColliderType() {
+      if (_type == "box") {
+        type = Type::Box;
+      } else if (_type == "capsule") {
+        type = Type::Capsule;
+      } else if (_type == "mesh") {
+        type = Type::Mesh;
+      } else if (_type == "sphere") {
+        type = Type::Sphere;
+      } else if (_type == "rectangle") {
+        type = Type::Rectangle;
+      } else {
+        ENGINE_ASSERT(false, "Unknown collider type {}", _type);
+      }
+    }
 };
 }
 
 template <>
 inline void engine::SceneManager::onComponentAdded(entt::entity e,
                                                    CCollider& c) {
-  if (c._type == "box") {
-    c.type = CCollider::Type::Box;
-  } else if (c._type == "capsule") {
-    c.type = CCollider::Type::Capsule;
-  } else if (c._type == "mesh") {
-    c.type = CCollider::Type::Mesh;
-  } else if (c._type == "sphere") {
-    c.type = CCollider::Type::Sphere;
-  } else if (c._type == "rectangle") {
-    c.type = CCollider::Type::Rectangle;
-  } else {
-    ENGINE_ASSERT(false, "Unknown collider type {}", c._type);
-  }
+  c.setColliderType();
 
   m_registry.replace<CCollider>(e, c);
 }

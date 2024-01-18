@@ -50,19 +50,30 @@ struct CBody {
     std::string getMaterialInfo(int index) const {
       return MapToJson(materials.at(index).getInfo());
     }
+
+    void setMesh() {
+      // TODO rethink if add if not empty here and do it as ctag but creating
+      // all the fields
+      // TODO support multiple models
+      ENGINE_ASSERT(!filepath.empty(), "filepath for model is empty");
+      const auto& assets_manager = Application::Get().getAssetsManager();
+      auto model = *assets_manager->get<assets::Model>(
+        filepath); // We need a copy of the model
+      meshes = std::move(model.getMeshes());
+      materials = std::move(model.getMaterials());
+    }
+
+    void reloadMesh(std::string&& fp) {
+      ENGINE_ASSERT(fp != filepath, "filepath for model is the same");
+      filepath = std::move(fp);
+      setMesh();
+    }
 };
 }
 
 template <>
-void engine::SceneManager::onComponentAdded(entt::entity e, CBody& c) {
-  const auto& assetsManager = Application::Get().getAssetsManager();
-
-  // TODO rethink if add if not empty here and do it as ctag but creating all
-  // the fields
-  auto model = *assetsManager->get<assets::Model>(
-    c.filepath); // We need a copy of the model
-  c.meshes = std::move(model.getMeshes());
-  c.materials = std::move(model.getMaterials());
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CBody& c) {
+  c.setMesh();
 
   m_registry.replace<CBody>(e, c);
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <entt/entt.hpp>
+
 #include "scene/components/graphics/cMesh.h"
 #include "scene/components/physics/cTransform.h"
 #include "scene/components/world/cBlock.h"
@@ -50,8 +52,7 @@ struct CChunk {
       return MapToJson(terrainMesh.getInfo());
     }
 
-    std::string
-    getTransformInfo(int index) const {
+    std::string getTransformInfo(int index) const {
       return MapToJson(transform.getInfo());
     }
 
@@ -75,4 +76,11 @@ struct CChunk {
       }
     }
 };
+}
+
+template <>
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CChunk& c) {
+  c.setBiome();
+
+  m_registry.replace<CChunk>(e, c);
 }

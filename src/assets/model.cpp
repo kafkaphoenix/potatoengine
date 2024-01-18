@@ -1,9 +1,9 @@
 #include "assets/model.h"
 
+#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-#include <assimp/Importer.hpp>
-
+#include "core/application.h"
 #include "renderer/buffer.h"
 
 namespace potatoengine::assets {
@@ -85,7 +85,7 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
     if (mesh->mAABB.mMin not_eq aiVector3D(0.f, 0.f, 0.f) and
         mesh->mAABB.mMax not_eq aiVector3D(0.f, 0.f, 0.f)) {
-      // TODO aabb
+      // TODO aabb with models
     }
 
     if (mesh->HasFaces()) {
@@ -123,10 +123,18 @@ CMesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
   loadAndInsertTextures(aiTextureType_HEIGHT, "textureNormal");
   loadAndInsertTextures(aiTextureType_AMBIENT, "textureHeight");
 
-  if (textures.empty() and materialData.diffuse == glm::vec3(0.f, 0.f, 0.f)) {
-    textures.emplace_back(
-      std::make_shared<Texture>("assets/textures/default.jpg",
-                                "textureDiffuse")); // TODO: add asset manager?
+  // 0.6 is the default value for diffuse in assimp
+  if (textures.empty() and
+      materialData.diffuse == glm::vec3(0.6f)) {
+    const auto& assets_manager = Application::Get().getAssetsManager();
+    if (assets_manager->contains<Texture>("default")) {
+      textures.emplace_back(assets_manager->get<Texture>("default"));
+    } else {
+      textures.emplace_back(std::make_shared<Texture>(
+        "assets/textures/default.jpg", "textureDiffuse"));
+      assets_manager->load<assets::Texture>(
+        "default", "assets/textures/default.jpg", "textureDiffuse");
+    }
   }
   m_materials.emplace_back(std::move(materialData));
 

@@ -20,7 +20,7 @@ namespace potatoengine {
 
 bool onMouseMoved(MouseMovedEvent& e, entt::registry& registry) {
   ImGuiIO& io = ImGui::GetIO();
-  if (io.WantCaptureMouse and Application::Get().isDebugging()) {
+  if (io.WantCaptureMouse and Application::Get().isDebugging() or Application::Get().isGamePaused()) {
     return true;
   } else {
     io.ClearEventsQueue();
@@ -70,7 +70,7 @@ bool onMouseMoved(MouseMovedEvent& e, entt::registry& registry) {
 
 bool onMouseScrolled(MouseScrolledEvent& e, entt::registry& registry) {
   ImGuiIO& io = ImGui::GetIO();
-  if (io.WantCaptureMouse and Application::Get().isDebugging()) {
+  if (io.WantCaptureMouse and Application::Get().isDebugging() or Application::Get().isGamePaused()) {
     return true;
   } else {
     io.ClearEventsQueue();

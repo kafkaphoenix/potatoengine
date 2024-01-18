@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <entt/entt.hpp>
 
 #include "scene/components/world/cChunk.h"
 #include "utils/numericComparator.h"
@@ -32,9 +33,9 @@ struct CChunkManager {
     int width{3};
     int height{3};
     std::unordered_map<glm::vec3, CChunk> chunks; // TODO: change to ivec3
-    std::string _meshType{};
+    std::string _meshType;
     MeshType meshType;
-    std::string _meshAlgorithm{};
+    std::string _meshAlgorithm;
     MeshAlgorithm meshAlgorithm;
     bool useBiomes{};
 
@@ -101,4 +102,13 @@ struct CChunkManager {
       }
     }
 };
+}
+
+template <>
+inline void engine::SceneManager::onComponentAdded(entt::entity e,
+                                                   CChunkManager& c) {
+  c.setMeshType();
+  c.setMeshAlgorithm();
+
+  m_registry.replace<CChunkManager>(e, c);
 }

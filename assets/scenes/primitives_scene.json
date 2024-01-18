@@ -25,10 +25,6 @@
                 "type": "textureDiffuse",
                 "flip_vertically": false
             },
-            "default": {
-                "filepath": "assets/textures/default.jpg",
-                "type": "textureDiffuse"
-            },
             "grass": {
                 "filepath": "assets/textures/grass.jpg",
                 "type": "textureDiffuse"
