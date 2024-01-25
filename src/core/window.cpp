@@ -92,7 +92,7 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
       }
 
       // for fullscreen it will update the resolution
-      WindowResizeEvent event(width, height);
+      events::WindowResizeEvent event(width, height);
       data.eventCallback(event);
     });
 
@@ -104,7 +104,7 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
       if (not data.fullscreen) {
         data.positionX = xpos;
         data.positionY = ypos;
-        WindowMovedEvent event(xpos, ypos);
+        events::WindowMovedEvent event(xpos, ypos);
         data.eventCallback(event);
       }
     });
@@ -112,7 +112,7 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
   glfwSetWindowCloseCallback(m_window, [](GLFWwindow* window) {
     WindowData& data =
       *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
-    WindowCloseEvent event;
+    events::WindowCloseEvent event;
     data.eventCallback(event);
   });
 
@@ -123,17 +123,17 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
 
       switch (action) {
       case GLFW_PRESS: {
-        KeyPressedEvent event(key, false);
+        events::KeyPressedEvent event(key, false);
         data.eventCallback(event);
         break;
       }
       case GLFW_RELEASE: {
-        KeyReleasedEvent event(key);
+        events::KeyReleasedEvent event(key);
         data.eventCallback(event);
         break;
       }
       case GLFW_REPEAT: {
-        KeyPressedEvent event(key, true);
+        events::KeyPressedEvent event(key, true);
         data.eventCallback(event);
         break;
       }
@@ -144,7 +144,7 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
     WindowData& data =
       *std::bit_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
-    KeyTypedEvent event(keycode);
+    events::KeyTypedEvent event(keycode);
     data.eventCallback(event);
   });
 
@@ -155,12 +155,12 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
 
       switch (action) {
       case GLFW_PRESS: {
-        MouseButtonPressedEvent event(button);
+        events::MouseButtonPressedEvent event(button);
         data.eventCallback(event);
         break;
       }
       case GLFW_RELEASE: {
-        MouseButtonReleasedEvent event(button);
+        events::MouseButtonReleasedEvent event(button);
         data.eventCallback(event);
         break;
       }
@@ -193,7 +193,7 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
       data.mouseX = data.debugMouseX;
       data.mouseY = data.debugMouseY;
 
-      MouseMovedEvent event(xoffset, yoffset);
+      events::MouseMovedEvent event(xoffset, yoffset);
       data.eventCallback(event);
     });
 
@@ -206,7 +206,7 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
         return;
       }
 
-      MouseScrolledEvent event((float)xoffset, (float)yoffset);
+      events::MouseScrolledEvent event((float)xoffset, (float)yoffset);
       data.eventCallback(event);
     });
 
@@ -216,11 +216,11 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
 
     if (minimized == GLFW_TRUE) {
       data.minimized = true;
-      WindowMinimizedEvent event;
+      events::WindowMinimizedEvent event;
       data.eventCallback(event);
     } else {
       data.minimized = false;
-      WindowRestoredEvent event;
+      events::WindowRestoredEvent event;
       data.eventCallback(event);
     }
   });
@@ -232,11 +232,11 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
 
       if (maximized == GLFW_TRUE) {
         data.maximized = true;
-        WindowMaximizedEvent event;
+        events::WindowMaximizedEvent event;
         data.eventCallback(event);
       } else {
         data.maximized = false;
-        WindowRestoredEvent event;
+        events::WindowRestoredEvent event;
         data.eventCallback(event);
       }
     });
@@ -247,11 +247,11 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
 
     if (focused == GLFW_TRUE) {
       data.focused = true;
-      WindowFocusEvent event;
+      events::WindowFocusEvent event;
       data.eventCallback(event);
     } else {
       data.focused = false;
-      WindowLostFocusEvent event;
+      events::WindowLostFocusEvent event;
       data.eventCallback(event);
     }
   });

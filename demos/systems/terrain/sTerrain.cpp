@@ -1,20 +1,10 @@
-#pragma once
+#include "systems/terrain/sTerrain.h"
 
-#include <entt/entt.hpp>
 #include <glm/glm.hpp>
-
-#include "core/application.h"
-#include "pch.h"
-#include "scene/components/common/cUUID.h"
-#include "scene/components/graphics/cMesh.h"
-#include "scene/components/graphics/cTexture.h"
-#include "scene/components/utils/cNoise.h"
-#include "scene/components/world/cChunk.h"
-#include "scene/components/world/cChunkManager.h"
 
 using namespace entt::literals;
 
-namespace potatoengine {
+namespace demos::systems {
 
 static constexpr glm::vec3 LIGHT_BLUE = {0.f, 0.9725f, 0.9725f};
 static constexpr glm::vec3 LIGHT_YELLOW = {0.9725f, 0.9725f, 0.f};
@@ -62,7 +52,7 @@ glm::vec3 calculateBiomeColor(float height, int amplitude) {
 }
 
 glm::vec3 calculateBiomeTexture(float height, int amplitude,
-                                const CTextureAtlas& cTextureAtlas) {
+                                const engine::CTextureAtlas& cTextureAtlas) {
   height = (height + amplitude) / (2 * amplitude);
 
   int rows = cTextureAtlas.rows;
@@ -91,8 +81,9 @@ glm::vec3 calculateBiomeTexture(float height, int amplitude,
           0.f};
 }
 
-std::vector<std::vector<float>>
-generateHeights(int chunkSize, const CNoise& noise, int xOffset, int zOffset) {
+std::vector<std::vector<float>> generateHeights(int chunkSize,
+                                                const engine::CNoise& noise,
+                                                int xOffset, int zOffset) {
   std::vector<std::vector<float>> heights; // z = row, x = col
   heights.reserve(chunkSize + 1);
   for (int row = 0; row < chunkSize + 1; ++row) {
@@ -125,7 +116,7 @@ generateBiomes(std::vector<std::vector<float>> heights, int amplitude) {
 
 std::vector<std::vector<glm::vec3>>
 generateBiomesTextures(std::vector<std::vector<float>> heights, int amplitude,
-                       const CTextureAtlas& cTextureAtlas) {
+                       const engine::CTextureAtlas& cTextureAtlas) {
   std::vector<std::vector<glm::vec3>> textures; // z = row, x = col
   textures.reserve(heights.size());
   for (int row = 0; row < heights.size(); ++row) {
@@ -140,18 +131,18 @@ generateBiomesTextures(std::vector<std::vector<float>> heights, int amplitude,
   return textures;
 }
 
-CMesh generateTriangleMesh(
+engine::CMesh generateTriangleMesh(
   int chunkSize, int blockSize, const std::vector<std::vector<float>>& heights,
   const std::optional<
     std::reference_wrapper<std::vector<std::vector<glm::vec3>>>>
     biomes = std::nullopt) {
-  CMesh mesh;
+  engine::CMesh mesh;
   int totalVertices =
     (chunkSize + 1) *
     (chunkSize + 1); // Triangles share vertices making impossible to use more
                      // than one texture for all the mesh
 
-  std::vector<TerrainVertex> vertices;
+  std::vector<engine::TerrainVertex> vertices;
   vertices.reserve(totalVertices);
 
   std::vector<uint32_t> indices;
@@ -199,12 +190,12 @@ CMesh generateTriangleMesh(
   }
 
   mesh.vertexType = "terrain";
-  mesh.vbo = VBO::CreateTerrain(vertices);
+  mesh.vbo = engine::VBO::CreateTerrain(vertices);
   mesh.indices = std::move(indices);
   return mesh;
 }
 
-void addQuadVertexData(std::vector<TerrainVertex>& vertices,
+void addQuadVertexData(std::vector<engine::TerrainVertex>& vertices,
                        std::vector<uint32_t>& indices,
                        const std::array<glm::vec3, 4>& positions,
                        glm::vec3 normal,
@@ -232,7 +223,7 @@ void addQuadVertexData(std::vector<TerrainVertex>& vertices,
   indices.push_back(bottomRightIndex);
 }
 
-void addTriangleVertexData(std::vector<TerrainVertex>& vertices,
+void addTriangleVertexData(std::vector<engine::TerrainVertex>& vertices,
                            std::vector<uint32_t>& indices, glm::vec3 first,
                            glm::vec3 second, glm::vec3 third, glm::vec3 normal,
                            glm::vec2 firstTextureCoordinates,
@@ -300,9 +291,10 @@ calculateBiomeTextures(int col, int row,
   return textureCoordinates;
 }
 
-void addQuad(std::vector<TerrainVertex>& vertices,
+void addQuad(std::vector<engine::TerrainVertex>& vertices,
              std::vector<uint32_t>& indices, int col, int row, int chunkSize,
-             int blockSize, bool duplicateVertices, CTexture::DrawMode drawMode,
+             int blockSize, bool duplicateVertices,
+             engine::CTexture::DrawMode drawMode,
              const std::vector<std::vector<float>>& heights,
              const std::optional<
                std::reference_wrapper<std::vector<std::vector<glm::vec3>>>>
@@ -313,9 +305,9 @@ void addQuad(std::vector<TerrainVertex>& vertices,
   std::array<glm::vec3, 4> colors{};
 
   if (biomes.has_value()) {
-    if (drawMode == CTexture::DrawMode::COLOR) {
+    if (drawMode == engine::CTexture::DrawMode::COLOR) {
       colors = calculateBiomeColors(col, row, biomes.value());
-    } else if (drawMode == CTexture::DrawMode::TEXTURE_ATLAS) {
+    } else if (drawMode == engine::CTexture::DrawMode::TEXTURE_ATLAS) {
       textureCoordinates = calculateBiomeTextures(col, row, biomes.value());
     }
   }
@@ -338,13 +330,14 @@ void addQuad(std::vector<TerrainVertex>& vertices,
   }
 }
 
-CMesh generateQuadMesh(
-  int chunkSize, int blockSize, bool duplicateVertices,
-  CTexture::DrawMode drawMode, const std::vector<std::vector<float>>& heights,
-  const std::optional<
-    std::reference_wrapper<std::vector<std::vector<glm::vec3>>>>
-    biomes = std::nullopt) {
-  CMesh mesh;
+engine::CMesh
+generateQuadMesh(int chunkSize, int blockSize, bool duplicateVertices,
+                 engine::CTexture::DrawMode drawMode,
+                 const std::vector<std::vector<float>>& heights,
+                 const std::optional<
+                   std::reference_wrapper<std::vector<std::vector<glm::vec3>>>>
+                   biomes = std::nullopt) {
+  engine::CMesh mesh;
   int totalVertices =
     chunkSize * chunkSize * 4; // 4 vertices per quad, triangles share vertices
   if (duplicateVertices) {
@@ -353,7 +346,7 @@ CMesh generateQuadMesh(
       6; // 6 vertices per quad (2 triangles) for higher quality lighting
   }
 
-  std::vector<TerrainVertex> vertices;
+  std::vector<engine::TerrainVertex> vertices;
   vertices.reserve(totalVertices);
 
   std::vector<uint32_t> indices;
@@ -374,23 +367,26 @@ CMesh generateQuadMesh(
   }
 
   mesh.vertexType = "terrain";
-  mesh.vbo = VBO::CreateTerrain(vertices);
+  mesh.vbo = engine::VBO::CreateTerrain(vertices);
   mesh.indices = std::move(indices);
   return mesh;
 }
 
-CMesh generateTerrain(
-  CChunkManager::MeshType meshType, CChunkManager::MeshAlgorithm meshAlgorithm,
-  int chunkSize, int blockSize, CTexture::DrawMode drawMode,
-  const std::vector<std::vector<float>>& heights,
-  const std::optional<
-    std::reference_wrapper<std::vector<std::vector<glm::vec3>>>>
-    biomes = std::nullopt) {
-  if (meshType == CChunkManager::MeshType::Plane) {
-    if (meshAlgorithm == CChunkManager::MeshAlgorithm::SimplifiedTriangle) {
+engine::CMesh
+generateTerrain(engine::CChunkManager::MeshType meshType,
+                engine::CChunkManager::MeshAlgorithm meshAlgorithm,
+                int chunkSize, int blockSize,
+                engine::CTexture::DrawMode drawMode,
+                const std::vector<std::vector<float>>& heights,
+                const std::optional<
+                  std::reference_wrapper<std::vector<std::vector<glm::vec3>>>>
+                  biomes = std::nullopt) {
+  if (meshType == engine::CChunkManager::MeshType::Plane) {
+    if (meshAlgorithm ==
+        engine::CChunkManager::MeshAlgorithm::SimplifiedTriangle) {
       if (biomes.has_value()) {
         return generateTriangleMesh(chunkSize, blockSize, heights, biomes);
-      } else if (drawMode == CTexture::DrawMode::TEXTURE) {
+      } else if (drawMode == engine::CTexture::DrawMode::TEXTURE) {
         return generateTriangleMesh(chunkSize, blockSize, heights);
       } else { // TODO improve log to show string and not int
         ENGINE_ASSERT(
@@ -399,10 +395,11 @@ CMesh generateTerrain(
           static_cast<int>(drawMode), static_cast<int>(meshType),
           static_cast<int>(meshAlgorithm));
       }
-    } else if (meshAlgorithm == CChunkManager::MeshAlgorithm::SimplifiedQuad or
-               meshAlgorithm == CChunkManager::MeshAlgorithm::Quad) {
+    } else if (meshAlgorithm ==
+                 engine::CChunkManager::MeshAlgorithm::SimplifiedQuad or
+               meshAlgorithm == engine::CChunkManager::MeshAlgorithm::Quad) {
       bool duplicateVertices =
-        meshAlgorithm == CChunkManager::MeshAlgorithm::Quad;
+        meshAlgorithm == engine::CChunkManager::MeshAlgorithm::Quad;
       if (biomes.has_value()) {
         return generateQuadMesh(chunkSize, blockSize, duplicateVertices,
                                 drawMode, heights, biomes);
@@ -414,27 +411,36 @@ CMesh generateTerrain(
           static_cast<int>(meshAlgorithm));
       }
     }
-  } else if (meshType == CChunkManager::MeshType::Chunk) {
-    if (meshAlgorithm == CChunkManager::MeshAlgorithm::Greedy) {
+  } else if (meshType == engine::CChunkManager::MeshType::Chunk) {
+    if (meshAlgorithm == engine::CChunkManager::MeshAlgorithm::Greedy) {
       // return generateChunkMesh(chunkSize, blockSize, heights);
     }
-  } else if (meshType == CChunkManager::MeshType::Sphere) {
+  } else if (meshType == engine::CChunkManager::MeshType::Sphere) {
     // return generateSphereMesh(chunkSize, blockSize, heights);
   } else {
     ENGINE_ERROR("Mesh type {} not supported", static_cast<int>(meshType));
   }
-  return CMesh{};
+  return engine::CMesh{};
 }
 
-void terrainSystem(entt::registry& registry) {
-  registry.view<CChunkManager, CTexture, CNoise, CUUID>().each(
-    [&](entt::entity e, CChunkManager& cChunkManager, const CTexture& cTexture,
-        const CNoise& cNoise, const CUUID& cUUID) {
-      CTextureAtlas* cTextureAtlas = nullptr;
-      if (cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS or
-          cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND or
-          cTexture.drawMode == CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
-        cTextureAtlas = registry.try_get<CTextureAtlas>(e);
+void TerrainSystem::update(entt::registry& registry, const engine::Time& ts) {
+  if (engine::Application::Get().isGamePaused()) {
+    return;
+  }
+
+  registry
+    .view<engine::CChunkManager, engine::CTexture, engine::CNoise,
+          engine::CUUID>()
+    .each([&](entt::entity e, engine::CChunkManager& cChunkManager,
+              const engine::CTexture& cTexture, const engine::CNoise& cNoise,
+              const engine::CUUID& cUUID) {
+      engine::CTextureAtlas* cTextureAtlas = nullptr;
+      if (cTexture.drawMode == engine::CTexture::DrawMode::TEXTURE_ATLAS or
+          cTexture.drawMode ==
+            engine::CTexture::DrawMode::TEXTURE_ATLAS_BLEND or
+          cTexture.drawMode ==
+            engine::CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
+        cTextureAtlas = registry.try_get<engine::CTextureAtlas>(e);
         ENGINE_ASSERT(cTextureAtlas, "Texture atlas not found for entity: {}",
                       cUUID.uuid);
       }
@@ -444,23 +450,23 @@ void terrainSystem(entt::registry& registry) {
         // TODO y axis should infinite, maybe rename z to depth
         std::vector<std::vector<float>> heights;
         std::vector<std::vector<glm::vec3>> biomes;
-        CChunk chunk;
+        engine::CChunk chunk;
         for (int row = -cChunkManager.width; row <= cChunkManager.width;
              ++row) {
           for (int col = -cChunkManager.height; col <= cChunkManager.height;
                ++col) {
-            chunk = CChunk{"plains"};
+            chunk = engine::CChunk{"plains"};
             heights =
               generateHeights(cChunkManager.chunkSize, cNoise, col, row);
             if (cChunkManager.useBiomes) {
-              if (cTexture.drawMode == CTexture::DrawMode::COLOR) {
+              if (cTexture.drawMode == engine::CTexture::DrawMode::COLOR) {
                 biomes = generateBiomes(heights, cNoise.amplitude);
               } else if (cTexture.drawMode ==
-                           CTexture::DrawMode::TEXTURE_ATLAS or
+                           engine::CTexture::DrawMode::TEXTURE_ATLAS or
                          cTexture.drawMode ==
-                           CTexture::DrawMode::TEXTURE_ATLAS_BLEND or
-                         cTexture.drawMode ==
-                           CTexture::DrawMode::TEXTURE_ATLAS_BLEND_COLOR) {
+                           engine::CTexture::DrawMode::TEXTURE_ATLAS_BLEND or
+                         cTexture.drawMode == engine::CTexture::DrawMode::
+                                                TEXTURE_ATLAS_BLEND_COLOR) {
                 biomes = generateBiomesTextures(heights, cNoise.amplitude,
                                                 *cTextureAtlas);
               }

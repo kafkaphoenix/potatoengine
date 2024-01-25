@@ -19,7 +19,7 @@ std::string selectedAssetTabType;
 std::string selectedFilepath;
 char assets_text_filter[128]{}; // TODO: move to class
 
-void drawAssetsManager(const std::unique_ptr<AssetsManager>& assets_manager,
+void drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_manager,
                        const std::unique_ptr<Settings>& settings) {
   const auto& assets = assets_manager->getAssets();
 

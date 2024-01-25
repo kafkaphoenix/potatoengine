@@ -1,15 +1,13 @@
-#pragma once
+#include "systems/world/sTime.h"
 
-#include <entt/entt.hpp>
+namespace demos::systems {
 
-#include "core/application.h"
-#include "core/time.h"
-#include "scene/components/world/cTime.h"
+void TimeSystem::update(entt::registry& registry, const engine::Time& ts) {
+  if (engine::Application::Get().isGamePaused()) {
+    return;
+  }
 
-namespace potatoengine {
-
-void timeSystem(entt::registry& registry, const Time& ts) {
-  registry.view<CTime>().each([&](CTime& cTime) {
+  registry.view<engine::CTime>().each([&](engine::CTime& cTime) {
     // We call it fps frames per second instead of 1 but the other functions
     // divide by fps so it is ok
     float timeScale = 86400.f / (cTime.dayLength * 3600.f);

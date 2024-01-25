@@ -7,7 +7,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <nlohmann/json.hpp>
 
-#include "scene/components/common/cDeleted.h"
+#include "scene/components/core/cDeleted.h"
 
 using json = nlohmann::json;
 using namespace entt::literals;

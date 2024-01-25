@@ -20,6 +20,7 @@ bool filterPrefabs{};
 bool filterPrototypes{};
 bool filterInstances{};
 bool filterComponents{};
+bool filterSystems{};
 
 void drawChildInfo(
   const std::map<std::string, std::string, NumericComparator>& infoData,
@@ -80,6 +81,8 @@ void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
   ImGui::Checkbox("Instances", &filterInstances);
   ImGui::SameLine();
   ImGui::Checkbox("Components", &filterComponents);
+  ImGui::SameLine();
+  ImGui::Checkbox("Systems", &filterSystems);
 
   ImGui::Separator();
   ImGui::Columns(2);
@@ -127,6 +130,20 @@ void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
       if (ImGui::Selectable(name.c_str())) {
         selectedSceneManagerTabKey = std::to_string(entt::to_integral(entity));
       }
+    }
+  }
+
+  if (collapsed not_eq -1) {
+    ImGui::SetNextItemOpen(collapsed not_eq 0);
+  }
+
+  if (ImGui::CollapsingHeader("Systems")) {
+    for (const auto& name : scene_manager->getNamedSystems()) {
+      if (filterSystems and scene_objects_text_filter[0] not_eq '\0' and
+          strstr(name.c_str(), scene_objects_text_filter) == nullptr) {
+        continue;
+      }
+      ImGui::Text("%s", name.c_str());
     }
   }
 

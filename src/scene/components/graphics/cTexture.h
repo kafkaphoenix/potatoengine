@@ -134,3 +134,12 @@ struct CTexture {
     }
 };
 }
+
+template <>
+inline void engine::SceneManager::onComponentAdded(entt::entity e,
+                                                   CTexture& c) {
+  c.setDrawMode();
+  c.setTextures();
+
+  m_registry.replace<CTexture>(e, c);
+}

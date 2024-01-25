@@ -33,7 +33,7 @@ Application::~Application() {
   ui::ImGuiAPI::Shutdown();
 }
 
-void Application::onEvent(Event& e) {
+void Application::onEvent(events::Event& e) {
   for (auto it = m_states->rbegin();
        it not_eq m_states->rend() and not e.m_handled; ++it) {
     (*it)->onEvent(e);

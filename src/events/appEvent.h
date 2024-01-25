@@ -2,7 +2,7 @@
 
 #include "events/event.h"
 
-namespace potatoengine {
+namespace potatoengine::events {
 
 // TODO use for something
 class AppTickEvent : public Event {

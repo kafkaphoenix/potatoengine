@@ -8,10 +8,11 @@
 #include "scene/components/camera/cActiveCamera.h"
 #include "scene/components/camera/cCamera.h"
 #include "scene/components/camera/cDistanceFromCamera.h"
-#include "scene/components/common/cDeleted.h"
-#include "scene/components/common/cName.h"
-#include "scene/components/common/cTag.h"
-#include "scene/components/common/cUUID.h"
+#include "scene/components/core/cDeleted.h"
+#include "scene/components/core/cName.h"
+#include "scene/components/core/cRelationship.h"
+#include "scene/components/core/cTag.h"
+#include "scene/components/core/cUUID.h"
 #include "scene/components/effects/cParticle.h"
 #include "scene/components/graphics/cAnimation.h"
 #include "scene/components/graphics/cBody.h"
@@ -30,7 +31,6 @@
 #include "scene/components/physics/cRigidBody.h"
 #include "scene/components/physics/cTransform.h"
 #include "scene/components/utils/cNoise.h"
-#include "scene/components/utils/cRelationship.h"
 #include "scene/components/world/cBlock.h"
 #include "scene/components/world/cChunk.h"
 #include "scene/components/world/cChunkManager.h"
@@ -534,23 +534,4 @@ void PrintScene(entt::registry& registry) {
   }
   ENGINE_BACKTRACE("=============================================");
 }
-}
-
-template <>
-inline void engine::SceneManager::onComponentAdded(entt::entity e, CCamera& c) {
-  c.setCameraType();
-  c.setAspectRatio();
-  c.setMode();
-  c.calculateProjection();
-
-  m_registry.replace<CCamera>(e, c);
-}
-
-template <>
-inline void engine::SceneManager::onComponentAdded(entt::entity e,
-                                                   CTexture& c) {
-  c.setDrawMode();
-  c.setTextures();
-
-  m_registry.replace<CTexture>(e, c);
 }

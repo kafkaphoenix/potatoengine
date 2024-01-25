@@ -2,9 +2,10 @@
 
 #define GLM_FORCE_CTOR_INIT
 
-#include "utils/numericComparator.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
+
+#include "utils/numericComparator.h"
 
 namespace potatoengine {
 

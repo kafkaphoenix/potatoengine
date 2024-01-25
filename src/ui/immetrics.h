@@ -12,9 +12,9 @@ namespace potatoengine::ui {
 
 bool show_tool_metrics = false;
 
-void drawMetrics(const std::unique_ptr<AssetsManager>& assets_manager,
+void drawMetrics(const std::unique_ptr<assets::AssetsManager>& assets_manager,
                  const std::unique_ptr<Renderer>& renderer,
-                  const std::unique_ptr<SceneManager>& scene_manager) {
+                 const std::unique_ptr<SceneManager>& scene_manager) {
   if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_M)) and
       ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftCtrl))) {
     show_tool_metrics = not show_tool_metrics;

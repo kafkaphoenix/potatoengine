@@ -117,3 +117,13 @@ struct CCamera {
     }
 };
 }
+
+template <>
+inline void engine::SceneManager::onComponentAdded(entt::entity e, CCamera& c) {
+  c.setCameraType();
+  c.setAspectRatio();
+  c.setMode();
+  c.calculateProjection();
+
+  m_registry.replace<CCamera>(e, c);
+}

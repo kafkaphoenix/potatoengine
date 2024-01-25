@@ -1,40 +1,20 @@
-#pragma once
+#include "systems/graphics/sRender.h"
 
-#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
-#include "core/application.h"
-#include "pch.h"
-#include "renderer/renderer.h"
-#include "renderer/rendererAPI.h"
-#include "scene/components/camera/cActiveCamera.h"
-#include "scene/components/camera/cCamera.h"
-#include "scene/components/common/cName.h"
-#include "scene/components/common/cUUID.h"
-#include "scene/components/graphics/cBody.h"
-#include "scene/components/graphics/cFBO.h"
-#include "scene/components/graphics/cMaterial.h"
-#include "scene/components/graphics/cMesh.h"
-#include "scene/components/graphics/cShaderProgram.h"
-#include "scene/components/graphics/cShape.h"
-#include "scene/components/graphics/cTexture.h"
-#include "scene/components/graphics/cTextureAtlas.h"
-#include "scene/components/physics/cTransform.h"
-#include "scene/components/world/cChunk.h"
-#include "scene/components/world/cChunkManager.h"
-#include "scene/components/world/cSkybox.h"
+namespace demos::systems {
 
-namespace potatoengine {
-
-void render(CTexture* cTexture, CTextureAtlas* cTextureAtlas, CSkybox* cSkybox,
-            CMaterial* cMaterial, CMesh* cMesh, const CTransform& cTransform,
-            const CShaderProgram& cShaderProgram, CTexture* cSkyboxTexture,
-            const std::unique_ptr<Renderer>& renderer) {
+void render(engine::CTexture* cTexture, engine::CTextureAtlas* cTextureAtlas,
+            const engine::CSkybox* cSkybox, engine::CMaterial* cMaterial,
+            engine::CMesh* cMesh, const engine::CTransform& cTransform,
+            const engine::CShaderProgram& cShaderProgram,
+            engine::CTexture* cSkyboxTexture,
+            const std::unique_ptr<engine::Renderer>& renderer) {
   if (cTexture and cTexture->hasTransparency) {
-    RendererAPI::ToggleCulling(false);
+    engine::RendererAPI::ToggleCulling(false);
   }
   if (cSkybox) {
-    RendererAPI::SetDepthLEqual();
+    engine::RendererAPI::SetDepthLEqual();
   }
   cMesh->bindTextures(renderer->getShaderProgram(cShaderProgram.name), cTexture,
                       cTextureAtlas, cSkyboxTexture, cMaterial);
@@ -42,60 +22,68 @@ void render(CTexture* cTexture, CTextureAtlas* cTextureAtlas, CSkybox* cSkybox,
                    cShaderProgram.name);
   cMesh->unbindTextures(cTexture);
   if (cTexture and cTexture->hasTransparency) {
-    RendererAPI::ToggleCulling(true);
+    engine::RendererAPI::ToggleCulling(true);
   }
   if (cSkybox) {
-    RendererAPI::SetDepthLess();
+    engine::RendererAPI::SetDepthLess();
   }
 }
 
-void renderSystem(entt::registry& registry) {
-  const auto& renderer = Application::Get().getRenderer();
+void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
+  auto& app = engine::Application::Get();
+  const auto& renderer = app.getRenderer();
 
-  entt::entity fbo =
-    registry.view<CFBO, CUUID>().front(); // TODO: support more than one?
+  entt::entity fbo = registry.view<engine::CFBO, engine::CUUID>()
+                       .front(); // TODO: support more than one?
   if (fbo not_eq entt::null) {
-    CFBO& cfbo = registry.get<CFBO>(fbo);
+    engine::CFBO& cfbo = registry.get<engine::CFBO>(fbo);
     const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
     defaultFBO->bindToDraw();
-    RendererAPI::ToggleDepthTest(true);
+    engine::RendererAPI::ToggleDepthTest(true);
   }
 
   // FBOs are cleared in their own render pass at the end of the scene
-  RendererAPI::Clear();
+  engine::RendererAPI::Clear();
   renderer->resetMetrics();
 
-  entt::entity camera =
-    registry.view<CCamera, CActiveCamera, CTransform, CUUID>().front();
+  entt::entity camera = registry
+                          .view<engine::CCamera, engine::CActiveCamera,
+                                engine::CTransform, engine::CUUID>()
+                          .front();
   ENGINE_ASSERT(camera not_eq entt::null, "No active camera found!");
-  CCamera& cCamera = registry.get<CCamera>(camera);
-  const CTransform& cCameraTransform = registry.get<CTransform>(camera);
+  engine::CCamera& cCamera = registry.get<engine::CCamera>(camera);
+  const engine::CTransform& cCameraTransform =
+    registry.get<engine::CTransform>(camera);
   cCamera.calculateView(cCameraTransform.position, cCameraTransform.rotation);
-  renderer->beginScene(cCamera, cCameraTransform);
+  renderer->beginScene(cCamera.view, cCamera.projection,
+                       cCameraTransform.position);
 
-  entt::entity sky =
-    registry.view<CSkybox, CUUID>().front(); // TODO: support more than one?
-  CTexture* cSkyboxTexture;
+  entt::entity sky = registry.view<engine::CSkybox, engine::CUUID>()
+                       .front(); // TODO: support more than one?
+  engine::CTexture* cSkyboxTexture;
   if (sky not_eq entt::null) {
-    cSkyboxTexture = registry.try_get<CTexture>(sky);
+    cSkyboxTexture = registry.try_get<engine::CTexture>(sky);
   }
 
-  registry.view<CTransform, CShaderProgram, CUUID>().each(
-    [&](entt::entity e, const CTransform& cTransform,
-        const CShaderProgram& cShaderProgram, const CUUID& cUUID) {
-      CTexture* cTexture = registry.try_get<CTexture>(e);
-      CTextureAtlas* cTextureAtlas = registry.try_get<CTextureAtlas>(e);
-      CSkybox* cSkybox = registry.try_get<CSkybox>(e);
-      CMaterial* cMaterial = registry.try_get<CMaterial>(e);
-      CBody* cBody = registry.try_get<CBody>(e);
-      CMesh* cMesh = registry.try_get<CMesh>(e);
-      CShape* cShape = registry.try_get<CShape>(e);
-      CChunkManager* cChunkManager = registry.try_get<CChunkManager>(e);
+  registry.view<engine::CTransform, engine::CShaderProgram, engine::CUUID>()
+    .each([&](entt::entity e, const engine::CTransform& cTransform,
+              const engine::CShaderProgram& cShaderProgram,
+              const engine::CUUID& cUUID) {
+      engine::CTexture* cTexture = registry.try_get<engine::CTexture>(e);
+      engine::CTextureAtlas* cTextureAtlas =
+        registry.try_get<engine::CTextureAtlas>(e);
+      engine::CSkybox* cSkybox = registry.try_get<engine::CSkybox>(e);
+      engine::CMaterial* cMaterial = registry.try_get<engine::CMaterial>(e);
+      engine::CBody* cBody = registry.try_get<engine::CBody>(e);
+      engine::CMesh* cMesh = registry.try_get<engine::CMesh>(e);
+      engine::CShape* cShape = registry.try_get<engine::CShape>(e);
+      engine::CChunkManager* cChunkManager =
+        registry.try_get<engine::CChunkManager>(e);
 
       if (cShaderProgram.isVisible) {
         if (cMesh) { // TODO objects with one mesh unused
           if (not cTexture) {
-            CName* cName = registry.try_get<CName>(e);
+            engine::CName* cName = registry.try_get<engine::CName>(e);
             if (cName) {
               ENGINE_ASSERT(false, "No texture found for entity {} {}",
                             cUUID.uuid, cName->name);
@@ -109,14 +97,14 @@ void renderSystem(entt::registry& registry) {
                  cShaderProgram, cSkyboxTexture, renderer);
         } else if (cBody) { // models
           for (size_t i = 0; i < cBody->meshes.size(); ++i) {
-            CMesh& mesh = cBody->meshes.at(i);
-            CMaterial& material = cBody->materials.at(i);
+            engine::CMesh& mesh = cBody->meshes.at(i);
+            engine::CMaterial& material = cBody->materials.at(i);
             render(cTexture, cTextureAtlas, cSkybox, &material, &mesh,
                    cTransform, cShaderProgram, cSkyboxTexture, renderer);
           }
         } else if (cShape) { // primitives
           if (not cTexture) {
-            CName* cName = registry.try_get<CName>(e);
+            engine::CName* cName = registry.try_get<engine::CName>(e);
             if (cName) {
               ENGINE_ASSERT(false, "No texture found for entity {} {}",
                             cUUID.uuid, cName->name);
@@ -132,7 +120,7 @@ void renderSystem(entt::registry& registry) {
           }
         } else if (cChunkManager) { // terrain
           if (not cTexture) {
-            CName* cName = registry.try_get<CName>(e);
+            engine::CName* cName = registry.try_get<engine::CName>(e);
             if (cName) {
               ENGINE_ASSERT(false, "No texture found for entity {} {}",
                             cUUID.uuid, cName->name);
@@ -148,7 +136,7 @@ void renderSystem(entt::registry& registry) {
                    cSkyboxTexture, renderer);
           }
         } else {
-          CName* cName = registry.try_get<CName>(e);
+          engine::CName* cName = registry.try_get<engine::CName>(e);
           if (cName) {
             ENGINE_ASSERT(false, "No mesh found for entity {} {}", cUUID.uuid,
                           cName->name);
@@ -160,16 +148,16 @@ void renderSystem(entt::registry& registry) {
     });
 
   if (fbo not_eq entt::null) {
-    CFBO& cfbo = registry.get<CFBO>(fbo);
+    engine::CFBO& cfbo = registry.get<engine::CFBO>(fbo);
     const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
     defaultFBO->unbind(); // go back to default framebuffer
-    RendererAPI::ClearColor();
-    RendererAPI::ToggleDepthTest(
+    engine::RendererAPI::ClearColor();
+    engine::RendererAPI::ToggleDepthTest(
       false); // disable depth test so screen-space quad isn't discarded due to
               // depth test.
-    auto& cShape = registry.get<CShape>(fbo);
+    engine::CShape& cShape = registry.get<engine::CShape>(fbo);
     cfbo.setupProperties(renderer->getShaderProgram("fbo"));
-    const auto& settings = Application::Get().getSettings();
+    const auto& settings = app.getSettings();
     if (settings->windowInsideImgui) {
       renderer->renderInsideImGui(cShape.meshes.at(0).getVAO(), cfbo.fbo,
                                   "scene", {0, 0}, {0, 0},

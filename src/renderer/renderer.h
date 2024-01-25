@@ -8,8 +8,6 @@
 #include "renderer/framebuffer.h"
 #include "renderer/shaderProgram.h"
 #include "renderer/vao.h"
-#include "scene/components/camera/cCamera.h"
-#include "scene/components/physics/cTransform.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -21,11 +19,13 @@ class Renderer {
 
     void onWindowResize(uint32_t w, uint32_t h) const;
 
-    void beginScene(const CCamera& c, const CTransform& t);
+    void beginScene(glm::mat4 view, glm::mat4 projection,
+                    glm::vec3 cameraPosition);
     void endScene();
 
-    void addShaderProgram(std::string&& name,
-                          const std::unique_ptr<assets::AssetsManager>& assetsManager);
+    void addShaderProgram(
+      std::string&& name,
+      const std::unique_ptr<assets::AssetsManager>& assetsManager);
     void addFramebuffer(std::string&& framebuffer, uint32_t width,
                         uint32_t height, uint32_t bufferType);
     void deleteFramebuffer(std::string_view framebuffer);
@@ -37,7 +37,8 @@ class Renderer {
     getFramebuffers() const noexcept {
       return m_framebuffers;
     }
-    const std::unique_ptr<ShaderProgram>& getShaderProgram(std::string_view shaderProgram);
+    const std::unique_ptr<ShaderProgram>&
+    getShaderProgram(std::string_view shaderProgram);
 
     void render(const std::shared_ptr<VAO>& vao, const glm::mat4& transform,
                 std::string_view shaderProgram);

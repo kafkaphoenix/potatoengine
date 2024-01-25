@@ -7,16 +7,17 @@
 #include "renderer/renderer.h"
 #include "scene/sceneManager.h"
 #include "settings.h"
-#include "ui/imassets.h"
-#include "ui/imentities.h"
-#include "ui/imrenderer.h"
-#include "ui/imsettings.h"
+#include "ui/im_assets_manager.h"
+#include "ui/im_render_manager.h"
+#include "ui/im_scene_manager.h"
+#include "ui/im_settings_manager.h"
 
 namespace potatoengine::ui {
-void drawManagersBar(const std::unique_ptr<AssetsManager>& assets_manager,
-                     const std::unique_ptr<Renderer>& renderer,
-                     const std::unique_ptr<SceneManager>& scene_manager,
-                     const std::unique_ptr<Settings>& settings) {
+void drawManagersBar(
+  const std::unique_ptr<assets::AssetsManager>& assets_manager,
+  const std::unique_ptr<Renderer>& renderer,
+  const std::unique_ptr<SceneManager>& scene_manager,
+  const std::unique_ptr<Settings>& settings) {
   if (ImGui::BeginTabBar("RootTabBar", ImGuiTabBarFlags_Reorderable)) {
     if (ImGui::BeginTabItem("Assets Manager")) {
       drawAssetsManager(assets_manager, settings);
@@ -37,6 +38,7 @@ void drawManagersBar(const std::unique_ptr<AssetsManager>& assets_manager,
       filterPrototypes = false;
       filterInstances = false;
       filterComponents = false;
+      filterSystems = false;
     }
     if (ImGui::BeginTabItem("Render Manager")) {
       drawRenderManager(renderer, settings);

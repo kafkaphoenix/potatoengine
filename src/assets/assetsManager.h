@@ -57,8 +57,8 @@ class AssetsManager {
       m_dirty = false;
     }
 
-    static std::unique_ptr<AssetsManager> Create() {
-      return std::make_unique<AssetsManager>();
+    static std::unique_ptr<assets::AssetsManager> Create() {
+      return std::make_unique<assets::AssetsManager>();
     }
 
     const std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<Asset>>>&

@@ -16,16 +16,18 @@ void Renderer::onWindowResize(uint32_t w, uint32_t h) const {
   RendererAPI::SetViewport(0, 0, w, h);
 }
 
-void Renderer::beginScene(const CCamera& c, const CTransform& t) {
-  m_view = c.view;
-  m_projection = c.projection;
-  m_cameraPosition = t.position;
+void Renderer::beginScene(glm::mat4 view, glm::mat4 projection,
+                          glm::vec3 cameraPosition) {
+  m_view = view;
+  m_projection = projection;
+  m_cameraPosition = cameraPosition;
 }
 
 void Renderer::endScene() {}
 
 void Renderer::addShaderProgram(
-  std::string&& name, const std::unique_ptr<assets::AssetsManager>& assets_manager) {
+  std::string&& name,
+  const std::unique_ptr<assets::AssetsManager>& assets_manager) {
   auto newShaderProgram = ShaderProgram::Create(std::string(name));
   const auto& vs = assets_manager->get<assets::Shader>("v" + name);
   const auto& fs = assets_manager->get<assets::Shader>("f" + name);

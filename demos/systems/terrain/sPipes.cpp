@@ -1,19 +1,6 @@
-#pragma once
+#include "systems/terrain/sPipes.h"
 
-#include <entt/entt.hpp>
-
-#include "core/application.h"
-#include "scene/components/common/cName.h"
-#include "scene/components/common/cTag.h"
-#include "scene/components/common/cUUID.h"
-#include "scene/components/graphics/cShaderProgram.h"
-#include "scene/components/graphics/cShape.h"
-#include "scene/components/graphics/cTexture.h"
-#include "scene/components/physics/cRigidBody.h"
-#include "scene/components/physics/cTransform.h"
-#include "scene/components/world/cTime.h"
-
-namespace potatoengine {
+namespace demos::systems {
 
 int getTextureAtlasIndex(int index) {
   // 8: 4, 9: 5
@@ -34,8 +21,14 @@ int getTextureAtlasIndex(int index) {
   }
 }
 
-void pipesSystem(entt::registry& registry) {
-  const auto& settings = Application::Get().getSettings();
+void PipesSystem::update(entt::registry& registry, const engine::Time& ts) {
+  auto& app = engine::Application::Get();
+  if (app.isGamePaused()) {
+    return;
+  }
+  const auto& settings = app.getSettings();
+  const auto& scene_manager = app.getSceneManager();
+
   if (settings->activeScene == "Flappy Bird") {
     // state
     static int maxPipes = 4;
@@ -48,8 +41,8 @@ void pipesSystem(entt::registry& registry) {
     }
 
     // time
-    const auto& time = registry.view<CTime, CUUID>().front();
-    const auto& cTime = registry.get<CTime>(time);
+    const auto& time = registry.view<engine::CTime, engine::CUUID>().front();
+    const auto& cTime = registry.get<engine::CTime>(time);
     if (cTime.currentSecond >= 59) { // TODO more than 2 digits and real time
       timei2++;
     }
@@ -60,11 +53,13 @@ void pipesSystem(entt::registry& registry) {
 
     // movement
     registry
-      .view<CShaderProgram, CTexture, CTransform, CShape, CTag, CName, CUUID>()
-      .each([&](entt::entity e, CShaderProgram& cShaderProgram,
-                const CTexture& cTexture, CTransform& cTransform,
-                CShape& cShape, const CTag& cTag, const CName& cName,
-                const CUUID& cUUID) {
+      .view<engine::CShaderProgram, engine::CTexture, engine::CTransform,
+            engine::CShape, engine::CTag, engine::CName, engine::CUUID>()
+      .each([&](entt::entity e, engine::CShaderProgram& cShaderProgram,
+                const engine::CTexture& cTexture,
+                engine::CTransform& cTransform, engine::CShape& cShape,
+                const engine::CTag& cTag, const engine::CName& cName,
+                const engine::CUUID& cUUID) {
         if (cTag.tag == "pipe") {
           if (cShaderProgram.isVisible) {
             // int screenW = settings->windowWidth;
@@ -120,34 +115,28 @@ void pipesSystem(entt::registry& registry) {
 
     // points
     if (scorei1 == 0) {
-      entt::entity score2 =
-        Application::Get().getSceneManager()->getEntity("score2");
-      auto& cTextureAtlasScore2 = registry.get<CTextureAtlas>(score2);
+      entt::entity score2 = scene_manager->getEntity("score2");
+      auto& cTextureAtlasScore2 = registry.get<engine::CTextureAtlas>(score2);
       cTextureAtlasScore2.index = getTextureAtlasIndex(scorei2);
     } else {
-      entt::entity score1 =
-        Application::Get().getSceneManager()->getEntity("score1");
-      auto& cTextureAtlasScore1 = registry.get<CTextureAtlas>(score1);
-      entt::entity score2 =
-        Application::Get().getSceneManager()->getEntity("score2");
-      auto& cTextureAtlasScore2 = registry.get<CTextureAtlas>(score2);
+      entt::entity score1 = scene_manager->getEntity("score1");
+      auto& cTextureAtlasScore1 = registry.get<engine::CTextureAtlas>(score1);
+      entt::entity score2 = scene_manager->getEntity("score2");
+      auto& cTextureAtlasScore2 = registry.get<engine::CTextureAtlas>(score2);
       cTextureAtlasScore1.index = getTextureAtlasIndex(scorei1);
       cTextureAtlasScore2.index = getTextureAtlasIndex(scorei2);
     }
 
     // time
     if (timei1 == 0) {
-      entt::entity time2 =
-        Application::Get().getSceneManager()->getEntity("time2");
-      auto& cTextureAtlasTime2 = registry.get<CTextureAtlas>(time2);
+      entt::entity time2 = scene_manager->getEntity("time2");
+      auto& cTextureAtlasTime2 = registry.get<engine::CTextureAtlas>(time2);
       cTextureAtlasTime2.index = getTextureAtlasIndex(timei2);
     } else {
-      entt::entity time1 =
-        Application::Get().getSceneManager()->getEntity("time1");
-      auto& cTextureAtlasTime1 = registry.get<CTextureAtlas>(time1);
-      entt::entity time2 =
-        Application::Get().getSceneManager()->getEntity("time2");
-      auto& cTextureAtlasTime2 = registry.get<CTextureAtlas>(time2);
+      entt::entity time1 = scene_manager->getEntity("time1");
+      auto& cTextureAtlasTime1 = registry.get<engine::CTextureAtlas>(time1);
+      entt::entity time2 = scene_manager->getEntity("time2");
+      auto& cTextureAtlasTime2 = registry.get<engine::CTextureAtlas>(time2);
       cTextureAtlasTime1.index = getTextureAtlasIndex(timei1);
       cTextureAtlasTime2.index = getTextureAtlasIndex(timei2);
     }

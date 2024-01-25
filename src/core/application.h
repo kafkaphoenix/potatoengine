@@ -25,7 +25,7 @@ class Application {
     Application(std::unique_ptr<Settings>&& settings, CLArgs&& args);
     virtual ~Application();
 
-    void onEvent(Event& e);
+    void onEvent(events::Event& e);
     void pushState(std::unique_ptr<State>&& s);
     void pushOverlay(std::unique_ptr<State>&& s);
 
@@ -44,10 +44,14 @@ class Application {
     void close() noexcept { m_running = false; }
     void pause(bool paused) noexcept { m_paused = paused; }
     void togglePauseGame(bool pause) noexcept;
+    void setRestoreGamePaused(bool restore) noexcept {
+      m_restoreGamePaused = restore;
+    }
     void debug(bool debugging) noexcept { m_debugging = debugging; }
 
     bool isPaused() const noexcept { return m_paused; }
     bool isGamePaused() const noexcept { return m_gamePaused; }
+    bool isRestoreGamePaused() const noexcept { return m_restoreGamePaused; }
     bool isDebugging() const noexcept { return m_debugging; }
 
     static Application& Get() { return *s_instance; }
@@ -68,6 +72,7 @@ class Application {
     bool m_running{true};
     bool m_paused{};
     bool m_gamePaused{};
+    bool m_restoreGamePaused{};
     bool m_debugging{};
     float m_lastFrame{};
     float m_accumulator{};

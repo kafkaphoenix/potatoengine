@@ -3,7 +3,7 @@
 #include "core/keyCodes.h"
 #include "events/event.h"
 
-namespace potatoengine {
+namespace potatoengine::events {
 
 class KeyEvent : public Event {
   public:

@@ -1,25 +1,21 @@
-#pragma once
-
-#include <entt/entt.hpp>
-
-#include "core/application.h"
-#include "scene/components/common/cUUID.h"
-#include "scene/components/graphics/cTexture.h"
-#include "scene/components/physics/cRigidBody.h"
-#include "scene/components/physics/cTransform.h"
-#include "scene/components/world/cSkybox.h"
-#include "scene/components/world/cTime.h"
+#include "systems/world/sSkybox.h"
 
 using namespace entt::literals;
 
-namespace potatoengine {
+namespace demos::systems {
 
-void skyboxSystem(entt::registry& registry) {
-  registry.view<CSkybox, CTransform, CRigidBody, CTime, CTexture, CUUID>().each(
-    [&](const CSkybox& cSkybox, CTransform& cTransform,
-        const CRigidBody& cRigidBody, const CTime& cTime, CTexture& cTexture,
-        const CUUID& cUUID) {
-      if (cTexture.drawMode == CTexture::DrawMode::TEXTURES_BLEND) {
+void SkyboxSystem::update(entt::registry& registry, const engine::Time& ts) {
+  if (engine::Application::Get().isGamePaused()) {
+    return;
+  }
+
+  registry
+    .view<engine::CSkybox, engine::CTransform, engine::CRigidBody,
+          engine::CTime, engine::CTexture, engine::CUUID>()
+    .each([&](const engine::CSkybox& cSkybox, engine::CTransform& cTransform,
+              const engine::CRigidBody& cRigidBody, const engine::CTime& cTime,
+              engine::CTexture& cTexture, const engine::CUUID& cUUID) {
+      if (cTexture.drawMode == engine::CTexture::DrawMode::TEXTURES_BLEND) {
         float blendFactor = 0.f;
         if (cTime.currentHour >= cTime.nightStart and
             cTime.currentHour < cTime.dayTransitionStart) {

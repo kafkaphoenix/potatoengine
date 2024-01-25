@@ -2,7 +2,7 @@
 
 #include "events/event.h"
 
-namespace potatoengine {
+namespace potatoengine::events {
 
 class MouseMovedEvent : public Event {
   public:

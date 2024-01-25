@@ -1,9 +1,7 @@
 #include "scene/sceneManager.h"
 
-#include "scene/components/common/cName.h"
-#include "scene/components/common/cUUID.h"
-#include "scene/systems/sEvent.h"
-#include "scene/systems/sUpdate.h"
+#include "scene/components/core/cName.h"
+#include "scene/components/core/cUUID.h"
 #include "scene/utils.h"
 
 using namespace entt::literals;
@@ -17,9 +15,16 @@ SceneManager::SceneManager() : m_sceneFactory() {
   ENGINE_TRACE("Scene manager created!");
 }
 
-void SceneManager::onEvent(Event& e) { eventSystem(m_registry, e); }
+void SceneManager::registerSystem(std::unique_ptr<systems::System>&& system) {
+  m_systems.emplace(std::move(system));
+  dirtySystems = true;
+}
 
-void SceneManager::onUpdate(const Time& ts) { updateSystem(m_registry, ts); }
+void SceneManager::onUpdate(const Time& ts) {
+  for (const auto& system : m_systems) {
+    system->update(m_registry, ts);
+  }
+}
 
 entt::registry& SceneManager::getRegistry() noexcept { return m_registry; }
 
@@ -39,6 +44,23 @@ entt::entity SceneManager::getEntity(UUID& uuid) {
     }
   }
   ENGINE_ASSERT(false, "Entity not found");
+}
+
+const std::vector<std::string>&
+SceneManager::getNamedSystems() {
+  if (not dirtySystems) {
+    return m_namedSystems;
+  }
+
+  m_namedSystems.clear();
+  for (const auto& system : m_systems) {
+    std::string name = std::string(typeid(*system).name());
+    name = name.substr(name.find_last_of(':') + 1);
+    m_namedSystems.emplace_back(name + " - Priority " + std::to_string(system->getPriority()));
+  }
+  dirtySystems = false;
+
+  return m_namedSystems;
 }
 
 template <typename Component>

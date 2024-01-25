@@ -9,7 +9,7 @@
 #include "settings.h"
 
 namespace potatoengine {
-using EventCallbackFn = std::function<void(Event&)>;
+using EventCallbackFn = std::function<void(events::Event&)>;
 
 enum class CursorMode { Normal = 0, Hidden, Disabled };
 

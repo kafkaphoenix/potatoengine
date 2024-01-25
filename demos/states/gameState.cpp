@@ -1,6 +1,19 @@
 #include "states/gameState.h"
 
 #include "serializers/ssettings.h"
+#include "systems/animation/sAnimation.h"
+#include "systems/core/sDelete.h"
+#include "systems/graphics/sRender.h"
+#include "systems/physics/sCollision.h"
+#include "systems/physics/sGravity.h"
+#include "systems/physics/sMovement.h"
+#include "systems/terrain/sPipes.h"
+#include "systems/terrain/sTerrain.h"
+#include "systems/world/sLight.h"
+#include "systems/world/sSkybox.h"
+#include "systems/world/sTime.h"
+#include "dispatchers/appDispatcher.h"
+#include "dispatchers/inputDispatcher.h"
 
 namespace demos {
 
@@ -10,6 +23,17 @@ void GameState::onAttach() {
   auto& app = engine::Application::Get();
   const auto& settings = app.getSettings();
   const auto& scene_manager = app.getSceneManager();
+  scene_manager->registerSystem(std::make_unique<systems::DeleteSystem>(-100));
+  scene_manager->registerSystem(std::make_unique<systems::TimeSystem>(0));
+  scene_manager->registerSystem(std::make_unique<systems::TerrainSystem>(1));
+  scene_manager->registerSystem(std::make_unique<systems::PipesSystem>(2));
+  scene_manager->registerSystem(std::make_unique<systems::SkyboxSystem>(3));
+  scene_manager->registerSystem(std::make_unique<systems::LightSystem>(4));
+  scene_manager->registerSystem(std::make_unique<systems::CollisionSystem>(5));
+  scene_manager->registerSystem(std::make_unique<systems::GravitySystem>(6));
+  scene_manager->registerSystem(std::make_unique<systems::AnimationSystem>(7));
+  scene_manager->registerSystem(std::make_unique<systems::MovementSystem>(8));
+  scene_manager->registerSystem(std::make_unique<systems::RenderSystem>(100));
   engine::RendererAPI::SetClearColor(settings->clearColor);
   engine::RendererAPI::SetClearDepth(settings->clearDepth);
 
@@ -68,7 +92,8 @@ void GameState::onUpdate(const engine::Time& ts) {
     } else {
       scene_manager->clearScene();
       asset_manager->clear();
-      scene_manager->createScene(settings->activeScene, settings->activeScenePath);
+      scene_manager->createScene(settings->activeScene,
+                                 settings->activeScenePath);
     }
     settings->reloadScene = false;
 
@@ -105,9 +130,11 @@ void GameState::onUpdate(const engine::Time& ts) {
 
 void GameState::onImguiUpdate() {}
 
-void GameState::onEvent(engine::Event& e) {
-  const auto& scene_manager = engine::Application::Get().getSceneManager();
-  scene_manager->onEvent(e);
+void GameState::onEvent(engine::events::Event& e) {
+  auto& registry = engine::Application::Get().getSceneManager()->getRegistry();
+  
+  dispatchers::appDispatcher(registry, e);
+  dispatchers::inputDispatcher(registry, e);
 }
 
 std::unique_ptr<engine::State> GameState::Create() {
