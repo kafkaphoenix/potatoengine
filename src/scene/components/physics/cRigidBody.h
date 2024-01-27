@@ -15,8 +15,8 @@ struct CRigidBody {
       : mass(m), friction(f), bounciness(b), isKinematic(k) {}
 
     void print() const {
-      ENGINE_BACKTRACE("\t\tmass: {0}\n\t\t\t\tfriction: "
-                       "{1}\n\t\t\t\tbounciness: {2}\n\t\t\t\tisKinematic: {3}",
+      ENGINE_BACKTRACE("\t\tmass: {0}\n\t\t\t\t\t\tfriction: "
+                       "{1}\n\t\t\t\t\t\tbounciness: {2}\n\t\t\t\t\t\tisKinematic: {3}",
                        mass, friction, bounciness, isKinematic);
     }
 

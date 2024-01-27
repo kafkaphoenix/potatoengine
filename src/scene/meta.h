@@ -5,7 +5,7 @@
 namespace potatoengine {
 
 template <typename Component, typename... Args>
-Component& assign(entt::entity e, Args... args) {
+inline Component& assign(entt::entity e, Args... args) {
   auto& registry = Application::Get().getSceneManager()->getRegistry();
   ENGINE_ASSERT(not registry.all_of<Component>(e), "Entity already has component {}",
                 typeid(Component).name());
@@ -13,13 +13,13 @@ Component& assign(entt::entity e, Args... args) {
 }
 
 template <typename Component>
-Component& onComponentAdded(entt::entity e, Component& c) {
+inline Component& onComponentAdded(entt::entity e, Component& c) {
   Application::Get().getSceneManager()->onComponentAdded<Component>(e, c);
   return c;
 }
 
 template <typename Component>
-Component& onComponentCloned(entt::entity e, Component& c) {
+inline Component& onComponentCloned(entt::entity e, Component& c) {
   Application::Get().getSceneManager()->onComponentCloned<Component>(e, c);
   return c;
 }

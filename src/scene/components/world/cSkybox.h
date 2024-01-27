@@ -22,9 +22,9 @@ struct CSkybox {
         rotationSpeed(rs) {}
 
     void print() const {
-      ENGINE_BACKTRACE("\t\tuseFog: {0}\n\t\t\t\tfogColor: "
-                       "{1}\n\t\t\t\tfogDensity: {2}\n\t\t\t\tfogGradient: "
-                       "{3}\n\t\t\t\trotationSpeed: {4}",
+      ENGINE_BACKTRACE("\t\tuseFog: {0}\n\t\t\t\t\t\tfogColor: "
+                       "{1}\n\t\t\t\t\t\tfogDensity: {2}\n\t\t\t\t\t\tfogGradient: "
+                       "{3}\n\t\t\t\t\t\trotationSpeed: {4}",
                        useFog, glm::to_string(fogColor), fogDensity,
                        fogGradient, rotationSpeed);
     }

@@ -22,7 +22,7 @@ bool filterInstances{};
 bool filterComponents{};
 bool filterSystems{};
 
-void drawChildInfo(
+inline void drawChildInfo(
   const std::map<std::string, std::string, NumericComparator>& infoData,
   const std::string& sceneName) {
   for (const auto& [key, value] : infoData) {
@@ -54,8 +54,8 @@ void drawChildInfo(
   }
 }
 
-void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
-                      const std::unique_ptr<Settings>& settings) {
+inline void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
+                             const std::unique_ptr<Settings>& settings) {
   entt::registry& registry = scene_manager->getRegistry();
 
   if (registry.storage<entt::entity>().in_use() == 0) {

@@ -30,10 +30,10 @@ struct CNoise {
         amplitude(amplitude), positive(positive) {}
 
     void print() const {
-      ENGINE_BACKTRACE("\t\ttype: {0}\n\t\t\t\tseed: {1}\n\t\t\t\toctaves: "
-                       "{2}\n\t\t\t\tfrequency: {3}\n\t\t\t\tpersistence: "
-                       "{4}\n\t\t\t\tlacunarity: {5}\n\t\t\t\tamplitude: "
-                       "{6}\n\t\t\t\tpositive: {7}",
+      ENGINE_BACKTRACE("\t\ttype: {0}\n\t\t\t\t\t\tseed: {1}\n\t\t\t\t\t\toctaves: "
+                       "{2}\n\t\t\t\t\t\tfrequency: {3}\n\t\t\t\t\t\tpersistence: "
+                       "{4}\n\t\t\t\t\t\tlacunarity: {5}\n\t\t\t\t\t\tamplitude: "
+                       "{6}\n\t\t\t\t\t\tpositive: {7}",
                        _type, seed, octaves, frequency, persistence, lacunarity,
                        amplitude, positive);
     }

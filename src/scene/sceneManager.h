@@ -13,7 +13,10 @@ namespace potatoengine {
 class SceneManager {
   public:
     SceneManager();
-    void registerSystem(std::unique_ptr<systems::System>&& system);
+    void registerSystem(std::string&& name,
+                        std::unique_ptr<systems::System>&& system);
+    void unregisterSystem(std::string_view name);
+    bool containsSystem(std::string_view name);
     void onUpdate(const Time& ts);
     entt::registry& getRegistry() noexcept;
     entt::entity getEntity(std::string_view name);
@@ -28,10 +31,10 @@ class SceneManager {
     static std::unique_ptr<SceneManager> Create();
 
     // scene factory methods
-    entt::entity
-    createEntity(std::string_view prefabID, std::string&& prototypeID,
-                 std::string&& name,
-                 const std::optional<uint32_t>& uuid = std::nullopt);
+    entt::entity createEntity(std::string_view prefabID,
+                              std::string&& prototypeID, std::string&& name,
+                              std::optional<std::string> tag = std::nullopt,
+                              std::optional<uint32_t> uuid = std::nullopt);
     entt::entity cloneEntity(const entt::entity& e);
     void removeEntity(entt::entity& e);
 
@@ -45,17 +48,16 @@ class SceneManager {
 
     // entity factory methods
     void createPrototypes(std::string_view prefab_name,
-                          const std::unordered_set<std::string>& prototypeIDs);
+                          const std::vector<std::string>& prototypeIDs);
     void updatePrototypes(std::string_view prefab_name,
-                          const std::unordered_set<std::string>& prototypeIDs);
+                          const std::vector<std::string>& prototypeIDs);
     void destroyPrototypes(std::string_view prefab_name,
-                           const std::unordered_set<std::string>& prototypeIDs);
+                           const std::vector<std::string>& prototypeIDs);
     EntityFactory::Prototypes
     getPrototypes(std::string_view prefab_name,
-                  const std::unordered_set<std::string>& prototypeIDs);
-    bool
-    containsPrototypes(std::string_view prefab_name,
-                       const std::unordered_set<std::string>& prototypeIDs);
+                  const std::vector<std::string>& prototypeIDs);
+    bool containsPrototypes(std::string_view prefab_name,
+                            const std::vector<std::string>& prototypeIDs);
     const std::map<std::string, EntityFactory::Prototypes, NumericComparator>&
     getAllPrototypes();
     const std::map<std::string, std::string, NumericComparator>&
@@ -66,7 +68,8 @@ class SceneManager {
   private:
     entt::registry m_registry;
     SceneFactory m_sceneFactory;
-    std::set<std::unique_ptr<systems::System>, systems::SystemComparator>
+    std::set<std::pair<std::string, std::unique_ptr<systems::System>>,
+             systems::SystemComparator>
       m_systems;
     std::vector<std::string> m_namedSystems;
     bool dirtySystems{};

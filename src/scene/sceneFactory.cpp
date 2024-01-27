@@ -15,6 +15,7 @@
 #include "scene/components/core/cDeleted.h"
 #include "scene/components/core/cName.h"
 #include "scene/components/core/cTag.h"
+#include "scene/components/core/cTime.h"
 #include "scene/components/core/cUUID.h"
 #include "scene/components/graphics/cBody.h"
 #include "scene/components/graphics/cFBO.h"
@@ -26,11 +27,10 @@
 #include "scene/components/input/cInput.h"
 #include "scene/components/physics/cRigidBody.h"
 #include "scene/components/physics/cTransform.h"
+#include "scene/components/terrain/cChunkManager.h"
 #include "scene/components/utils/cNoise.h"
-#include "scene/components/world/cChunkManager.h"
 #include "scene/components/world/cLight.h"
 #include "scene/components/world/cSkybox.h"
-#include "scene/components/world/cTime.h"
 #include "utils/timer.h"
 #include "utils/uuid.h"
 
@@ -45,18 +45,20 @@ entt::entity SceneFactory::createEntity(std::string_view prefab_id,
                                         std::string&& prototypeID,
                                         entt::registry& registry,
                                         std::string&& name,
-                                        const std::optional<uint32_t>& uuid) {
+                                        std::optional<std::string> tag,
+                                        std::optional<uint32_t> uuid) {
   UUID _uuid = uuid.has_value() ? UUID(uuid.value()) : UUID();
+  std::string _tag = tag.has_value() ? tag.value() : prototypeID;
   entt::entity e = cloneEntity(
     m_entityFactory.getPrototypes(prefab_id, {prototypeID}).at(prototypeID),
-    _uuid, registry, std::move(name), std::move(prototypeID));
+    _uuid, registry, std::move(name), std::move(_tag));
   return e;
 }
 
 entt::entity SceneFactory::cloneEntity(const entt::entity& e, uint32_t uuid,
                                        entt::registry& registry,
                                        std::optional<std::string> name,
-                                       std::optional<std::string> prototypeID) {
+                                       std::optional<std::string> tag) {
   entt::entity cloned = registry.create();
 
   for (const auto& curr : registry.storage()) {
@@ -72,12 +74,11 @@ entt::entity SceneFactory::cloneEntity(const entt::entity& e, uint32_t uuid,
   }
 
   registry.emplace<CUUID>(cloned, uuid);
-  // name and prototypeID come mainly from cloning a prefab the first time
   if (name.has_value()) {
     registry.emplace<CName>(cloned, std::move(name.value()));
   }
-  if (prototypeID.has_value()) {
-    registry.emplace<CTag>(cloned, std::move(prototypeID.value()));
+  if (tag.has_value()) {
+    registry.emplace<CTag>(cloned, std::move(tag.value()));
   }
   m_dirtyMetrics = true;
   m_dirtyNamedEntities = true;
@@ -162,8 +163,6 @@ void SceneFactory::clearScene(const std::unique_ptr<Renderer>& renderer,
   m_namedEntities.clear();
   m_dirtyMetrics = false;
   m_dirtyNamedEntities = false;
-  entt::monostate<"useFog"_hs>{} = 0.f;
-  entt::monostate<"useSkyBlending"_hs>{} = 0.f;
 }
 
 void SceneFactory::createShaderPrograms(
@@ -227,9 +226,9 @@ void SceneFactory::createEntitiesFromPrefabs(
   for (const auto& [prefab_name, options] : scene.getPrefabs()) {
     auto prefab = assets::Prefab(
       options.at("filepath").get<std::string>(),
-      options.at("targeted_prototypes").get<std::unordered_set<std::string>>());
+      options.at("targeted_prototypes").get<std::vector<std::string>>());
     ENGINE_TRACE("Creating scene prototypes for prefab {}...", prefab_name);
-    std::unordered_set<std::string> targetedPrototypes =
+    std::vector<std::string> targetedPrototypes =
       prefab.getTargetedPrototypes();
     assets_manager->load<assets::Prefab>(prefab_name, std::move(prefab));
     m_entityFactory.createPrototypes(prefab_name, targetedPrototypes, registry,

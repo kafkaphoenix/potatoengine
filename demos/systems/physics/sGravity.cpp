@@ -10,7 +10,7 @@ void GravitySystem::update(entt::registry& registry, const engine::Time& ts) {
   registry
     .view<engine::CTransform, engine::CRigidBody, engine::CGravity,
           engine::CUUID>()
-    .each([&](entt::entity e, engine::CTransform& cTransform,
+    .each([&](engine::CTransform& cTransform,
               const engine::CRigidBody& cRigidBody,
               const engine::CGravity& cGravity, const engine::CUUID& cUUID) {
       if (cRigidBody.isKinematic) {

@@ -17,8 +17,8 @@ bool filterFBOS{};
 bool filterShaderPrograms{};
 bool filterShaderInfo{};
 
-void drawRenderManager(const std::unique_ptr<Renderer>& renderer,
-                       const std::unique_ptr<Settings>& settings) {
+inline void drawRenderManager(const std::unique_ptr<Renderer>& renderer,
+                              const std::unique_ptr<Settings>& settings) {
   const auto& fbos = renderer->getFramebuffers();
   const auto& sp = renderer->getShaderPrograms();
 

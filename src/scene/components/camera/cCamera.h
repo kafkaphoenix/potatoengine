@@ -45,9 +45,9 @@ struct CCamera {
 
     void print() const {
       ENGINE_BACKTRACE(
-        "\t\ttype: {0}\n\t\t\t\taspectRatio: {1}\n\t\t\t\tmode: "
-        "{2}\n\t\t\t\tfov: {3}\n\t\t\t\tzoomFactor: {4}\n\t\t\t\tzoomMin: "
-        "{5}\n\t\t\t\tzoomMax: {6}\n\t\t\t\tnearClip: {7}\n\t\t\t\tfarClip: "
+        "\t\ttype: {0}\n\t\t\t\t\t\taspectRatio: {1}\n\t\t\t\t\t\tmode: "
+        "{2}\n\t\t\t\t\t\tfov: {3}\n\t\t\t\t\t\tzoomFactor: {4}\n\t\t\t\t\t\tzoomMin: "
+        "{5}\n\t\t\t\t\t\tzoomMax: {6}\n\t\t\t\t\t\tnearClip: {7}\n\t\t\t\t\t\tfarClip: "
         "{8}",
         _type, _aspectRatio, _mode, fov, zoomFactor, zoomMin, zoomMax, nearClip,
         farClip);

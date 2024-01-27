@@ -5,12 +5,16 @@
 #include <glm/gtc/quaternion.hpp>
 #include <imgui.h>
 
+#include "components/core/cState.h"
 #include "engineAPI.h"
+#include "states/gameState.h"
+#include "states/menuState.h"
+#include "states/pauseState.h"
 
 namespace demos::dispatchers {
 
-bool onMouseMoved(engine::events::MouseMovedEvent& e,
-                  entt::registry& registry) {
+inline bool onMouseMoved(engine::events::MouseMovedEvent& e,
+                         entt::registry& registry) {
   ImGuiIO& io = ImGui::GetIO();
   if (io.WantCaptureMouse and engine::Application::Get().isDebugging() or
       engine::Application::Get().isGamePaused()) {
@@ -65,8 +69,8 @@ bool onMouseMoved(engine::events::MouseMovedEvent& e,
   return true;
 }
 
-bool onMouseScrolled(engine::events::MouseScrolledEvent& e,
-                     entt::registry& registry) {
+inline bool onMouseScrolled(engine::events::MouseScrolledEvent& e,
+                            entt::registry& registry) {
   ImGuiIO& io = ImGui::GetIO();
   auto& app = engine::Application::Get();
   if (io.WantCaptureMouse and app.isDebugging() or app.isGamePaused()) {
@@ -94,7 +98,7 @@ bool onMouseScrolled(engine::events::MouseScrolledEvent& e,
   return true;
 }
 
-bool onMouseButtonPressed(engine::events::MouseButtonPressedEvent& e) {
+inline bool onMouseButtonPressed(engine::events::MouseButtonPressedEvent& e) {
   ImGuiIO& io = ImGui::GetIO();
   if (io.WantCaptureMouse and engine::Application::Get().isDebugging()) {
     return true;
@@ -105,7 +109,7 @@ bool onMouseButtonPressed(engine::events::MouseButtonPressedEvent& e) {
   return true;
 }
 
-bool onMouseButtonReleased(engine::events::MouseButtonReleasedEvent& e) {
+inline bool onMouseButtonReleased(engine::events::MouseButtonReleasedEvent& e) {
   ImGuiIO& io = ImGui::GetIO();
   if (io.WantCaptureMouse and engine::Application::Get().isDebugging()) {
     return true;
@@ -116,10 +120,10 @@ bool onMouseButtonReleased(engine::events::MouseButtonReleasedEvent& e) {
   return true;
 }
 
-bool onKeyPressed(engine::events::KeyPressedEvent& e) {
+inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
   auto& app = engine::Application::Get();
   const auto& settings = app.getSettings();
-  auto& window = app.getWindow();
+  const auto& window = app.getWindow();
   bool isDebugging = app.isDebugging();
   bool isGamePaused = app.isGamePaused();
 
@@ -127,33 +131,86 @@ bool onKeyPressed(engine::events::KeyPressedEvent& e) {
     if (isDebugging) {
       app.debug(false);
       app.togglePauseGame(false);
-      window.restoreCursor();
-      window.toggleCameraPositionUpdate(true);
-      window.setLastMousePosition(engine::Input::GetMouseX(), engine::Input::GetMouseY());
+      window->restoreCursor();
+      window->toggleCameraPositionUpdate(true);
+      window->setLastMousePosition(engine::Input::GetMouseX(),
+                                   engine::Input::GetMouseY());
     } else {
       app.debug(true);
       app.togglePauseGame(true);
-      glfwSetCursor(window.getNativeWindow(), nullptr);
-      window.setCursorMode(engine::CursorMode::Normal, false);
-      window.toggleCameraPositionUpdate(false);
+      glfwSetCursor(window->getNativeWindow(), nullptr);
+      window->setCursorMode(engine::CursorMode::Normal, false);
+      window->toggleCameraPositionUpdate(false);
     }
     return true;
   } else if (e.getKeyCode() == engine::Key::Escape) {
     if (isDebugging) {
-      window.restoreCursor();
+      window->restoreCursor();
     }
     app.close();
     return true;
   } else if (e.getKeyCode() == engine::Key::F4) {
-    const auto& windowData = window.getWindowData();
+    const auto& windowData = window->getWindowData();
     engine::RendererAPI::ToggleWireframe(not windowData.wireframe);
-    window.toggleWireframe(not windowData.wireframe);
+    window->toggleWireframe(not windowData.wireframe);
     return true;
   } else if (e.getKeyCode() == engine::Key::F12) {
-    window.toggleFullscreen(not settings->fullscreen);
+    window->toggleFullscreen(not settings->fullscreen);
     return true;
   } else if (e.getKeyCode() == engine::Key::P) {
-    app.togglePauseGame(not isGamePaused);
+    if (settings->activeScene == "Flappy Bird") {
+      entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
+      CState& cState =
+        app.getSceneManager()->getRegistry().get<CState>(gamestate);
+      if (cState.state == CState::State::READY or
+          cState.state == CState::State::RUNNING or
+          cState.state == CState::State::STARTING) {
+        app.pushOverlay(states::PauseState::Create());
+      } else if (cState.state == CState::State::PAUSED) {
+        app.popOverlay("PauseState");
+      }
+    } else {
+      app.togglePauseGame(not isGamePaused);
+    }
+  } else if (e.getKeyCode() == engine::Key::Enter) {
+    if (settings->activeScene == "Flappy Bird") {
+      entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
+      CState& cState =
+        app.getSceneManager()->getRegistry().get<CState>(gamestate);
+      if (cState.state == CState::State::MENU) {
+        app.popState("MenuState");
+        app.pushState(states::GameState::Create());
+      }
+    }
+  } else if (e.getKeyCode() == engine::Key::R) {
+    if (settings->activeScene == "Flappy Bird") {
+      entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
+      CState& cState =
+        app.getSceneManager()->getRegistry().get<CState>(gamestate);
+      if (cState.state == CState::State::GAMEOVER or
+          cState.state == CState::State::STOPPED or
+          cState.state == CState::State::PAUSED) {
+        app.getSettings()->reloadScene = true;
+      }
+    }
+  } else if (e.getKeyCode() == engine::Key::M) {
+    if (settings->activeScene == "Flappy Bird") {
+      entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
+      CState& cState =
+        app.getSceneManager()->getRegistry().get<CState>(gamestate);
+      if (cState.state == CState::State::PAUSED) {
+        app.popOverlay("PauseState");
+        app.popState("GameState");
+        app.pushState(states::MenuState::Create());
+      } else if (cState.state == CState::State::GAMEOVER or
+                 cState.state == CState::State::STOPPED) {
+        app.popOverlay("ScoreState");
+        app.popState("GameState");
+        app.pushState(states::MenuState::Create());
+      }
+    }
+  } else if (e.getKeyCode() == engine::Key::N) {
+    // TODO Next level maybe add level to game state
   }
 
   ImGuiIO& io = ImGui::GetIO();
@@ -174,8 +231,8 @@ bool onKeyPressed(engine::events::KeyPressedEvent& e) {
   switch (e.getKeyCode()) {
   case engine::Key::LeftAlt:
     if (not isDebugging) {
-      window.toggleCameraPositionUpdate(false);
-      window.setCursorMode(engine::CursorMode::Normal, false);
+      window->toggleCameraPositionUpdate(false);
+      window->setCursorMode(engine::CursorMode::Normal, false);
     }
     break;
   }
@@ -183,7 +240,7 @@ bool onKeyPressed(engine::events::KeyPressedEvent& e) {
   return true;
 }
 
-bool onKeyReleased(engine::events::KeyReleasedEvent& e) {
+inline bool onKeyReleased(engine::events::KeyReleasedEvent& e) {
   ImGuiIO& io = ImGui::GetIO();
   auto& app = engine::Application::Get();
 
@@ -193,14 +250,15 @@ bool onKeyReleased(engine::events::KeyReleasedEvent& e) {
     io.ClearEventsQueue();
   }
 
-  auto& window = app.getWindow();
+  const auto& window = app.getWindow();
 
   switch (e.getKeyCode()) {
   case engine::Key::LeftAlt:
     if (not app.isDebugging()) {
-      window.setLastMousePosition(engine::Input::GetMouseX(), engine::Input::GetMouseY());
-      window.toggleCameraPositionUpdate(true);
-      window.restoreCursor();
+      window->setLastMousePosition(engine::Input::GetMouseX(),
+                                   engine::Input::GetMouseY());
+      window->toggleCameraPositionUpdate(true);
+      window->restoreCursor();
     }
     break;
   }
@@ -208,7 +266,7 @@ bool onKeyReleased(engine::events::KeyReleasedEvent& e) {
   return true;
 }
 
-bool onKeyTyped(engine::events::KeyTypedEvent& e) {
+inline bool onKeyTyped(engine::events::KeyTypedEvent& e) {
   ImGuiIO& io = ImGui::GetIO();
   if (io.WantCaptureKeyboard and engine::Application::Get().isDebugging()) {
     return true;
@@ -219,7 +277,8 @@ bool onKeyTyped(engine::events::KeyTypedEvent& e) {
   return true;
 }
 
-void inputDispatcher(entt::registry& registry, engine::events::Event& e) {
+inline void inputDispatcher(entt::registry& registry,
+                            engine::events::Event& e) {
   engine::events::EventDispatcher dispatcher(e);
 
   dispatcher.dispatch<engine::events::MouseMovedEvent>(

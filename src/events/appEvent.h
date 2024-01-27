@@ -4,7 +4,6 @@
 
 namespace potatoengine::events {
 
-// TODO use for something
 class AppTickEvent : public Event {
   public:
     EVENT_CLASS_TYPE(AppTick)
@@ -13,8 +12,15 @@ class AppTickEvent : public Event {
 
 class AppUpdateEvent : public Event {
   public:
+    AppUpdateEvent(std::string&& dispatcher_target) : m_dispatcherTarget(dispatcher_target) {}
+
+    std::string_view getDispatcherTarget() const noexcept { return m_dispatcherTarget; }
+
     EVENT_CLASS_TYPE(AppUpdate)
     EVENT_CLASS_CATEGORY(EventCategoryApplication)
+  
+  private:
+    std::string m_dispatcherTarget;
 };
 
 class AppRenderEvent : public Event {

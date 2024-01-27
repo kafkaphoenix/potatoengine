@@ -9,11 +9,11 @@ namespace demos::systems {
 class PipesSystem : public engine::systems::System {
   public:
     PipesSystem(int priority) : engine::systems::System(priority) {}
-    ~PipesSystem() override = default;
+    ~PipesSystem() override final;
 
-    void init(entt::registry& registry, const engine::Time& ts) override{};
-    void update(entt::registry& registry, const engine::Time& ts) override;
-    void shutdown(entt::registry& registry, const engine::Time& ts) override{};
+    void init(entt::registry& registry) override final;
+    void update(entt::registry& registry,
+                const engine::Time& ts) override final;
 };
 
 }

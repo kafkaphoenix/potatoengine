@@ -6,8 +6,8 @@ namespace potatoengine::assets {
 
 void Prefab::process_prototype(const std::string& name, const json& prototypeData,
                        const json& data) {
-  std::unordered_set<std::string> inherits;
-  std::unordered_set<std::string> ctags;
+  std::vector<std::string> inherits;
+  std::vector<std::string> ctags;
   std::unordered_map<std::string, json> components;
 
   if (prototypeData.contains("inherits")) {
@@ -25,7 +25,7 @@ void Prefab::process_prototype(const std::string& name, const json& prototypeDat
 }
 
 Prefab::Prefab(std::filesystem::path&& fp,
-               std::unordered_set<std::string>&& targetedPrototypes)
+               std::vector<std::string>&& targetedPrototypes)
   : m_name(std::move(fp.filename().string())),
     m_filepath(std::move(fp.string())),
     m_targetedPrototypes(std::move(targetedPrototypes)) {
@@ -38,15 +38,16 @@ Prefab::Prefab(std::filesystem::path&& fp,
   json data = json::parse(f);
   f.close();
 
-  if (m_targetedPrototypes == std::unordered_set<std::string>{"*"}) {
+  if (m_targetedPrototypes == std::vector<std::string>{"*"}) {
     m_targetedPrototypes.clear();
     for (const auto& [name, prototypeData] : data.items()) {
-      m_targetedPrototypes.emplace(name);
+      m_targetedPrototypes.emplace_back(name);
       process_prototype(name, prototypeData, data);
     }
   } else {
     for (const auto& [name, prototypeData] : data.items()) {
-      if (not m_targetedPrototypes.contains(name)) {
+      if (std::find(m_targetedPrototypes.begin(), m_targetedPrototypes.end(),
+                    name) == m_targetedPrototypes.end()) {
         continue;
       }
       process_prototype(name, prototypeData, data);
@@ -54,19 +55,19 @@ Prefab::Prefab(std::filesystem::path&& fp,
   }
 }
 
-void Prefab::read(const json& data, std::unordered_set<std::string>& inherits,
-                  std::unordered_set<std::string>& ctags,
+void Prefab::read(const json& data, std::vector<std::string>& inherits,
+                  std::vector<std::string>& ctags,
                   std::unordered_map<std::string, json>& components) {
   if (data.contains("ctags")) {
     for (const json& c : data.at("ctags")) {
-      ctags.emplace(c);
+      ctags.emplace_back(c);
     }
   }
 
   if (data.contains("components")) {
     for (const auto& [cKey, cValue] : data.at("components").items()) {
-      if (inherits.size() > 0 and ctags.contains(cKey)) {
-        ctags.erase(cKey);
+      if (inherits.size() > 0) {
+        std::erase_if(ctags, [&cKey](const std::string& c) { return c == cKey; });
       }
       if (components.contains(cKey)) {
         for (const auto& [cFieldKey, cFieldValue] : cValue.items()) {

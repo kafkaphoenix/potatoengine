@@ -75,11 +75,7 @@
             },
             "skybox": {
                 "prefab": "systems",
-                "prototype": "skybox",
-                "options": {
-                    "time": 7,
-                    "acceleration": 1
-                }
+                "prototype": "skybox"
             },
             "chunk_config": {
                 "prefab": "systems",

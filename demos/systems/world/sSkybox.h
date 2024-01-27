@@ -9,11 +9,11 @@ namespace demos::systems {
 class SkyboxSystem : public engine::systems::System {
   public:
     SkyboxSystem(int priority) : engine::systems::System(priority) {}
-    ~SkyboxSystem() override = default;
+    ~SkyboxSystem() override final;
 
-    void init(entt::registry& registry, const engine::Time& ts) override{};
-    void update(entt::registry& registry, const engine::Time& ts) override;
-    void shutdown(entt::registry& registry, const engine::Time& ts) override{};
+    void init(entt::registry& registry) override final;
+    void update(entt::registry& registry,
+                const engine::Time& ts) override final;
 };
 
 }

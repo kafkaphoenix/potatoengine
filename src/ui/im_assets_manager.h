@@ -10,8 +10,6 @@
 #include "settings.h"
 #include "ui/imutils.h"
 
-using namespace potatoengine::assets;
-
 namespace potatoengine::ui {
 
 std::string selectedAssetManagerTabKey;
@@ -19,8 +17,9 @@ std::string selectedAssetTabType;
 std::string selectedFilepath;
 char assets_text_filter[128]{}; // TODO: move to class
 
-void drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_manager,
-                       const std::unique_ptr<Settings>& settings) {
+inline void
+drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_manager,
+                  const std::unique_ptr<Settings>& settings) {
   const auto& assets = assets_manager->getAssets();
 
   if (assets.empty()) {
@@ -43,7 +42,6 @@ void drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_mana
   ImGui::Separator();
   ImGui::Columns(2);
 
-  bool filterOption = false;
   for (const auto& [type, value] : assets) {
     if (collapsed not_eq -1) {
       ImGui::SetNextItemOpen(collapsed not_eq 0);
@@ -78,7 +76,7 @@ void drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_mana
     for (const auto& [key, value] : assetInfo) {
       if (key.starts_with("Prototype ") and selectedAssetTabType == "Prefab") {
         const auto& prefab =
-          assets_manager->get<Prefab>(selectedAssetManagerTabKey);
+          assets_manager->get<assets::Prefab>(selectedAssetManagerTabKey);
         const auto& prototypeInfo = prefab->getTargetedPrototypeInfo(value);
         if (ImGui::TreeNode((selectedAssetTabType + selectedAssetManagerTabKey +
                              key + settings->activeScene)
@@ -92,7 +90,7 @@ void drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_mana
       } else if (key.starts_with("Loaded Texture ") and
                  selectedAssetTabType == "Model") {
         const auto& model =
-          assets_manager->get<Model>(selectedAssetManagerTabKey);
+          assets_manager->get<assets::Model>(selectedAssetManagerTabKey);
         const auto& textureInfo = model->getLoadedTextureInfo(value);
         if (ImGui::TreeNode((selectedAssetTabType + selectedAssetManagerTabKey +
                              key + settings->activeScene)
@@ -106,7 +104,7 @@ void drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_mana
       } else if (key.starts_with("Filepath ") and
                  selectedAssetTabType == "Texture") {
         const auto& texture =
-          assets_manager->get<Texture>(selectedAssetManagerTabKey);
+          assets_manager->get<assets::Texture>(selectedAssetManagerTabKey);
         if (texture->isCubemap()) {
           ImGui::BulletText("%s: %s", key.c_str(), value.c_str());
         } else {
@@ -124,12 +122,25 @@ void drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_mana
 
     if (not selectedFilepath.empty()) {
       const auto& texture =
-        assets_manager->get<Texture>(selectedAssetManagerTabKey);
+        assets_manager->get<assets::Texture>(selectedAssetManagerTabKey);
       if (not texture->isCubemap()) {
-        int maxWidth = texture->getWidth() > 128 ? 128 : texture->getWidth();
-        int maxHeight = texture->getHeight() > 128 ? 128 : texture->getHeight();
-        ImGui::Image((void*)texture->getID(), ImVec2(maxWidth, maxHeight), ImVec2(0, 1),
-                     ImVec2(1, 0));
+        int maxWidth = texture->getWidth();
+        int maxHeight = texture->getHeight();
+        if (maxWidth <= 64 and maxHeight <= 64) {
+          maxWidth *= 2;
+          maxHeight *= 2;
+        } else if (maxWidth >= 1024 or maxHeight >= 1024) {
+          maxHeight /= 4;
+          maxWidth /= 4;
+        } else if (maxWidth >= 512 or maxHeight >= 512) {
+          maxHeight /= 3;
+          maxWidth /= 3;
+        } else if (maxWidth >= 256 or maxHeight >= 256) {
+          maxHeight /= 2;
+          maxWidth /= 2;
+        }
+        ImGui::Image((void*)texture->getID(), ImVec2(maxWidth, maxHeight),
+                     ImVec2(0, 1), ImVec2(1, 0));
       }
     }
   }

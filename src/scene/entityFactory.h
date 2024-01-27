@@ -15,20 +15,20 @@ class EntityFactory {
 
     void createPrototypes(
       std::string_view prefab_name,
-      const std::unordered_set<std::string>& prototypeIDs, entt::registry& registry,
+      const std::vector<std::string>& prototypeIDs, entt::registry& registry,
       const std::unique_ptr<assets::AssetsManager>& assets_manager);
     void updatePrototypes(
       std::string_view prefab_name,
-      const std::unordered_set<std::string>& prototypeIDs, entt::registry& registry,
+      const std::vector<std::string>& prototypeIDs, entt::registry& registry,
       const std::unique_ptr<assets::AssetsManager>& assets_manager);
     void destroyPrototypes(std::string_view prefab_name,
-                           const std::unordered_set<std::string>& prototypeIDs,
+                           const std::vector<std::string>& prototypeIDs,
                            entt::registry& registry);
     Prototypes
     getPrototypes(std::string_view prefab_name,
-                  const std::unordered_set<std::string>& prototypeIDs);
+                  const std::vector<std::string>& prototypeIDs);
     bool containsPrototypes(std::string_view prefab_name,
-                            const std::unordered_set<std::string>& prototypeIDs) const;
+                            const std::vector<std::string>& prototypeIDs) const;
 
     const std::map<std::string, Prototypes, NumericComparator>&
     getAllPrototypes();

@@ -36,9 +36,9 @@ struct CLight {
 
     void print() const {
       ENGINE_BACKTRACE(
-        "\t\ttype: {0}\n\t\t\t\tcolor: {1}\n\t\t\t\tintensity: "
-        "{2}\n\t\t\t\trange: "
-        "{3}\n\t\t\t\tinnerConeAngle: {4}\n\t\t\t\touterConeAngle: {5}",
+        "\t\ttype: {0}\n\t\t\t\t\t\tcolor: {1}\n\t\t\t\t\t\tintensity: "
+        "{2}\n\t\t\t\t\t\trange: "
+        "{3}\n\t\t\t\t\t\tinnerConeAngle: {4}\n\t\t\t\t\t\touterConeAngle: {5}",
         _type, glm::to_string(color), intensity, range, innerConeAngle,
         outerConeAngle);
     }

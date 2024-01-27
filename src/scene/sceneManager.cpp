@@ -15,13 +15,39 @@ SceneManager::SceneManager() : m_sceneFactory() {
   ENGINE_TRACE("Scene manager created!");
 }
 
-void SceneManager::registerSystem(std::unique_ptr<systems::System>&& system) {
-  m_systems.emplace(std::move(system));
+void SceneManager::registerSystem(std::string&& name,
+                                  std::unique_ptr<systems::System>&& system) {
+  ENGINE_ASSERT(not containsSystem(name), "System {} already registered",
+                name);
+  system->init(m_registry);
+  m_systems.emplace(std::make_pair(std::move(name), std::move(system)));
   dirtySystems = true;
 }
 
+void SceneManager::unregisterSystem(std::string_view name) {
+  bool deleted = false;
+  for (auto it = m_systems.begin(); it != m_systems.end(); ++it) {
+    if (it->first == name) {
+      m_systems.erase(it);
+      deleted = true;
+      break;
+    }
+  }
+  ENGINE_ASSERT(deleted, "System {} not found", name);
+  dirtySystems = true;
+}
+
+bool SceneManager::containsSystem(std::string_view name) {
+  for (const auto& [n, _] : m_systems) {
+    if (n == name) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void SceneManager::onUpdate(const Time& ts) {
-  for (const auto& system : m_systems) {
+  for (const auto& [_, system] : m_systems) {
     system->update(m_registry, ts);
   }
 }
@@ -34,7 +60,7 @@ entt::entity SceneManager::getEntity(std::string_view name) {
       return e;
     }
   }
-  ENGINE_ASSERT(false, "Entity not found");
+  ENGINE_ASSERT(false, "Entity with name {} not found", name);
 }
 
 entt::entity SceneManager::getEntity(UUID& uuid) {
@@ -43,20 +69,18 @@ entt::entity SceneManager::getEntity(UUID& uuid) {
       return e;
     }
   }
-  ENGINE_ASSERT(false, "Entity not found");
+  ENGINE_ASSERT(false, "Entity with UUID {} not found", std::to_string(uuid));
 }
 
-const std::vector<std::string>&
-SceneManager::getNamedSystems() {
+const std::vector<std::string>& SceneManager::getNamedSystems() {
   if (not dirtySystems) {
     return m_namedSystems;
   }
 
   m_namedSystems.clear();
-  for (const auto& system : m_systems) {
-    std::string name = std::string(typeid(*system).name());
-    name = name.substr(name.find_last_of(':') + 1);
-    m_namedSystems.emplace_back(name + " - Priority " + std::to_string(system->getPriority()));
+  for (const auto& [name, system] : m_systems) {
+    m_namedSystems.emplace_back(name + " - Priority " +
+                                std::to_string(system->getPriority()));
   }
   dirtySystems = false;
 
@@ -84,9 +108,10 @@ std::unique_ptr<SceneManager> SceneManager::Create() {
 entt::entity SceneManager::createEntity(std::string_view prefabID,
                                         std::string&& prototypeID,
                                         std::string&& name,
-                                        const std::optional<uint32_t>& uuid) {
+                                        std::optional<std::string> tag,
+                                        std::optional<uint32_t> uuid) {
   return m_sceneFactory.createEntity(prefabID, std::move(prototypeID),
-                                     m_registry, std::move(name), uuid);
+                                     m_registry, std::move(name), tag, uuid);
 }
 
 entt::entity SceneManager::cloneEntity(const entt::entity& e) {
@@ -112,6 +137,9 @@ void SceneManager::reloadScene(bool reload_prototypes) {
 
 void SceneManager::clearScene() {
   m_sceneFactory.clearScene(Application::Get().getRenderer(), m_registry);
+  m_systems.clear();
+  m_namedSystems.clear();
+  dirtySystems = false;
 }
 
 std::string SceneManager::getActiveScene() const {
@@ -130,7 +158,7 @@ SceneManager::getMetrics() {
 
 void SceneManager::createPrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs) {
+  const std::vector<std::string>& prototypeIDs) {
   m_sceneFactory.getEntityFactory().createPrototypes(
     prefab_name, prototypeIDs, m_registry,
     Application::Get().getAssetsManager());
@@ -138,7 +166,7 @@ void SceneManager::createPrototypes(
 
 void SceneManager::updatePrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs) {
+  const std::vector<std::string>& prototypeIDs) {
   m_sceneFactory.getEntityFactory().updatePrototypes(
     prefab_name, prototypeIDs, m_registry,
     Application::Get().getAssetsManager());
@@ -146,21 +174,21 @@ void SceneManager::updatePrototypes(
 
 void SceneManager::destroyPrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs) {
+  const std::vector<std::string>& prototypeIDs) {
   m_sceneFactory.getEntityFactory().destroyPrototypes(prefab_name, prototypeIDs,
                                                       m_registry);
 }
 
 EntityFactory::Prototypes SceneManager::getPrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs) {
+  const std::vector<std::string>& prototypeIDs) {
   return m_sceneFactory.getEntityFactory().getPrototypes(prefab_name,
                                                          prototypeIDs);
 }
 
 bool SceneManager::containsPrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs) {
+  const std::vector<std::string>& prototypeIDs) {
   return m_sceneFactory.getEntityFactory().containsPrototypes(prefab_name,
                                                               prototypeIDs);
 }

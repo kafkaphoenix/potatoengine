@@ -11,9 +11,11 @@
 #include "ui/im_render_manager.h"
 #include "ui/im_scene_manager.h"
 #include "ui/im_settings_manager.h"
+#include "ui/im_state_machine_manager.h"
 
 namespace potatoengine::ui {
-void drawManagersBar(
+
+inline void drawManagersBar(
   const std::unique_ptr<assets::AssetsManager>& assets_manager,
   const std::unique_ptr<Renderer>& renderer,
   const std::unique_ptr<SceneManager>& scene_manager,
@@ -50,6 +52,13 @@ void drawManagersBar(
       filterFBOS = false;
       filterShaderPrograms = false;
       filterShaderInfo = false;
+    }
+    if (ImGui::BeginTabItem("State Machine Manager")) {
+      drawStateMachineManager();
+      ImGui::EndTabItem();
+    } else {
+      state_machine_states_text_filter[0] = '\0';
+      filterStates = false;
     }
     if (ImGui::BeginTabItem("Settings Manager")) {
       drawSettingsManager(settings, renderer);

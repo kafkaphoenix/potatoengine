@@ -136,8 +136,9 @@ const std::map<std::string, std::string, NumericComparator>& FBO::getInfo() {
 }
 
 void FBO::bindToDraw() {
+  const auto& renderer = Application::Get().getRenderer();
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
-  glViewport(0, 0, m_width, m_height);
+  renderer->onWindowResize(m_width, m_height);
 }
 
 void FBO::bindToRead() {
@@ -148,15 +149,17 @@ void FBO::bindToRead() {
 
 void FBO::unbind() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0); // default framebuffer
-  const auto& settings = Application::Get().getSettings();
+  auto& app = Application::Get();
+  const auto& settings = app.getSettings();
+  const auto& renderer = app.getRenderer();
   if (settings->fullscreen) {
     int monitorCount;
     GLFWmonitor* monitor =
       (glfwGetMonitors(&monitorCount))[settings->primaryMonitor];
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    glViewport(0, 0, mode->width, mode->height);
+    renderer->onWindowResize(mode->width, mode->height);
   } else {
-    glViewport(0, 0, settings->windowWidth, settings->windowHeight);
+    renderer->onWindowResize(settings->windowWidth, settings->windowHeight);
   }
 }
 

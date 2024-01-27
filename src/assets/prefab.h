@@ -9,8 +9,8 @@
 using json = nlohmann::json;
 
 struct Prototype {
-    std::unordered_set<std::string> inherits{};
-    std::unordered_set<std::string> ctags{};
+    std::vector<std::string> inherits{};
+    std::vector<std::string> ctags{};
     std::unordered_map<std::string, json> components{};
 };
 
@@ -18,19 +18,19 @@ namespace potatoengine::assets {
 class Prefab : public Asset {
   public:
     Prefab(std::filesystem::path&& fp,
-           std::unordered_set<std::string>&& targetedPrototypes);
+           std::vector<std::string>&& targetedPrototypes);
 
     virtual const std::map<std::string, std::string, NumericComparator>&
     getInfo() override final;
     const std::map<std::string, std::string, NumericComparator>&
     getTargetedPrototypeInfo(std::string_view prototypeID);
 
-    const std::unordered_set<std::string>&
+    const std::vector<std::string>&
     getInherits(std::string_view prototypeID) const {
       return m_prototypes.at(prototypeID.data()).inherits;
     }
 
-    const std::unordered_set<std::string>&
+    const std::vector<std::string>&
     getCTags(std::string_view prototypeID) const {
       return m_prototypes.at(prototypeID.data()).ctags;
     }
@@ -40,7 +40,7 @@ class Prefab : public Asset {
       return m_prototypes.at(prototypeID.data()).components;
     }
 
-    const std::unordered_set<std::string>&
+    const std::vector<std::string>&
     getTargetedPrototypes() const noexcept {
       return m_targetedPrototypes;
     }
@@ -56,7 +56,7 @@ class Prefab : public Asset {
   private:
     std::string m_name{};
     std::string m_filepath{};
-    std::unordered_set<std::string> m_targetedPrototypes{};
+    std::vector<std::string> m_targetedPrototypes{};
     std::unordered_map<std::string, Prototype> m_prototypes{};
 
     std::map<std::string, std::string, NumericComparator> m_info{};
@@ -64,8 +64,8 @@ class Prefab : public Asset {
              NumericComparator>
       m_prototypeInfo{};
 
-    void read(const json& j, std::unordered_set<std::string>& inherits,
-              std::unordered_set<std::string>& ctags,
+    void read(const json& j, std::vector<std::string>& inherits,
+              std::vector<std::string>& ctags,
               std::unordered_map<std::string, json>& components);
 
     void process_prototype(const std::string& name, const json& prototypeData,

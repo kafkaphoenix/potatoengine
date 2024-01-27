@@ -20,7 +20,7 @@ struct CText {
       : text(std::move(t)), color(std::move(c)) {}
 
     void print() const {
-      ENGINE_BACKTRACE("\t\ttext: {0}\n\t\t\t\tcolor: {1}", text,
+      ENGINE_BACKTRACE("\t\ttext: {0}\n\t\t\t\t\t\tcolor: {1}", text,
                        glm::to_string(color));
     }
 

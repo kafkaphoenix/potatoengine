@@ -27,8 +27,8 @@ struct CShape {
       : type(t), size(d), meshes(std::move(m)), repeatTexture(r) {}
 
     void print() const {
-      ENGINE_BACKTRACE("\t\ttype: {0}\n\t\t\t\tsize: {1}\n\t\t\t\tmeshes: "
-                       "{2}\n\t\t\t\trepeatTexture: {3}",
+      ENGINE_BACKTRACE("\t\ttype: {0}\n\t\t\t\t\t\tsize: {1}\n\t\t\t\t\t\tmeshes: "
+                       "{2}\n\t\t\t\t\t\trepeatTexture: {3}",
                        _type, glm::to_string(size), meshes.size(),
                        repeatTexture);
     }

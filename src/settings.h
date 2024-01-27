@@ -7,6 +7,7 @@
 using json = nlohmann::json;
 
 namespace potatoengine {
+
 struct Settings {
     std::string appName = "potatoengine";
     std::string root = "..";
@@ -54,6 +55,7 @@ struct Settings {
     std::string activeScene{"Empty"};
     std::string activeScenePath{"assets/scenes/empty_scene.json"};
     bool reloadScene = false;
+    bool reloadPrototypes = false;
 
     std::vector<const char*> scenes{
       "Sponza", "Dabrovic Sponza", "Lowpoly City", "Skycrapers", "Trailer park",
@@ -80,5 +82,5 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
   debugEnabled, displayFPS, enableEngineLogger, enableAppLogger, engineLogLevel,
   appLogLevel, engineFlushLevel, appFlushLevel, enableEngineBacktraceLogger,
   enableAppBacktraceLogger, clearColor, clearDepth, activeScene,
-  activeScenePath);
+  activeScenePath, reloadPrototypes);
 }

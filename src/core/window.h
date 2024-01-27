@@ -9,6 +9,7 @@
 #include "settings.h"
 
 namespace potatoengine {
+
 using EventCallbackFn = std::function<void(events::Event&)>;
 
 enum class CursorMode { Normal = 0, Hidden, Disabled };
@@ -56,6 +57,7 @@ class Window {
     void shutdown();
     void onUpdate();
     void onEvent();
+    void triggerEvent(events::Event& e);
 
     GLFWwindow* getNativeWindow() const noexcept { return m_window; }
     const WindowData& getWindowData() const noexcept { return m_data; }
@@ -85,7 +87,8 @@ class Window {
     void toggleWindowInsideImgui(bool windowInsideImgui);
     void toggleFitToWindow(bool fitToWindow);
 
-    static std::unique_ptr<Window> Create(const std::unique_ptr<Settings>& settings);
+    static std::unique_ptr<Window>
+    Create(const std::unique_ptr<Settings>& settings);
 
   private:
     GLFWwindow* m_window{}; // TODO: this class should be a window manager, and

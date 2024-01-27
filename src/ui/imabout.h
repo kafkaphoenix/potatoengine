@@ -8,7 +8,7 @@ namespace potatoengine::ui {
 
 bool show_tool_about = false;
 
-void drawAbout() {
+inline void drawAbout() {
   if (not show_tool_about)
     return;
 

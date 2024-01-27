@@ -27,9 +27,9 @@ struct CInput {
 
     void print() const {
       ENGINE_BACKTRACE(
-        "\t\tmode: {0}\n\t\t\t\tmouseSensitivity: "
-        "{1}\n\t\t\t\ttranslationSpeed: {2}\n\t\t\t\tverticalSpeed: "
-        "{3}\n\t\t\t\trotationSpeed: {4}",
+        "\t\tmode: {0}\n\t\t\t\t\t\tmouseSensitivity: "
+        "{1}\n\t\t\t\t\t\ttranslationSpeed: {2}\n\t\t\t\t\t\tverticalSpeed: "
+        "{3}\n\t\t\t\t\t\trotationSpeed: {4}",
         _mode, mouseSensitivity, translationSpeed, verticalSpeed,
         rotationSpeed);
     }

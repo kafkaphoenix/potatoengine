@@ -13,8 +13,8 @@ Application::Application(std::unique_ptr<Settings>&& s, CLArgs&& args)
 
   m_name = m_settings->appName;
   std::filesystem::current_path(m_settings->root);
-  m_states = StateStack::Create();
-  m_assetsManager = AssetsManager::Create();
+  m_states = StateMachine::Create();
+  m_assetsManager = assets::AssetsManager::Create();
 
   m_window = Window::Create(m_settings);
   m_window->setEventCallback(BIND_EVENT(Application::onEvent));
@@ -28,7 +28,7 @@ Application::Application(std::unique_ptr<Settings>&& s, CLArgs&& args)
 }
 
 Application::~Application() {
-  ENGINE_WARN("Deleting Application");
+  ENGINE_WARN("Deleting application");
   m_renderer->shutdown();
   ui::ImGuiAPI::Shutdown();
 }
@@ -48,6 +48,14 @@ void Application::pushState(std::unique_ptr<State>&& s) {
 void Application::pushOverlay(std::unique_ptr<State>&& s) {
   s->onAttach();
   m_states->pushOverlay(std::move(s));
+}
+
+void Application::popState(std::string_view name) {
+  m_states->popState(name);
+}
+
+void Application::popOverlay(std::string_view name) {
+  m_states->popOverlay(name);
 }
 
 void Application::togglePauseGame(bool pause) noexcept {

@@ -18,8 +18,8 @@ struct CMaterial {
         shininess(sh) {}
 
     void print() const {
-      ENGINE_BACKTRACE("\t\tambient: {0}\n\t\t\t\tdiffuse: "
-                       "{1}\n\t\t\t\tspecular: {2}\n\t\t\t\tshininess: {3}",
+      ENGINE_BACKTRACE("\t\tambient: {0}\n\t\t\t\t\t\tdiffuse: "
+                       "{1}\n\t\t\t\t\t\tspecular: {2}\n\t\t\t\t\t\tshininess: {3}",
                        glm::to_string(ambient), glm::to_string(diffuse),
                        glm::to_string(specular), shininess);
     }

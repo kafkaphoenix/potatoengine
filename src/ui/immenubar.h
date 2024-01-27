@@ -12,7 +12,8 @@
 #include "ui/immetrics.h"
 
 namespace potatoengine::ui {
-void drawMenuBar(const std::unique_ptr<assets::AssetsManager>& assets_manager,
+
+inline void drawMenuBar(const std::unique_ptr<assets::AssetsManager>& assets_manager,
                  const std::unique_ptr<Renderer>& renderer,
                   const std::unique_ptr<SceneManager>& scene_manager,
                   const std::unique_ptr<Settings>& settings) {

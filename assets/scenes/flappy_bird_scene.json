@@ -32,8 +32,13 @@
                 "type": "textureDiffuse",
                 "flip_vertically": false
             },
-            "background": {
-                "filepath": "assets/textures/flappy_bird/background.png",
+            "background_day": {
+                "filepath": "assets/textures/flappy_bird/background_day.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "background_night": {
+                "filepath": "assets/textures/flappy_bird/background_night.png",
                 "type": "textureDiffuse",
                 "flip_vertically": true
             },
@@ -46,6 +51,41 @@
                 "filepath": "assets/textures/flappy_bird/numbers.png",
                 "type": "textureDiffuse",
                 "flip_vertically": true
+            },
+            "buttons": {
+                "filepath": "assets/textures/flappy_bird/buttons.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "gameover": {
+                "filepath": "assets/textures/flappy_bird/gameover.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "completed": {
+                "filepath": "assets/textures/flappy_bird/completed.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "ready": {
+                "filepath": "assets/textures/flappy_bird/ready.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "title": {
+                "filepath": "assets/textures/flappy_bird/title.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "paused": {
+                "filepath": "assets/textures/flappy_bird/paused.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
+            },
+            "coin": {
+                "filepath": "assets/textures/flappy_bird/coin.png",
+                "type": "textureDiffuse",
+                "flip_vertically": true
             }
         },
         "prefabs": {
@@ -55,14 +95,14 @@
                     "*"
                 ]
             },
-            "objects": {
-                "filepath": "assets/prefabs/flappy_bird/objects.json",
+            "meta": {
+                "filepath": "assets/prefabs/flappy_bird/meta.json",
                 "targeted_prototypes": [
                     "*"
                 ]
             },
-            "structures": {
-                "filepath": "assets/prefabs/flappy_bird/structures.json",
+            "scene": {
+                "filepath": "assets/prefabs/flappy_bird/scene.json",
                 "targeted_prototypes": [
                     "*"
                 ]
@@ -71,110 +111,130 @@
     },
     "entities": {
         "normals": {
-            "background": {
-                "prefab": "structures",
-                "prototype": "background"
+            "background_day": {
+                "prefab": "scene",
+                "prototype": "background",
+                "options": {
+                    "filepaths": ["background_day"]
+                }
+            },
+            "background_night": {
+                "prefab": "scene",
+                "prototype": "background",
+                "options": {
+                    "isVisible": false,
+                    "filepaths": ["background_night"]
+                }
+            },
+            "overlay": {
+                "prefab": "scene",
+                "prototype": "overlay",
+                "options": {
+                    "isVisible": false
+                }
             },
             "ground": {
-                "prefab": "structures",
+                "prefab": "scene",
                 "prototype": "ground"
             },
             "bird": {
                 "prefab": "creatures",
                 "prototype": "bird"
             },
-            "time1": {
-                "prefab": "structures",
-                "prototype": "numbers",
+            "gamestate": {
+                "prefab": "meta",
+                "prototype": "gamestate"
+            },
+            "title": {
+                "prefab": "scene",
+                "prototype": "text",
                 "options": {
-                    "isVisible": true,
-                    "position": {
-                        "x": -1.6,
-                        "y": 0.8,
-                        "z": 0.0
-                    }
+                    "filepaths": ["title"],
+                    "scale": {"x": 1, "y": 1, "z": 1}
                 }
             },
-            "time2": {
-                "prefab": "structures",
-                "prototype": "numbers",
+            "ready": {
+                "prefab": "scene",
+                "prototype": "text",
                 "options": {
-                    "isVisible": true,
-                    "position": {
-                        "x": -1.45,
-                        "y": 0.8,
-                        "z": 0.0
-                    }
+                    "filepaths": ["ready"],
+                    "isVisible": false,
+                    "position": {"x": 0, "y": 0.7, "z": 0}
                 }
             },
-            "score1": {
-                "prefab": "structures",
-                "prototype": "numbers",
+            "gameover": {
+                "prefab": "scene",
+                "prototype": "text",
                 "options": {
-                    "isVisible": true,
-                    "position": {
-                        "x": 1.45,
-                        "y": 0.8,
-                        "z": 0.0
-                    }
+                    "filepaths": ["gameover"],
+                    "isVisible": false,
+                    "position": {"x": 0, "y": 0.7, "z": 0}
                 }
             },
-            "score2": {
-                "prefab": "structures",
-                "prototype": "numbers",
+            "completed": {
+                "prefab": "scene",
+                "prototype": "text",
                 "options": {
-                    "isVisible": true,
-                    "position": {
-                        "x": 1.6,
-                        "y": 0.8,
-                        "z": 0.0
-                    }
+                    "filepaths": ["completed"],
+                    "isVisible": false,
+                    "position": {"x": 0, "y": 0.7, "z": 0}
                 }
             },
-            "green_pipe_top": {
-                "prefab": "structures",
-                "prototype": "pipe",
+            "paused": {
+                "prefab": "scene",
+                "prototype": "text",
                 "options": {
-                    "filepaths": [
-                        "green_pipe_top"
-                    ],
+                    "filepaths": ["paused"],
                     "isVisible": false
                 }
             },
-            "green_pipe_bottom": {
-                "prefab": "structures",
-                "prototype": "pipe",
+            "start": {
+                "prefab": "scene",
+                "prototype": "buttons",
                 "options": {
-                    "filepaths": [
-                        "green_pipe_bottom"
-                    ],
-                    "isVisible": false
+                    "textureAtlas": {"index": 7},
+                    "position": {"x": 0, "y": 0, "z": 0}
                 }
             },
-            "red_pipe_top": {
-                "prefab": "structures",
-                "prototype": "pipe",
+            "restart": {
+                "prefab": "scene",
+                "prototype": "buttons",
                 "options": {
-                    "filepaths": [
-                        "red_pipe_top"
-                    ],
-                    "isVisible": false
+                    "isVisible": false,
+                    "textureAtlas": {"index": 3},
+                    "position": {"x": 0, "y": -0.6, "z": 0}
                 }
             },
-            "red_pipe_bottom": {
-                "prefab": "structures",
-                "prototype": "pipe",
+            "resume": {
+                "prefab": "scene",
+                "prototype": "buttons",
                 "options": {
-                    "filepaths": [
-                        "red_pipe_bottom"
-                    ],
-                    "isVisible": false
+                    "isVisible": false,
+                    "textureAtlas": {"index": 4},
+                    "position": {"x": 0, "y": 0, "z": 0}
+                }
+            },
+            "menu": {
+                "prefab": "scene",
+                "prototype": "buttons",
+                "options": {
+                    "isVisible": false,
+                    "textureAtlas": {"index": 8},
+                    "position": {"x": 0, "y": -0.4, "z": 0}
+                }
+            },
+            "exit": {
+                "prefab": "scene",
+                "prototype": "buttons",
+                "options": {
+                    "textureAtlas": {"index": 6},
+                    "position": {"x": 0, "y": -0.2, "z": 0}
                 }
             }
         },
         "cameras": {
             "scene_camera": {
-                "prefab": "objects",
+                "prefab": "meta",
                 "prototype": "camera"
             }
         }

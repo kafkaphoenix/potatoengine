@@ -2,7 +2,7 @@
 
 #include "assets/assetsManager.h"
 #include "core/state.h"
-#include "core/stateStack.h"
+#include "core/stateMachine.h"
 #include "core/window.h"
 #include "events/event.h"
 #include "pch.h"
@@ -28,18 +28,24 @@ class Application {
     void onEvent(events::Event& e);
     void pushState(std::unique_ptr<State>&& s);
     void pushOverlay(std::unique_ptr<State>&& s);
+    void popState(std::string_view name);
+    void popOverlay(std::string_view name);
 
-    Window& getWindow() const {
-      return *m_window;
-    } // TODO rename to getActiveWindow when multi-window support is added
+    // TODO rename to getActiveWindow when multi-window support is added and i
+    // have a window manager
+    const std::unique_ptr<Window>& getWindow() const { return m_window; }
     const std::unique_ptr<SceneManager>& getSceneManager() const {
       return m_sceneManager;
     }
     const std::unique_ptr<assets::AssetsManager>& getAssetsManager() const {
       return m_assetsManager;
     }
+    // TODO rename both classes and methods to managers
     const std::unique_ptr<Renderer>& getRenderer() const { return m_renderer; }
     const std::unique_ptr<Settings>& getSettings() const { return m_settings; }
+    const std::unique_ptr<StateMachine>& getStateMachine() const {
+      return m_states;
+    }
 
     void close() noexcept { m_running = false; }
     void pause(bool paused) noexcept { m_paused = paused; }
@@ -66,7 +72,7 @@ class Application {
     void run();
 
     std::unique_ptr<Window> m_window;
-    std::unique_ptr<StateStack> m_states;
+    std::unique_ptr<StateMachine> m_states;
 
     std::string m_name{};
     bool m_running{true};

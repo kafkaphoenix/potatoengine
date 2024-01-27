@@ -3,28 +3,31 @@
 #include <entt/entt.hpp>
 #include <imgui.h>
 
+#include "components/meta/cTimer.h"
+#include "dispatchers/onCoinCollected.h"
+#include "dispatchers/onTimerTicked.h"
 #include "engineAPI.h"
 
 namespace demos::dispatchers {
 
-bool onWindowClosed(engine::events::WindowCloseEvent& e) {
+inline bool onWindowClosed(engine::events::WindowCloseEvent& e) {
   engine::Application::Get().close();
   return true;
 }
 
-bool onWindowRestored(engine::events::WindowRestoredEvent& e) {
+inline bool onWindowRestored(engine::events::WindowRestoredEvent& e) {
   return true;
 }
 
-bool onWindowMinimized(engine::events::WindowMinimizedEvent& e) {
+inline bool onWindowMinimized(engine::events::WindowMinimizedEvent& e) {
   return true;
 }
 
-bool onWindowMaximized(engine::events::WindowMaximizedEvent& e) { 
+inline bool onWindowMaximized(engine::events::WindowMaximizedEvent& e) {
   return true;
 }
 
-bool onWindowFocus(engine::events::WindowFocusEvent& e) {
+inline bool onWindowFocus(engine::events::WindowFocusEvent& e) {
   engine::Application::Get().pause(false);
   if (engine::Application::Get().isRestoreGamePaused()) {
     engine::Application::Get().togglePauseGame(true);
@@ -35,7 +38,7 @@ bool onWindowFocus(engine::events::WindowFocusEvent& e) {
   return true;
 }
 
-bool onWindowLostFocus(engine::events::WindowLostFocusEvent& e) {
+inline bool onWindowLostFocus(engine::events::WindowLostFocusEvent& e) {
   engine::Application::Get().pause(true);
   if (engine::Application::Get().isGamePaused()) {
     engine::Application::Get().setRestoreGamePaused(true);
@@ -45,19 +48,21 @@ bool onWindowLostFocus(engine::events::WindowLostFocusEvent& e) {
   return true;
 }
 
-bool onWindowMoved(engine::events::WindowMovedEvent& e) { return true; }
+inline bool onWindowMoved(engine::events::WindowMovedEvent& e) { return true; }
 
-bool onWindowResized(engine::events::WindowResizeEvent& e,
-                     entt::registry& registry) {
-  engine::RendererAPI::SetViewport(0, 0, e.getWidth(), e.getHeight());
+inline bool onWindowResized(engine::events::WindowResizeEvent& e,
+                            entt::registry& registry) {
   auto& app = engine::Application::Get();
   const auto& settings = app.getSettings();
+  const auto& renderer = app.getRenderer();
+
+  renderer->onWindowResize(e.getWidth(), e.getHeight());
+
   if (not settings->fullscreen) { // when resizing with the mouse
     settings->windowWidth = e.getWidth();
     settings->windowHeight = e.getHeight();
   }
 
-  const auto& renderer = app.getRenderer();
   if (not renderer->getFramebuffers().empty()) {
     entt::entity fbo = registry.view<engine::CFBO, engine::CUUID>()
                          .front(); // TODO: support more than one?
@@ -70,13 +75,24 @@ bool onWindowResized(engine::events::WindowResizeEvent& e,
   return true;
 }
 
-bool onAppTick(engine::events::AppTickEvent& e) { return true; }
+inline bool onAppTick(engine::events::AppTickEvent& e,
+                      entt::registry& registry) {
+  onTimerTicked(registry);
+  return true;
+}
 
-bool onAppUpdate(engine::events::AppUpdateEvent& e) { return true; }
+inline bool onAppUpdate(engine::events::AppUpdateEvent& e,
+                        entt::registry& registry) {
+  if (e.getDispatcherTarget() == "onCoinCollected") {
+    return onCoinCollected(registry);
+  }
 
-bool onAppRender(engine::events::AppRenderEvent& e) { return true; }
+  return true;
+}
 
-void appDispatcher(entt::registry& registry, engine::events::Event& e) {
+inline bool onAppRender(engine::events::AppRenderEvent& e) { return true; }
+
+inline void appDispatcher(entt::registry& registry, engine::events::Event& e) {
   engine::events::EventDispatcher dispatcher(e);
 
   dispatcher.dispatch<engine::events::WindowCloseEvent>(
@@ -97,11 +113,10 @@ void appDispatcher(entt::registry& registry, engine::events::Event& e) {
     BIND_STATIC_EVENT(onWindowMoved));
 
   dispatcher.dispatch<engine::events::AppTickEvent>(
-    BIND_STATIC_EVENT(onAppTick));
+    BIND_STATIC_EVENT(onAppTick, registry));
   dispatcher.dispatch<engine::events::AppUpdateEvent>(
-    BIND_STATIC_EVENT(onAppUpdate));
+    BIND_STATIC_EVENT(onAppUpdate, registry));
   dispatcher.dispatch<engine::events::AppRenderEvent>(
     BIND_STATIC_EVENT(onAppRender));
 }
-
 }

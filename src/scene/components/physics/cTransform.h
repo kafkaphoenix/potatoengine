@@ -33,7 +33,7 @@ struct CTransform {
 
     void print() const {
       ENGINE_BACKTRACE(
-        "\t\tposition: {0}\n\t\t\t\trotation: {1}\n\t\t\t\tscale: {2}",
+        "\t\tposition: {0}\n\t\t\t\t\t\trotation: {1}\n\t\t\t\t\t\tscale: {2}",
         glm::to_string(position), glm::to_string(rotation),
         glm::to_string(scale));
     }

@@ -12,7 +12,7 @@ struct CTextureAtlas {
     explicit CTextureAtlas(int r, int i) : rows(r), index(i) {}
 
     void print() const {
-      ENGINE_BACKTRACE("\t\trows: {0}\n\t\t\t\tindex: {1}", rows, index);
+      ENGINE_BACKTRACE("\t\trows: {0}\n\t\t\t\t\t\tindex: {1}", rows, index);
     }
 
     std::map<std::string, std::string, NumericComparator> getInfo() const {

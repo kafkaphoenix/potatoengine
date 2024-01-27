@@ -1,6 +1,6 @@
 {
     "bird": {
-        "ctags": ["activeInput"],
+        "ctags": ["activeInput", "transform"],
         "components": {
             "shaderProgram": {
                 "name": "shape"
@@ -17,8 +17,7 @@
                 "drawMode": "textureAtlas"
             },
             "textureAtlas": {
-                "rows": 2,
-                "index": 3
+                "rows": 2
             },
             "distanceFromCamera": {
                 "distance": 2
@@ -34,9 +33,6 @@
             },
             "gravity": {
                 "acceleration": 0.65
-            },
-            "transform": {
-                "position": {"x": 0, "y": 0.5, "z": 0}
             }
         }
     }

@@ -175,7 +175,7 @@ void processComponent(entt::entity& e, const std::string& cPrefab,
 
 void EntityFactory::createPrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs, entt::registry& registry,
+  const std::vector<std::string>& prototypeIDs, entt::registry& registry,
   const std::unique_ptr<assets::AssetsManager>& assets_manager) {
   const auto& prefab = assets_manager->get<assets::Prefab>(prefab_name);
 
@@ -200,7 +200,7 @@ void EntityFactory::createPrototypes(
 
 void EntityFactory::updatePrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs, entt::registry& registry,
+  const std::vector<std::string>& prototypeIDs, entt::registry& registry,
   const std::unique_ptr<assets::AssetsManager>& assetsManager) {
   destroyPrototypes(prefab_name, prototypeIDs, registry);
   createPrototypes(prefab_name, prototypeIDs, registry, assetsManager);
@@ -208,7 +208,7 @@ void EntityFactory::updatePrototypes(
 
 void EntityFactory::destroyPrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs,
+  const std::vector<std::string>& prototypeIDs,
   entt::registry& registry) {
   for (std::string_view prototypeID : prototypeIDs) {
     ENGINE_ASSERT(m_prefabs.at(prefab_name.data()).contains(prototypeID.data()),
@@ -223,7 +223,7 @@ void EntityFactory::destroyPrototypes(
 
 EntityFactory::Prototypes EntityFactory::getPrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs) {
+  const std::vector<std::string>& prototypeIDs) {
   ENGINE_ASSERT(m_prefabs.contains(prefab_name.data()), "Unknown prefab {}",
                 prefab_name);
   Prototypes prototypes;
@@ -240,7 +240,7 @@ EntityFactory::Prototypes EntityFactory::getPrototypes(
 
 bool EntityFactory::containsPrototypes(
   std::string_view prefab_name,
-  const std::unordered_set<std::string>& prototypeIDs) const {
+  const std::vector<std::string>& prototypeIDs) const {
   ENGINE_ASSERT(m_prefabs.contains(prefab_name.data()), "Unknown prefab {}",
                 prefab_name);
   for (std::string_view prototypeID : prototypeIDs) {

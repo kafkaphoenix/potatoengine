@@ -423,11 +423,7 @@ generateTerrain(engine::CChunkManager::MeshType meshType,
   return engine::CMesh{};
 }
 
-void TerrainSystem::update(entt::registry& registry, const engine::Time& ts) {
-  if (engine::Application::Get().isGamePaused()) {
-    return;
-  }
-
+void TerrainSystem::init(entt::registry& registry) {
   registry
     .view<engine::CChunkManager, engine::CTexture, engine::CNoise,
           engine::CUUID>()
@@ -445,57 +441,62 @@ void TerrainSystem::update(entt::registry& registry, const engine::Time& ts) {
                       cUUID.uuid);
       }
 
-      if (cChunkManager.chunks.empty()) {
-        // Create chunks around 0 0 0
-        // TODO y axis should infinite, maybe rename z to depth
-        std::vector<std::vector<float>> heights;
-        std::vector<std::vector<glm::vec3>> biomes;
-        engine::CChunk chunk;
-        for (int row = -cChunkManager.width; row <= cChunkManager.width;
-             ++row) {
-          for (int col = -cChunkManager.height; col <= cChunkManager.height;
-               ++col) {
-            chunk = engine::CChunk{"plains"};
-            heights =
-              generateHeights(cChunkManager.chunkSize, cNoise, col, row);
-            if (cChunkManager.useBiomes) {
-              if (cTexture.drawMode == engine::CTexture::DrawMode::COLOR) {
-                biomes = generateBiomes(heights, cNoise.amplitude);
-              } else if (cTexture.drawMode ==
-                           engine::CTexture::DrawMode::TEXTURE_ATLAS or
-                         cTexture.drawMode ==
-                           engine::CTexture::DrawMode::TEXTURE_ATLAS_BLEND or
-                         cTexture.drawMode == engine::CTexture::DrawMode::
-                                                TEXTURE_ATLAS_BLEND_COLOR) {
-                biomes = generateBiomesTextures(heights, cNoise.amplitude,
-                                                *cTextureAtlas);
-              }
-              chunk.terrainMesh = std::move(generateTerrain(
-                cChunkManager.meshType, cChunkManager.meshAlgorithm,
-                cChunkManager.chunkSize, cChunkManager.blockSize,
-                cTexture.drawMode, heights, biomes));
-            } else {
-              chunk.terrainMesh = std::move(generateTerrain(
-                cChunkManager.meshType, cChunkManager.meshAlgorithm,
-                cChunkManager.chunkSize, cChunkManager.blockSize,
-                cTexture.drawMode, heights));
+      // Create chunks around 0 0 0
+      // TODO y axis should infinite, maybe rename z to depth
+      std::vector<std::vector<float>> heights;
+      std::vector<std::vector<glm::vec3>> biomes;
+      engine::CChunk chunk;
+      for (int row = -cChunkManager.width; row <= cChunkManager.width; ++row) {
+        for (int col = -cChunkManager.height; col <= cChunkManager.height;
+             ++col) {
+          chunk = engine::CChunk{"plains"};
+          heights = generateHeights(cChunkManager.chunkSize, cNoise, col, row);
+          if (cChunkManager.useBiomes) {
+            if (cTexture.drawMode == engine::CTexture::DrawMode::COLOR) {
+              biomes = generateBiomes(heights, cNoise.amplitude);
+            } else if (cTexture.drawMode ==
+                         engine::CTexture::DrawMode::TEXTURE_ATLAS or
+                       cTexture.drawMode ==
+                         engine::CTexture::DrawMode::TEXTURE_ATLAS_BLEND or
+                       cTexture.drawMode == engine::CTexture::DrawMode::
+                                              TEXTURE_ATLAS_BLEND_COLOR) {
+              biomes = generateBiomesTextures(heights, cNoise.amplitude,
+                                              *cTextureAtlas);
             }
-            chunk.transform.position =
-              glm::vec3{static_cast<float>(col) * cChunkManager.chunkSize *
-                          cChunkManager.blockSize,
-                        0.f,
-                        static_cast<float>(row) * cChunkManager.chunkSize *
-                          cChunkManager.blockSize};
-            cChunkManager.chunks.emplace(
-              glm::vec3{static_cast<float>(col) * cChunkManager.chunkSize *
-                          cChunkManager.blockSize,
-                        0.f,
-                        static_cast<float>(row) * cChunkManager.chunkSize *
-                          cChunkManager.blockSize},
-              std::move(chunk)); // TODO check if this work with blocksize
+            chunk.terrainMesh = std::move(generateTerrain(
+              cChunkManager.meshType, cChunkManager.meshAlgorithm,
+              cChunkManager.chunkSize, cChunkManager.blockSize,
+              cTexture.drawMode, heights, biomes));
+          } else {
+            chunk.terrainMesh = std::move(generateTerrain(
+              cChunkManager.meshType, cChunkManager.meshAlgorithm,
+              cChunkManager.chunkSize, cChunkManager.blockSize,
+              cTexture.drawMode, heights));
           }
+          chunk.transform.position =
+            glm::vec3{static_cast<float>(col) * cChunkManager.chunkSize *
+                        cChunkManager.blockSize,
+                      0.f,
+                      static_cast<float>(row) * cChunkManager.chunkSize *
+                        cChunkManager.blockSize};
+          cChunkManager.chunks.emplace(
+            glm::vec3{static_cast<float>(col) * cChunkManager.chunkSize *
+                        cChunkManager.blockSize,
+                      0.f,
+                      static_cast<float>(row) * cChunkManager.chunkSize *
+                        cChunkManager.blockSize},
+            std::move(chunk)); // TODO check if this work with blocksize
         }
       }
     });
+}
+
+void TerrainSystem::update(entt::registry& registry, const engine::Time& ts) {
+  auto& app = engine::Application::Get();
+  if (app.isGamePaused()) {
+    return;
+  }
+
+  // TODO here we rebuild meshes and stuff
 }
 }

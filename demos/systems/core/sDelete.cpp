@@ -7,7 +7,7 @@ void DeleteSystem::update(entt::registry& registry, const engine::Time& ts) {
     return;
   }
 
-  auto to_destroy = registry.view<engine::CDeleted>();
+  auto to_destroy = registry.view<engine::CDeleted, engine::CUUID>();
   registry.destroy(to_destroy.begin(), to_destroy.end());
 }
 }

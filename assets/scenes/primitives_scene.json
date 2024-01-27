@@ -65,7 +65,6 @@
                 "prefab": "systems",
                 "prototype": "skybox",
                 "options": {
-                    "time": 7,
                     "useFog": false
                 }
             },

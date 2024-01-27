@@ -1,0 +1,163 @@
+{
+    "sprite": {
+        "ctags": ["transform"],
+        "components": {
+            "shaderProgram": {
+                "name": "shape"
+            },
+            "shape": {
+                "type": "rectangle"
+            },
+            "texture": {
+                "drawMode": "texture"
+            }
+        }
+    },
+    "background": {
+        "inherits": ["sprite"],
+        "components": {
+            "distanceFromCamera": {
+                "distance": 5
+            },
+            "shape": {
+                "size": {"x": 2, "y": 2, "z": 0}
+            },
+            "transform": {
+                "position": {"x": 0, "y": 0.5, "z": 0}
+            }
+        }
+    },
+    "overlay": {
+        "inherits": ["sprite"],
+        "components": {
+            "shape": {
+                "size": {"x": 1, "y": 1, "z": 1}
+            },
+            "texture": {
+                "drawMode": "color",
+                "color": {"r": 0, "g": 0, "b": 0, "a": 0.5}
+            },
+            "distanceFromCamera": {
+                "distance": 0.3
+            }
+        }
+    },
+    "ground": {
+        "inherits": ["sprite"],
+        "ctags": ["rigidBody"],
+        "components": {
+            "distanceFromCamera": {
+                "distance": 3
+            },
+            "texture": {
+                "filepaths": ["ground"]
+            },
+            "shape": {
+                "size": {"x": 3, "y": 0.5, "z": 0}
+            },
+            "transform": {
+                "position": {"x": -1, "y": -1, "z": 0}
+            },
+            "collider": {
+                "type": "rectangle",
+                "size": {"x": 3, "y": 0.5, "z": 0}
+            }
+        }
+    },
+    "pipe": {
+        "inherits": ["sprite"],
+        "ctags": ["rigidBody"],
+        "components": {
+            "distanceFromCamera": {
+                "distance": 4
+            },
+            "shape": {
+                "size": {"x": 0.1, "y": 0.4, "z": 0}
+            },
+            "collider": {
+                "type": "rectangle",
+                "size": {"x": 0.1, "y": 0.4, "z": 0}
+            }
+        }
+    },
+    "numbers": {
+        "inherits": ["sprite"],
+        "components": {
+            "distanceFromCamera": {
+                "distance": 1
+            },
+            "shape": {
+                "size": {"x": 0.1, "y": 0.1, "z": 0}
+            },
+            "texture": {
+                "filepaths": ["numbers"],
+                "drawMode": "textureAtlas"
+            },
+            "textureAtlas": {
+                "rows": 4
+            }
+        }
+    },
+    "buttons": {
+        "inherits": ["sprite"],
+        "components": {
+            "shape": {
+                "size": {"x": 0.3, "y": 0.2, "z": 1}
+            },
+            "texture": {
+                "filepaths": ["buttons"],
+                "drawMode": "textureAtlas"
+            },
+            "distanceFromCamera": {
+                "distance": 0.2
+            },
+            "textureAtlas": {
+                "rows": 3
+            },
+            "collider": {
+                "type": "rectangle",
+                "size": {"x": 0.3, "y": 0.2, "z": 1}
+            }
+        }
+    },
+    "text": {
+        "inherits": ["sprite"],
+        "components": {
+            "shape": {
+                "size": {"x": 1, "y": 0.2, "z": 1}
+            },
+            "distanceFromCamera": {
+                "distance": 0.1
+            },
+            "transform": {
+                "position": {"x": 0, "y": 0.5, "z": 0},
+                "scale": {"x": 0.75, "y": 0.75, "z": 0.75}
+            }
+        }
+    },
+    "coin": {
+        "inherits": ["sprite"],
+        "components": {
+            "shape": {
+                "size": {"x": 0.05, "y": 0.05, "z": 0}
+            },
+            "texture": {
+                "filepaths": ["coin"],
+                "drawMode": "textureAtlas"
+            },
+            "distanceFromCamera": {
+                "distance": 3
+            },
+            "textureAtlas": {
+                "rows": 3
+            },
+            "rigidBody": {
+                "isKinematic": true
+            },
+            "collider": {
+                "type": "rectangle",
+                "size": {"x": 0.05, "y": 0.05, "z": 0}
+            }
+        }
+    }
+}

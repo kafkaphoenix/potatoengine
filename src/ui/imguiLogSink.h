@@ -20,8 +20,8 @@ class ImGuiLogSink : public spdlog::sinks::base_sink<std::mutex> {
     void ToggleWrap() { m_wrap = not m_wrap; }
 
   protected:
-    void sink_it_(const spdlog::details::log_msg& msg) override;
-    void flush_() override;
+    void sink_it_(const spdlog::details::log_msg& msg) override final;
+    void flush_() override final;
 
   private:
     void showLogFormatPopup();

@@ -12,10 +12,12 @@
 #include "ui/immenubar.h"
 
 namespace potatoengine::ui {
-void drawDebugger(const std::unique_ptr<Settings>& settings,
-                  const std::unique_ptr<assets::AssetsManager>& assets_manager,
-                  const std::unique_ptr<Renderer>& renderer,
-                  const std::unique_ptr<SceneManager>& scene_manager) {
+
+inline void
+drawDebugger(const std::unique_ptr<Settings>& settings,
+             const std::unique_ptr<assets::AssetsManager>& assets_manager,
+             const std::unique_ptr<Renderer>& renderer,
+             const std::unique_ptr<SceneManager>& scene_manager) {
   ImGui::SetNextWindowPos(ImVec2(settings->windowWidth / 2.f, 20.f),
                           ImGuiCond_FirstUseEver);
 

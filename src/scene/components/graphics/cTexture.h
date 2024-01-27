@@ -48,19 +48,20 @@ struct CTexture {
     void print() const {
       std::string texturePaths;
       if (filepaths.size() == 0) {
-        texturePaths = "\n\t\t\t\t none";
+        texturePaths = "\n\t\t\t\t\t\t none";
       } else {
         for (std::string_view filepath : filepaths) {
-          texturePaths += std::format("\n\t\t\t\t {}", filepath);
+          texturePaths += std::format("\n\t\t\t\t\t\t {}", filepath);
         }
       }
       ENGINE_BACKTRACE(
-        "\t\tcolor: {0}\n\t\t\t\tblendFactor: {1}\n\t\t\t\treflectivity: "
-        "{2}\n\t\t\t\trefractiveIndex: "
-        "{3}\n\t\t\t\thasTransparency: {4}\n\t\t\t\tuseLighting: "
-        "{5}\n\t\t\t\tuseReflection: "
-        "{6}\n\t\t\t\tuseRefraction: {7}\n\t\t\t\tdrawMode: "
-        "{8}\n\t\t\t\ttextures: {9}",
+        "\t\tcolor: {0}\n\t\t\t\t\t\tblendFactor: "
+        "{1}\n\t\t\t\t\t\treflectivity: "
+        "{2}\n\t\t\t\t\t\trefractiveIndex: "
+        "{3}\n\t\t\t\t\t\thasTransparency: {4}\n\t\t\t\t\t\tuseLighting: "
+        "{5}\n\t\t\t\t\t\tuseReflection: "
+        "{6}\n\t\t\t\t\t\tuseRefraction: {7}\n\t\t\t\t\t\tdrawMode: "
+        "{8}\n\t\t\t\t\t\ttextures: {9}",
         glm::to_string(color), blendFactor, reflectivity, refractiveIndex,
         hasTransparency, useLighting, useReflection, useRefraction, _drawMode,
         texturePaths);

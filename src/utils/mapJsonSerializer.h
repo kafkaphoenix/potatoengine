@@ -8,6 +8,7 @@
 using json = nlohmann::json;
 
 namespace potatoengine {
+
 inline std::string MapToJson(
   const std::map<std::string, std::string, NumericComparator>& inputMap) {
   nlohmann::json jsonMap;

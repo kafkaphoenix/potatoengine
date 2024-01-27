@@ -131,7 +131,8 @@ void ShaderProgram::resetActiveUniforms() {
 }
 
 void ShaderProgram::printActiveUniforms() {
-  ENGINE_BACKTRACE("===================Uniforms===================");
+  ENGINE_BACKTRACE(
+    "===================Shader program {} Uniforms===================", m_name);
   for (const auto& [type, name] : m_activeUniforms) {
     if (type == GL_INT) {
       ENGINE_BACKTRACE("Uniform {} type: {}", name, "int");
@@ -157,7 +158,8 @@ void ShaderProgram::printActiveUniforms() {
   ENGINE_BACKTRACE("=====================================================");
 }
 
-const std::map<std::string, std::string, NumericComparator>& ShaderProgram::getInfo() {
+const std::map<std::string, std::string, NumericComparator>&
+ShaderProgram::getInfo() {
   if (not m_info.empty()) {
     return m_info;
   }
@@ -190,8 +192,7 @@ const std::map<std::string, std::string, NumericComparator>& ShaderProgram::getI
   return m_info;
 }
 
-std::unique_ptr<ShaderProgram>
-ShaderProgram::Create(std::string&& name) {
+std::unique_ptr<ShaderProgram> ShaderProgram::Create(std::string&& name) {
   return std::make_unique<ShaderProgram>(std::move(name));
 }
 

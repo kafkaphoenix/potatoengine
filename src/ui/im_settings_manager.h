@@ -13,8 +13,8 @@ namespace potatoengine::ui {
 
 std::string selectedSettingsManagerTabKey;
 
-void drawSettingsManager(const std::unique_ptr<Settings>& settings,
-                         const std::unique_ptr<Renderer>& renderer) {
+inline void drawSettingsManager(const std::unique_ptr<Settings>& settings,
+                                const std::unique_ptr<Renderer>& renderer) {
   ImGui::Columns(2);
 
   ImGui::SeparatorText("Engine");
@@ -42,9 +42,9 @@ void drawSettingsManager(const std::unique_ptr<Settings>& settings,
   if (not selectedSettingsManagerTabKey.empty()) {
     ImGui::SeparatorText("Edit");
     if (selectedSettingsManagerTabKey == "Window") {
-      auto& window = Application::Get().getWindow();
+      const auto& window = Application::Get().getWindow();
       ImGui::Checkbox("Fullscreen", &settings->fullscreen);
-      window.toggleFullscreen(settings->fullscreen);
+      window->toggleFullscreen(settings->fullscreen);
 
       if (renderer->getFramebuffersCount() == 0) {
         ImGui::BeginDisabled();
@@ -55,7 +55,7 @@ void drawSettingsManager(const std::unique_ptr<Settings>& settings,
       }
       ImGui::SameLine();
       helpMark("Only works with a framebuffer");
-      window.toggleWindowInsideImgui(settings->windowInsideImgui);
+      window->toggleWindowInsideImgui(settings->windowInsideImgui);
       if (renderer->getFramebuffersCount() == 0) {
         ImGui::BeginDisabled();
       }
@@ -65,7 +65,7 @@ void drawSettingsManager(const std::unique_ptr<Settings>& settings,
       }
       ImGui::SameLine();
       helpMark("Only works with a framebuffer");
-      window.toggleFitToWindow(settings->fitToWindow);
+      window->toggleFitToWindow(settings->fitToWindow);
 
       bool isFullscreen = settings->fullscreen;
       if (isFullscreen) {
@@ -86,7 +86,7 @@ void drawSettingsManager(const std::unique_ptr<Settings>& settings,
       }
       ImGui::SameLine();
       helpMark("Only works in windowed mode");
-      window.resize(settings->windowWidth, settings->windowHeight);
+      window->resize(settings->windowWidth, settings->windowHeight);
       if (isFullscreen) {
         ImGui::BeginDisabled();
       }
@@ -96,7 +96,7 @@ void drawSettingsManager(const std::unique_ptr<Settings>& settings,
       }
       ImGui::SameLine();
       helpMark("Only works in windowed mode");
-      window.toggleResizable(settings->resizable);
+      window->toggleResizable(settings->resizable);
 
       if (not isFullscreen) {
         ImGui::BeginDisabled();
@@ -107,22 +107,22 @@ void drawSettingsManager(const std::unique_ptr<Settings>& settings,
       }
       ImGui::SameLine();
       helpMark("Only works in fullscreen");
-      window.setRefreshRate(settings->refreshRate);
+      window->setRefreshRate(settings->refreshRate);
 
       ImGui::InputInt("Depth bits", &settings->depthBits);
       ImGui::SameLine();
       helpMark("Requires restart");
       ImGui::Checkbox("VSync", &settings->vSync);
-      window.toggleVSync(settings->vSync);
+      window->toggleVSync(settings->vSync);
       ImGui::InputInt("Primary monitor", &settings->primaryMonitor);
-      window.setWindowMonitor(settings->primaryMonitor);
+      window->setWindowMonitor(settings->primaryMonitor);
 
       ImGui::SeparatorText("Info");
       ImGui::Text(std::format("OpenGL version {}.{}",
                               settings->openglMajorVersion,
                               settings->openglMinorVersion)
                     .c_str());
-      const auto& windowData = window.getWindowData();
+      const auto& windowData = window->getWindowData();
       ImGui::Text(std::format("Window position x:{}, y:{}",
                               windowData.positionX, windowData.positionY)
                     .c_str());

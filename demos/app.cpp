@@ -4,6 +4,7 @@
 #include "serializers/sSettings.h"
 #include "settings.h"
 #include "states/gameState.h"
+#include "states/menuState.h"
 #include "utils.h"
 
 namespace demos {
@@ -12,10 +13,16 @@ class Demos : public engine::Application {
   public:
     Demos(std::unique_ptr<engine::Settings>&& s, engine::CLArgs&& args)
       : engine::Application(std::move(s), std::move(args)) {
+      engine::RendererAPI::SetClearColor(m_settings->clearColor);
+      engine::RendererAPI::SetClearDepth(m_settings->clearDepth);
       APP_TRACE("Registering app components...");
       RegisterComponents();
       APP_TRACE("Loading initial state...");
-      pushState(GameState::Create());
+      if (m_settings->activeScene == "Flappy Bird") {
+        pushState(states::MenuState::Create());
+      } else {
+        pushState(states::GameState::Create());
+      }
       APP_TRACE("State loaded!");
     }
 

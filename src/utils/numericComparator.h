@@ -3,6 +3,7 @@
 #include "pch.h"
 
 namespace potatoengine {
+
 struct NumericComparator {
     bool operator()(const std::string& lhs, const std::string& rhs) const {
       if (lhs == rhs) {
@@ -43,7 +44,8 @@ struct NumericComparator {
       rhsStream >> rhsNumber;
 
       if (lhsNumber == rhsNumber) {
-        return NumericComparator{}(lhs.substr(lhsStream.tellg()), rhs.substr(rhsStream.tellg()));
+        return NumericComparator{}(lhs.substr(lhsStream.tellg()),
+                                   rhs.substr(rhsStream.tellg()));
       }
 
       return lhsNumber < rhsNumber;

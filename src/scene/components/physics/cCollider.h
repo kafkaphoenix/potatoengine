@@ -20,7 +20,7 @@ struct CCollider {
     explicit CCollider(Type t, glm::vec3&& s) : type(t), size(std::move(s)) {}
 
     void print() const {
-      ENGINE_BACKTRACE("\t\ttype: {0}\n\t\t\t\tsize: {1}", _type,
+      ENGINE_BACKTRACE("\t\ttype: {0}\n\t\t\t\t\t\tsize: {1}", _type,
                        glm::to_string(size));
     }
 

@@ -26,7 +26,7 @@ struct CBody {
 
     void print() const {
       ENGINE_BACKTRACE(
-        "\t\tfilepath: {0}\n\t\t\t\tmeshes: {1}\n\t\t\t\tmaterials: {2}",
+        "\t\tfilepath: {0}\n\t\t\t\t\t\tmeshes: {1}\n\t\t\t\t\t\tmaterials: {2}",
         filepath, meshes.size(), materials.size());
     }
 

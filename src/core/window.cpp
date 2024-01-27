@@ -272,9 +272,13 @@ void Window::shutdown() {
   }
 }
 
+void Window::onUpdate() { m_context->swapBuffers(); }
+
 void Window::onEvent() { glfwPollEvents(); }
 
-void Window::onUpdate() { m_context->swapBuffers(); }
+void Window::triggerEvent(events::Event& e) {
+  m_data.eventCallback(e);
+}
 
 void Window::setPosition(int x, int y) {
   if (Application::Get().getSettings()->fullscreen) {
