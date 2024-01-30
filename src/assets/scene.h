@@ -56,21 +56,21 @@ class Scene : public Asset {
     virtual bool operator==(const Asset& other) const override final;
 
   private:
-    std::string m_filepath{};
+    std::string m_filepath;
 
-    std::unordered_map<std::string, json> m_shaders{};
-    std::unordered_map<std::string, json> m_textures{};
-    std::unordered_map<std::string, json> m_models{};
-    std::unordered_map<std::string, json> m_prefabs{};
-    std::unordered_map<std::string, json> m_scenes{};
+    std::unordered_map<std::string, json> m_shaders;
+    std::unordered_map<std::string, json> m_textures;
+    std::unordered_map<std::string, json> m_models;
+    std::unordered_map<std::string, json> m_prefabs;
+    std::unordered_map<std::string, json> m_scenes;
 
-    std::unordered_map<std::string, json> m_normalEntities{};
-    std::unordered_map<std::string, json> m_lightEntities{};
-    std::unordered_map<std::string, json> m_cameraEntities{};
-    std::unordered_map<std::string, json> m_systemEntities{};
-    std::unordered_map<std::string, json> m_fboEntities{};
+    std::unordered_map<std::string, json> m_normalEntities;
+    std::unordered_map<std::string, json> m_lightEntities;
+    std::unordered_map<std::string, json> m_cameraEntities;
+    std::unordered_map<std::string, json> m_systemEntities;
+    std::unordered_map<std::string, json> m_fboEntities;
 
-    std::map<std::string, std::string, NumericComparator> m_info{};
+    std::map<std::string, std::string, NumericComparator> m_info;
 
     void read(const json& j);
 };

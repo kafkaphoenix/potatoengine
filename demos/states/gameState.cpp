@@ -26,14 +26,14 @@ GameState::GameState() : State("GameState") {}
 
 void GameState::onAttach() {
   auto& app = engine::Application::Get();
-  const auto& settings = app.getSettings();
+  const auto& settings_manager = app.getSettingsManager();
   const auto& scene_manager = app.getSceneManager();
   scene_manager->registerSystem("delete_system",
                                 std::make_unique<systems::DeleteSystem>(-100));
   scene_manager->registerSystem("render_system",
                                 std::make_unique<systems::RenderSystem>(100));
 
-  if (settings->activeScene == "Flappy Bird") {
+  if (settings_manager->activeScene == "Flappy Bird") {
     scene_manager->registerSystem("time_system",
                                   std::make_unique<systems::TimeSystem>(0));
     scene_manager->registerSystem(
@@ -54,9 +54,9 @@ void GameState::onAttach() {
 
     auto gamestate = scene_manager->getEntity("gamestate");
     registry.get<CState>(gamestate).state = CState::State::STARTING;
-  } else if (settings->activeScene == "Plane terrain") {
-    scene_manager->createScene(settings->activeScene,
-                               settings->activeScenePath);
+  } else if (settings_manager->activeScene == "Plane terrain") {
+    scene_manager->createScene(settings_manager->activeScene,
+                               settings_manager->activeScenePath);
     scene_manager->registerSystem("time_system",
                                   std::make_unique<systems::TimeSystem>(0));
     scene_manager->registerSystem("terrain_system",
@@ -65,9 +65,9 @@ void GameState::onAttach() {
                                   std::make_unique<systems::SkyboxSystem>(3));
     scene_manager->registerSystem("movement_system",
                                   std::make_unique<systems::MovementSystem>(8));
-  } else if (settings->activeScene == "Cubes") {
-    scene_manager->createScene(settings->activeScene,
-                               settings->activeScenePath);
+  } else if (settings_manager->activeScene == "Cubes") {
+    scene_manager->createScene(settings_manager->activeScene,
+                               settings_manager->activeScenePath);
     scene_manager->registerSystem("time_system",
                                   std::make_unique<systems::TimeSystem>(0));
     scene_manager->registerSystem("skybox_system",
@@ -78,18 +78,18 @@ void GameState::onAttach() {
       "animation_system", std::make_unique<systems::AnimationSystem>(7));
     scene_manager->registerSystem("movement_system",
                                   std::make_unique<systems::MovementSystem>(8));
-  } else if (settings->activeScene == "Skycrapers") {
-    scene_manager->createScene(settings->activeScene,
-                               settings->activeScenePath);
+  } else if (settings_manager->activeScene == "Skycrapers") {
+    scene_manager->createScene(settings_manager->activeScene,
+                               settings_manager->activeScenePath);
     scene_manager->registerSystem("time_system",
                                   std::make_unique<systems::TimeSystem>(0));
     scene_manager->registerSystem("skybox_system",
                                   std::make_unique<systems::SkyboxSystem>(3));
     scene_manager->registerSystem("movement_system",
                                   std::make_unique<systems::MovementSystem>(8));
-  } else if (settings->activeScene == "Primitives") {
-    scene_manager->createScene(settings->activeScene,
-                               settings->activeScenePath);
+  } else if (settings_manager->activeScene == "Primitives") {
+    scene_manager->createScene(settings_manager->activeScene,
+                               settings_manager->activeScenePath);
     scene_manager->registerSystem("time_system",
                                   std::make_unique<systems::TimeSystem>(0));
     scene_manager->registerSystem("skybox_system",
@@ -97,8 +97,8 @@ void GameState::onAttach() {
     scene_manager->registerSystem("movement_system",
                                   std::make_unique<systems::MovementSystem>(8));
   } else {
-    scene_manager->createScene(settings->activeScene,
-                               settings->activeScenePath);
+    scene_manager->createScene(settings_manager->activeScene,
+                               settings_manager->activeScenePath);
     scene_manager->registerSystem("movement_system",
                                   std::make_unique<systems::MovementSystem>(8));
   }
@@ -106,29 +106,29 @@ void GameState::onAttach() {
 
 void GameState::onDetach() {
   auto& app = engine::Application::Get();
-  const auto& settings = app.getSettings();
+  const auto& settings_manager = app.getSettingsManager();
   const auto& scene_manager = app.getSceneManager();
   const auto& asset_manager = app.getAssetsManager();
 
   APP_INFO("Saving settings...");
   engine::serializers::save_settings(
-    settings, engine::serializers::get_default_roaming_path("Demos"));
+    settings_manager, engine::serializers::get_default_roaming_path("Demos"));
   scene_manager->clearScene();
   asset_manager->clear();
 }
 
 void GameState::onUpdate(const engine::Time& ts) {
   auto& app = engine::Application::Get();
-  const auto& settings = app.getSettings();
+  const auto& settings_manager = app.getSettingsManager();
   const auto& scene_manager = app.getSceneManager();
   const auto& asset_manager = app.getAssetsManager();
   auto& registry = scene_manager->getRegistry();
 
-  if (settings->reloadScene) {
-    if (scene_manager->getActiveScene() == settings->activeScene) {
-      scene_manager->reloadScene(settings->reloadPrototypes);
+  if (settings_manager->reloadScene) {
+    if (scene_manager->getActiveScene() == settings_manager->activeScene) {
+      scene_manager->reloadScene(settings_manager->reloadPrototypes);
 
-      if (settings->activeScene == "Flappy Bird") {
+      if (settings_manager->activeScene == "Flappy Bird") {
         // TODO remove this after moving to different project as
         // we dont need to reload from other demo scenes deleting the
         // templates or we will delete in retry some of them
@@ -168,7 +168,7 @@ void GameState::onUpdate(const engine::Time& ts) {
         scene_manager->unregisterSystem("time_system");
         scene_manager->registerSystem("time_system",
                                       std::make_unique<systems::TimeSystem>(0));
-      } else if (settings->activeScene == "Plane terrain") {
+      } else if (settings_manager->activeScene == "Plane terrain") {
         scene_manager->unregisterSystem("time_system");
         scene_manager->registerSystem("time_system",
                                       std::make_unique<systems::TimeSystem>(0));
@@ -178,7 +178,7 @@ void GameState::onUpdate(const engine::Time& ts) {
         scene_manager->unregisterSystem("skybox_system");
         scene_manager->registerSystem(
           "skybox_system", std::make_unique<systems::SkyboxSystem>(3));
-      } else if (settings->activeScene == "Cubes") {
+      } else if (settings_manager->activeScene == "Cubes") {
         scene_manager->unregisterSystem("time_system");
         scene_manager->registerSystem("time_system",
                                       std::make_unique<systems::TimeSystem>(0));
@@ -188,14 +188,14 @@ void GameState::onUpdate(const engine::Time& ts) {
         scene_manager->unregisterSystem("light_system");
         scene_manager->registerSystem(
           "light_system", std::make_unique<systems::LightSystem>(4));
-      } else if (settings->activeScene == "Skycrapers") {
+      } else if (settings_manager->activeScene == "Skycrapers") {
         scene_manager->unregisterSystem("time_system");
         scene_manager->registerSystem("time_system",
                                       std::make_unique<systems::TimeSystem>(0));
         scene_manager->unregisterSystem("skybox_system");
         scene_manager->registerSystem(
           "skybox_system", std::make_unique<systems::SkyboxSystem>(3));
-      } else if (settings->activeScene == "Primitives") {
+      } else if (settings_manager->activeScene == "Primitives") {
         scene_manager->unregisterSystem("time_system");
         scene_manager->registerSystem("time_system",
                                       std::make_unique<systems::TimeSystem>(0));
@@ -206,9 +206,9 @@ void GameState::onUpdate(const engine::Time& ts) {
     } else {
       scene_manager->clearScene();
       asset_manager->clear();
-      if (settings->activeScene == "Flappy Bird") {
-        scene_manager->createScene(settings->activeScene,
-                                   settings->activeScenePath);
+      if (settings_manager->activeScene == "Flappy Bird") {
+        scene_manager->createScene(settings_manager->activeScene,
+                                   settings_manager->activeScenePath);
         // TODO remove this after moving to different project as
         // we dont need to reload from other demo scenes deleting the
         // templates or we will delete in retry some of them
@@ -230,9 +230,9 @@ void GameState::onUpdate(const engine::Time& ts) {
       onAttach();
     }
 
-    settings->reloadScene = false;
+    settings_manager->reloadScene = false;
   } else {
-    if (settings->activeScene == "Flappy Bird") {
+    if (settings_manager->activeScene == "Flappy Bird") {
       entt::entity gamestate = scene_manager->getEntity("gamestate");
       CState& state = registry.get<CState>(gamestate);
 

@@ -5,7 +5,7 @@
 
 #include "pch.h"
 #include "scene/sceneManager.h"
-#include "settings.h"
+#include "core/settingsManager.h"
 #include "ui/imutils.h"
 #include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
@@ -55,7 +55,7 @@ inline void drawChildInfo(
 }
 
 inline void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
-                             const std::unique_ptr<Settings>& settings) {
+                             const std::unique_ptr<SettingsManager>& settings_manager) {
   entt::registry& registry = scene_manager->getRegistry();
 
   if (registry.storage<entt::entity>().in_use() == 0) {
@@ -99,7 +99,7 @@ inline void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
           strstr(prefabName.c_str(), scene_objects_text_filter) == nullptr) {
         continue;
       }
-      if (ImGui::TreeNode((prefabName + settings->activeScene).c_str(),
+      if (ImGui::TreeNode((prefabName + settings_manager->activeScene).c_str(),
                           prefabName.c_str())) {
         for (auto& [prototypeID, entity] : prototypes) {
           if (filterPrototypes and scene_objects_text_filter[0] not_eq '\0' and
@@ -147,7 +147,7 @@ inline void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
     }
   }
 
-  if (collapsed == 0 or settings->reloadScene) {
+  if (collapsed == 0 or settings_manager->reloadScene) {
     selectedSceneManagerTabKey.clear();
   }
 
@@ -175,7 +175,7 @@ inline void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
           getInfoFunc = cType.func("getInfo"_hs);
           if (getInfoFunc) {
             if (ImGui::TreeNode(
-                  (selectedSceneManagerTabKey + cName + settings->activeScene)
+                  (selectedSceneManagerTabKey + cName + settings_manager->activeScene)
                     .c_str(),
                   cName.c_str())) {
               info = getInfoFunc.invoke(cData);
@@ -185,7 +185,7 @@ inline void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
                 if (infoData.empty()) {
                   ImGui::Text("no data");
                 } else {
-                  drawChildInfo(infoData, settings->activeScene);
+                  drawChildInfo(infoData, settings_manager->activeScene);
                 }
               } else {
                 ENGINE_ERROR("Failed to get info for component {0}", cName);
@@ -195,7 +195,7 @@ inline void drawSceneManager(const std::unique_ptr<SceneManager>& scene_manager,
             }
           } else {
             if (ImGui::TreeNode(
-                  (selectedSceneManagerTabKey + cName + settings->activeScene)
+                  (selectedSceneManagerTabKey + cName + settings_manager->activeScene)
                     .c_str(),
                   cName.c_str())) {
               ENGINE_ERROR("Failed to get info for component {0}", cName);

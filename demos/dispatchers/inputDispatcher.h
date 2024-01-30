@@ -122,8 +122,8 @@ inline bool onMouseButtonReleased(engine::events::MouseButtonReleasedEvent& e) {
 
 inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
   auto& app = engine::Application::Get();
-  const auto& settings = app.getSettings();
-  const auto& window = app.getWindow();
+  const auto& settings_manager = app.getSettingsManager();
+  const auto& windows_manager = app.getWindowsManager();
   bool isDebugging = app.isDebugging();
   bool isGamePaused = app.isGamePaused();
 
@@ -131,34 +131,34 @@ inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
     if (isDebugging) {
       app.debug(false);
       app.togglePauseGame(false);
-      window->restoreCursor();
-      window->toggleCameraPositionUpdate(true);
-      window->setLastMousePosition(engine::Input::GetMouseX(),
+      windows_manager->restoreCursor();
+      windows_manager->toggleCameraPositionUpdate(true);
+      windows_manager->setLastMousePosition(engine::Input::GetMouseX(),
                                    engine::Input::GetMouseY());
     } else {
       app.debug(true);
       app.togglePauseGame(true);
-      glfwSetCursor(window->getNativeWindow(), nullptr);
-      window->setCursorMode(engine::CursorMode::Normal, false);
-      window->toggleCameraPositionUpdate(false);
+      glfwSetCursor(windows_manager->getNativeWindow(), nullptr);
+      windows_manager->setCursorMode(engine::CursorMode::Normal, false);
+      windows_manager->toggleCameraPositionUpdate(false);
     }
     return true;
   } else if (e.getKeyCode() == engine::Key::Escape) {
     if (isDebugging) {
-      window->restoreCursor();
+      windows_manager->restoreCursor();
     }
     app.close();
     return true;
   } else if (e.getKeyCode() == engine::Key::F4) {
-    const auto& windowData = window->getWindowData();
-    engine::RendererAPI::ToggleWireframe(not windowData.wireframe);
-    window->toggleWireframe(not windowData.wireframe);
+    const auto& windowData = windows_manager->getWindowData();
+    engine::RenderAPI::ToggleWireframe(not windowData.wireframe);
+    windows_manager->toggleWireframe(not windowData.wireframe);
     return true;
   } else if (e.getKeyCode() == engine::Key::F12) {
-    window->toggleFullscreen(not settings->fullscreen);
+    windows_manager->toggleFullscreen(not settings_manager->fullscreen);
     return true;
   } else if (e.getKeyCode() == engine::Key::P) {
-    if (settings->activeScene == "Flappy Bird") {
+    if (settings_manager->activeScene == "Flappy Bird") {
       entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
       CState& cState =
         app.getSceneManager()->getRegistry().get<CState>(gamestate);
@@ -173,7 +173,7 @@ inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
       app.togglePauseGame(not isGamePaused);
     }
   } else if (e.getKeyCode() == engine::Key::Enter) {
-    if (settings->activeScene == "Flappy Bird") {
+    if (settings_manager->activeScene == "Flappy Bird") {
       entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
       CState& cState =
         app.getSceneManager()->getRegistry().get<CState>(gamestate);
@@ -183,18 +183,18 @@ inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
       }
     }
   } else if (e.getKeyCode() == engine::Key::R) {
-    if (settings->activeScene == "Flappy Bird") {
+    if (settings_manager->activeScene == "Flappy Bird") {
       entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
       CState& cState =
         app.getSceneManager()->getRegistry().get<CState>(gamestate);
       if (cState.state == CState::State::GAMEOVER or
           cState.state == CState::State::STOPPED or
           cState.state == CState::State::PAUSED) {
-        app.getSettings()->reloadScene = true;
+        app.getSettingsManager()->reloadScene = true;
       }
     }
   } else if (e.getKeyCode() == engine::Key::M) {
-    if (settings->activeScene == "Flappy Bird") {
+    if (settings_manager->activeScene == "Flappy Bird") {
       entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
       CState& cState =
         app.getSceneManager()->getRegistry().get<CState>(gamestate);
@@ -231,8 +231,8 @@ inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
   switch (e.getKeyCode()) {
   case engine::Key::LeftAlt:
     if (not isDebugging) {
-      window->toggleCameraPositionUpdate(false);
-      window->setCursorMode(engine::CursorMode::Normal, false);
+      windows_manager->toggleCameraPositionUpdate(false);
+      windows_manager->setCursorMode(engine::CursorMode::Normal, false);
     }
     break;
   }
@@ -250,15 +250,15 @@ inline bool onKeyReleased(engine::events::KeyReleasedEvent& e) {
     io.ClearEventsQueue();
   }
 
-  const auto& window = app.getWindow();
+  const auto& windows_manager = app.getWindowsManager();
 
   switch (e.getKeyCode()) {
   case engine::Key::LeftAlt:
     if (not app.isDebugging()) {
-      window->setLastMousePosition(engine::Input::GetMouseX(),
+      windows_manager->setLastMousePosition(engine::Input::GetMouseX(),
                                    engine::Input::GetMouseY());
-      window->toggleCameraPositionUpdate(true);
-      window->restoreCursor();
+      windows_manager->toggleCameraPositionUpdate(true);
+      windows_manager->restoreCursor();
     }
     break;
   }

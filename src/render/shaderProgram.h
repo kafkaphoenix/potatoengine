@@ -41,9 +41,9 @@ class ShaderProgram {
 
   private:
     uint32_t m_id{};
-    std::string m_name{};
-    std::vector<ActiveUniform> m_activeUniforms{};
-    std::map<std::string, std::string, NumericComparator> m_info{};
+    std::string m_name;
+    std::vector<ActiveUniform> m_activeUniforms;
+    std::map<std::string, std::string, NumericComparator> m_info;
 
     std::vector<ActiveUniform> getActiveUniforms();
 };

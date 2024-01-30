@@ -5,11 +5,11 @@
 namespace demos {
 
 struct CTimer {
-    int maxTime{65};
-    int left{65};
+    uint32_t maxTime{65};
+    uint32_t left{65};
 
     CTimer() = default;
-    explicit CTimer(int t, int l) : maxTime(t), left(l) {}
+    explicit CTimer(uint32_t t, uint32_t l) : maxTime(t), left(l) {}
 
     void print() const {
       APP_BACKTRACE("\t\tmaxTime: {0}\n\t\t\t\t\t\tleft: {1}", maxTime, left);

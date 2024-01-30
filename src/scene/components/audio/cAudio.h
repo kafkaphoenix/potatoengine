@@ -7,7 +7,7 @@ namespace potatoengine {
 
 struct CAudio {
     // TODO Audio class
-    std::string filepath{};
+    std::string filepath;
     float volume{};
     float pitch{};
     bool loop{};

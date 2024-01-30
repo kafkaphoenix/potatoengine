@@ -12,7 +12,7 @@ namespace potatoengine {
 
 struct CText {
     // font class or freetype?
-    std::string text{};
+    std::string text;
     glm::vec3 color{};
 
     CText() = default;

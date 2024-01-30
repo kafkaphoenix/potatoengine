@@ -5,12 +5,12 @@
 namespace engine = potatoengine;
 
 #include "pch.h"
-#include "settings.h"
 
 // core
 #include "core/application.h"
 #include "core/input.h"
 #include "core/keyCodes.h"
+#include "core/settingsManager.h"
 #include "core/state.h"
 #include "core/time.h"
 #include "ui/imguiLogSink.h"
@@ -52,10 +52,10 @@ namespace engine = potatoengine;
 // serializers
 #include "serializers/sSettings.h"
 
-// renderer
-#include "renderer/buffer.h"
-#include "renderer/renderer.h"
-#include "renderer/rendererAPI.h"
+// render
+#include "render/buffer.h"
+#include "render/renderAPI.h"
+#include "render/renderManager.h"
 
 // assets
 #include "assets/assetsManager.h"

@@ -21,6 +21,7 @@
         "components": {
             "camera": {
                 "type": "perspective",
+                "aspectRatio": "16:9",
                 "mode": "3D"
             },
             "input": {

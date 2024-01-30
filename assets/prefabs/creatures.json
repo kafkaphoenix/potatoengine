@@ -9,6 +9,7 @@
             "body": "player",
             "camera": {
                 "type": "perspective",
+                "aspectRatio": "16:9",
                 "fov": 90,
                 "mode": "3D"
             },

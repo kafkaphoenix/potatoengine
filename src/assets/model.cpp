@@ -4,7 +4,7 @@
 #include <assimp/postprocess.h>
 
 #include "core/application.h"
-#include "renderer/buffer.h"
+#include "render/buffer.h"
 
 namespace potatoengine::assets {
 
@@ -211,7 +211,7 @@ const std::map<std::string, std::string, NumericComparator>& Model::getInfo() {
   m_info["Filepath"] = m_filepath;
   m_info["Meshes"] = std::to_string(m_meshes.size());
   m_info["Materials"] = std::to_string(m_materials.size());
-  for (int i = 0; i < m_loadedTextures.size(); ++i) {
+  for (uint32_t i = 0; i < m_loadedTextures.size(); ++i) {
     m_info["Loaded Texture " + std::to_string(i)] = std::to_string(i);
   }
 

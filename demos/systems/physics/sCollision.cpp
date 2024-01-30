@@ -7,7 +7,7 @@ void CollisionSystem::update(entt::registry& registry, const engine::Time& ts) {
   if (app.isGamePaused()) {
     return;
   }
-  const auto& settings = app.getSettings();
+  const auto& settings_manager = app.getSettingsManager();
 
   entt::entity bird = app.getSceneManager()->getEntity("bird");
   engine::CTransform& cTransform = registry.get<engine::CTransform>(bird);
@@ -47,10 +47,10 @@ void CollisionSystem::update(entt::registry& registry, const engine::Time& ts) {
   }
 
   if (collidedWith == "pipe" or collidedWith == "ground") {
-    settings->reloadScene = true;
+    settings_manager->reloadScene = true;
   } else if (collidedWith == "coin") {
     engine::events::AppUpdateEvent event("onCoinCollected");
-    app.getWindow()->triggerEvent(event);
+    app.getWindowsManager()->triggerEvent(event);
   }
 
   // top off screen check

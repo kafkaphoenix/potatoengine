@@ -2,9 +2,9 @@
 
 #include <imgui.h>
 
+#include "core/settingsManager.h"
 #include "pch.h"
-#include "renderer/renderer.h"
-#include "settings.h"
+#include "render/renderManager.h"
 #include "ui/imutils.h"
 #include "utils/mapJsonSerializer.h"
 
@@ -17,17 +17,18 @@ bool filterFBOS{};
 bool filterShaderPrograms{};
 bool filterShaderInfo{};
 
-inline void drawRenderManager(const std::unique_ptr<Renderer>& renderer,
-                              const std::unique_ptr<Settings>& settings) {
-  const auto& fbos = renderer->getFramebuffers();
-  const auto& sp = renderer->getShaderPrograms();
+inline void
+drawRenderManager(const std::unique_ptr<RenderManager>& render_manager,
+                  const std::unique_ptr<SettingsManager>& settings_manager) {
+  const auto& fbos = render_manager->getFramebuffers();
+  const auto& sp = render_manager->getShaderPrograms();
 
   int collapsed = collapser();
 
   ImGui::InputText("##filter", render_objects_text_filter,
                    IM_ARRAYSIZE(render_objects_text_filter));
   if (ImGui::IsItemHovered()) {
-    ImGui::SetTooltip("Filter renderer objects by name");
+    ImGui::SetTooltip("Filter render objects by name");
   }
   ImGui::SameLine();
   if (ImGui::Button("Clear Filter")) {
@@ -82,7 +83,7 @@ inline void drawRenderManager(const std::unique_ptr<Renderer>& renderer,
     }
   }
 
-  if (collapsed == 0 or settings->reloadScene) {
+  if (collapsed == 0 or settings_manager->reloadScene) {
     selectedRenderManagerTabKey.clear();
     selectedRenderManagerTabType.clear();
   }
@@ -107,7 +108,7 @@ inline void drawRenderManager(const std::unique_ptr<Renderer>& renderer,
           const auto& textureInfo = JsonToMap(value);
           if (ImGui::TreeNode((selectedRenderManagerTabType +
                                selectedRenderManagerTabKey + key +
-                               settings->activeScene)
+                               settings_manager->activeScene)
                                 .c_str(),
                               key.c_str())) {
             for (const auto& [key, value] : textureInfo) {

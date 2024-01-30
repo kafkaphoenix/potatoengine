@@ -5,14 +5,15 @@ C++ OpenGL engine for 3d and 2d game development
 ## Engine Features
 
 - Self contained engine, everything can be accessed just importing a header `engineAPI.h`
-- OpenGL 4.5 API abstraction
-- Multi window/overlay support
-- Entity Component System engine oriented
-- Asset manager for caching and hot reloading prefabs, shaders, textures, models and scenes
-- State machine
-- Events (Mouse/Keyboard/Window/Application)
+- Scene manager: Entity Component System engine oriented
+- Render manager: OpenGL 4.5 API abstraction
+- Window manager: Multi window/overlay support
+- Assets manager: Caching and hot reloading of prefabs, shaders, textures, models and scenes
+- States manager: State machine
+- Settings manager: Persist your settings
+- Debugger (Logger, Metrics, Dynamic settings, assets/entities/scene/states inspector)
+- Event-driven (Mouse/Keyboard/Window/Application)
 - Loading scenes and entity prototypes from json
-- Debugger menu (Logger, Metrics, Dynamic settings, assets/entities inspector)
 - Perspective camera
 - Model, Texture and Cubemaps loader
 - Phong lighthing
@@ -27,10 +28,12 @@ Inside the folder `demos` you can find several example scenes:
 - Sponza
 - Dabrovic sponza
 - Lowpoly city
+- Skycrapers city
+- Trailer park
 - Noise generated terrain and skybox
 - Flat terrain with primitives and skybox
 - Several cube instances with reflection, light, using a texture atlas and a skybox
-- Voxel terrain (TODO)
+- Flappy Bird game
 
 ## To compile and run
 ```

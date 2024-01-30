@@ -53,23 +53,23 @@ inline bool onWindowMoved(engine::events::WindowMovedEvent& e) { return true; }
 inline bool onWindowResized(engine::events::WindowResizeEvent& e,
                             entt::registry& registry) {
   auto& app = engine::Application::Get();
-  const auto& settings = app.getSettings();
-  const auto& renderer = app.getRenderer();
+  const auto& settings_manager = app.getSettingsManager();
+  const auto& render_manager = app.getRenderManager();
 
-  renderer->onWindowResize(e.getWidth(), e.getHeight());
+  render_manager->onWindowResize(e.getWidth(), e.getHeight());
 
-  if (not settings->fullscreen) { // when resizing with the mouse
-    settings->windowWidth = e.getWidth();
-    settings->windowHeight = e.getHeight();
+  if (not settings_manager->fullscreen) { // when resizing with the mouse
+    settings_manager->windowWidth = e.getWidth();
+    settings_manager->windowHeight = e.getHeight();
   }
 
-  if (not renderer->getFramebuffers().empty()) {
+  if (not render_manager->getFramebuffers().empty()) {
     entt::entity fbo = registry.view<engine::CFBO, engine::CUUID>()
                          .front(); // TODO: support more than one?
     engine::CFBO& cfbo = registry.get<engine::CFBO>(fbo);
-    renderer->deleteFramebuffer(cfbo.fbo);
-    renderer->addFramebuffer(std::string(cfbo.fbo), e.getWidth(), e.getHeight(),
-                             cfbo.attachment);
+    render_manager->deleteFramebuffer(cfbo.fbo);
+    render_manager->addFramebuffer(std::string(cfbo.fbo), e.getWidth(),
+                                   e.getHeight(), cfbo.attachment);
   }
 
   return true;

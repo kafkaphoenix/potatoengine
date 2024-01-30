@@ -9,11 +9,11 @@ namespace potatoengine::ui {
 inline void renderScene(uint32_t fboTextureID, std::string_view title,
                         glm::vec2 size, glm::vec2 position, bool fitToWindow) {
   const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-  int windowWidth = size.x != 0 ? size.x : main_viewport->Size.x;
-  int windowHeight = size.y != 0 ? size.y : main_viewport->Size.y;
+  uint32_t windowWidth = size.x != 0 ? size.x : main_viewport->Size.x;
+  uint32_t windowHeight = size.y != 0 ? size.y : main_viewport->Size.y;
   windowWidth *= 0.75f;
   windowHeight *= 0.75f;
-  int w, h;
+  uint32_t w, h;
   if (fitToWindow) {
     w = windowWidth;
     h = windowHeight;

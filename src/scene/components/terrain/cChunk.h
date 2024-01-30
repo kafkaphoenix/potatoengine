@@ -12,17 +12,17 @@ namespace potatoengine {
 
 struct CChunk {
     enum class Biome {
+      plains,
       desert,
       forest,
       jungle,
-      plains,
       savanna,
       snowy,
       swamp,
       taiga,
     };
 
-    std::string _biome{"plains"};
+    std::string _biome{};
     Biome biome{Biome::plains};
     std::vector<CBlock> blocks;
     CMesh terrainMesh;
@@ -33,7 +33,7 @@ struct CChunk {
 
     void print() const {
       std::string b;
-      for (int i = 0; i < blocks.size(); ++i) {
+      for (uint32_t i = 0; i < blocks.size(); ++i) {
         b += std::format("\n\t\t\t\t\t\t\tblock: {} {}", i, blocks[i]._type);
       }
       ENGINE_BACKTRACE("\t\tbiome: {0}\n\t\t\t\t\t\tblocks: {1}", _biome, b);
@@ -48,11 +48,11 @@ struct CChunk {
       return info;
     }
 
-    std::string getMeshInfo(int index) const {
+    std::string getMeshInfo(uint32_t index) const {
       return MapToJson(terrainMesh.getInfo());
     }
 
-    std::string getTransformInfo(int index) const {
+    std::string getTransformInfo(uint32_t index) const {
       return MapToJson(transform.getInfo());
     }
 

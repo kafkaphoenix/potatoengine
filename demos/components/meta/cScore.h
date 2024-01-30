@@ -5,7 +5,7 @@
 namespace demos {
 
 struct CScore {
-    int score{0};
+    int score{};
 
     CScore() = default;
     explicit CScore(int s) : score(s) {}

@@ -20,7 +20,7 @@ class State {
     std::string_view getName() const noexcept { return m_name; }
 
   protected:
-    std::string m_name{};
+    std::string m_name;
 };
 
 }

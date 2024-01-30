@@ -1,4 +1,4 @@
-#include "core/window.h"
+#include "core/windowsManager.h"
 
 #include <stb_image.h>
 
@@ -9,15 +9,16 @@
 
 namespace potatoengine {
 
-Window::Window(const std::unique_ptr<Settings>& settings) {
-  m_data.windowTitle = settings->appName;
-  m_data.width = settings->windowWidth;
-  m_data.height = settings->windowHeight;
-  m_data.primaryMonitor = settings->primaryMonitor;
+WindowsManager::WindowsManager(
+  const std::unique_ptr<SettingsManager>& settings_manager) {
+  m_data.windowTitle = settings_manager->appName;
+  m_data.width = settings_manager->windowWidth;
+  m_data.height = settings_manager->windowHeight;
+  m_data.primaryMonitor = settings_manager->primaryMonitor;
   m_data.mouseX = m_data.width / 2.0f;  // center of the screen
   m_data.mouseY = m_data.height / 2.0f; // center of the screen
-  m_data.windowInsideImgui = settings->windowInsideImgui;
-  m_data.fitToWindow = settings->fitToWindow;
+  m_data.windowInsideImgui = settings_manager->windowInsideImgui;
+  m_data.fitToWindow = settings_manager->fitToWindow;
   ENGINE_TRACE("Creating window {} with resolution {}x{}...",
                m_data.windowTitle, m_data.width, m_data.height);
   if (s_GLFWWindowCount == 0) {
@@ -27,34 +28,37 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
     });
   }
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, settings->openglMajorVersion);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, settings->openglMinorVersion);
-  glfwWindowHint(GLFW_DEPTH_BITS, settings->depthBits);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,
+                 settings_manager->openglMajorVersion);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,
+                 settings_manager->openglMinorVersion);
+  glfwWindowHint(GLFW_DEPTH_BITS, settings_manager->depthBits);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_RESIZABLE, settings->resizable);
-  m_data.resizable = settings->resizable;
-  glfwWindowHint(GLFW_REFRESH_RATE, settings->refreshRate);
-  m_data.refreshRate = settings->refreshRate;
+  glfwWindowHint(GLFW_RESIZABLE, settings_manager->resizable);
+  m_data.resizable = settings_manager->resizable;
+  glfwWindowHint(GLFW_REFRESH_RATE, settings_manager->refreshRate);
+  m_data.refreshRate = settings_manager->refreshRate;
 
-  ENGINE_TRACE("Loading OpengGL version {}.{}", settings->openglMajorVersion,
-               settings->openglMinorVersion);
+  ENGINE_TRACE("Loading OpengGL version {}.{}",
+               settings_manager->openglMajorVersion,
+               settings_manager->openglMinorVersion);
 
   int monitorCount;
   GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
-  if (settings->primaryMonitor < 0 or
-      settings->primaryMonitor >= monitorCount) {
+  if (settings_manager->primaryMonitor < 0 or
+      settings_manager->primaryMonitor >= monitorCount) {
     ENGINE_ERROR("Invalid monitor index!");
     return;
   }
   const GLFWvidmode* mode =
-    glfwGetVideoMode(monitors[settings->primaryMonitor]);
+    glfwGetVideoMode(monitors[settings_manager->primaryMonitor]);
   int xpos = (mode->width - m_data.width) / 2;
   int ypos = (mode->height - m_data.height) / 2;
-  if (settings->fullscreen) {
+  if (settings_manager->fullscreen) {
     m_data.fullscreen = true;
     m_window =
       glfwCreateWindow(mode->width, mode->height, m_data.windowTitle.c_str(),
-                       monitors[settings->primaryMonitor], nullptr);
+                       monitors[settings_manager->primaryMonitor], nullptr);
     // center of the screen to avoid 0 0 when windowed first time
     m_data.positionX = xpos;
     m_data.positionY = ypos;
@@ -75,10 +79,10 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
     glViewport(0, 0, m_data.width, m_data.height);
   }
 
-  setWindowIcon(settings->windowIconPath);
-  setCursorMode(static_cast<CursorMode>(settings->cursorMode), true);
-  setCursorIcon(settings->cursorIconPath);
-  toggleVSync(settings->vSync);
+  setWindowIcon(settings_manager->windowIconPath);
+  setCursorMode(static_cast<CursorMode>(settings_manager->cursorMode), true);
+  setCursorIcon(settings_manager->cursorIconPath);
+  toggleVSync(settings_manager->vSync);
   glfwSetWindowUserPointer(m_window, &m_data);
 
   glfwSetFramebufferSizeCallback(
@@ -257,12 +261,12 @@ Window::Window(const std::unique_ptr<Settings>& settings) {
   });
 }
 
-Window::~Window() {
+WindowsManager::~WindowsManager() {
   ENGINE_WARN("Deleting window");
   shutdown();
 }
 
-void Window::shutdown() {
+void WindowsManager::shutdown() {
   glfwDestroyWindow(m_window);
   --s_GLFWWindowCount;
 
@@ -272,16 +276,14 @@ void Window::shutdown() {
   }
 }
 
-void Window::onUpdate() { m_context->swapBuffers(); }
+void WindowsManager::onUpdate() { m_context->swapBuffers(); }
 
-void Window::onEvent() { glfwPollEvents(); }
+void WindowsManager::onEvent() { glfwPollEvents(); }
 
-void Window::triggerEvent(events::Event& e) {
-  m_data.eventCallback(e);
-}
+void WindowsManager::triggerEvent(events::Event& e) { m_data.eventCallback(e); }
 
-void Window::setPosition(int x, int y) {
-  if (Application::Get().getSettings()->fullscreen) {
+void WindowsManager::setPosition(int x, int y) {
+  if (Application::Get().getSettingsManager()->fullscreen) {
     ENGINE_ERROR("Cannot set position of fullscreen window!");
     return;
   }
@@ -293,16 +295,16 @@ void Window::setPosition(int x, int y) {
   }
 }
 
-void Window::setLastMousePosition(float x, float y) {
+void WindowsManager::setLastMousePosition(float x, float y) {
   m_data.mouseX = x;
   m_data.mouseY = y;
 }
 
-void Window::toggleCameraPositionUpdate(bool enable) {
+void WindowsManager::toggleCameraPositionUpdate(bool enable) {
   m_data.toggleCameraPositionUpdate = enable;
 }
 
-void Window::minimize(bool minimize) {
+void WindowsManager::minimize(bool minimize) {
   if (minimize and not m_data.minimized) {
     glfwIconifyWindow(m_window);
   } else if (not minimize and m_data.minimized) {
@@ -310,8 +312,8 @@ void Window::minimize(bool minimize) {
   }
 }
 
-void Window::maximize(bool maximize) {
-  if (Application::Get().getSettings()->fullscreen) {
+void WindowsManager::maximize(bool maximize) {
+  if (Application::Get().getSettingsManager()->fullscreen) {
     ENGINE_ERROR("Cannot maximize fullscreen window!");
     return;
   }
@@ -323,8 +325,8 @@ void Window::maximize(bool maximize) {
   }
 }
 
-void Window::toggleFocus(bool focused) {
-  if (Application::Get().getSettings()->fullscreen) {
+void WindowsManager::toggleFocus(bool focused) {
+  if (Application::Get().getSettingsManager()->fullscreen) {
     ENGINE_ERROR("Cannot set focus of fullscreen window!");
     return;
   }
@@ -346,7 +348,7 @@ void Window::toggleFocus(bool focused) {
   }
 }
 
-void Window::toggleVisibility(bool visible) {
+void WindowsManager::toggleVisibility(bool visible) {
   if (visible and m_data.visible) {
     ENGINE_ERROR("Cannot show visible window!");
     return;
@@ -366,36 +368,36 @@ void Window::toggleVisibility(bool visible) {
   }
 }
 
-void Window::toggleWireframe(bool wireframe) {
+void WindowsManager::toggleWireframe(bool wireframe) {
   if (wireframe not_eq m_data.wireframe) {
     m_data.wireframe = wireframe;
   }
 }
 
-void Window::setEventCallback(EventCallbackFn&& cb) {
+void WindowsManager::setEventCallback(EventCallbackFn&& cb) {
   m_data.eventCallback = std::move(cb);
 }
 
-void Window::setWindowTitle(std::string title) {
+void WindowsManager::setWindowTitle(std::string title) {
   if (title.empty()) {
-    ENGINE_ERROR("Window title is empty!");
+    ENGINE_ERROR("WindowsManager title is empty!");
     return;
   }
 
   if (title not_eq m_data.windowTitle) {
     glfwSetWindowTitle(m_window, title.c_str());
     m_data.windowTitle = title;
-    Application::Get().getSettings()->appName = title;
+    Application::Get().getSettingsManager()->appName = title;
   }
 }
 
-void Window::setWindowIcon(std::string path) {
+void WindowsManager::setWindowIcon(std::string path) {
   if (path.empty()) {
-    ENGINE_ERROR("Window icon path is empty!");
+    ENGINE_ERROR("WindowsManager icon path is empty!");
   }
 
   if (not std::filesystem::exists(path)) {
-    ENGINE_ERROR("Window icon path {} does not exist!", path);
+    ENGINE_ERROR("WindowsManager icon path {} does not exist!", path);
     return;
   }
 
@@ -406,20 +408,20 @@ void Window::setWindowIcon(std::string path) {
     glfwSetWindowIcon(m_window, 1, images);
     stbi_image_free(images[0].pixels);
     m_data.windowIconPath = path;
-    Application::Get().getSettings()->windowIconPath = path;
+    Application::Get().getSettingsManager()->windowIconPath = path;
   }
 }
 
-void Window::restoreWindowIcon() {
+void WindowsManager::restoreWindowIcon() {
   if (m_data.windowIconPath.empty()) {
-    ENGINE_ERROR("Window icon path is empty!");
+    ENGINE_ERROR("WindowsManager icon path is empty!");
     return;
   }
 
   setWindowIcon(m_data.windowIconPath);
 }
 
-void Window::setCursorIcon(std::string path) {
+void WindowsManager::setCursorIcon(std::string path) {
   if (path.empty()) {
     ENGINE_ERROR("Cursor icon path is empty!");
     return;
@@ -442,11 +444,11 @@ void Window::setCursorIcon(std::string path) {
     glfwSetCursor(m_window, m_data.cursor);
     stbi_image_free(images[0].pixels);
     m_data.cursorIconPath = path;
-    Application::Get().getSettings()->cursorIconPath = path;
+    Application::Get().getSettingsManager()->cursorIconPath = path;
   }
 }
 
-void Window::setCursorMode(CursorMode cursorMode, bool update) {
+void WindowsManager::setCursorMode(CursorMode cursorMode, bool update) {
   if (cursorMode not_eq m_data.cursorMode) {
     int mode = static_cast<int>(cursorMode);
     if (mode == 0) {
@@ -461,12 +463,12 @@ void Window::setCursorMode(CursorMode cursorMode, bool update) {
     }
     if (update) {
       m_data.cursorMode = cursorMode;
-      Application::Get().getSettings()->cursorMode = mode;
+      Application::Get().getSettingsManager()->cursorMode = mode;
     }
   }
 }
 
-void Window::restoreCursor() {
+void WindowsManager::restoreCursor() {
   int mode = static_cast<int>(m_data.cursorMode);
   if (mode == 0) {
     glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -484,16 +486,20 @@ void Window::restoreCursor() {
   }
 }
 
-void Window::resize(int width, int height) {
+void WindowsManager::resize(int width, int height) {
   // for fullscreen windows it updates the resolution
   // m_data is updated in the callback
   // and settings in the event
+  if (width < 0 or height < 0) {
+    ENGINE_ERROR("Invalid window size!");
+    return;
+  }
   if (width not_eq m_data.width or height not_eq m_data.height) {
     glfwSetWindowSize(m_window, width, height);
   }
 }
 
-void Window::toggleResizable(bool resizable) {
+void WindowsManager::toggleResizable(bool resizable) {
   if (resizable not_eq m_data.resizable) {
     if (m_data.fullscreen) {
       ENGINE_ERROR("Cannot set resizable of fullscreen window!");
@@ -502,41 +508,46 @@ void Window::toggleResizable(bool resizable) {
 
     glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, resizable);
     m_data.resizable = resizable;
-    Application::Get().getSettings()->resizable = resizable;
+    Application::Get().getSettingsManager()->resizable = resizable;
   }
 }
 
-void Window::setRefreshRate(int refreshRate) {
+void WindowsManager::setRefreshRate(int refreshRate) {
   if (refreshRate not_eq m_data.refreshRate) {
     if (not m_data.fullscreen) {
       ENGINE_ERROR("Cannot set refresh rate of windowed window!");
       return;
     }
 
-    const auto& settings = Application::Get().getSettings();
+    if (refreshRate < 0) {
+      ENGINE_ERROR("Invalid refresh rate!");
+      return;
+    }
+
+    const auto& settings_manager = Application::Get().getSettingsManager();
     int monitorCount;
     GLFWmonitor* monitor =
-      glfwGetMonitors(&monitorCount)[settings->primaryMonitor];
+      glfwGetMonitors(&monitorCount)[settings_manager->primaryMonitor];
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     glfwSetWindowMonitor(m_window, monitor, GLFW_DONT_CARE, GLFW_DONT_CARE,
                          mode->width, mode->height, refreshRate);
     m_data.refreshRate = refreshRate;
-    settings->refreshRate = refreshRate;
+    settings_manager->refreshRate = refreshRate;
     if (m_data.vSync) {
       glfwSwapInterval(1); // https://github.com/glfw/glfw/issues/1072
     }
   }
 }
 
-void Window::toggleVSync(bool enabled) {
+void WindowsManager::toggleVSync(bool enabled) {
   if (enabled not_eq m_data.vSync) {
     glfwSwapInterval(enabled ? 1 : 0);
     m_data.vSync = enabled;
-    Application::Get().getSettings()->vSync = enabled;
+    Application::Get().getSettingsManager()->vSync = enabled;
   }
 }
 
-void Window::setWindowMonitor(int monitor) {
+void WindowsManager::setWindowMonitor(int monitor) {
   if (monitor not_eq m_data.primaryMonitor) {
     int monitorCount;
     GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
@@ -545,36 +556,37 @@ void Window::setWindowMonitor(int monitor) {
       return;
     }
 
-    const auto& settings = Application::Get().getSettings();
+    const auto& settings_manager = Application::Get().getSettingsManager();
     int xpos = m_data.fullscreen ? GLFW_DONT_CARE : m_data.positionX;
     int ypos = m_data.fullscreen ? GLFW_DONT_CARE : m_data.positionY;
     int refreshRate =
-      m_data.fullscreen ? settings->refreshRate : GLFW_DONT_CARE;
+      m_data.fullscreen ? settings_manager->refreshRate : GLFW_DONT_CARE;
 
     glfwSetWindowMonitor(m_window, monitors[monitor], xpos, ypos, m_data.width,
                          m_data.height, refreshRate);
     m_data.primaryMonitor = monitor;
-    settings->primaryMonitor = monitor;
+    settings_manager->primaryMonitor = monitor;
   }
 }
 
-void Window::toggleFullscreen(bool fullscreen) {
+void WindowsManager::toggleFullscreen(bool fullscreen) {
   if (fullscreen and not m_data.fullscreen) {
-    const auto& settings = Application::Get().getSettings();
+    const auto& settings_manager = Application::Get().getSettingsManager();
     int monitorCount;
     GLFWmonitor* monitor =
-      (glfwGetMonitors(&monitorCount))[settings->primaryMonitor];
+      (glfwGetMonitors(&monitorCount))[settings_manager->primaryMonitor];
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     m_data.fullscreen = fullscreen;
-    settings->fullscreen = fullscreen;
+    settings_manager->fullscreen = fullscreen;
     glfwSetWindowMonitor(m_window, monitor, GLFW_DONT_CARE, GLFW_DONT_CARE,
-                         mode->width, mode->height, settings->refreshRate);
+                         mode->width, mode->height,
+                         settings_manager->refreshRate);
     if (m_data.vSync) {
       glfwSwapInterval(1); // https://github.com/glfw/glfw/issues/1072
     }
   } else if (not fullscreen and m_data.fullscreen) {
     m_data.fullscreen = fullscreen;
-    Application::Get().getSettings()->fullscreen = fullscreen;
+    Application::Get().getSettingsManager()->fullscreen = fullscreen;
     glfwSetWindowMonitor(m_window, nullptr, m_data.positionX, m_data.positionY,
                          m_data.width, m_data.height, GLFW_DONT_CARE);
     restoreWindowIcon();
@@ -584,22 +596,23 @@ void Window::toggleFullscreen(bool fullscreen) {
   }
 }
 
-void Window::toggleWindowInsideImgui(bool windowInsideImgui) {
+void WindowsManager::toggleWindowInsideImgui(bool windowInsideImgui) {
   if (windowInsideImgui not_eq m_data.windowInsideImgui) {
     m_data.windowInsideImgui = windowInsideImgui;
-    Application::Get().getSettings()->windowInsideImgui = windowInsideImgui;
+    Application::Get().getSettingsManager()->windowInsideImgui =
+      windowInsideImgui;
   }
 }
 
-void Window::toggleFitToWindow(bool fitToWindow) {
+void WindowsManager::toggleFitToWindow(bool fitToWindow) {
   if (fitToWindow not_eq m_data.fitToWindow) {
     m_data.fitToWindow = fitToWindow;
-    Application::Get().getSettings()->fitToWindow = fitToWindow;
+    Application::Get().getSettingsManager()->fitToWindow = fitToWindow;
   }
 }
 
-std::unique_ptr<Window>
-Window::Create(const std::unique_ptr<Settings>& settings) {
-  return std::make_unique<Window>(settings);
+std::unique_ptr<WindowsManager> WindowsManager::Create(
+  const std::unique_ptr<SettingsManager>& settings_manager) {
+  return std::make_unique<WindowsManager>(settings_manager);
 }
 }

@@ -3,10 +3,10 @@
 #include <glm/glm.hpp>
 
 #include "pch.h"
-#include "renderer/vao.h"
+#include "render/vao.h"
 
 namespace potatoengine {
-class RendererAPI {
+class RenderAPI {
   public:
     static void Init();
     static void ToggleCulling(bool enabled);

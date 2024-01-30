@@ -6,9 +6,9 @@
 
 namespace potatoengine {
 
-class StateMachine {
+class StatesManager {
   public:
-    ~StateMachine();
+    ~StatesManager();
 
     void pushState(std::unique_ptr<State>&& s);
     void pushOverlay(std::unique_ptr<State>&& o);
@@ -26,12 +26,12 @@ class StateMachine {
     auto rbegin() const { return m_states.rbegin(); }
     auto rend() const { return m_states.rend(); }
 
-    static std::unique_ptr<StateMachine> Create();
+    static std::unique_ptr<StatesManager> Create();
 
   private:
-    std::vector<std::unique_ptr<State>> m_states{};
+    std::vector<std::unique_ptr<State>> m_states;
     uint32_t m_idx{};
-    std::map<std::string, std::string, NumericComparator> m_metrics{};
+    std::map<std::string, std::string, NumericComparator> m_metrics;
     bool m_dirty{};
 };
 

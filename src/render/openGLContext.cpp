@@ -1,4 +1,4 @@
-#include "renderer/openGLContext.h"
+#include "render/openGLContext.h"
 
 #include <glad/glad.h>
 

@@ -12,7 +12,6 @@
 #include "scene/components/core/cTag.h"
 #include "scene/components/core/cTime.h"
 #include "scene/components/core/cUUID.h"
-#include "scene/components/graphics/cAnimation.h"
 #include "scene/components/graphics/cBody.h"
 #include "scene/components/graphics/cFBO.h"
 #include "scene/components/graphics/cMaterial.h"
@@ -40,101 +39,89 @@ using namespace entt::literals;
 
 namespace potatoengine {
 
-inline CUUID& CastCUUID(void* other) { return *static_cast<CUUID*>(other); }
+CUUID& CastCUUID(void* other) { return *static_cast<CUUID*>(other); }
 
-inline CName& CastCName(void* other) { return *static_cast<CName*>(other); }
+CName& CastCName(void* other) { return *static_cast<CName*>(other); }
 
-inline CTag& CastCTag(void* other) { return *static_cast<CTag*>(other); }
+CTag& CastCTag(void* other) { return *static_cast<CTag*>(other); }
 
-inline CShaderProgram& CastCShaderProgram(void* other) {
+CShaderProgram& CastCShaderProgram(void* other) {
   return *static_cast<CShaderProgram*>(other);
 }
 
-inline CTransform& CastCTransform(void* other) {
+CTransform& CastCTransform(void* other) {
   return *static_cast<CTransform*>(other);
 }
 
-inline CMaterial& CastCMaterial(void* other) {
+CMaterial& CastCMaterial(void* other) {
   return *static_cast<CMaterial*>(other);
 }
 
-inline CTextureAtlas& CastCTextureAtlas(void* other) {
+CTextureAtlas& CastCTextureAtlas(void* other) {
   return *static_cast<CTextureAtlas*>(other);
 }
 
-inline CTexture& CastCTexture(void* other) {
-  return *static_cast<CTexture*>(other);
-}
+CTexture& CastCTexture(void* other) { return *static_cast<CTexture*>(other); }
 
-inline CMesh& CastCMesh(void* other) { return *static_cast<CMesh*>(other); }
+CMesh& CastCMesh(void* other) { return *static_cast<CMesh*>(other); }
 
-inline CBody& CastCBody(void* other) { return *static_cast<CBody*>(other); }
+CBody& CastCBody(void* other) { return *static_cast<CBody*>(other); }
 
-inline CGravity& CastCGravity(void* other) {
-  return *static_cast<CGravity*>(other);
-}
+CGravity& CastCGravity(void* other) { return *static_cast<CGravity*>(other); }
 
-inline CRigidBody& CastCRigidBody(void* other) {
+CRigidBody& CastCRigidBody(void* other) {
   return *static_cast<CRigidBody*>(other);
 }
 
-inline CCollider& CastCCollider(void* other) {
+CCollider& CastCCollider(void* other) {
   return *static_cast<CCollider*>(other);
 }
 
-inline CCamera& CastCCamera(void* other) {
-  return *static_cast<CCamera*>(other);
-}
+CCamera& CastCCamera(void* other) { return *static_cast<CCamera*>(other); }
 
-inline CDistanceFromCamera& CastCDistanceFromCamera(void* other) {
+CDistanceFromCamera& CastCDistanceFromCamera(void* other) {
   return *static_cast<CDistanceFromCamera*>(other);
 }
 
-inline CActiveCamera& CastCActiveCamera(void* other) {
+CActiveCamera& CastCActiveCamera(void* other) {
   return *static_cast<CActiveCamera*>(other);
 }
 
-inline CInput& CastCInput(void* other) { return *static_cast<CInput*>(other); }
+CInput& CastCInput(void* other) { return *static_cast<CInput*>(other); }
 
-inline CActiveInput& CastCActiveInput(void* other) {
+CActiveInput& CastCActiveInput(void* other) {
   return *static_cast<CActiveInput*>(other);
 }
 
-inline CSkybox& CastCSkybox(void* other) {
-  return *static_cast<CSkybox*>(other);
-}
+CSkybox& CastCSkybox(void* other) { return *static_cast<CSkybox*>(other); }
 
-inline CTime& CastCTime(void* other) { return *static_cast<CTime*>(other); }
+CTime& CastCTime(void* other) { return *static_cast<CTime*>(other); }
 
-inline CLight& CastCLight(void* other) { return *static_cast<CLight*>(other); }
+CLight& CastCLight(void* other) { return *static_cast<CLight*>(other); }
 
-inline CAudio& CastCAudio(void* other) { return *static_cast<CAudio*>(other); }
+CAudio& CastCAudio(void* other) { return *static_cast<CAudio*>(other); }
 
-inline CAnimation& CastCAnimation(void* other) {
-  return *static_cast<CAnimation*>(other);
-}
+CText& CastCText(void* other) { return *static_cast<CText*>(other); }
 
-inline CText& CastCText(void* other) { return *static_cast<CText*>(other); }
-
-inline CRelationship& CastCRelationship(void* other) {
+CRelationship& CastCRelationship(void* other) {
   return *static_cast<CRelationship*>(other);
 }
 
-inline CShape& CastCShape(void* other) { return *static_cast<CShape*>(other); }
+CShape& CastCShape(void* other) { return *static_cast<CShape*>(other); }
 
-inline CFBO& CastCFBO(void* other) { return *static_cast<CFBO*>(other); }
+CFBO& CastCFBO(void* other) { return *static_cast<CFBO*>(other); }
 
-inline CNoise& CastCNoise(void* other) { return *static_cast<CNoise*>(other); }
+CNoise& CastCNoise(void* other) { return *static_cast<CNoise*>(other); }
 
-inline CChunkManager& CastCChunkManager(void* other) {
+CChunkManager& CastCChunkManager(void* other) {
   return *static_cast<CChunkManager*>(other);
 }
 
-inline CChunk& CastCChunk(void* other) { return *static_cast<CChunk*>(other); }
+CChunk& CastCChunk(void* other) { return *static_cast<CChunk*>(other); }
 
-inline CBlock& CastCBlock(void* other) { return *static_cast<CBlock*>(other); }
+CBlock& CastCBlock(void* other) { return *static_cast<CBlock*>(other); }
 
-inline void RegisterComponents() {
+void RegisterComponents() {
   entt::meta<CUUID>()
     .type("uuid"_hs)
     .ctor<&CastCUUID, entt::as_ref_t>()
@@ -377,14 +364,6 @@ inline void RegisterComponents() {
     .func<&CAudio::getInfo>("getInfo"_hs)
     .func<&assign<CAudio>, entt::as_ref_t>("assign"_hs);
 
-  entt::meta<CAnimation>()
-    .type("animation"_hs)
-    .ctor<&CastCAnimation, entt::as_ref_t>()
-    .data<&CAnimation::filepath>("filepath"_hs)
-    .func<&CAnimation::print>("print"_hs)
-    .func<&CAnimation::getInfo>("getInfo"_hs)
-    .func<&assign<CAnimation>, entt::as_ref_t>("assign"_hs);
-
   entt::meta<CText>()
     .type("text"_hs)
     .ctor<&CastCText, entt::as_ref_t>()
@@ -479,7 +458,7 @@ inline void RegisterComponents() {
     .func<&assign<CBlock>, entt::as_ref_t>("assign"_hs);
 }
 
-inline void PrintScene(entt::registry& registry) {
+void PrintScene(entt::registry& registry) {
   auto entities = registry.view<CUUID>();
   entt::meta_type cType;
   entt::meta_any cData;

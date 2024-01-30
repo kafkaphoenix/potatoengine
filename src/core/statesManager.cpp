@@ -1,9 +1,9 @@
-#include "core/stateMachine.h"
+#include "core/statesManager.h"
 
 namespace potatoengine {
 
-StateMachine::~StateMachine() {
-  ENGINE_WARN("Deleting state machine");
+StatesManager::~StatesManager() {
+  ENGINE_WARN("Deleting states manager");
   for (auto& s : m_states) {
     s->onDetach();
   }
@@ -12,17 +12,17 @@ StateMachine::~StateMachine() {
   m_dirty = false;
 }
 
-void StateMachine::pushState(std::unique_ptr<State>&& s) {
+void StatesManager::pushState(std::unique_ptr<State>&& s) {
   m_states.emplace(m_states.begin() + m_idx++, std::move(s));
   m_dirty = true;
 }
 
-void StateMachine::pushOverlay(std::unique_ptr<State>&& o) {
+void StatesManager::pushOverlay(std::unique_ptr<State>&& o) {
   m_states.emplace_back(std::move(o));
   m_dirty = true;
 }
 
-void StateMachine::popState(std::string_view name) {
+void StatesManager::popState(std::string_view name) {
   auto it = std::ranges::find_if(
     m_states | std::views::take(m_idx),
     [&](const auto& state) { return state->getName() == name; });
@@ -34,7 +34,7 @@ void StateMachine::popState(std::string_view name) {
   m_dirty = true;
 }
 
-void StateMachine::popOverlay(std::string_view name) {
+void StatesManager::popOverlay(std::string_view name) {
   m_states.erase(
     std::remove_if(m_states.begin(), m_states.end(),
                    [&](const auto& state) { return state->getName() == name; }),
@@ -43,13 +43,13 @@ void StateMachine::popOverlay(std::string_view name) {
 }
 
 std::map<std::string, std::string, NumericComparator>&
-StateMachine::getMetrics() {
+StatesManager::getMetrics() {
   if (not m_dirty) {
     return m_metrics;
   }
 
   m_metrics.clear();
-  for (int i = 0; i < m_idx; ++i) {
+  for (uint32_t i = 0; i < m_idx; ++i) {
     m_metrics["state_" + std::to_string(i)] = m_states[i]->getName();
   }
   m_metrics["state_idx"] = std::to_string(m_idx);
@@ -58,7 +58,7 @@ StateMachine::getMetrics() {
   return m_metrics;
 }
 
-std::unique_ptr<StateMachine> StateMachine::Create() {
-  return std::make_unique<StateMachine>();
+std::unique_ptr<StatesManager> StatesManager::Create() {
+  return std::make_unique<StatesManager>();
 }
 }

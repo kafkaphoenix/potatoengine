@@ -27,16 +27,16 @@ class Model : public Asset {
     virtual bool operator==(const Asset& other) const override final;
 
   private:
-    std::string m_filepath{};
-    std::string m_directory{};
-    std::vector<CMesh> m_meshes{};
-    std::vector<CMaterial> m_materials{};
-    std::vector<std::shared_ptr<Texture>> m_loadedTextures{};
+    std::string m_filepath;
+    std::string m_directory;
+    std::vector<CMesh> m_meshes;
+    std::vector<CMaterial> m_materials;
+    std::vector<std::shared_ptr<Texture>> m_loadedTextures;
 
-    std::map<std::string, std::string, NumericComparator> m_info{};
+    std::map<std::string, std::string, NumericComparator> m_info;
     std::map<std::string, std::map<std::string, std::string, NumericComparator>,
              NumericComparator>
-      m_loadedTextureInfo{};
+      m_loadedTextureInfo;
 
     void processNode(aiNode* node, const aiScene* scene);
     CMesh processMesh(aiMesh* mesh, const aiScene* scene);

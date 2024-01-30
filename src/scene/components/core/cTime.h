@@ -9,9 +9,9 @@ namespace potatoengine {
 
 struct CTime {
     float seconds{};
-    int currentHour{};
-    int currentMinute{};
-    int currentSecond{};
+    uint32_t currentHour{};
+    uint32_t currentMinute{};
+    uint32_t currentSecond{};
     float dayLength{0.5};
     float startingTime{7};
     float dayTransitionStart{5};
@@ -19,11 +19,11 @@ struct CTime {
     float nightTransitionStart{19};
     float nightStart{21};
     float acceleration{1.f};
-    int fps{60};
+    uint32_t fps{60};
 
     CTime() = default;
-    explicit CTime(float s, int ch, int cm, int cs, float st, float dl,
-                   float ns, float dts, float ds, float nts, float a, int f)
+    explicit CTime(float s, uint32_t ch, uint32_t cm, uint32_t cs, float st, float dl,
+                   float ns, float dts, float ds, float nts, float a, uint32_t f)
       : seconds(s), currentHour(ch), currentMinute(cm), currentSecond(cs),
         startingTime(st), dayLength(dl), nightStart(ns),
         dayTransitionStart(dts), dayStart(ds), nightTransitionStart(nts),
@@ -63,9 +63,9 @@ struct CTime {
 
     void setTime(float time) {
       seconds = time * 3600.f;
-      currentHour = static_cast<int>(seconds / 3600.f);
-      currentMinute = static_cast<int>((seconds / 60.f) - (currentHour * 60.f));
-      currentSecond = static_cast<int>(seconds) % 60;
+      currentHour = static_cast<uint32_t>(seconds / 3600.f);
+      currentMinute = static_cast<uint32_t>((seconds / 60.f) - (currentHour * 60.f));
+      currentSecond = static_cast<uint32_t>(seconds) % 60;
     }
 
     void validate() {

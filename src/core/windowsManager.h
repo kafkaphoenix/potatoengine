@@ -5,8 +5,8 @@
 
 #include "events/event.h"
 #include "pch.h"
-#include "renderer/openGLContext.h"
-#include "settings.h"
+#include "render/openGLContext.h"
+#include "core/settingsManager.h"
 
 namespace potatoengine {
 
@@ -47,12 +47,12 @@ struct WindowData {
     bool fitToWindow{};
 };
 
-static int s_GLFWWindowCount = 0;
+static uint32_t s_GLFWWindowCount{};
 
-class Window {
+class WindowsManager {
   public:
-    Window(const std::unique_ptr<Settings>& settings);
-    ~Window();
+    WindowsManager(const std::unique_ptr<SettingsManager>& settings_manager);
+    ~WindowsManager();
 
     void shutdown();
     void onUpdate();
@@ -87,8 +87,8 @@ class Window {
     void toggleWindowInsideImgui(bool windowInsideImgui);
     void toggleFitToWindow(bool fitToWindow);
 
-    static std::unique_ptr<Window>
-    Create(const std::unique_ptr<Settings>& settings);
+    static std::unique_ptr<WindowsManager>
+    Create(const std::unique_ptr<SettingsManager>& settings_manager);
 
   private:
     GLFWwindow* m_window{}; // TODO: this class should be a window manager, and

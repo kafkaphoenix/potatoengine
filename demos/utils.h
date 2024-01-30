@@ -13,17 +13,17 @@ using namespace entt::literals;
 
 namespace demos {
 
-inline CCoins& CastCCoins(void* other) { return *static_cast<CCoins*>(other); }
+CCoins& CastCCoins(void* other) { return *static_cast<CCoins*>(other); }
 
-inline CPipes& CastCPipes(void* other) { return *static_cast<CPipes*>(other); }
+CPipes& CastCPipes(void* other) { return *static_cast<CPipes*>(other); }
 
-inline CScore& CastCScore(void* other) { return *static_cast<CScore*>(other); }
+CScore& CastCScore(void* other) { return *static_cast<CScore*>(other); }
 
-inline CTimer& CastCTimer(void* other) { return *static_cast<CTimer*>(other); }
+CTimer& CastCTimer(void* other) { return *static_cast<CTimer*>(other); }
 
-inline CState& CastCState(void* other) { return *static_cast<CState*>(other); }
+CState& CastCState(void* other) { return *static_cast<CState*>(other); }
 
-inline void RegisterComponents() {
+void RegisterComponents() {
   entt::meta<CCoins>()
     .type("coins"_hs)
     .ctor<&CastCCoins, entt::as_ref_t>()

@@ -5,11 +5,11 @@
 namespace demos {
 
 struct CPipes {
-    int maxPipes{4};
-    int pipes{0};
+    uint32_t maxPipes{4};
+    uint32_t pipes{0};
 
     CPipes() = default;
-    explicit CPipes(int mp, int p) : maxPipes(mp), pipes(p) {}
+    explicit CPipes(uint32_t mp, uint32_t p) : maxPipes(mp), pipes(p) {}
 
     void print() const {
       APP_BACKTRACE("\t\tmaxPipes: {0}\n\t\t\t\t\t\tpipes: {1}", maxPipes, pipes);

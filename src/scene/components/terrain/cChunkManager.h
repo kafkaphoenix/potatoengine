@@ -28,10 +28,10 @@ struct CChunkManager {
       Greedy, // optimize quads
     };
 
-    int chunkSize{16};
-    int blockSize{1};
-    int width{3};
-    int height{3};
+    uint32_t chunkSize{16};
+    uint32_t blockSize{1};
+    uint32_t width{3};
+    uint32_t height{3};
     std::unordered_map<glm::vec3, CChunk> chunks; // TODO: change to ivec3
     std::string _meshType;
     MeshType meshType;
@@ -40,7 +40,7 @@ struct CChunkManager {
     bool useBiomes{};
 
     CChunkManager() = default;
-    explicit CChunkManager(int w, int h, int cs, int bs,
+    explicit CChunkManager(uint32_t w, uint32_t h, uint32_t cs, uint32_t bs,
                            std::unordered_map<glm::vec3, CChunk>&& c,
                            std::string&& mt, std::string&& ma, bool ub)
       : width(w), height(h), chunkSize(cs), blockSize(bs), chunks(std::move(c)),

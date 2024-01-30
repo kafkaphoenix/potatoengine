@@ -4,8 +4,8 @@
 #include <entt/entt.hpp>
 
 #include "pch.h"
-#include "renderer/shaderProgram.h"
-#include "renderer/framebuffer.h"
+#include "render/shaderProgram.h"
+#include "render/framebuffer.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -22,10 +22,10 @@ struct CFBO {
       Emboss
     };
 
-    std::string fbo{};
-    std::string _mode{};
+    std::string fbo;
+    std::string _mode;
     Mode mode;
-    std::string _attachment{};
+    std::string _attachment;
     uint32_t attachment{};
     uint32_t width{};
     uint32_t height{};

@@ -5,14 +5,14 @@
 
 #include "assets/assetsManager.h"
 #include "pch.h"
-#include "renderer/framebuffer.h"
-#include "renderer/shaderProgram.h"
-#include "renderer/vao.h"
+#include "render/framebuffer.h"
+#include "render/shaderProgram.h"
+#include "render/vao.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
 
-class Renderer {
+class RenderManager {
   public:
     void init() const;
     void shutdown();
@@ -47,12 +47,12 @@ class Renderer {
                            std::string_view fbo, std::string_view title,
                            glm::vec2 size, glm::vec2 position,
                            bool fitToWindow);
-    int getShaderProgramsCount() const { return m_shaderPrograms.size(); }
-    int getFramebuffersCount() const { return m_framebuffers.size(); }
+    uint32_t getShaderProgramsCount() const { return m_shaderPrograms.size(); }
+    uint32_t getFramebuffersCount() const { return m_framebuffers.size(); }
     void clear();
     void resetMetrics();
     const std::map<std::string, std::string, NumericComparator>& getMetrics();
-    static std::unique_ptr<Renderer> Create();
+    static std::unique_ptr<RenderManager> Create();
 
   private:
     glm::mat4 m_view{};
@@ -61,10 +61,10 @@ class Renderer {
     std::unordered_map<std::string, std::unique_ptr<ShaderProgram>>
       m_shaderPrograms;
     std::unordered_map<std::string, std::unique_ptr<FBO>> m_framebuffers;
-    std::map<std::string, std::string, NumericComparator> m_metrics{};
-    int m_drawCalls{};
-    int m_triangles{};
-    int m_vertices{};
-    int m_indices{};
+    std::map<std::string, std::string, NumericComparator> m_metrics;
+    uint32_t m_drawCalls{};
+    uint32_t m_triangles{};
+    uint32_t m_vertices{};
+    uint32_t m_indices{};
 };
 }

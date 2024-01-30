@@ -107,16 +107,16 @@ Prefab::getTargetedPrototypeInfo(std::string_view prototypeID) {
 
   std::map<std::string, std::string, NumericComparator> m_info{};
   m_info["Name"] = prototypeID.data();
-  for (int i = 0; i < m_prototypes.at(prototypeID.data()).inherits.size();
+  for (uint32_t i = 0; i < m_prototypes.at(prototypeID.data()).inherits.size();
        ++i) {
     m_info["Inherits " + std::to_string(i)] =
       *std::next(m_prototypes.at(prototypeID.data()).inherits.begin(), i);
   }
-  for (int i = 0; i < m_prototypes.at(prototypeID.data()).ctags.size(); ++i) {
+  for (uint32_t i = 0; i < m_prototypes.at(prototypeID.data()).ctags.size(); ++i) {
     m_info["CTag " + std::to_string(i)] =
       *std::next(m_prototypes.at(prototypeID.data()).ctags.begin(), i);
   }
-  int i = 0;
+  uint32_t i = 0;
   for (const auto& [componentID, _] :
        m_prototypes.at(prototypeID.data()).components) {
     m_info["Component " + std::to_string(i++)] = componentID;

@@ -9,42 +9,42 @@ void render(engine::CTexture* cTexture, engine::CTextureAtlas* cTextureAtlas,
             engine::CMesh* cMesh, const engine::CTransform& cTransform,
             const engine::CShaderProgram& cShaderProgram,
             engine::CTexture* cSkyboxTexture,
-            const std::unique_ptr<engine::Renderer>& renderer) {
+            const std::unique_ptr<engine::RenderManager>& render_manager) {
   if (cTexture and cTexture->hasTransparency) {
-    engine::RendererAPI::ToggleCulling(false);
+    engine::RenderAPI::ToggleCulling(false);
   }
   if (cSkybox) {
-    engine::RendererAPI::SetDepthLEqual();
+    engine::RenderAPI::SetDepthLEqual();
   }
-  cMesh->bindTextures(renderer->getShaderProgram(cShaderProgram.name), cTexture,
+  cMesh->bindTextures(render_manager->getShaderProgram(cShaderProgram.name), cTexture,
                       cTextureAtlas, cSkyboxTexture, cMaterial);
-  renderer->render(cMesh->getVAO(), cTransform.calculate(),
+  render_manager->render(cMesh->getVAO(), cTransform.calculate(),
                    cShaderProgram.name);
   cMesh->unbindTextures(cTexture);
   if (cTexture and cTexture->hasTransparency) {
-    engine::RendererAPI::ToggleCulling(true);
+    engine::RenderAPI::ToggleCulling(true);
   }
   if (cSkybox) {
-    engine::RendererAPI::SetDepthLess();
+    engine::RenderAPI::SetDepthLess();
   }
 }
 
 void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
   auto& app = engine::Application::Get();
-  const auto& renderer = app.getRenderer();
+  const auto& render_manager = app.getRenderManager();
 
   entt::entity fbo = registry.view<engine::CFBO, engine::CUUID>()
                        .front(); // TODO: support more than one?
   if (fbo not_eq entt::null) {
     engine::CFBO& cfbo = registry.get<engine::CFBO>(fbo);
-    const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
+    const auto& defaultFBO = render_manager->getFramebuffers().at(cfbo.fbo);
     defaultFBO->bindToDraw();
-    engine::RendererAPI::ToggleDepthTest(true);
+    engine::RenderAPI::ToggleDepthTest(true);
   }
 
   // FBOs are cleared in their own render pass at the end of the scene
-  engine::RendererAPI::Clear();
-  renderer->resetMetrics();
+  engine::RenderAPI::Clear();
+  render_manager->resetMetrics();
 
   entt::entity camera = registry
                           .view<engine::CCamera, engine::CActiveCamera,
@@ -55,7 +55,7 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
   const engine::CTransform& cCameraTransform =
     registry.get<engine::CTransform>(camera);
   cCamera.calculateView(cCameraTransform.position, cCameraTransform.rotation);
-  renderer->beginScene(cCamera.view, cCamera.projection,
+  render_manager->beginScene(cCamera.view, cCamera.projection,
                        cCameraTransform.position);
 
   entt::entity sky = registry.view<engine::CSkybox, engine::CUUID>()
@@ -94,13 +94,13 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
           }
 
           render(cTexture, cTextureAtlas, cSkybox, cMaterial, cMesh, cTransform,
-                 cShaderProgram, cSkyboxTexture, renderer);
+                 cShaderProgram, cSkyboxTexture, render_manager);
         } else if (cBody) { // models
           for (size_t i = 0; i < cBody->meshes.size(); ++i) {
             engine::CMesh& mesh = cBody->meshes.at(i);
             engine::CMaterial& material = cBody->materials.at(i);
             render(cTexture, cTextureAtlas, cSkybox, &material, &mesh,
-                   cTransform, cShaderProgram, cSkyboxTexture, renderer);
+                   cTransform, cShaderProgram, cSkyboxTexture, render_manager);
           }
         } else if (cShape) { // primitives
           if (not cTexture) {
@@ -116,7 +116,7 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
 
           for (auto& mesh : cShape->meshes) {
             render(cTexture, cTextureAtlas, cSkybox, cMaterial, &mesh,
-                   cTransform, cShaderProgram, cSkyboxTexture, renderer);
+                   cTransform, cShaderProgram, cSkyboxTexture, render_manager);
           }
         } else if (cChunkManager) { // terrain
           if (not cTexture) {
@@ -133,7 +133,7 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
           for (auto& [position, chunk] : cChunkManager->chunks) {
             render(cTexture, cTextureAtlas, cSkybox, cMaterial,
                    &chunk.terrainMesh, chunk.transform, cShaderProgram,
-                   cSkyboxTexture, renderer);
+                   cSkyboxTexture, render_manager);
           }
         } else {
           engine::CName* cName = registry.try_get<engine::CName>(e);
@@ -149,25 +149,25 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
 
   if (fbo not_eq entt::null) {
     engine::CFBO& cfbo = registry.get<engine::CFBO>(fbo);
-    const auto& defaultFBO = renderer->getFramebuffers().at(cfbo.fbo);
+    const auto& defaultFBO = render_manager->getFramebuffers().at(cfbo.fbo);
     defaultFBO->unbind(); // go back to default framebuffer
-    engine::RendererAPI::ClearColor();
-    engine::RendererAPI::ToggleDepthTest(
+    engine::RenderAPI::ClearColor();
+    engine::RenderAPI::ToggleDepthTest(
       false); // disable depth test so screen-space quad isn't discarded due to
               // depth test.
     engine::CShape& cShape = registry.get<engine::CShape>(fbo);
-    cfbo.setupProperties(renderer->getShaderProgram("fbo"));
-    const auto& settings = app.getSettings();
-    if (settings->windowInsideImgui) {
-      renderer->renderInsideImGui(cShape.meshes.at(0).getVAO(), cfbo.fbo,
+    cfbo.setupProperties(render_manager->getShaderProgram("fbo"));
+    const auto& settings_manager = app.getSettingsManager();
+    if (settings_manager->windowInsideImgui) {
+      render_manager->renderInsideImGui(cShape.meshes.at(0).getVAO(), cfbo.fbo,
                                   "scene", {0, 0}, {0, 0},
-                                  settings->fitToWindow);
+                                  settings_manager->fitToWindow);
     } else {
-      renderer->renderFBO(cShape.meshes.at(0).getVAO(), cfbo.fbo);
+      render_manager->renderFBO(cShape.meshes.at(0).getVAO(), cfbo.fbo);
     }
   }
 
-  renderer->endScene();
+  render_manager->endScene();
 }
 
 }

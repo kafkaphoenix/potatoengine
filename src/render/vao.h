@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/buffer.h"
+#include "render/buffer.h"
 #include "utils/numericComparator.h"
 
 namespace potatoengine {
@@ -35,11 +35,11 @@ class VAO {
     static std::shared_ptr<VAO> Create();
 
   private:
-    uint32_t m_id;
-    uint32_t m_vboIDX = 0;
+    uint32_t m_id{};
+    uint32_t m_vboIDX{};
     std::vector<std::shared_ptr<VBO>> m_vbos;
     std::unique_ptr<IBO> m_ibo;
-    std::map<std::string, std::string, NumericComparator> m_info{};
+    std::map<std::string, std::string, NumericComparator> m_info;
     bool m_dirty{};
     bool m_binded{};
 };

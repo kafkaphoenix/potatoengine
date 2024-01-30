@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/vao.h"
+#include "render/vao.h"
 
 namespace potatoengine {
 

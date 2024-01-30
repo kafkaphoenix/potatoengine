@@ -1,4 +1,4 @@
-#include "renderer/framebuffer.h"
+#include "render/framebuffer.h"
 
 #include <glad/glad.h>
 
@@ -8,19 +8,19 @@
 namespace potatoengine {
 
 FBO::FBO(uint32_t w, uint32_t h, uint32_t t) : m_depthBufferType(t) {
-  const auto& settings = Application::Get().getSettings();
-  int windowWidth;
-  int windowHeight;
-  if (settings->fullscreen) {
+  const auto& settings_manager = Application::Get().getSettingsManager();
+  uint32_t windowWidth;
+  uint32_t windowHeight;
+  if (settings_manager->fullscreen) {
     int monitorCount;
     GLFWmonitor* monitor =
-      (glfwGetMonitors(&monitorCount))[settings->primaryMonitor];
+      (glfwGetMonitors(&monitorCount))[settings_manager->primaryMonitor];
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     windowWidth = mode->width;
     windowHeight = mode->height;
   } else {
-    windowWidth = settings->windowWidth;
-    windowHeight = settings->windowHeight;
+    windowWidth = settings_manager->windowWidth;
+    windowHeight = settings_manager->windowHeight;
   }
   m_width = w == 0 ? windowWidth : w;
   m_height = h == 0 ? windowHeight : h;
@@ -136,9 +136,9 @@ const std::map<std::string, std::string, NumericComparator>& FBO::getInfo() {
 }
 
 void FBO::bindToDraw() {
-  const auto& renderer = Application::Get().getRenderer();
+  const auto& render_manager = Application::Get().getRenderManager();
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
-  renderer->onWindowResize(m_width, m_height);
+  render_manager->onWindowResize(m_width, m_height);
 }
 
 void FBO::bindToRead() {
@@ -150,16 +150,16 @@ void FBO::bindToRead() {
 void FBO::unbind() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0); // default framebuffer
   auto& app = Application::Get();
-  const auto& settings = app.getSettings();
-  const auto& renderer = app.getRenderer();
-  if (settings->fullscreen) {
+  const auto& settings_manager = app.getSettingsManager();
+  const auto& render_manager = app.getRenderManager();
+  if (settings_manager->fullscreen) {
     int monitorCount;
     GLFWmonitor* monitor =
-      (glfwGetMonitors(&monitorCount))[settings->primaryMonitor];
+      (glfwGetMonitors(&monitorCount))[settings_manager->primaryMonitor];
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    renderer->onWindowResize(mode->width, mode->height);
+    render_manager->onWindowResize(mode->width, mode->height);
   } else {
-    renderer->onWindowResize(settings->windowWidth, settings->windowHeight);
+    render_manager->onWindowResize(settings_manager->windowWidth, settings_manager->windowHeight);
   }
 }
 

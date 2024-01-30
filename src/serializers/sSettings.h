@@ -2,8 +2,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "core/settingsManager.h"
 #include "pch.h"
-#include "settings.h"
 
 using json = nlohmann::json;
 
@@ -33,9 +33,10 @@ get_default_roaming_path(std::string_view projectName) {
   return path;
 }
 
-inline void save_settings(const std::unique_ptr<Settings>& settings,
-                          std::filesystem::path path) {
-  json data = *settings;
+inline void
+save_settings(const std::unique_ptr<SettingsManager>& settings_manager,
+              std::filesystem::path path) {
+  json data = *settings_manager;
 
   std::ofstream file(path);
   ENGINE_ASSERT(file.is_open(), "Failed to open settings file!");
@@ -44,25 +45,27 @@ inline void save_settings(const std::unique_ptr<Settings>& settings,
   file.close();
 }
 
-inline std::unique_ptr<Settings> load_settings(std::string_view projectName) {
-  std::unique_ptr<Settings> settings = std::make_unique<Settings>();
+inline std::unique_ptr<SettingsManager>
+load_settings(std::string_view projectName) {
+  std::unique_ptr<SettingsManager> settings_manager =
+    std::make_unique<SettingsManager>();
   auto path = get_default_roaming_path(projectName);
 
   if (!std::filesystem::exists(path)) {
-    settings->appName = projectName.data();
-    settings->logFilePath = std::format("logs/{}.log", projectName);
-    save_settings(settings, path);
+    settings_manager->appName = projectName.data();
+    settings_manager->logFilePath = std::format("logs/{}.log", projectName);
+    save_settings(settings_manager, path);
   } else {
     std::ifstream file(path);
     ENGINE_ASSERT(file.is_open(), "Failed to open settings file!");
     ENGINE_ASSERT(file.peek() not_eq std::ifstream::traits_type::eof(),
-               "Settings file is empty!");
+                  "Settings file is empty!");
     json data = json::parse(file);
     file.close();
-    *settings = data.get<Settings>();
+    *settings_manager = data.get<SettingsManager>();
   }
 
-  return settings;
+  return settings_manager;
 }
 
 }

@@ -5,9 +5,9 @@
 
 #include "assets/texture.h"
 #include "pch.h"
-#include "renderer/buffer.h"
-#include "renderer/shaderProgram.h"
-#include "renderer/vao.h"
+#include "render/buffer.h"
+#include "render/shaderProgram.h"
+#include "render/vao.h"
 #include "scene/components/graphics/cMaterial.h"
 #include "scene/components/graphics/cTexture.h"
 #include "scene/components/graphics/cTextureAtlas.h"
@@ -114,12 +114,12 @@ struct CMesh {
               sp->getName() ==
                 "shape") { // terrain shader get texture atlas data from vertex
             sp->setFloat("useTextureAtlas", 1.f);
-            int index = cTextureAtlas->index;
-            int rows = cTextureAtlas->rows;
+            uint32_t index = cTextureAtlas->index;
+            uint32_t rows = cTextureAtlas->rows;
             sp->setFloat("numRows", rows);
-            int col = index % rows;
+            uint32_t col = index % rows;
             float coll = static_cast<float>(col) / rows;
-            int row = index / rows;
+            uint32_t row = index / rows;
             float roww = static_cast<float>(row) / rows;
             sp->setVec2("offset", glm::vec2(coll, roww));
           }
@@ -220,7 +220,7 @@ struct CMesh {
 
     std::map<std::string, std::string, NumericComparator> getInfo() const {
       std::map<std::string, std::string, NumericComparator> info;
-      for (int i = 0; i < textures.size(); ++i) {
+      for (uint32_t i = 0; i < textures.size(); ++i) {
         info["texture " + std::to_string(i)] = getTextureInfo(i);
       }
       info["vao 0"] = vao ? getVAOInfo() : "undefined";
@@ -231,7 +231,7 @@ struct CMesh {
 
     std::string getVAOInfo() const { return MapToJson(vao->getInfo()); }
 
-    std::string getTextureInfo(int index) const {
+    std::string getTextureInfo(uint32_t index) const {
       return MapToJson(textures.at(index)->getInfo());
     }
 };

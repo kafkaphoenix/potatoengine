@@ -35,7 +35,7 @@ struct CTexture {
     bool useReflection{};
     bool useRefraction{};
     std::string _drawMode;
-    DrawMode drawMode{};
+    DrawMode drawMode;
 
     CTexture() = default;
     explicit CTexture(std::vector<std::string>&& fps, glm::vec4&& c, float bf,
@@ -79,14 +79,14 @@ struct CTexture {
       info["useRefraction"] = useRefraction ? "true" : "false";
       info["drawMode"] = _drawMode;
 
-      for (int i = 0; i < textures.size(); ++i) {
+      for (uint32_t i = 0; i < textures.size(); ++i) {
         info["texture " + std::to_string(i)] = getTextureInfo(i);
       }
 
       return info;
     }
 
-    std::string getTextureInfo(int index) const {
+    std::string getTextureInfo(uint32_t index) const {
       return MapToJson(textures.at(index)->getInfo());
     }
 

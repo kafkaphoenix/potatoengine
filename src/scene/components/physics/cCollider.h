@@ -12,7 +12,7 @@ namespace potatoengine {
 struct CCollider {
     enum class Type { Box, Capsule, Mesh, Sphere, Rectangle };
 
-    std::string _type{};
+    std::string _type;
     Type type;
     glm::vec3 size{glm::vec3(1.f)};
 

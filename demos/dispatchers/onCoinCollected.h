@@ -10,7 +10,7 @@ namespace demos::dispatchers {
 inline bool onCoinCollected(entt::registry& registry) {
   entt::entity gamestate = registry.view<CScore, engine::CUUID>().front();
   CScore& score = registry.get<CScore>(gamestate);
-  int new_score = ++score.score;
+  uint32_t new_score = ++score.score;
   registry.view<engine::CTextureAtlas, engine::CName, engine::CUUID>().each(
     [&](engine::CTextureAtlas& cTextureAtlas,
         const engine::CName& cName, const engine::CUUID& cUUID) {

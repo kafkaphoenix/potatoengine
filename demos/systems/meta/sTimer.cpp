@@ -28,7 +28,7 @@ void TimerSystem::init(entt::registry& registry) {
   registry.get<engine::CTransform>(centenas).position = {-1.6f, 0.8f, 0.f};
 
   entt::entity gamestate = registry.view<CTimer, engine::CUUID>().front();
-  int left = registry.get<CTimer>(gamestate).left;
+  uint32_t left = registry.get<CTimer>(gamestate).left;
 
   registry.get<engine::CTextureAtlas>(centenas).index = left / 100;
   registry.get<engine::CTextureAtlas>(decenas).index = (left % 100) / 10;

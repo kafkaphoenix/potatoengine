@@ -11,8 +11,8 @@
 namespace potatoengine::ui {
 class ImGuiAPI {
   public:
-    static void Init(GLFWwindow* window, int openglMajorVersion,
-                     int openglMinorVersion);
+    static void Init(GLFWwindow* window, uint32_t openglMajorVersion,
+                     uint32_t openglMinorVersion);
     static void NewFrame();
     static void Render();
     static void Shutdown();

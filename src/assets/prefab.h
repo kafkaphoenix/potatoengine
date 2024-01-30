@@ -9,9 +9,9 @@
 using json = nlohmann::json;
 
 struct Prototype {
-    std::vector<std::string> inherits{};
-    std::vector<std::string> ctags{};
-    std::unordered_map<std::string, json> components{};
+    std::vector<std::string> inherits;
+    std::vector<std::string> ctags;
+    std::unordered_map<std::string, json> components;
 };
 
 namespace potatoengine::assets {
@@ -54,15 +54,15 @@ class Prefab : public Asset {
     virtual bool operator==(const Asset& other) const override final;
 
   private:
-    std::string m_name{};
-    std::string m_filepath{};
-    std::vector<std::string> m_targetedPrototypes{};
-    std::unordered_map<std::string, Prototype> m_prototypes{};
+    std::string m_name;
+    std::string m_filepath;
+    std::vector<std::string> m_targetedPrototypes;
+    std::unordered_map<std::string, Prototype> m_prototypes;
 
-    std::map<std::string, std::string, NumericComparator> m_info{};
+    std::map<std::string, std::string, NumericComparator> m_info;
     std::map<std::string, std::map<std::string, std::string, NumericComparator>,
              NumericComparator>
-      m_prototypeInfo{};
+      m_prototypeInfo;
 
     void read(const json& j, std::vector<std::string>& inherits,
               std::vector<std::string>& ctags,

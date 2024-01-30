@@ -12,10 +12,11 @@ MenuState::MenuState() : State("MenuState") {}
 
 void MenuState::onAttach() {
   auto& app = engine::Application::Get();
-  const auto& settings = app.getSettings();
+  const auto& settings_manager = app.getSettingsManager();
   const auto& scene_manager = app.getSceneManager();
 
-  scene_manager->createScene(settings->activeScene, settings->activeScenePath);
+  scene_manager->createScene(settings_manager->activeScene,
+                             settings_manager->activeScenePath);
   entt::entity gamestate = scene_manager->getEntity("gamestate");
   CState& state = scene_manager->getRegistry().get<CState>(gamestate);
   state.state = CState::State::MENU;

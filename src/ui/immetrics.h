@@ -4,7 +4,7 @@
 
 #include "assets/assetsManager.h"
 #include "pch.h"
-#include "renderer/renderer.h"
+#include "render/renderManager.h"
 #include "scene/sceneManager.h"
 #include "ui/imutils.h"
 
@@ -14,7 +14,7 @@ bool show_tool_metrics = false;
 
 inline void
 drawMetrics(const std::unique_ptr<assets::AssetsManager>& assets_manager,
-            const std::unique_ptr<Renderer>& renderer,
+            const std::unique_ptr<RenderManager>& render_manager,
             const std::unique_ptr<SceneManager>& scene_manager) {
   if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_M)) and
       ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftCtrl))) {
@@ -40,13 +40,13 @@ drawMetrics(const std::unique_ptr<assets::AssetsManager>& assets_manager,
       ImGui::Text("%s: %s", key.c_str(), value.c_str());
     }
 
-    ImGui::SeparatorText("Asset Manager");
+    ImGui::SeparatorText("Assets Manager");
     for (const auto& [key, value] : assets_manager->getMetrics()) {
       ImGui::Text("%s: %s", key.c_str(), value.c_str());
     }
 
-    ImGui::SeparatorText("Renderer");
-    for (const auto& [key, value] : renderer->getMetrics()) {
+    ImGui::SeparatorText("Render Manager");
+    for (const auto& [key, value] : render_manager->getMetrics()) {
       ImGui::Text("%s: %s", key.c_str(), value.c_str());
     }
 

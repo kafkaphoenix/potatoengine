@@ -5,11 +5,11 @@
 namespace demos {
 
 struct CCoins {
-    int maxCoins{4};
-    int coins{0};
+    uint32_t maxCoins{4};
+    uint32_t coins{};
 
     CCoins() = default;
-    explicit CCoins(int mp, int p) : maxCoins(mp), coins(p) {}
+    explicit CCoins(uint32_t mp, uint32_t p) : maxCoins(mp), coins(p) {}
 
     void print() const {
       APP_BACKTRACE("\t\tmaxCoins: {0}\n\t\t\t\t\t\tcoins: {1}", maxCoins,

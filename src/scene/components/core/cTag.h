@@ -7,7 +7,7 @@
 namespace potatoengine {
 
 struct CTag {
-    std::string tag{};
+    std::string tag;
 
     CTag() = default;
     explicit CTag(std::string&& t) : tag(std::move(t)) {}

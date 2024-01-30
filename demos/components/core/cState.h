@@ -16,7 +16,7 @@ struct CState {
       GAMEOVER
     };
 
-    State state{State::INVALID};
+    State state{};
 
     CState() = default;
     explicit CState(State state) : state(state) {}

@@ -33,7 +33,7 @@ glm::vec3 calculateQuadNormal(int col, int row,
     glm::vec3(heightLeft - heightRight, 2.f, heightDown - heightUp));
 }
 
-glm::vec3 calculateBiomeColor(float height, int amplitude) {
+glm::vec3 calculateBiomeColor(float height, uint32_t amplitude) {
   height = (height + amplitude) / (2 * amplitude);
 
   if (height < 0.2f) {
@@ -51,14 +51,14 @@ glm::vec3 calculateBiomeColor(float height, int amplitude) {
   }
 }
 
-glm::vec3 calculateBiomeTexture(float height, int amplitude,
+glm::vec3 calculateBiomeTexture(float height, uint32_t amplitude,
                                 const engine::CTextureAtlas& cTextureAtlas) {
   height = (height + amplitude) / (2 * amplitude);
 
   int rows = cTextureAtlas.rows;
   int index = 5; // default
 
-  if (height < 0.2f) { // TODO contants
+  if (height < 0.2f) { // TODO constants
     index = 4;         // water
   } else if (height < 0.3f) {
     index = 3; // sand
@@ -72,16 +72,16 @@ glm::vec3 calculateBiomeTexture(float height, int amplitude,
     index = 6; // snow
   }
 
-  int col = index % rows;
+  uint32_t col = index % rows;
   float coll = static_cast<float>(col) / rows;
-  int row = index / rows;
+  uint32_t row = index / rows;
   float roww = static_cast<float>(row) / rows;
 
   return {static_cast<float>(coll) / rows, static_cast<float>(roww) / rows,
           0.f};
 }
 
-std::vector<std::vector<float>> generateHeights(int chunkSize,
+std::vector<std::vector<float>> generateHeights(uint32_t chunkSize,
                                                 const engine::CNoise& noise,
                                                 int xOffset, int zOffset) {
   std::vector<std::vector<float>> heights; // z = row, x = col
@@ -99,13 +99,13 @@ std::vector<std::vector<float>> generateHeights(int chunkSize,
 }
 
 std::vector<std::vector<glm::vec3>>
-generateBiomes(std::vector<std::vector<float>> heights, int amplitude) {
+generateBiomes(std::vector<std::vector<float>> heights, uint32_t amplitude) {
   std::vector<std::vector<glm::vec3>> biomes; // z = row, x = col
   biomes.reserve(heights.size());
-  for (int row = 0; row < heights.size(); ++row) {
+  for (uint32_t row = 0; row < heights.size(); ++row) {
     biomes.emplace_back(std::vector<glm::vec3>());
     biomes[row].reserve(heights[row].size());
-    for (int col = 0; col < heights[row].size(); ++col) {
+    for (uint32_t col = 0; col < heights[row].size(); ++col) {
       biomes[row].emplace_back(
         calculateBiomeColor(heights[row][col], amplitude));
     }
@@ -115,14 +115,15 @@ generateBiomes(std::vector<std::vector<float>> heights, int amplitude) {
 }
 
 std::vector<std::vector<glm::vec3>>
-generateBiomesTextures(std::vector<std::vector<float>> heights, int amplitude,
+generateBiomesTextures(std::vector<std::vector<float>> heights,
+                       uint32_t amplitude,
                        const engine::CTextureAtlas& cTextureAtlas) {
   std::vector<std::vector<glm::vec3>> textures; // z = row, x = col
   textures.reserve(heights.size());
-  for (int row = 0; row < heights.size(); ++row) {
+  for (uint32_t row = 0; row < heights.size(); ++row) {
     textures.emplace_back(std::vector<glm::vec3>());
     textures[row].reserve(heights[row].size());
-    for (int col = 0; col < heights[row].size(); ++col) {
+    for (uint32_t col = 0; col < heights[row].size(); ++col) {
       textures[row].emplace_back(
         calculateBiomeTexture(heights[row][col], amplitude, cTextureAtlas));
     }
@@ -132,12 +133,13 @@ generateBiomesTextures(std::vector<std::vector<float>> heights, int amplitude,
 }
 
 engine::CMesh generateTriangleMesh(
-  int chunkSize, int blockSize, const std::vector<std::vector<float>>& heights,
+  uint32_t chunkSize, uint32_t blockSize,
+  const std::vector<std::vector<float>>& heights,
   const std::optional<
     std::reference_wrapper<std::vector<std::vector<glm::vec3>>>>
     biomes = std::nullopt) {
   engine::CMesh mesh;
-  int totalVertices =
+  uint32_t totalVertices =
     (chunkSize + 1) *
     (chunkSize + 1); // Triangles share vertices making impossible to use more
                      // than one texture for all the mesh
@@ -150,8 +152,8 @@ engine::CMesh generateTriangleMesh(
 
   // c++ is row major order (x, y, z) -> (width, height, depth) -> (col, height,
   // row)
-  for (int row = 0; row < chunkSize + 1; ++row) {
-    for (int col = 0; col < chunkSize + 1; ++col) {
+  for (uint32_t row = 0; row < chunkSize + 1; ++row) {
+    for (uint32_t col = 0; col < chunkSize + 1; ++col) {
       float x = static_cast<float>(col) * blockSize;
       float y = heights[row][col] * blockSize;
       float z = static_cast<float>(row) * blockSize;
@@ -173,8 +175,8 @@ engine::CMesh generateTriangleMesh(
     }
   }
 
-  for (int row = 0; row < chunkSize; ++row) {
-    for (int col = 0; col < chunkSize; ++col) {
+  for (uint32_t row = 0; row < chunkSize; ++row) {
+    for (uint32_t col = 0; col < chunkSize; ++col) {
       uint32_t topLeft = (row * (chunkSize + 1)) + col;
       uint32_t topRight = topLeft + 1;
       uint32_t bottomLeft = ((row + 1) * (chunkSize + 1)) + col;
@@ -245,9 +247,9 @@ void addTriangleVertexData(std::vector<engine::TerrainVertex>& vertices,
 }
 
 std::array<glm::vec3, 4>
-calculateQuadPositions(int col, int row,
+calculateQuadPositions(uint32_t col, uint32_t row,
                        const std::vector<std::vector<float>>& heights,
-                       int blockSize) {
+                       uint32_t blockSize) {
   std::array<glm::vec3, 4> positions;
   positions[0] = {static_cast<float>(col) * blockSize,
                   heights[row][col] * blockSize,
@@ -266,7 +268,7 @@ calculateQuadPositions(int col, int row,
 }
 
 std::array<glm::vec3, 4>
-calculateBiomeColors(int col, int row,
+calculateBiomeColors(uint32_t col, uint32_t row,
                      const std::vector<std::vector<glm::vec3>>& biomes) {
   std::array<glm::vec3, 4> colors;
   colors[0] = biomes[row][col];         // top left
@@ -278,7 +280,7 @@ calculateBiomeColors(int col, int row,
 }
 
 std::array<glm::vec2, 4>
-calculateBiomeTextures(int col, int row,
+calculateBiomeTextures(uint32_t col, uint32_t row,
                        const std::vector<std::vector<glm::vec3>>& biomes) {
   std::array<glm::vec2, 4>
     textureCoordinates; // TODO Do i need to multiply by blocksize?
@@ -292,8 +294,8 @@ calculateBiomeTextures(int col, int row,
 }
 
 void addQuad(std::vector<engine::TerrainVertex>& vertices,
-             std::vector<uint32_t>& indices, int col, int row, int chunkSize,
-             int blockSize, bool duplicateVertices,
+             std::vector<uint32_t>& indices, uint32_t col, uint32_t row,
+             uint32_t chunkSize, uint32_t blockSize, bool duplicateVertices,
              engine::CTexture::DrawMode drawMode,
              const std::vector<std::vector<float>>& heights,
              const std::optional<
@@ -331,14 +333,14 @@ void addQuad(std::vector<engine::TerrainVertex>& vertices,
 }
 
 engine::CMesh
-generateQuadMesh(int chunkSize, int blockSize, bool duplicateVertices,
+generateQuadMesh(uint32_t chunkSize, uint32_t blockSize, bool duplicateVertices,
                  engine::CTexture::DrawMode drawMode,
                  const std::vector<std::vector<float>>& heights,
                  const std::optional<
                    std::reference_wrapper<std::vector<std::vector<glm::vec3>>>>
                    biomes = std::nullopt) {
   engine::CMesh mesh;
-  int totalVertices =
+  uint32_t totalVertices =
     chunkSize * chunkSize * 4; // 4 vertices per quad, triangles share vertices
   if (duplicateVertices) {
     totalVertices =
@@ -354,8 +356,8 @@ generateQuadMesh(int chunkSize, int blockSize, bool duplicateVertices,
 
   // c++ is row major order (x, y, z) -> (width, height, depth) -> (col, height,
   // row)
-  for (int row = 0; row < chunkSize; ++row) {
-    for (int col = 0; col < chunkSize; ++col) {
+  for (uint32_t row = 0; row < chunkSize; ++row) {
+    for (uint32_t col = 0; col < chunkSize; ++col) {
       if (biomes.has_value()) {
         addQuad(vertices, indices, col, row, chunkSize, blockSize,
                 duplicateVertices, drawMode, heights, biomes);
@@ -375,7 +377,7 @@ generateQuadMesh(int chunkSize, int blockSize, bool duplicateVertices,
 engine::CMesh
 generateTerrain(engine::CChunkManager::MeshType meshType,
                 engine::CChunkManager::MeshAlgorithm meshAlgorithm,
-                int chunkSize, int blockSize,
+                uint32_t chunkSize, uint32_t blockSize,
                 engine::CTexture::DrawMode drawMode,
                 const std::vector<std::vector<float>>& heights,
                 const std::optional<
@@ -443,6 +445,8 @@ void TerrainSystem::init(entt::registry& registry) {
 
       // Create chunks around 0 0 0
       // TODO y axis should infinite, maybe rename z to depth
+      // TODO fix this, it's not working heights is always the same maybe is
+      // something with int and uint32_t?
       std::vector<std::vector<float>> heights;
       std::vector<std::vector<glm::vec3>> biomes;
       engine::CChunk chunk;

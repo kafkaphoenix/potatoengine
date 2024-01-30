@@ -20,11 +20,11 @@ class Shader : public Asset {
     operator GLuint() const noexcept { return m_id; }
 
   private:
-    std::string m_filepath{};
+    std::string m_filepath;
     uint32_t m_id{};
     GLenum m_type{};
 
-    std::map<std::string, std::string, NumericComparator> m_info{};
+    std::map<std::string, std::string, NumericComparator> m_info;
 };
 
 }

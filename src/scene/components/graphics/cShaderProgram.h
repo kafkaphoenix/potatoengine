@@ -7,7 +7,7 @@
 namespace potatoengine {
 
 struct CShaderProgram {
-    std::string name{};
+    std::string name;
     bool isVisible{true};
 
     CShaderProgram() = default;

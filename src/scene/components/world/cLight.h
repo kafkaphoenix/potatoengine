@@ -19,7 +19,7 @@ struct CLight {
       Area,
     };
 
-    std::string _type{};
+    std::string _type;
     Type type;
     glm::vec3 color{glm::vec3(1.f)};
     float intensity{};

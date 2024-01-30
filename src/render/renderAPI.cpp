@@ -1,4 +1,4 @@
-#include "renderer/rendererAPI.h"
+#include "render/renderAPI.h"
 
 #include <glad/glad.h>
 
@@ -54,7 +54,7 @@ void APIENTRY message_callback(GLenum source, GLenum type, uint32_t id,
   }
 }
 
-void RendererAPI::Init() {
+void RenderAPI::Init() {
   glEnable(GL_DEBUG_OUTPUT);
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
   glDebugMessageCallback(message_callback, nullptr);
@@ -71,51 +71,51 @@ void RendererAPI::Init() {
   glEnable(GL_DEPTH_TEST);
 }
 
-void RendererAPI::ToggleCulling(bool enabled) {
+void RenderAPI::ToggleCulling(bool enabled) {
   enabled ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 }
 
-void RendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+void RenderAPI::SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
   glViewport(x, y, w, h);
 }
 
-void RendererAPI::SetClearColor(const std::array<float, 4>& color) {
+void RenderAPI::SetClearColor(const std::array<float, 4>& color) {
   glClearColor(color[0], color[1], color[2], color[3]);
 }
 
-void RendererAPI::SetClearDepth(const float depth) { glClearDepth(depth); }
+void RenderAPI::SetClearDepth(const float depth) { glClearDepth(depth); }
 
-void RendererAPI::ToggleWireframe(bool enabled) {
+void RenderAPI::ToggleWireframe(bool enabled) {
   enabled ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
           : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void RendererAPI::ToggleBlend(bool enabled) {
+void RenderAPI::ToggleBlend(bool enabled) {
   enabled ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
 }
 
-void RendererAPI::ToggleDepthTest(bool enabled) {
+void RenderAPI::ToggleDepthTest(bool enabled) {
   enabled ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 }
 
-void RendererAPI::SetDepthLEqual() {
+void RenderAPI::SetDepthLEqual() {
   glDepthFunc(GL_LEQUAL); // depth test passes when values are equal to depth
                           // buffer content [for cubemaps]
 }
 
-void RendererAPI::SetDepthLess() {
+void RenderAPI::SetDepthLess() {
   glDepthFunc(GL_LESS); // default
 }
 
-void RendererAPI::Clear() {
+void RenderAPI::Clear() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void RendererAPI::ClearColor() { glClear(GL_COLOR_BUFFER_BIT); }
+void RenderAPI::ClearColor() { glClear(GL_COLOR_BUFFER_BIT); }
 
-void RendererAPI::ClearDepth() { glClear(GL_DEPTH_BUFFER_BIT); }
+void RenderAPI::ClearDepth() { glClear(GL_DEPTH_BUFFER_BIT); }
 
-void RendererAPI::DrawIndexed(const std::shared_ptr<VAO>& vao) {
+void RenderAPI::DrawIndexed(const std::shared_ptr<VAO>& vao) {
   vao->bind();
   glDrawElements(GL_TRIANGLES, vao->getEBO()->getCount(), GL_UNSIGNED_INT,
                  nullptr);

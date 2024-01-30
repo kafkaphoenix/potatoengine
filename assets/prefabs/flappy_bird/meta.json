@@ -3,6 +3,8 @@
         "ctags": ["activeCamera", "time"],
         "components": {
             "camera": {
+                "type": "perspective",
+                "aspectRatio": "16:9",
                 "mode": "2D"
             },
             "transform": {

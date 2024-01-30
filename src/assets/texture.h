@@ -47,9 +47,9 @@ class Texture : public Asset {
                                            std::optional<bool> wrap);
 
   private:
-    std::vector<std::string> m_filepaths{};
-    std::string m_directory{};
-    std::string m_type{};
+    std::vector<std::string> m_filepaths;
+    std::string m_directory;
+    std::string m_type;
     uint32_t m_width{}, m_height{};
     uint32_t m_id{};
     GLenum m_glFormat{}, m_format{};
@@ -59,7 +59,7 @@ class Texture : public Asset {
     uint32_t m_mipmapLevel{};
     bool m_gammaCorrection{};
 
-    std::map<std::string, std::string, NumericComparator> m_info{};
+    std::map<std::string, std::string, NumericComparator> m_info;
 
     void loadTexture();
 };

@@ -88,12 +88,12 @@ entt::entity SceneFactory::cloneEntity(const entt::entity& e, uint32_t uuid,
 void SceneFactory::createScene(
   std::string scene_id, std::string scene_path,
   const std::unique_ptr<assets::AssetsManager>& assets_manager,
-  const std::unique_ptr<Renderer>& renderer, entt::registry& registry) {
+  const std::unique_ptr<RenderManager>& render_manager, entt::registry& registry) {
   Timer timer;
   ENGINE_INFO("Creating scene...");
 
   assets::Scene scene = assets::Scene(scene_path);
-  createShaderPrograms(scene, assets_manager, renderer);
+  createShaderPrograms(scene, assets_manager, render_manager);
   ENGINE_INFO("Shader programs creation TIME: {:.6f}s", timer.getSeconds());
   timer.reset();
   createTextures(scene, assets_manager);
@@ -102,7 +102,7 @@ void SceneFactory::createScene(
   createModels(scene, assets_manager);
   ENGINE_INFO("Models creation TIME: {:.6f}s", timer.getSeconds());
   timer.reset();
-  createEntitiesFromPrefabs(scene, assets_manager, renderer, registry);
+  createEntitiesFromPrefabs(scene, assets_manager, render_manager, registry);
   ENGINE_INFO("Entities creation TIME: {:.6f}s", timer.getSeconds());
   timer.reset();
   createChildrenScenes(scene, assets_manager);
@@ -118,7 +118,7 @@ void SceneFactory::createScene(
 
 void SceneFactory::reloadScene(
   const std::unique_ptr<assets::AssetsManager>& assets_manager,
-  const std::unique_ptr<Renderer>& renderer, entt::registry& registry,
+  const std::unique_ptr<RenderManager>& render_manager, entt::registry& registry,
   bool reload_prototypes) {
   Timer timer;
   ENGINE_ASSERT(not m_active_scene.empty(), "No scene is active!");
@@ -140,7 +140,7 @@ void SceneFactory::reloadScene(
     registry.destroy(to_destroy.begin(), to_destroy.end());
   }
   ENGINE_TRACE("Reloading scene entities...");
-  createSceneEntities(*scene, assets_manager, renderer, registry);
+  createSceneEntities(*scene, assets_manager, render_manager, registry);
 
   ENGINE_INFO("Scene {} reloading TIME: {:.6f}s", m_active_scene,
               timer.getSeconds());
@@ -149,7 +149,7 @@ void SceneFactory::reloadScene(
   m_dirtyNamedEntities = true;
 }
 
-void SceneFactory::clearScene(const std::unique_ptr<Renderer>& renderer,
+void SceneFactory::clearScene(const std::unique_ptr<RenderManager>& render_manager,
                               entt::registry& registry) {
   ENGINE_ASSERT(not m_active_scene.empty(), "No scene is active!");
   ENGINE_WARN("Clearing scene {}", m_active_scene);
@@ -157,7 +157,7 @@ void SceneFactory::clearScene(const std::unique_ptr<Renderer>& renderer,
   registry.clear(); // soft delete / = {};  would delete them completely but
                     // does not invoke signals/mixin methods
   m_entityFactory.clearPrototypes();
-  renderer->clear();
+  render_manager->clear();
   m_active_scene.clear();
   m_metrics.clear();
   m_namedEntities.clear();
@@ -168,12 +168,12 @@ void SceneFactory::clearScene(const std::unique_ptr<Renderer>& renderer,
 void SceneFactory::createShaderPrograms(
   const assets::Scene& scene,
   const std::unique_ptr<assets::AssetsManager>& assets_manager,
-  const std::unique_ptr<Renderer>& renderer) {
+  const std::unique_ptr<RenderManager>& render_manager) {
   for (const auto& [shader_program, shader_program_data] : scene.getShaders()) {
     for (const auto& [shader_type, filepath] : shader_program_data.items()) {
       assets_manager->load<assets::Shader>(shader_type, filepath);
     } // TODO maybe remove shader as asset?
-    renderer->addShaderProgram(std::string(shader_program), assets_manager);
+    render_manager->addShaderProgram(std::string(shader_program), assets_manager);
   }
 }
 
@@ -203,13 +203,13 @@ void SceneFactory::createModels(
 void SceneFactory::createSceneEntities(
   const assets::Scene& scene,
   const std::unique_ptr<assets::AssetsManager>& assets_manager,
-  const std::unique_ptr<Renderer>& renderer, entt::registry& registry) {
+  const std::unique_ptr<RenderManager>& render_manager, entt::registry& registry) {
 
   createNormalEntities(scene, assets_manager, registry);
   createLightEntities(scene, assets_manager, registry);
   createCameraEntities(scene, assets_manager, registry);
   createSystemEntities(scene, registry);
-  createFBOEntities(scene, registry, renderer);
+  createFBOEntities(scene, registry, render_manager);
 
   registry.sort<CDistanceFromCamera>(
     [](const CDistanceFromCamera& lhs, const CDistanceFromCamera& rhs) {
@@ -222,7 +222,7 @@ void SceneFactory::createSceneEntities(
 void SceneFactory::createEntitiesFromPrefabs(
   const assets::Scene& scene,
   const std::unique_ptr<assets::AssetsManager>& assets_manager,
-  const std::unique_ptr<Renderer>& renderer, entt::registry& registry) {
+  const std::unique_ptr<RenderManager>& render_manager, entt::registry& registry) {
   for (const auto& [prefab_name, options] : scene.getPrefabs()) {
     auto prefab = assets::Prefab(
       options.at("filepath").get<std::string>(),
@@ -235,7 +235,7 @@ void SceneFactory::createEntitiesFromPrefabs(
                                      assets_manager);
   }
   ENGINE_TRACE("Creating scene entities...");
-  createSceneEntities(scene, assets_manager, renderer, registry);
+  createSceneEntities(scene, assets_manager, render_manager, registry);
 }
 
 void SceneFactory::createChildrenScenes(
@@ -656,7 +656,7 @@ void SceneFactory::createSystemEntities(const assets::Scene& scene,
 
 void SceneFactory::createFBOEntities(
   const assets::Scene& scene, entt::registry& registry,
-  const std::unique_ptr<Renderer>& renderer) {
+  const std::unique_ptr<RenderManager>& render_manager) {
   ENGINE_TRACE("Creating scene FBO entities...");
   for (const auto& [name, data] : scene.getFBOEntities()) {
     entt::entity e = createEntity(data.at("prefab").get<std::string>(),
@@ -681,7 +681,7 @@ void SceneFactory::createFBOEntities(
         fbo.setMode();
       }
     }
-    renderer->addFramebuffer(std::string(fbo.fbo), fbo.width, fbo.height,
+    render_manager->addFramebuffer(std::string(fbo.fbo), fbo.width, fbo.height,
                              fbo.attachment);
   }
 }

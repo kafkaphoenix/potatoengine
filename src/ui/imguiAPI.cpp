@@ -1,8 +1,8 @@
 #include "ui/imguiAPI.h"
 
 namespace potatoengine::ui {
-void ImGuiAPI::Init(GLFWwindow* window, int openglMajorVersion,
-                    int openglMinorVersion) {
+void ImGuiAPI::Init(GLFWwindow* window, uint32_t openglMajorVersion,
+                    uint32_t openglMinorVersion) {
   ENGINE_TRACE("Initializing ImGuiAPI");
   std::string glsl_version =
     std::format("#version {}{}0", openglMajorVersion, openglMinorVersion);
@@ -36,7 +36,7 @@ void ImGuiAPI::Render() {
 }
 
 void ImGuiAPI::Shutdown() {
-  ENGINE_WARN("Shutting down ImGuiAPI");
+  ENGINE_WARN("Shutting down imgui api");
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();

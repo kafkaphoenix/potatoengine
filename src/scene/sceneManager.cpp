@@ -125,18 +125,18 @@ void SceneManager::removeEntity(entt::entity& e) {
 void SceneManager::createScene(std::string scene_name, std::string scene_path) {
   auto& app = Application::Get();
   m_sceneFactory.createScene(scene_name, scene_path, app.getAssetsManager(),
-                             app.getRenderer(), m_registry);
+                             app.getRenderManager(), m_registry);
   PrintScene(m_registry);
 }
 
 void SceneManager::reloadScene(bool reload_prototypes) {
   auto& app = Application::Get();
-  m_sceneFactory.reloadScene(app.getAssetsManager(), app.getRenderer(),
+  m_sceneFactory.reloadScene(app.getAssetsManager(), app.getRenderManager(),
                              m_registry, reload_prototypes);
 }
 
 void SceneManager::clearScene() {
-  m_sceneFactory.clearScene(Application::Get().getRenderer(), m_registry);
+  m_sceneFactory.clearScene(Application::Get().getRenderManager(), m_registry);
   m_systems.clear();
   m_namedSystems.clear();
   dirtySystems = false;

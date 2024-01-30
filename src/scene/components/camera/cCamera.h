@@ -19,9 +19,9 @@ struct CCamera {
     enum class Mode { _None, _3D, _2D };
 
     std::string _type = "perspective";
-    CameraType type = CameraType::Perspective;
+    CameraType type;
     std::string _aspectRatio = "16:9";
-    AspectRatio aspectRatio = AspectRatio::_16_9;
+    AspectRatio aspectRatio;
     std::string _mode;
     Mode mode;
     float aspectRatioValue = 16.f / 9.f;
@@ -73,6 +73,8 @@ struct CCamera {
         type = CameraType::Perspective;
       } else if (_type == "orthographic") {
         type = CameraType::Orthographic;
+      } else {
+        ENGINE_ASSERT(false, "Invalid camera type!");
       }
     }
 
@@ -83,6 +85,8 @@ struct CCamera {
       } else if (_aspectRatio == "4:3") {
         aspectRatio = AspectRatio::_4_3;
         aspectRatioValue = 4.f / 3.f;
+      } else {
+        ENGINE_ASSERT(false, "Invalid camera aspect ratio!");
       }
     }
 

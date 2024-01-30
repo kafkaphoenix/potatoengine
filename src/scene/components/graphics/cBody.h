@@ -13,9 +13,9 @@
 namespace potatoengine {
 
 struct CBody {
-    std::string filepath{};
-    std::vector<CMesh> meshes{};
-    std::vector<CMaterial> materials{};
+    std::string filepath;
+    std::vector<CMesh> meshes;
+    std::vector<CMaterial> materials;
 
     CBody() = default;
     explicit CBody(std::string&& fp) : filepath(std::move(fp)) {}
@@ -33,21 +33,21 @@ struct CBody {
     std::map<std::string, std::string, NumericComparator> getInfo() const {
       std::map<std::string, std::string, NumericComparator> info;
       info["filepath"] = filepath;
-      for (int i = 0; i < meshes.size(); ++i) {
+      for (uint32_t i = 0; i < meshes.size(); ++i) {
         info["mesh " + std::to_string(i)] = getMeshInfo(i);
       }
-      for (int i = 0; i < materials.size(); ++i) {
+      for (uint32_t i = 0; i < materials.size(); ++i) {
         info["material " + std::to_string(i)] = getMaterialInfo(i);
       }
 
       return info;
     }
 
-    std::string getMeshInfo(int index) const {
+    std::string getMeshInfo(uint32_t index) const {
       return MapToJson(meshes.at(index).getInfo());
     }
 
-    std::string getMaterialInfo(int index) const {
+    std::string getMaterialInfo(uint32_t index) const {
       return MapToJson(materials.at(index).getInfo());
     }
 

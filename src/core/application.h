@@ -1,28 +1,28 @@
 #pragma once
 
 #include "assets/assetsManager.h"
+#include "core/WindowsManager.h"
 #include "core/state.h"
-#include "core/stateMachine.h"
-#include "core/window.h"
+#include "core/statesManager.h"
 #include "events/event.h"
 #include "pch.h"
-#include "renderer/renderer.h"
+#include "render/renderManager.h"
 #include "scene/sceneManager.h"
-#include "settings.h"
+#include "core/settingsManager.h"
 
 int main(int argc, char** argv);
 
 namespace potatoengine {
 
 struct CLArgs {
-    std::span<const char*> args{};
+    std::span<const char*> args;
 
     const char* operator[](int idx) const { return args[idx]; }
 };
 
 class Application {
   public:
-    Application(std::unique_ptr<Settings>&& settings, CLArgs&& args);
+    Application(std::unique_ptr<SettingsManager>&& settings_manager, CLArgs&& args);
     virtual ~Application();
 
     void onEvent(events::Event& e);
@@ -31,20 +31,26 @@ class Application {
     void popState(std::string_view name);
     void popOverlay(std::string_view name);
 
-    // TODO rename to getActiveWindow when multi-window support is added and i
+    // TODO add getActiveWindow when multi-window support is added and i
     // have a window manager
-    const std::unique_ptr<Window>& getWindow() const { return m_window; }
+    const std::unique_ptr<WindowsManager>& getWindowsManager() const {
+      return m_windows_manager;
+    }
     const std::unique_ptr<SceneManager>& getSceneManager() const {
-      return m_sceneManager;
+      return m_scene_manager;
     }
     const std::unique_ptr<assets::AssetsManager>& getAssetsManager() const {
-      return m_assetsManager;
+      return m_assets_manager;
     }
     // TODO rename both classes and methods to managers
-    const std::unique_ptr<Renderer>& getRenderer() const { return m_renderer; }
-    const std::unique_ptr<Settings>& getSettings() const { return m_settings; }
-    const std::unique_ptr<StateMachine>& getStateMachine() const {
-      return m_states;
+    const std::unique_ptr<RenderManager>& getRenderManager() const {
+      return m_render_manager;
+    }
+    const std::unique_ptr<SettingsManager>& getSettingsManager() const {
+      return m_settings_manager;
+    }
+    const std::unique_ptr<StatesManager>& getStatesManager() const {
+      return m_states_manager;
     }
 
     void close() noexcept { m_running = false; }
@@ -63,18 +69,18 @@ class Application {
     static Application& Get() { return *s_instance; }
 
   protected:
-    std::unique_ptr<SceneManager> m_sceneManager;
-    std::unique_ptr<assets::AssetsManager> m_assetsManager;
-    std::unique_ptr<Renderer> m_renderer;
-    std::unique_ptr<Settings> m_settings;
+    std::unique_ptr<SceneManager> m_scene_manager;
+    std::unique_ptr<assets::AssetsManager> m_assets_manager;
+    std::unique_ptr<RenderManager> m_render_manager;
+    std::unique_ptr<SettingsManager> m_settings_manager;
 
   private:
     void run();
 
-    std::unique_ptr<Window> m_window;
-    std::unique_ptr<StateMachine> m_states;
+    std::unique_ptr<WindowsManager> m_windows_manager;
+    std::unique_ptr<StatesManager> m_states_manager;
 
-    std::string m_name{};
+    std::string m_name;
     bool m_running{true};
     bool m_paused{};
     bool m_gamePaused{};
@@ -83,7 +89,7 @@ class Application {
     float m_lastFrame{};
     float m_accumulator{};
 
-    CLArgs m_clargs{};
+    CLArgs m_clargs;
 
     inline static Application* s_instance;
     friend int ::main(int argc, char** argv);

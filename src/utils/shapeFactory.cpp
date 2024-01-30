@@ -96,7 +96,7 @@ std::shared_ptr<VAO> ShapeFactory::CreateCircle(float radius, uint32_t segments)
 
   // Vertices around the circle
   indices.reserve(segments * 3);
-  for (int i = 0; i < segments; ++i) {
+  for (uint32_t i = 0; i < segments; ++i) {
     float x = radius * cos(i * angleIncrement);
     float y = radius * sin(i * angleIncrement);
     float u = 0.5f * (1.f + cos(i * angleIncrement));

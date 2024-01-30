@@ -15,10 +15,10 @@ namespace potatoengine {
 struct CShape {
     enum class Type { Triangle, Rectangle, Cube, Circle };
 
-    std::string _type{};
+    std::string _type;
     Type type;
     glm::vec3 size{glm::vec3(1.f)};
-    std::vector<CMesh> meshes{};
+    std::vector<CMesh> meshes;
     bool repeatTexture{};
 
     CShape() = default;
@@ -37,7 +37,7 @@ struct CShape {
       std::map<std::string, std::string, NumericComparator> info;
       info["type"] = _type;
       info["size"] = glm::to_string(size);
-      for (int i = 0; i < meshes.size(); ++i) {
+      for (uint32_t i = 0; i < meshes.size(); ++i) {
         info["mesh " + std::to_string(i)] = getMeshInfo(i);
       }
       info["repeatTexture"] = repeatTexture ? "true" : "false";
@@ -45,7 +45,7 @@ struct CShape {
       return info;
     }
 
-    std::string getMeshInfo(int index) const {
+    std::string getMeshInfo(uint32_t index) const {
       return MapToJson(meshes.at(index).getInfo());
     }
 

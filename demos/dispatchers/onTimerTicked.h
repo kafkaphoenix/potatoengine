@@ -12,7 +12,10 @@ inline bool onTimerTicked(entt::registry& registry) {
   entt::entity gamestate = registry.view<CTimer, engine::CUUID>().front();
   CTimer& timer = registry.get<CTimer>(gamestate);
   CState& state = registry.get<CState>(gamestate);
-  int left = --timer.left;
+  if (state.state == CState::State::STOPPED) {
+    return true;
+  }
+  uint32_t left = --timer.left;
   if (timer.maxTime - left == 5) {
     state.state = CState::State::READY;
   } else if (left == 0) {

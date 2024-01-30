@@ -3,26 +3,26 @@
 #include <imgui.h>
 
 #include "assets/assetsManager.h"
+#include "core/settingsManager.h"
 #include "pch.h"
-#include "renderer/renderer.h"
+#include "render/renderManager.h"
 #include "scene/sceneManager.h"
-#include "settings.h"
 #include "ui/im_assets_manager.h"
 #include "ui/im_render_manager.h"
 #include "ui/im_scene_manager.h"
 #include "ui/im_settings_manager.h"
-#include "ui/im_state_machine_manager.h"
+#include "ui/im_states_manager.h"
 
 namespace potatoengine::ui {
 
-inline void drawManagersBar(
-  const std::unique_ptr<assets::AssetsManager>& assets_manager,
-  const std::unique_ptr<Renderer>& renderer,
-  const std::unique_ptr<SceneManager>& scene_manager,
-  const std::unique_ptr<Settings>& settings) {
+inline void
+drawManagersBar(const std::unique_ptr<assets::AssetsManager>& assets_manager,
+                const std::unique_ptr<RenderManager>& render_manager,
+                const std::unique_ptr<SceneManager>& scene_manager,
+                const std::unique_ptr<SettingsManager>& settings_manager) {
   if (ImGui::BeginTabBar("RootTabBar", ImGuiTabBarFlags_Reorderable)) {
     if (ImGui::BeginTabItem("Assets Manager")) {
-      drawAssetsManager(assets_manager, settings);
+      drawAssetsManager(assets_manager, settings_manager);
       ImGui::EndTabItem();
     } else {
       selectedAssetManagerTabKey.clear();
@@ -31,7 +31,7 @@ inline void drawManagersBar(
       assets_text_filter[0] = '\0';
     }
     if (ImGui::BeginTabItem("Scene Manager")) {
-      drawSceneManager(scene_manager, settings);
+      drawSceneManager(scene_manager, settings_manager);
       ImGui::EndTabItem();
     } else {
       selectedSceneManagerTabKey.clear();
@@ -43,7 +43,7 @@ inline void drawManagersBar(
       filterSystems = false;
     }
     if (ImGui::BeginTabItem("Render Manager")) {
-      drawRenderManager(renderer, settings);
+      drawRenderManager(render_manager, settings_manager);
       ImGui::EndTabItem();
     } else {
       selectedRenderManagerTabKey.clear();
@@ -53,15 +53,15 @@ inline void drawManagersBar(
       filterShaderPrograms = false;
       filterShaderInfo = false;
     }
-    if (ImGui::BeginTabItem("State Machine Manager")) {
-      drawStateMachineManager();
+    if (ImGui::BeginTabItem("States Manager")) {
+      drawStatesManager();
       ImGui::EndTabItem();
     } else {
-      state_machine_states_text_filter[0] = '\0';
+      states_text_filter[0] = '\0';
       filterStates = false;
     }
     if (ImGui::BeginTabItem("Settings Manager")) {
-      drawSettingsManager(settings, renderer);
+      drawSettingsManager(settings_manager, render_manager);
       ImGui::EndTabItem();
     } else {
       selectedSettingsManagerTabKey.clear();

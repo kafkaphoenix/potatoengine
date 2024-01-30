@@ -6,8 +6,8 @@
 #include "assets/model.h"
 #include "assets/prefab.h"
 #include "assets/texture.h"
+#include "core/settingsManager.h"
 #include "pch.h"
-#include "settings.h"
 #include "ui/imutils.h"
 
 namespace potatoengine::ui {
@@ -19,7 +19,7 @@ char assets_text_filter[128]{}; // TODO: move to class
 
 inline void
 drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_manager,
-                  const std::unique_ptr<Settings>& settings) {
+                  const std::unique_ptr<SettingsManager>& settings_manager) {
   const auto& assets = assets_manager->getAssets();
 
   if (assets.empty()) {
@@ -61,7 +61,7 @@ drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_manager,
     }
   }
 
-  if (collapsed == 0 or settings->reloadScene) {
+  if (collapsed == 0 or settings_manager->reloadScene) {
     selectedAssetManagerTabKey.clear();
     selectedAssetTabType.clear();
     selectedFilepath.clear();
@@ -79,7 +79,7 @@ drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_manager,
           assets_manager->get<assets::Prefab>(selectedAssetManagerTabKey);
         const auto& prototypeInfo = prefab->getTargetedPrototypeInfo(value);
         if (ImGui::TreeNode((selectedAssetTabType + selectedAssetManagerTabKey +
-                             key + settings->activeScene)
+                             key + settings_manager->activeScene)
                               .c_str(),
                             key.c_str())) {
           for (const auto& [key, value] : prototypeInfo) {
@@ -93,7 +93,7 @@ drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_manager,
           assets_manager->get<assets::Model>(selectedAssetManagerTabKey);
         const auto& textureInfo = model->getLoadedTextureInfo(value);
         if (ImGui::TreeNode((selectedAssetTabType + selectedAssetManagerTabKey +
-                             key + settings->activeScene)
+                             key + settings_manager->activeScene)
                               .c_str(),
                             key.c_str())) {
           for (const auto& [key, value] : textureInfo) {
@@ -124,8 +124,8 @@ drawAssetsManager(const std::unique_ptr<assets::AssetsManager>& assets_manager,
       const auto& texture =
         assets_manager->get<assets::Texture>(selectedAssetManagerTabKey);
       if (not texture->isCubemap()) {
-        int maxWidth = texture->getWidth();
-        int maxHeight = texture->getHeight();
+        uint32_t maxWidth = texture->getWidth();
+        uint32_t maxHeight = texture->getHeight();
         if (maxWidth <= 64 and maxHeight <= 64) {
           maxWidth *= 2;
           maxHeight *= 2;

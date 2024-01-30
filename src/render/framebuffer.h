@@ -45,12 +45,12 @@ class FBO {
     uint32_t m_width{};
     uint32_t m_height{};
     uint32_t m_depthBufferType{};
-    std::unique_ptr<assets::Texture> m_colorTexture{};
-    std::unique_ptr<assets::Texture> m_depthTexture{};
+    std::unique_ptr<assets::Texture> m_colorTexture;
+    std::unique_ptr<assets::Texture> m_depthTexture;
     uint32_t m_depthRenderBuffer{};
     uint32_t m_stencilRenderBuffer{};
     uint32_t m_depthStencilRenderBuffer{};
 
-    std::map<std::string, std::string, NumericComparator> m_info{};
+    std::map<std::string, std::string, NumericComparator> m_info;
 };
 }

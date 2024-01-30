@@ -7,7 +7,7 @@ void TimeSystem::update(entt::registry& registry, const engine::Time& ts) {
   if (app.isGamePaused()) {
     return;
   }
-  const auto& settings = app.getSettings(); // TODO remove this for demos
+  const auto& settings_manager = app.getSettingsManager(); // TODO remove this for demos
 
   registry.view<engine::CTime, engine::CUUID>().each([&](engine::CTime& cTime, const engine::CUUID& cUUID) {
     // We call it fps frames per second instead of 1 but the other functions
@@ -21,17 +21,17 @@ void TimeSystem::update(entt::registry& registry, const engine::Time& ts) {
     // instead of 1 but at the same time it helps us to see the time correctly
     // per frame so the logic works for 24 hours
     // TODO revisit probably will break with different fps
-    int lastSecond = cTime.currentSecond;
-    cTime.currentSecond = static_cast<int>(cTime.seconds) % cTime.fps;
+    uint32_t lastSecond = cTime.currentSecond;
+    cTime.currentSecond = static_cast<uint32_t>(cTime.seconds) % cTime.fps;
 
     // tick every real second
     if (lastSecond != cTime.currentSecond) {
       // then we update minutes and hours
       if (cTime.currentSecond == 0) {
         cTime.currentMinute++;
-        if (settings->activeScene == "Flappy Bird") {
+        if (settings_manager->activeScene == "Flappy Bird") {
           engine::events::AppTickEvent event;
-          app.getWindow()->triggerEvent(event);
+          app.getWindowsManager()->triggerEvent(event);
         }
         if (cTime.currentMinute == 60) {
           cTime.currentMinute = 0;

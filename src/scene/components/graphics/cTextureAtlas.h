@@ -5,11 +5,11 @@
 namespace potatoengine {
 
 struct CTextureAtlas {
-    int rows{};
-    int index{};
+    uint32_t rows{};
+    uint32_t index{};
 
     CTextureAtlas() = default;
-    explicit CTextureAtlas(int r, int i) : rows(r), index(i) {}
+    explicit CTextureAtlas(uint32_t r, uint32_t i) : rows(r), index(i) {}
 
     void print() const {
       ENGINE_BACKTRACE("\t\trows: {0}\n\t\t\t\t\t\tindex: {1}", rows, index);

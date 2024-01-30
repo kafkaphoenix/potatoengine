@@ -26,7 +26,7 @@ struct CBlock {
     };
 
     std::string _type{"air"};
-    Type type{Type::Air};
+    Type type{};
 
     CBlock() = default;
     explicit CBlock(std::string&& t) : _type(std::move(t)) {}

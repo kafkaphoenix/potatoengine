@@ -8,7 +8,7 @@ using json = nlohmann::json;
 
 namespace potatoengine {
 
-struct Settings {
+struct SettingsManager {
     std::string appName = "potatoengine";
     std::string root = "..";
     std::string logFilePath = "logs/potatoengine.log";
@@ -23,13 +23,13 @@ struct Settings {
     int primaryMonitor = 0;  // 0: primary, 1: secondary
     bool vSync = true;
     bool resizable = true;
-    int openglMajorVersion = 4; // only 4.5 is supported
-    int openglMinorVersion = 5;
+    uint32_t openglMajorVersion = 4; // only 4.5 is supported
+    uint32_t openglMinorVersion = 5;
     bool windowInsideImgui = true; // it needs an opengl fbo to work
     bool fitToWindow = true;
 
     std::string cursorIconPath = "assets/textures/cursor.png";
-    int cursorMode = 2; // 0: normal, 1: hidden, 2: disabled
+    uint32_t cursorMode = 2; // 0: normal, 1: hidden, 2: disabled
 
     bool debugEnabled = true; // TODO use for something
     bool displayFPS = false;  // TODO implement with debugEnabled maybe?
@@ -37,10 +37,10 @@ struct Settings {
     bool enableEngineLogger = true;
     bool enableAppLogger = true;
     // 0: trace, 1: debug, 2: info, 3: warning, 4: error, 5: critical
-    int engineLogLevel = 0;
-    int engineFlushLevel = 0;
-    int appLogLevel = 0;
-    int appFlushLevel = 0;
+    uint32_t engineLogLevel{};
+    uint32_t engineFlushLevel{};
+    uint32_t appLogLevel{};
+    uint32_t appFlushLevel{};
 #ifdef DEBUG
     bool enableEngineBacktraceLogger = true;
     bool enableAppBacktraceLogger = true;
@@ -76,7 +76,7 @@ struct Settings {
                                        "Warning", "Error", "Critical"};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
-  Settings, appName, root, logFilePath, backtraceLogFilePath, windowIconPath,
+  SettingsManager, appName, root, logFilePath, backtraceLogFilePath, windowIconPath,
   windowWidth, windowHeight, depthBits, refreshRate, fullscreen, primaryMonitor,
   vSync, resizable, windowInsideImgui, fitToWindow, cursorIconPath, cursorMode,
   debugEnabled, displayFPS, enableEngineLogger, enableAppLogger, engineLogLevel,

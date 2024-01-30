@@ -17,7 +17,7 @@ class Timer {
     float getMilliseconds() const { return getSeconds() * 1000.f; }
 
   private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> m_start{};
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
 };
 
 }

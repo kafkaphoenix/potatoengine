@@ -19,7 +19,7 @@ void CoinsSystem::init(entt::registry& registry) {
   entt::entity gamestate = registry.view<CCoins, engine::CUUID>().front();
   CCoins& coins_config = registry.get<CCoins>(gamestate);
 
-  for (int i = 0; i < coins_config.maxCoins; i++) {
+  for (uint32_t i = 0; i < coins_config.maxCoins; i++) {
     entt::entity coin_ =
       scene_manager->createEntity("scene", "coin", "coin_" + std::to_string(i));
     registry.get<engine::CShaderProgram>(coin_).isVisible = false;
