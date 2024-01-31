@@ -4,39 +4,20 @@
 
 #include "core/settingsManager.h"
 #include "pch.h"
+#include "utils/getDefaultRoamingPath.h"
 
 using json = nlohmann::json;
 
 namespace potatoengine::serializers {
 
-inline std::filesystem::path
-get_default_roaming_path(std::string_view projectName) {
-  auto path = std::filesystem::temp_directory_path()
-                .parent_path()
-                .parent_path()
-                .parent_path();
-
-  path /= "Roaming";
-
-  if (!std::filesystem::exists(path)) {
-    std::filesystem::create_directories(path);
-  }
-
-  path /= projectName.data();
-
-  if (!std::filesystem::exists(path)) {
-    std::filesystem::create_directories(path);
-  }
-
-  path /= "settings.json";
-
-  return path;
-}
-
 inline void
 save_settings(const std::unique_ptr<SettingsManager>& settings_manager,
               std::filesystem::path path) {
   json data = *settings_manager;
+
+  if (path.filename() not_eq "settings.json") {
+    path /= "settings.json";
+  }
 
   std::ofstream file(path);
   ENGINE_ASSERT(file.is_open(), "Failed to open settings file!");
@@ -49,7 +30,7 @@ inline std::unique_ptr<SettingsManager>
 load_settings(std::string_view projectName) {
   std::unique_ptr<SettingsManager> settings_manager =
     std::make_unique<SettingsManager>();
-  auto path = get_default_roaming_path(projectName);
+  auto path = get_default_roaming_path(projectName) / "settings.json";
 
   if (!std::filesystem::exists(path)) {
     settings_manager->appName = projectName.data();

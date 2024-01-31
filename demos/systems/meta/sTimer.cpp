@@ -14,7 +14,8 @@ TimerSystem::~TimerSystem() {
 }
 
 void TimerSystem::init(entt::registry& registry) {
-  const auto& scene_manager = engine::Application::Get().getSceneManager();
+  auto& app = engine::Application::Get();
+  const auto& scene_manager = app.getSceneManager();
 
   entt::entity unidades =
     scene_manager->createEntity("scene", "numbers", "timer_unidades", "timer");
@@ -37,6 +38,8 @@ void TimerSystem::init(entt::registry& registry) {
   registry.get<engine::CShaderProgram>(unidades).isVisible = true;
   registry.get<engine::CShaderProgram>(decenas).isVisible = true;
   registry.get<engine::CShaderProgram>(centenas).isVisible = true;
+
+  app.getRenderManager()->reorder();
 }
 
 }

@@ -29,7 +29,7 @@
             },
             "collider": {
                 "type": "rectangle",
-                "size": {"x": 0.1, "y": 0.1, "z": 0}
+                "size": {"x": 0.1, "y": 0.075, "z": 0}
             },
             "gravity": {
                 "acceleration": 0.65

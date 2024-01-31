@@ -211,12 +211,7 @@ void SceneFactory::createSceneEntities(
   createSystemEntities(scene, registry);
   createFBOEntities(scene, registry, render_manager);
 
-  registry.sort<CDistanceFromCamera>(
-    [](const CDistanceFromCamera& lhs, const CDistanceFromCamera& rhs) {
-      return lhs.distance < rhs.distance;
-    });
-
-  registry.sort<CUUID, CDistanceFromCamera>();
+  render_manager->reorder();
 }
 
 void SceneFactory::createEntitiesFromPrefabs(

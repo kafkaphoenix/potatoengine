@@ -8,17 +8,29 @@ uniform sampler2D textureDiffuse1;
 uniform float useTextureAtlas;
 uniform float numRows;
 uniform vec2 offset;
+uniform float useColor;
+uniform vec4 color;
 
-void main()
-{
-    vec2 offsetTexture = vTextureCoords;
-    if (int(useTextureAtlas) == 1) {
-        offsetTexture = vTextureCoords / numRows + offset;
+void loadTexture() {
+    if (int(useColor) == 0) {
+        vec2 offsetTexture = vTextureCoords;
+        if (int(useTextureAtlas) == 1) {
+            offsetTexture = vTextureCoords / numRows + offset;
+        }
+        fragColor = texture(textureDiffuse1, offsetTexture);
+    } else {
+        fragColor = color;
     }
-    vec4 texture = texture(textureDiffuse1, offsetTexture);
+}
 
-    fragColor = texture;
+void calculateTransparency() {
     if (fragColor.a < 0.1) {
         discard;
     }
+}
+
+void main()
+{
+    loadTexture();
+    calculateTransparency();
 }

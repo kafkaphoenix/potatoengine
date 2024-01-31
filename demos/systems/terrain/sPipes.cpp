@@ -2,6 +2,8 @@
 
 #include "components/config/cPipes.h"
 
+static float delay = 50;
+
 namespace demos::systems {
 
 PipesSystem::~PipesSystem() {
@@ -14,7 +16,9 @@ PipesSystem::~PipesSystem() {
 }
 
 void PipesSystem::init(entt::registry& registry) {
-  const auto& scene_manager = engine::Application::Get().getSceneManager();
+  auto& app = engine::Application::Get();
+  const auto& scene_manager = app.getSceneManager();
+  const auto& render_manager = app.getRenderManager();
 
   entt::entity gamestate = registry.view<CPipes, engine::CUUID>().front();
   CPipes& pipes_config = registry.get<CPipes>(gamestate);
@@ -26,6 +30,7 @@ void PipesSystem::init(entt::registry& registry) {
       "green_pipe_top",
     });
   registry.get<engine::CShaderProgram>(green_pipe_top).isVisible = false;
+  registry.get<engine::CTransform>(green_pipe_top).position.x = 2.f;
   entt::entity green_pipe_bottom =
     scene_manager->createEntity("scene", "pipe", "green_pipe_bottom");
   registry.get<engine::CTexture>(green_pipe_bottom)
@@ -33,6 +38,7 @@ void PipesSystem::init(entt::registry& registry) {
       "green_pipe_bottom",
     });
   registry.get<engine::CShaderProgram>(green_pipe_bottom).isVisible = false;
+  registry.get<engine::CTransform>(green_pipe_bottom).position.x = 2.f;
   entt::entity red_pipe_top =
     scene_manager->createEntity("scene", "pipe", "red_pipe_top");
   registry.get<engine::CTexture>(red_pipe_top)
@@ -40,6 +46,7 @@ void PipesSystem::init(entt::registry& registry) {
       "red_pipe_top",
     });
   registry.get<engine::CShaderProgram>(red_pipe_top).isVisible = false;
+  registry.get<engine::CTransform>(red_pipe_top).position.x = 2.f;
   entt::entity red_pipe_bottom =
     scene_manager->createEntity("scene", "pipe", "red_pipe_bottom");
   registry.get<engine::CTexture>(red_pipe_bottom)
@@ -47,8 +54,10 @@ void PipesSystem::init(entt::registry& registry) {
       "red_pipe_bottom",
     });
   registry.get<engine::CShaderProgram>(red_pipe_bottom).isVisible = false;
-
+  registry.get<engine::CTransform>(red_pipe_bottom).position.x = 2.f;
   pipes_config.pipes = pipes_config.maxPipes;
+
+  render_manager->reorder();
 }
 
 void PipesSystem::update(entt::registry& registry, const engine::Time& ts) {
@@ -81,7 +90,11 @@ void PipesSystem::update(entt::registry& registry, const engine::Time& ts) {
             cShaderProgram.isVisible = false;
           }
         } else {
-          if (pipes_config.pipes > 0) {
+          auto e = engine::Application::Get().getSceneManager()->getEntity(
+            "gamestate");
+          engine::CTime& cTime = registry.get<engine::CTime>(e);
+          if (pipes_config.pipes > 0 and cTime.currentSecond % 3 == 0 and
+              delay == 0) {
             // randomize y position
             if (cName.name.ends_with("top")) { //
               // -0.6 shortest -0.1 longest
@@ -97,6 +110,12 @@ void PipesSystem::update(entt::registry& registry, const engine::Time& ts) {
             cTransform.position.x = 2.f;
             cShaderProgram.isVisible = true;
             pipes_config.pipes--;
+            delay += 30;
+          } else {
+            delay -= 1;
+            if (delay < 0) {
+              delay = 50;
+            }
           }
         }
       }

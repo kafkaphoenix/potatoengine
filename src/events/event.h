@@ -50,7 +50,7 @@ enum EventCategory {
 class Event {
   public:
     virtual ~Event() = default;
-    bool m_handled{};
+    bool isHandled{}; // cannnot be returned by a method
 
     virtual EventType getEventType() const noexcept = 0;
     virtual const char* getName() const noexcept = 0;
@@ -67,7 +67,7 @@ class EventDispatcher {
 
     template <typename Type, typename Func> bool dispatch(const Func& func) {
       if (m_event.getEventType() == Type::GetStaticType()) {
-        m_event.m_handled |= func(static_cast<Type&>(m_event));
+        m_event.isHandled |= func(static_cast<Type&>(m_event));
         return true;
       }
       return false;

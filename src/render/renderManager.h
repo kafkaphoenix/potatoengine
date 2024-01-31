@@ -16,6 +16,8 @@ class RenderManager {
   public:
     void init() const;
     void shutdown();
+    void  reorder() { m_shouldReorder = true; }
+    bool shouldReorder() const { return m_shouldReorder; }
 
     void onWindowResize(uint32_t w, uint32_t h) const;
 
@@ -66,5 +68,6 @@ class RenderManager {
     uint32_t m_triangles{};
     uint32_t m_vertices{};
     uint32_t m_indices{};
+    bool m_shouldReorder{};
 };
 }

@@ -5,7 +5,9 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "pch.h"
+#include "scene/components/graphics/cMesh.h"
 #include "utils/numericComparator.h"
+#include "utils/shapeFactory.h"
 
 namespace potatoengine {
 
@@ -14,7 +16,9 @@ struct CCollider {
 
     std::string _type;
     Type type;
-    glm::vec3 size{glm::vec3(1.f)};
+    glm::vec3 size{};
+    CMesh mesh;
+    glm::vec4 color{1.0f, 0.0f, 0.0f, 1.f};
 
     CCollider() = default;
     explicit CCollider(Type t, glm::vec3&& s) : type(t), size(std::move(s)) {}
@@ -43,6 +47,7 @@ struct CCollider {
         type = Type::Sphere;
       } else if (_type == "rectangle") {
         type = Type::Rectangle;
+        mesh.vao = ShapeFactory::CreateRectangle(size.x, size.y, false);
       } else {
         ENGINE_ASSERT(false, "Unknown collider type {}", _type);
       }

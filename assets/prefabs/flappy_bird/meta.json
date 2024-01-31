@@ -1,6 +1,6 @@
 {
     "camera": {
-        "ctags": ["activeCamera", "time"],
+        "ctags": ["activeCamera"],
         "components": {
             "camera": {
                 "type": "perspective",
@@ -13,6 +13,6 @@
         }
     },
     "gamestate": {
-        "ctags": ["coins", "pipes", "score", "timer", "state"]
+        "ctags": ["coins", "pipes", "score", "timer", "time"]
     }
 }

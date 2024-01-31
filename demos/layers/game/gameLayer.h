@@ -2,18 +2,19 @@
 
 #include "engineAPI.h"
 
-namespace demos::states {
+namespace demos::layers {
 
-class PauseState : public engine::State {
+class GameLayer : public engine::Layer {
   public:
-    PauseState();
+    GameLayer();
 
-    virtual void onAttach() override final;
     virtual void onDetach() override final;
     virtual void onUpdate(const engine::Time& ts) override final;
-    virtual void onImguiUpdate() override final {}
     virtual void onEvent(engine::events::Event& e) override final;
 
-    static std::unique_ptr<State> Create();
+    static std::unique_ptr<engine::Layer> Create();
+
+  private:
+    bool onKeyPressed(engine::events::KeyPressedEvent& e);
 };
 }

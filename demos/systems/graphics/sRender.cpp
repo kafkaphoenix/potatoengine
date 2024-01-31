@@ -8,7 +8,7 @@ void render(engine::CTexture* cTexture, engine::CTextureAtlas* cTextureAtlas,
             const engine::CSkybox* cSkybox, engine::CMaterial* cMaterial,
             engine::CMesh* cMesh, const engine::CTransform& cTransform,
             const engine::CShaderProgram& cShaderProgram,
-            engine::CTexture* cSkyboxTexture,
+            engine::CTexture* cSkyboxTexture, engine::CCollider* cCollider,
             const std::unique_ptr<engine::RenderManager>& render_manager) {
   if (cTexture and cTexture->hasTransparency) {
     engine::RenderAPI::ToggleCulling(false);
@@ -16,16 +16,29 @@ void render(engine::CTexture* cTexture, engine::CTextureAtlas* cTextureAtlas,
   if (cSkybox) {
     engine::RenderAPI::SetDepthLEqual();
   }
-  cMesh->bindTextures(render_manager->getShaderProgram(cShaderProgram.name), cTexture,
-                      cTextureAtlas, cSkyboxTexture, cMaterial);
+  cMesh->bindTextures(render_manager->getShaderProgram(cShaderProgram.name),
+                      cTexture, cTextureAtlas, cSkyboxTexture, cMaterial);
   render_manager->render(cMesh->getVAO(), cTransform.calculate(),
-                   cShaderProgram.name);
+                         cShaderProgram.name);
   cMesh->unbindTextures(cTexture);
   if (cTexture and cTexture->hasTransparency) {
     engine::RenderAPI::ToggleCulling(true);
   }
   if (cSkybox) {
     engine::RenderAPI::SetDepthLess();
+  }
+  if (cCollider and
+      engine::Application::Get().getSettingsManager()->displayCollisionBoxes) {
+    // TODO fix transparency so I can render this first
+    // disabling culling is not working
+    const auto& sp = render_manager->getShaderProgram("shape");
+    sp->resetActiveUniforms();
+    sp->use();
+    sp->setFloat("useColor", 1.f);
+    sp->setVec4("color", cCollider->color);
+    sp->unuse();
+    render_manager->render(cCollider->mesh.getVAO(), cTransform.calculate(),
+                           "shape");
   }
 }
 
@@ -56,13 +69,22 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
     registry.get<engine::CTransform>(camera);
   cCamera.calculateView(cCameraTransform.position, cCameraTransform.rotation);
   render_manager->beginScene(cCamera.view, cCamera.projection,
-                       cCameraTransform.position);
+                             cCameraTransform.position);
 
   entt::entity sky = registry.view<engine::CSkybox, engine::CUUID>()
                        .front(); // TODO: support more than one?
   engine::CTexture* cSkyboxTexture;
   if (sky not_eq entt::null) {
     cSkyboxTexture = registry.try_get<engine::CTexture>(sky);
+  }
+
+  if (render_manager->shouldReorder()) {
+    registry.sort<engine::CDistanceFromCamera>(
+      [](const engine::CDistanceFromCamera& lhs,
+         const engine::CDistanceFromCamera& rhs) {
+        return lhs.distance < rhs.distance;
+      });
+    registry.sort<engine::CUUID, engine::CDistanceFromCamera>();
   }
 
   registry.view<engine::CTransform, engine::CShaderProgram, engine::CUUID>()
@@ -79,6 +101,7 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
       engine::CShape* cShape = registry.try_get<engine::CShape>(e);
       engine::CChunkManager* cChunkManager =
         registry.try_get<engine::CChunkManager>(e);
+      engine::CCollider* cCollider = registry.try_get<engine::CCollider>(e);
 
       if (cShaderProgram.isVisible) {
         if (cMesh) { // TODO objects with one mesh unused
@@ -94,13 +117,14 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
           }
 
           render(cTexture, cTextureAtlas, cSkybox, cMaterial, cMesh, cTransform,
-                 cShaderProgram, cSkyboxTexture, render_manager);
+                 cShaderProgram, cSkyboxTexture, cCollider, render_manager);
         } else if (cBody) { // models
           for (size_t i = 0; i < cBody->meshes.size(); ++i) {
             engine::CMesh& mesh = cBody->meshes.at(i);
             engine::CMaterial& material = cBody->materials.at(i);
             render(cTexture, cTextureAtlas, cSkybox, &material, &mesh,
-                   cTransform, cShaderProgram, cSkyboxTexture, render_manager);
+                   cTransform, cShaderProgram, cSkyboxTexture, cCollider,
+                   render_manager);
           }
         } else if (cShape) { // primitives
           if (not cTexture) {
@@ -116,7 +140,8 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
 
           for (auto& mesh : cShape->meshes) {
             render(cTexture, cTextureAtlas, cSkybox, cMaterial, &mesh,
-                   cTransform, cShaderProgram, cSkyboxTexture, render_manager);
+                   cTransform, cShaderProgram, cSkyboxTexture, cCollider,
+                   render_manager);
           }
         } else if (cChunkManager) { // terrain
           if (not cTexture) {
@@ -133,7 +158,7 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
           for (auto& [position, chunk] : cChunkManager->chunks) {
             render(cTexture, cTextureAtlas, cSkybox, cMaterial,
                    &chunk.terrainMesh, chunk.transform, cShaderProgram,
-                   cSkyboxTexture, render_manager);
+                   cSkyboxTexture, cCollider, render_manager);
           }
         } else {
           engine::CName* cName = registry.try_get<engine::CName>(e);
@@ -160,8 +185,8 @@ void RenderSystem::update(entt::registry& registry, const engine::Time& ts) {
     const auto& settings_manager = app.getSettingsManager();
     if (settings_manager->windowInsideImgui) {
       render_manager->renderInsideImGui(cShape.meshes.at(0).getVAO(), cfbo.fbo,
-                                  "scene", {0, 0}, {0, 0},
-                                  settings_manager->fitToWindow);
+                                        "scene", {0, 0}, {0, 0},
+                                        settings_manager->fitToWindow);
     } else {
       render_manager->renderFBO(cShape.meshes.at(0).getVAO(), cfbo.fbo);
     }

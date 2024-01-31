@@ -4,6 +4,7 @@
 
 #include "assets/assetsManager.h"
 #include "core/settingsManager.h"
+#include "core/statesManager.h"
 #include "pch.h"
 #include "render/renderManager.h"
 #include "scene/sceneManager.h"
@@ -19,7 +20,8 @@ inline void
 drawManagersBar(const std::unique_ptr<assets::AssetsManager>& assets_manager,
                 const std::unique_ptr<RenderManager>& render_manager,
                 const std::unique_ptr<SceneManager>& scene_manager,
-                const std::unique_ptr<SettingsManager>& settings_manager) {
+                const std::unique_ptr<SettingsManager>& settings_manager,
+                const std::unique_ptr<StatesManager>& states_manager) {
   if (ImGui::BeginTabBar("RootTabBar", ImGuiTabBarFlags_Reorderable)) {
     if (ImGui::BeginTabItem("Assets Manager")) {
       drawAssetsManager(assets_manager, settings_manager);
@@ -54,11 +56,12 @@ drawManagersBar(const std::unique_ptr<assets::AssetsManager>& assets_manager,
       filterShaderInfo = false;
     }
     if (ImGui::BeginTabItem("States Manager")) {
-      drawStatesManager();
+      drawStatesManager(settings_manager, states_manager);
       ImGui::EndTabItem();
     } else {
       states_text_filter[0] = '\0';
       filterStates = false;
+      filterLayers = false;
     }
     if (ImGui::BeginTabItem("Settings Manager")) {
       drawSettingsManager(settings_manager, render_manager);

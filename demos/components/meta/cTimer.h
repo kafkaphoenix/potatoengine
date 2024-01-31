@@ -5,8 +5,8 @@
 namespace demos {
 
 struct CTimer {
-    uint32_t maxTime{65};
-    uint32_t left{65};
+    uint32_t maxTime{20};
+    uint32_t left{20};
 
     CTimer() = default;
     explicit CTimer(uint32_t t, uint32_t l) : maxTime(t), left(l) {}

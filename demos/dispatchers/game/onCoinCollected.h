@@ -7,10 +7,10 @@
 
 namespace demos::dispatchers {
 
-inline bool onCoinCollected(entt::registry& registry) {
+inline void onCoinCollected(entt::registry& registry) {
   entt::entity gamestate = registry.view<CScore, engine::CUUID>().front();
   CScore& score = registry.get<CScore>(gamestate);
-  uint32_t new_score = ++score.score;
+  int new_score = ++score.score;
   registry.view<engine::CTextureAtlas, engine::CName, engine::CUUID>().each(
     [&](engine::CTextureAtlas& cTextureAtlas,
         const engine::CName& cName, const engine::CUUID& cUUID) {
@@ -22,7 +22,5 @@ inline bool onCoinCollected(entt::registry& registry) {
         cTextureAtlas.index = new_score / 100;
       }
     });
-
-  return true;
 }
 }

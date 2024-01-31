@@ -56,7 +56,6 @@ class WindowsManager {
 
     void shutdown();
     void onUpdate();
-    void onEvent();
     void triggerEvent(events::Event& e);
 
     GLFWwindow* getNativeWindow() const noexcept { return m_window; }

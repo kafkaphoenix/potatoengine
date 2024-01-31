@@ -1,3 +1,4 @@
+
 #pragma once
 
 // potatoengine API
@@ -21,6 +22,7 @@ namespace engine = potatoengine;
 // scene
 #include "scene/components/camera/cActiveCamera.h"
 #include "scene/components/camera/cCamera.h"
+#include "scene/components/camera/cDistanceFromCamera.h"
 #include "scene/components/core/cDeleted.h"
 #include "scene/components/core/cName.h"
 #include "scene/components/core/cTag.h"
@@ -68,5 +70,6 @@ namespace engine = potatoengine;
 #include "events/windowEvent.h"
 
 // utils
+#include "utils/getDefaultRoamingPath.h"
 #include "utils/numericComparator.h"
 #include "utils/timer.h"

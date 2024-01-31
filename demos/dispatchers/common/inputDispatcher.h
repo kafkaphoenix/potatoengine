@@ -5,11 +5,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <imgui.h>
 
-#include "components/core/cState.h"
 #include "engineAPI.h"
-#include "states/gameState.h"
-#include "states/menuState.h"
-#include "states/pauseState.h"
 
 namespace demos::dispatchers {
 
@@ -122,7 +118,6 @@ inline bool onMouseButtonReleased(engine::events::MouseButtonReleasedEvent& e) {
 
 inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
   auto& app = engine::Application::Get();
-  const auto& settings_manager = app.getSettingsManager();
   const auto& windows_manager = app.getWindowsManager();
   bool isDebugging = app.isDebugging();
   bool isGamePaused = app.isGamePaused();
@@ -134,7 +129,7 @@ inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
       windows_manager->restoreCursor();
       windows_manager->toggleCameraPositionUpdate(true);
       windows_manager->setLastMousePosition(engine::Input::GetMouseX(),
-                                   engine::Input::GetMouseY());
+                                            engine::Input::GetMouseY());
     } else {
       app.debug(true);
       app.togglePauseGame(true);
@@ -144,73 +139,12 @@ inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
     }
     return true;
   } else if (e.getKeyCode() == engine::Key::Escape) {
+    // TODO move to layers for flappy bird
     if (isDebugging) {
       windows_manager->restoreCursor();
     }
     app.close();
     return true;
-  } else if (e.getKeyCode() == engine::Key::F4) {
-    const auto& windowData = windows_manager->getWindowData();
-    engine::RenderAPI::ToggleWireframe(not windowData.wireframe);
-    windows_manager->toggleWireframe(not windowData.wireframe);
-    return true;
-  } else if (e.getKeyCode() == engine::Key::F12) {
-    windows_manager->toggleFullscreen(not settings_manager->fullscreen);
-    return true;
-  } else if (e.getKeyCode() == engine::Key::P) {
-    if (settings_manager->activeScene == "Flappy Bird") {
-      entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
-      CState& cState =
-        app.getSceneManager()->getRegistry().get<CState>(gamestate);
-      if (cState.state == CState::State::READY or
-          cState.state == CState::State::RUNNING or
-          cState.state == CState::State::STARTING) {
-        app.pushOverlay(states::PauseState::Create());
-      } else if (cState.state == CState::State::PAUSED) {
-        app.popOverlay("PauseState");
-      }
-    } else {
-      app.togglePauseGame(not isGamePaused);
-    }
-  } else if (e.getKeyCode() == engine::Key::Enter) {
-    if (settings_manager->activeScene == "Flappy Bird") {
-      entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
-      CState& cState =
-        app.getSceneManager()->getRegistry().get<CState>(gamestate);
-      if (cState.state == CState::State::MENU) {
-        app.popState("MenuState");
-        app.pushState(states::GameState::Create());
-      }
-    }
-  } else if (e.getKeyCode() == engine::Key::R) {
-    if (settings_manager->activeScene == "Flappy Bird") {
-      entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
-      CState& cState =
-        app.getSceneManager()->getRegistry().get<CState>(gamestate);
-      if (cState.state == CState::State::GAMEOVER or
-          cState.state == CState::State::STOPPED or
-          cState.state == CState::State::PAUSED) {
-        app.getSettingsManager()->reloadScene = true;
-      }
-    }
-  } else if (e.getKeyCode() == engine::Key::M) {
-    if (settings_manager->activeScene == "Flappy Bird") {
-      entt::entity gamestate = app.getSceneManager()->getEntity("gamestate");
-      CState& cState =
-        app.getSceneManager()->getRegistry().get<CState>(gamestate);
-      if (cState.state == CState::State::PAUSED) {
-        app.popOverlay("PauseState");
-        app.popState("GameState");
-        app.pushState(states::MenuState::Create());
-      } else if (cState.state == CState::State::GAMEOVER or
-                 cState.state == CState::State::STOPPED) {
-        app.popOverlay("ScoreState");
-        app.popState("GameState");
-        app.pushState(states::MenuState::Create());
-      }
-    }
-  } else if (e.getKeyCode() == engine::Key::N) {
-    // TODO Next level maybe add level to game state
   }
 
   ImGuiIO& io = ImGui::GetIO();
@@ -220,6 +154,7 @@ inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
     io.ClearEventsQueue();
   }
 
+  // repeat event if key is held down
   if (e.repeating())
     return false;
 
@@ -228,16 +163,21 @@ inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
   // Input::IsKeyPressed(Key::LeftShift) or
   // Input::IsKeyPressed(Key::RightShift);
 
-  switch (e.getKeyCode()) {
-  case engine::Key::LeftAlt:
+  if (e.getKeyCode() == engine::Key::LeftAlt) {
     if (not isDebugging) {
       windows_manager->toggleCameraPositionUpdate(false);
       windows_manager->setCursorMode(engine::CursorMode::Normal, false);
     }
-    break;
+    return true;
+  } else if (e.getKeyCode() == engine::Key::P) {
+    const auto& settings_manager = app.getSettingsManager();
+    if (settings_manager->activeScene not_eq "Flappy Bird") {
+      app.togglePauseGame(not isGamePaused);
+      return true;
+    }
   }
 
-  return true;
+  return false;
 }
 
 inline bool onKeyReleased(engine::events::KeyReleasedEvent& e) {
@@ -250,20 +190,16 @@ inline bool onKeyReleased(engine::events::KeyReleasedEvent& e) {
     io.ClearEventsQueue();
   }
 
-  const auto& windows_manager = app.getWindowsManager();
-
-  switch (e.getKeyCode()) {
-  case engine::Key::LeftAlt:
-    if (not app.isDebugging()) {
-      windows_manager->setLastMousePosition(engine::Input::GetMouseX(),
-                                   engine::Input::GetMouseY());
-      windows_manager->toggleCameraPositionUpdate(true);
-      windows_manager->restoreCursor();
-    }
-    break;
+  if (e.getKeyCode() == engine::Key::LeftAlt and not app.isDebugging()) {
+    const auto& windows_manager = app.getWindowsManager();
+    windows_manager->setLastMousePosition(engine::Input::GetMouseX(),
+                                          engine::Input::GetMouseY());
+    windows_manager->toggleCameraPositionUpdate(true);
+    windows_manager->restoreCursor();
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 inline bool onKeyTyped(engine::events::KeyTypedEvent& e) {
@@ -277,8 +213,8 @@ inline bool onKeyTyped(engine::events::KeyTypedEvent& e) {
   return true;
 }
 
-inline void inputDispatcher(entt::registry& registry,
-                            engine::events::Event& e) {
+inline void inputDispatcher(engine::events::Event& e,
+                            entt::registry& registry) {
   engine::events::EventDispatcher dispatcher(e);
 
   dispatcher.dispatch<engine::events::MouseMovedEvent>(

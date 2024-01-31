@@ -14,7 +14,8 @@ ScoreSystem::~ScoreSystem() {
 }
 
 void ScoreSystem::init(entt::registry& registry) {
-  const auto& scene_manager = engine::Application::Get().getSceneManager();
+  auto& app = engine::Application::Get();
+  const auto& scene_manager = app.getSceneManager();
 
   entt::entity unidades =
     scene_manager->createEntity("scene", "numbers", "score_unidades", "score");
@@ -37,6 +38,8 @@ void ScoreSystem::init(entt::registry& registry) {
   registry.get<engine::CShaderProgram>(unidades).isVisible = true;
   registry.get<engine::CShaderProgram>(decenas).isVisible = true;
   registry.get<engine::CShaderProgram>(centenas).isVisible = true;
+
+  app.getRenderManager()->reorder();
 }
 
 }

@@ -15,13 +15,14 @@ void CollisionSystem::update(entt::registry& registry, const engine::Time& ts) {
   const engine::CUUID& cUUID = registry.get<engine::CUUID>(bird);
   std::string_view collidedWith = "";
 
-  for (auto e : registry.view<engine::CTransform, engine::CCollider,
+  for (auto e : registry.view<engine::CTransform, engine::CCollider, engine::CShaderProgram,
                               engine::CTag, engine::CUUID>()) {
     const engine::CTransform& cTransform2 = registry.get<engine::CTransform>(e);
     const engine::CCollider& cCollider2 = registry.get<engine::CCollider>(e);
     const engine::CTag& cTag2 = registry.get<engine::CTag>(e);
     const engine::CUUID& cUUID2 = registry.get<engine::CUUID>(e);
-    if (cUUID.uuid != cUUID2.uuid) {
+    const engine::CShaderProgram& cSP = registry.get<engine::CShaderProgram>(e);
+    if (cUUID.uuid != cUUID2.uuid and cTag2.tag != "buttons") {
       if (cCollider.type == engine::CCollider::Type::Rectangle and
           cCollider2.type == engine::CCollider::Type::Rectangle) {
         // TODO move logic to class physics
@@ -35,7 +36,7 @@ void CollisionSystem::update(entt::registry& registry, const engine::Time& ts) {
         float minY2 = cTransform2.position.y - cCollider2.size.y / 2;
         float maxY2 = cTransform2.position.y + cCollider2.size.y / 2;
 
-        if (minX < maxX2 and maxX > minX2 and minY < maxY2 and maxY > minY2) {
+        if (minX < maxX2 and maxX > minX2 and minY < maxY2 and maxY > minY2 and cSP.isVisible) {
           collidedWith = cTag2.tag;
           if (collidedWith == "coin") {
             registry.get<engine::CShaderProgram>(e).isVisible = false;
@@ -47,7 +48,8 @@ void CollisionSystem::update(entt::registry& registry, const engine::Time& ts) {
   }
 
   if (collidedWith == "pipe" or collidedWith == "ground") {
-    settings_manager->reloadScene = true;
+    engine::events::AppUpdateEvent event("onDeath");
+    app.getWindowsManager()->triggerEvent(event);
   } else if (collidedWith == "coin") {
     engine::events::AppUpdateEvent event("onCoinCollected");
     app.getWindowsManager()->triggerEvent(event);

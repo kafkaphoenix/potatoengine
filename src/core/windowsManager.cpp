@@ -276,9 +276,10 @@ void WindowsManager::shutdown() {
   }
 }
 
-void WindowsManager::onUpdate() { m_context->swapBuffers(); }
-
-void WindowsManager::onEvent() { glfwPollEvents(); }
+void WindowsManager::onUpdate() {
+  m_context->swapBuffers();
+  glfwPollEvents();
+}
 
 void WindowsManager::triggerEvent(events::Event& e) { m_data.eventCallback(e); }
 

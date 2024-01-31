@@ -33,6 +33,7 @@ struct SettingsManager {
 
     bool debugEnabled = true; // TODO use for something
     bool displayFPS = false;  // TODO implement with debugEnabled maybe?
+    bool displayCollisionBoxes = false;
 
     bool enableEngineLogger = true;
     bool enableAppLogger = true;
@@ -82,5 +83,5 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
   debugEnabled, displayFPS, enableEngineLogger, enableAppLogger, engineLogLevel,
   appLogLevel, engineFlushLevel, appFlushLevel, enableEngineBacktraceLogger,
   enableAppBacktraceLogger, clearColor, clearDepth, activeScene,
-  activeScenePath, reloadPrototypes);
+  activeScenePath, reloadPrototypes, displayCollisionBoxes);
 }

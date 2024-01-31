@@ -17,8 +17,7 @@ SceneManager::SceneManager() : m_sceneFactory() {
 
 void SceneManager::registerSystem(std::string&& name,
                                   std::unique_ptr<systems::System>&& system) {
-  ENGINE_ASSERT(not containsSystem(name), "System {} already registered",
-                name);
+  ENGINE_ASSERT(not containsSystem(name), "System {} already registered", name);
   system->init(m_registry);
   m_systems.emplace(std::make_pair(std::move(name), std::move(system)));
   dirtySystems = true;
@@ -44,6 +43,11 @@ bool SceneManager::containsSystem(std::string_view name) {
     }
   }
   return false;
+}
+
+void SceneManager::clearSystems() {
+  m_systems.clear();
+  dirtySystems = false;
 }
 
 void SceneManager::onUpdate(const Time& ts) {
@@ -157,38 +161,34 @@ SceneManager::getMetrics() {
 }
 
 void SceneManager::createPrototypes(
-  std::string_view prefab_name,
-  const std::vector<std::string>& prototypeIDs) {
+  std::string_view prefab_name, const std::vector<std::string>& prototypeIDs) {
   m_sceneFactory.getEntityFactory().createPrototypes(
     prefab_name, prototypeIDs, m_registry,
     Application::Get().getAssetsManager());
 }
 
 void SceneManager::updatePrototypes(
-  std::string_view prefab_name,
-  const std::vector<std::string>& prototypeIDs) {
+  std::string_view prefab_name, const std::vector<std::string>& prototypeIDs) {
   m_sceneFactory.getEntityFactory().updatePrototypes(
     prefab_name, prototypeIDs, m_registry,
     Application::Get().getAssetsManager());
 }
 
 void SceneManager::destroyPrototypes(
-  std::string_view prefab_name,
-  const std::vector<std::string>& prototypeIDs) {
+  std::string_view prefab_name, const std::vector<std::string>& prototypeIDs) {
   m_sceneFactory.getEntityFactory().destroyPrototypes(prefab_name, prototypeIDs,
                                                       m_registry);
 }
 
-EntityFactory::Prototypes SceneManager::getPrototypes(
-  std::string_view prefab_name,
-  const std::vector<std::string>& prototypeIDs) {
+EntityFactory::Prototypes
+SceneManager::getPrototypes(std::string_view prefab_name,
+                            const std::vector<std::string>& prototypeIDs) {
   return m_sceneFactory.getEntityFactory().getPrototypes(prefab_name,
                                                          prototypeIDs);
 }
 
 bool SceneManager::containsPrototypes(
-  std::string_view prefab_name,
-  const std::vector<std::string>& prototypeIDs) {
+  std::string_view prefab_name, const std::vector<std::string>& prototypeIDs) {
   return m_sceneFactory.getEntityFactory().containsPrototypes(prefab_name,
                                                               prototypeIDs);
 }

@@ -135,11 +135,13 @@ drawSettingsManager(const std::unique_ptr<SettingsManager>& settings_manager,
                     .c_str());
 
     } else if (selectedSettingsManagerTabKey ==
-               "Debug") { // TODO use for something
+               "Debug") {
       ImGui::Checkbox("Game paused", &isGamePaused);
       app.togglePauseGame(isGamePaused);
-      ImGui::Checkbox("Debug enabled", &settings_manager->debugEnabled);
-      ImGui::Checkbox("Display FPS", &settings_manager->displayFPS);
+      ImGui::Checkbox("Debug enabled", &settings_manager->debugEnabled); // TODO use for something
+      ImGui::Checkbox("Display FPS", &settings_manager->displayFPS); // TODO use for something
+      ImGui::Checkbox("Display collision boxes",
+                      &settings_manager->displayCollisionBoxes);
     } else if (selectedSettingsManagerTabKey == "Logger") {
       ImGui::Checkbox("Enable engine logger",
                       &settings_manager->enableEngineLogger);

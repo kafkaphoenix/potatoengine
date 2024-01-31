@@ -6,6 +6,7 @@
 #include "states/gameState.h"
 #include "states/menuState.h"
 #include "utils.h"
+#include "utils/getDefaultRoamingPath.h"
 
 namespace demos {
 
@@ -19,9 +20,9 @@ class Demos : public engine::Application {
       RegisterComponents();
       APP_TRACE("Loading initial state...");
       if (m_settings_manager->activeScene == "Flappy Bird") {
-        pushState(states::MenuState::Create());
+        m_states_manager->pushState(states::MenuState::Create());
       } else {
-        pushState(states::GameState::Create());
+        m_states_manager->pushState(states::GameState::Create());
       }
       APP_TRACE("State loaded!");
     }
@@ -45,13 +46,13 @@ engine::Application* engine::CreateApp(engine::CLArgs&& args) {
   LogManager::ToggleAppLogger(settings_manager->enableAppLogger);
 
   if (not settings_manager->logFilePath.empty()) {
-    LogManager::CreateFileLogger(settings_manager->root + "/" +
-                                 settings_manager->logFilePath);
+    LogManager::CreateFileLogger(
+      (get_default_roaming_path("Demos") / settings_manager->logFilePath).string());
   }
 
   if (not settings_manager->backtraceLogFilePath.empty()) {
     LogManager::CreateBacktraceLogger(
-      settings_manager->backtraceLogFilePath,
+      (get_default_roaming_path("Demos") /settings_manager->backtraceLogFilePath).string(),
       settings_manager->enableEngineBacktraceLogger,
       settings_manager->enableAppBacktraceLogger);
   }

@@ -1,11 +1,7 @@
 #pragma once
 
 #include <entt/entt.hpp>
-#include <imgui.h>
 
-#include "components/meta/cTimer.h"
-#include "dispatchers/onCoinCollected.h"
-#include "dispatchers/onTimerTicked.h"
 #include "engineAPI.h"
 
 namespace demos::dispatchers {
@@ -28,7 +24,7 @@ inline bool onWindowMaximized(engine::events::WindowMaximizedEvent& e) {
 }
 
 inline bool onWindowFocus(engine::events::WindowFocusEvent& e) {
-  engine::Application::Get().pause(false);
+  engine::Application::Get().minimize(false);
   if (engine::Application::Get().isRestoreGamePaused()) {
     engine::Application::Get().togglePauseGame(true);
     engine::Application::Get().setRestoreGamePaused(false);
@@ -39,7 +35,7 @@ inline bool onWindowFocus(engine::events::WindowFocusEvent& e) {
 }
 
 inline bool onWindowLostFocus(engine::events::WindowLostFocusEvent& e) {
-  engine::Application::Get().pause(true);
+  engine::Application::Get().minimize(true);
   if (engine::Application::Get().isGamePaused()) {
     engine::Application::Get().setRestoreGamePaused(true);
   } else {
@@ -75,24 +71,8 @@ inline bool onWindowResized(engine::events::WindowResizeEvent& e,
   return true;
 }
 
-inline bool onAppTick(engine::events::AppTickEvent& e,
-                      entt::registry& registry) {
-  onTimerTicked(registry);
-  return true;
-}
-
-inline bool onAppUpdate(engine::events::AppUpdateEvent& e,
-                        entt::registry& registry) {
-  if (e.getDispatcherTarget() == "onCoinCollected") {
-    return onCoinCollected(registry);
-  }
-
-  return true;
-}
-
-inline bool onAppRender(engine::events::AppRenderEvent& e) { return true; }
-
-inline void appDispatcher(entt::registry& registry, engine::events::Event& e) {
+inline void windowDispatcher(engine::events::Event& e,
+                             entt::registry& registry) {
   engine::events::EventDispatcher dispatcher(e);
 
   dispatcher.dispatch<engine::events::WindowCloseEvent>(
@@ -111,12 +91,5 @@ inline void appDispatcher(entt::registry& registry, engine::events::Event& e) {
     BIND_STATIC_EVENT(onWindowLostFocus));
   dispatcher.dispatch<engine::events::WindowMovedEvent>(
     BIND_STATIC_EVENT(onWindowMoved));
-
-  dispatcher.dispatch<engine::events::AppTickEvent>(
-    BIND_STATIC_EVENT(onAppTick, registry));
-  dispatcher.dispatch<engine::events::AppUpdateEvent>(
-    BIND_STATIC_EVENT(onAppUpdate, registry));
-  dispatcher.dispatch<engine::events::AppRenderEvent>(
-    BIND_STATIC_EVENT(onAppRender));
 }
 }

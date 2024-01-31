@@ -17,6 +17,7 @@ class SceneManager {
                         std::unique_ptr<systems::System>&& system);
     void unregisterSystem(std::string_view name);
     bool containsSystem(std::string_view name);
+    void clearSystems();
     void onUpdate(const Time& ts);
     entt::registry& getRegistry() noexcept;
     entt::entity getEntity(std::string_view name);

@@ -141,16 +141,13 @@
                 "prefab": "creatures",
                 "prototype": "bird"
             },
-            "gamestate": {
-                "prefab": "meta",
-                "prototype": "gamestate"
-            },
             "title": {
                 "prefab": "scene",
                 "prototype": "text",
                 "options": {
                     "filepaths": ["title"],
-                    "scale": {"x": 1, "y": 1, "z": 1}
+                    "scale": {"x": 1, "y": 1, "z": 1},
+                    "isVisible": false
                 }
             },
             "ready": {
@@ -193,7 +190,8 @@
                 "prototype": "buttons",
                 "options": {
                     "textureAtlas": {"index": 7},
-                    "position": {"x": 0, "y": 0, "z": 0}
+                    "position": {"x": 0, "y": 0, "z": 0},
+                    "isVisible": false
                 }
             },
             "restart": {
@@ -202,7 +200,7 @@
                 "options": {
                     "isVisible": false,
                     "textureAtlas": {"index": 3},
-                    "position": {"x": 0, "y": -0.6, "z": 0}
+                    "position": {"x": 0, "y": -0.2, "z": 0}
                 }
             },
             "resume": {
@@ -228,7 +226,8 @@
                 "prototype": "buttons",
                 "options": {
                     "textureAtlas": {"index": 6},
-                    "position": {"x": 0, "y": -0.2, "z": 0}
+                    "position": {"x": 0, "y": -0.2, "z": 0},
+                    "isVisible": false
                 }
             }
         },

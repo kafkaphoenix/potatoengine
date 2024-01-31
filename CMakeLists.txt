@@ -41,10 +41,11 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "STBI_FAILURE_USERMSG")
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/stb)
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/fastnoiselite)
 target_include_directories(${PROJECT_NAME} PRIVATE ${glfw_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
 target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 target_include_directories(${PROJECT_NAME} PRIVATE ${assimp_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${spdlog_SOURCE_DIR}/include)
-target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${freetype_SOURCE_DIR}/include)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 target_precompile_headers(${PROJECT_NAME} PRIVATE src/pch.h)
 
@@ -65,7 +66,7 @@ add_custom_target(copy_assets
 )
 add_dependencies(${PROJECT_NAME} copy_assets)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog ${CMAKE_DL_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glm glad imgui EnTT nlohmann_json::nlohmann_json assimp ${ASSIMP_LIBRARIES} spdlog RmlCore freetype ${CMAKE_DL_LIBS})
 
 # Linters (Needs compilation database sadly no MSVC support yet, change to GCC to use)
 # https://stackoverflow.com/questions/65544093/no-compile-commands-json-file-using-cmake-with-vs-code-on-windows

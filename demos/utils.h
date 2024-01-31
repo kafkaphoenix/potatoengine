@@ -4,7 +4,6 @@
 
 #include "components/config/cCoins.h"
 #include "components/config/cPipes.h"
-#include "components/core/cState.h"
 #include "components/meta/cScore.h"
 #include "components/meta/cTimer.h"
 #include "engineAPI.h"
@@ -20,8 +19,6 @@ CPipes& CastCPipes(void* other) { return *static_cast<CPipes*>(other); }
 CScore& CastCScore(void* other) { return *static_cast<CScore*>(other); }
 
 CTimer& CastCTimer(void* other) { return *static_cast<CTimer*>(other); }
-
-CState& CastCState(void* other) { return *static_cast<CState*>(other); }
 
 void RegisterComponents() {
   entt::meta<CCoins>()
@@ -58,13 +55,5 @@ void RegisterComponents() {
     .func<&CTimer::print>("print"_hs)
     .func<&CTimer::getInfo>("getInfo"_hs)
     .func<&engine::assign<CTimer>, entt::as_ref_t>("assign"_hs);
-
-  entt::meta<CState>()
-    .type("state"_hs)
-    .ctor<&CastCState, entt::as_ref_t>()
-    .data<&CState::state>("state"_hs)
-    .func<&CState::print>("print"_hs)
-    .func<&CState::getInfo>("getInfo"_hs)
-    .func<&engine::assign<CState>, entt::as_ref_t>("assign"_hs);
 }
 }

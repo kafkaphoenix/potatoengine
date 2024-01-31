@@ -42,7 +42,7 @@ endif()
 FetchContent_Declare(
   imgui
   GIT_REPOSITORY https://github.com/ocornut/imgui.git
-  GIT_TAG v1.90
+  GIT_TAG v1.90.2
 )
 
 FetchContent_GetProperties(imgui)
@@ -62,7 +62,7 @@ endif ()
 FetchContent_Declare(
   entt
   GIT_REPOSITORY https://github.com/skypjack/entt.git
-  GIT_TAG v3.12.2
+  GIT_TAG v3.13.1
 )
 
 FetchContent_GetProperties(entt)
@@ -113,5 +113,29 @@ if(NOT spdlog_POPULATED)
   set(SPDLOG_BUILD_EXAMPLE OFF CACHE INTERNAL "" FORCE)
   set(SPDLOG_INSTALL OFF CACHE INTERNAL "" FORCE)
   set(SPDLOG_USE_STD_FORMAT ON CACHE INTERNAL "" FORCE)
-  add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
+  add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR})
+endif()
+
+FetchContent_Declare(
+  freetype
+  GIT_REPOSITORY https://github.com/freetype/freetype.git
+  GIT_TAG VER-2-13-2
+)
+
+FetchContent_MakeAvailable(freetype)
+
+# Set Freetype variables so rmlui can find it
+set(FREETYPE_INCLUDE_DIRS ${freetype_SOURCE_DIR}/include)
+set(FREETYPE_LIBRARY freetype)
+
+FetchContent_Declare(
+  rmlui
+  GIT_REPOSITORY https://github.com/mikke89/rmlui.git
+  GIT_TAG 5.1
+)
+
+FetchContent_GetProperties(rmlui)
+if(NOT rmlui_POPULATED)
+  FetchContent_Populate(rmlui)
+  add_subdirectory(${rmlui_SOURCE_DIR} ${rmlui_BINARY_DIR})
 endif()

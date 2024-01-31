@@ -64,8 +64,10 @@ $ .\Debug\potatoengine.exe
 - [EnTT](https://github.com/skypjack/entt): entity component system
 - [stb](https://github.com/nothings/stb): image loading
 - [glm](https://github.com/g-truc/glm): math operations
-- [imGui](https://github.com/ocornut/imgui): ui development framework
+- [imGui](https://github.com/ocornut/imgui): ui framework
 - [nlohmann_json](https://github.com/nlohmann/json): json processing
 - [assimp](https://github.com/assimp/assimp): model loading
 - [spdlog](https://github.com/gabime/spdlog): structured logging
 - [FastNoiseLite](https://github.com/Auburn/FastNoiseLite): noise generation
+- [freetype](https://github.com/freetype/freetype): font rendering
+- [RmlUi](https://github.com/mikke89/RmlUi): ui framework

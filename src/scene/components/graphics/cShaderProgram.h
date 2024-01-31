@@ -11,7 +11,7 @@ struct CShaderProgram {
     bool isVisible{true};
 
     CShaderProgram() = default;
-    explicit CShaderProgram(std::string&& n, bool iv = true)
+    explicit CShaderProgram(std::string&& n, bool iv)
       : name(std::move(n)), isVisible(iv) {}
 
     void print() const {

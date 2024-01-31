@@ -2,6 +2,8 @@
 
 #include "components/config/CCoins.h"
 
+static float delay2 = 70;
+
 namespace demos::systems {
 
 CoinsSystem::~CoinsSystem() {
@@ -14,7 +16,9 @@ CoinsSystem::~CoinsSystem() {
 }
 
 void CoinsSystem::init(entt::registry& registry) {
-  const auto& scene_manager = engine::Application::Get().getSceneManager();
+  auto& app = engine::Application::Get();
+  const auto& scene_manager = app.getSceneManager();
+  const auto& render_manager = app.getRenderManager();
 
   entt::entity gamestate = registry.view<CCoins, engine::CUUID>().front();
   CCoins& coins_config = registry.get<CCoins>(gamestate);
@@ -23,8 +27,11 @@ void CoinsSystem::init(entt::registry& registry) {
     entt::entity coin_ =
       scene_manager->createEntity("scene", "coin", "coin_" + std::to_string(i));
     registry.get<engine::CShaderProgram>(coin_).isVisible = false;
+    registry.get<engine::CTransform>(coin_).position.x = 2.f;
   }
   coins_config.coins = coins_config.maxCoins;
+
+  render_manager->reorder();
 }
 
 void CoinsSystem::update(entt::registry& registry, const engine::Time& ts) {
@@ -57,7 +64,11 @@ void CoinsSystem::update(entt::registry& registry, const engine::Time& ts) {
             cShaderProgram.isVisible = false;
           }
         } else {
-          if (coins_config.coins > 0) {
+          auto e = engine::Application::Get().getSceneManager()->getEntity(
+            "gamestate");
+          engine::CTime& cTime = registry.get<engine::CTime>(e);
+          if (coins_config.coins > 0 and cTime.currentSecond % 2 == 0 and
+              delay2 == 0) {
             // TODO check if there is a pipe already in the same position
             // randomize y position
             // -0.5 highest 0.6 lowest
@@ -67,6 +78,12 @@ void CoinsSystem::update(entt::registry& registry, const engine::Time& ts) {
             cTransform.position.x = 2.f;
             cShaderProgram.isVisible = true;
             coins_config.coins--;
+            delay2 += 20;
+          } else {
+            delay2 -= 1;
+            if (delay2 < 0) {
+              delay2 = 70;
+            }
           }
         }
       }
