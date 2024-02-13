@@ -21,8 +21,8 @@ class Model : public Asset {
     const std::map<std::string, std::string, NumericComparator>&
     getLoadedTextureInfo(std::string_view textureID);
 
-    std::vector<CMesh>& getMeshes() noexcept { return m_meshes; }
-    std::vector<CMaterial>& getMaterials() noexcept { return m_materials; }
+    std::vector<CMesh>& getMeshes() { return m_meshes; }
+    std::vector<CMaterial>& getMaterials() { return m_materials; }
 
     virtual bool operator==(const Asset& other) const override final;
 

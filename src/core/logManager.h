@@ -27,17 +27,16 @@ class LogManager {
     static void ToggleAppLogger(bool enable);
     static void ToggleEngineBacktraceLogger(bool enable);
     static void ToggleAppBacktraceLogger(bool enable);
-    static std::shared_ptr<spdlog::logger>& GetEngineLogger() noexcept {
+    static std::shared_ptr<spdlog::logger>& GetEngineLogger() {
       return s_engineLogger;
     }
-    static std::shared_ptr<spdlog::logger>& GetAppLogger() noexcept {
+    static std::shared_ptr<spdlog::logger>& GetAppLogger() {
       return s_appLogger;
     }
-    static std::shared_ptr<spdlog::logger>&
-    GetEngineBacktraceLogger() noexcept {
+    static std::shared_ptr<spdlog::logger>& GetEngineBacktraceLogger() {
       return s_engineBacktraceLogger;
     }
-    static std::shared_ptr<spdlog::logger>& GetAppBacktraceLogger() noexcept {
+    static std::shared_ptr<spdlog::logger>& GetAppBacktraceLogger() {
       return s_appBacktraceLogger;
     }
     static std::string_view GetEngineLoggerLevel() {

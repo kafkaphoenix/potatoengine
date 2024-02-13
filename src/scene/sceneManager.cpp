@@ -56,7 +56,7 @@ void SceneManager::onUpdate(const Time& ts) {
   }
 }
 
-entt::registry& SceneManager::getRegistry() noexcept { return m_registry; }
+entt::registry& SceneManager::getRegistry() { return m_registry; }
 
 entt::entity SceneManager::getEntity(std::string_view name) {
   for (const auto& [e, cName, _] : m_registry.view<CName, CUUID>().each()) {

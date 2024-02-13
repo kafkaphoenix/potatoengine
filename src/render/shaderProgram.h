@@ -33,8 +33,8 @@ class ShaderProgram {
     void printActiveUniforms();
     const std::map<std::string, std::string, NumericComparator>& getInfo();
 
-    std::string_view getName() const noexcept { return m_name; }
-    uint32_t getID() const noexcept { return m_id; }
+    std::string_view getName() const { return m_name; }
+    uint32_t getID() const { return m_id; }
     operator GLuint() const;
 
     static std::unique_ptr<ShaderProgram> Create(std::string&& name);

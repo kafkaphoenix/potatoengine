@@ -12,7 +12,7 @@ class UUID {
     UUID() : m_uuid(dis(gen)) {}
     UUID(uint32_t uuid) : m_uuid(uuid) {}
 
-    operator uint32_t() const noexcept { return m_uuid; }
+    operator uint32_t() const { return m_uuid; }
 
   private:
     uint32_t m_uuid{};

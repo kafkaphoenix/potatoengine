@@ -23,16 +23,16 @@ class Texture : public Asset {
     void rebindSlot();
     void unbindSlot();
 
-    uint32_t getWidth() const noexcept { return m_width; }
-    uint32_t getHeight() const noexcept { return m_height; }
-    uint32_t getID() const noexcept { return m_id; }
+    uint32_t getWidth() const { return m_width; }
+    uint32_t getHeight() const { return m_height; }
+    uint32_t getID() const { return m_id; }
     std::string_view getFilepath() const {
       return (m_filepaths.size() == 1) ? m_filepaths[0] : m_directory;
     }
-    std::string_view getType() const noexcept { return m_type; }
+    std::string_view getType() const { return m_type; }
     virtual const std::map<std::string, std::string, NumericComparator>&
     getInfo() override final;
-    bool isCubemap() const noexcept { return m_isCubemap; }
+    bool isCubemap() const { return m_isCubemap; }
 
     virtual bool operator==(const Asset& other) const override final;
 

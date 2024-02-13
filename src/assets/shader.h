@@ -17,7 +17,7 @@ class Shader : public Asset {
     getInfo() override final;
 
     virtual bool operator==(const Asset& other) const override final;
-    operator GLuint() const noexcept { return m_id; }
+    operator GLuint() const { return m_id; }
 
   private:
     std::string m_filepath;

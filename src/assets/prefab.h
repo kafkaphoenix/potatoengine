@@ -40,12 +40,11 @@ class Prefab : public Asset {
       return m_prototypes.at(prototypeID.data()).components;
     }
 
-    const std::vector<std::string>&
-    getTargetedPrototypes() const noexcept {
+    const std::vector<std::string>& getTargetedPrototypes() const {
       return m_targetedPrototypes;
     }
 
-    std::string_view getName() const noexcept { return m_name; }
+    std::string_view getName() const { return m_name; }
 
     const std::unordered_map<std::string, Prototype>& getPrototypes() const {
       return m_prototypes;
@@ -69,6 +68,6 @@ class Prefab : public Asset {
               std::unordered_map<std::string, json>& components);
 
     void process_prototype(const std::string& name, const json& prototypeData,
-                       const json& data);
+                           const json& data);
 };
 }

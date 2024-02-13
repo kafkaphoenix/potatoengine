@@ -3,10 +3,10 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
+#include "core/settingsManager.h"
 #include "events/event.h"
 #include "pch.h"
 #include "render/openGLContext.h"
-#include "core/settingsManager.h"
 
 namespace potatoengine {
 
@@ -58,8 +58,8 @@ class WindowsManager {
     void onUpdate();
     void triggerEvent(events::Event& e);
 
-    GLFWwindow* getNativeWindow() const noexcept { return m_window; }
-    const WindowData& getWindowData() const noexcept { return m_data; }
+    GLFWwindow* getNativeWindow() const { return m_window; }
+    const WindowData& getWindowData() const { return m_data; }
 
     void setPosition(int x, int y);
     void setLastMousePosition(float x, float y);

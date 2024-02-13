@@ -16,40 +16,35 @@ class Scene : public Asset {
     virtual const std::map<std::string, std::string, NumericComparator>&
     getInfo() override final;
 
-    const std::unordered_map<std::string, json>& getShaders() const noexcept {
+    const std::unordered_map<std::string, json>& getShaders() const {
       return m_shaders;
     }
-    const std::unordered_map<std::string, json>& getTextures() const noexcept {
+    const std::unordered_map<std::string, json>& getTextures() const {
       return m_textures;
     }
-    const std::unordered_map<std::string, json>& getModels() const noexcept {
+    const std::unordered_map<std::string, json>& getModels() const {
       return m_models;
     }
-    const std::unordered_map<std::string, json>& getPrefabs() const noexcept {
+    const std::unordered_map<std::string, json>& getPrefabs() const {
       return m_prefabs;
     }
-    const std::unordered_map<std::string, json>& getScenes() const noexcept {
+    const std::unordered_map<std::string, json>& getScenes() const {
       return m_scenes;
     }
 
-    const std::unordered_map<std::string, json>&
-    getNormalEntities() const noexcept {
+    const std::unordered_map<std::string, json>& getNormalEntities() const {
       return m_normalEntities;
     }
-    const std::unordered_map<std::string, json>&
-    getLightEntities() const noexcept {
+    const std::unordered_map<std::string, json>& getLightEntities() const {
       return m_lightEntities;
     }
-    const std::unordered_map<std::string, json>&
-    getCameraEntities() const noexcept {
+    const std::unordered_map<std::string, json>& getCameraEntities() const {
       return m_cameraEntities;
     }
-    const std::unordered_map<std::string, json>&
-    getSystemEntities() const noexcept {
+    const std::unordered_map<std::string, json>& getSystemEntities() const {
       return m_systemEntities;
     }
-    const std::unordered_map<std::string, json>&
-    getFBOEntities() const noexcept {
+    const std::unordered_map<std::string, json>& getFBOEntities() const {
       return m_fboEntities;
     }
 

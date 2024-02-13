@@ -19,7 +19,7 @@ class SceneManager {
     bool containsSystem(std::string_view name);
     void clearSystems();
     void onUpdate(const Time& ts);
-    entt::registry& getRegistry() noexcept;
+    entt::registry& getRegistry();
     entt::entity getEntity(std::string_view name);
     entt::entity getEntity(UUID& uuid);
     const std::vector<std::string>& getNamedSystems();

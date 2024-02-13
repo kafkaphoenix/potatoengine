@@ -14,8 +14,8 @@ class WindowResizeEvent : public Event {
   public:
     WindowResizeEvent(uint32_t w, uint32_t h) : m_width(w), m_height(h) {}
 
-    uint32_t getWidth() const noexcept { return m_width; }
-    uint32_t getHeight() const noexcept { return m_height; }
+    uint32_t getWidth() const { return m_width; }
+    uint32_t getHeight() const { return m_height; }
 
     EVENT_CLASS_TYPE(WindowResize)
     EVENT_CLASS_CATEGORY(EventCategoryWindow)
@@ -58,8 +58,8 @@ class WindowMovedEvent : public Event {
   public:
     WindowMovedEvent(int x, int y) : m_x(x), m_y(y) {}
 
-    int getX() const noexcept { return m_x; }
-    int getY() const noexcept { return m_y; }
+    int getX() const { return m_x; }
+    int getY() const { return m_y; }
 
     EVENT_CLASS_TYPE(WindowMoved)
     EVENT_CLASS_CATEGORY(EventCategoryWindow)

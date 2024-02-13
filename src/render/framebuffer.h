@@ -22,14 +22,14 @@ class FBO {
     void clear(const float color[4], const float depth);
 
     void resize(uint32_t width, uint32_t height);
-    const std::unique_ptr<assets::Texture>& getColorTexture() const noexcept {
+    const std::unique_ptr<assets::Texture>& getColorTexture() const {
       return m_colorTexture;
     }
-    const std::unique_ptr<assets::Texture>& getDepthTexture() const noexcept {
+    const std::unique_ptr<assets::Texture>& getDepthTexture() const {
       return m_depthTexture;
     }
     uint32_t getBufferID() const;
-    std::string_view getBufferType() const noexcept;
+    std::string_view getBufferType() const;
     const std::map<std::string, std::string, NumericComparator>& getInfo();
 
     static std::unique_ptr<FBO> Create(uint32_t width, uint32_t height,

@@ -38,25 +38,23 @@ enum EventCategory {
 };
 
 #define EVENT_CLASS_TYPE(type)                                                 \
-  static EventType GetStaticType() noexcept { return EventType::type; }        \
-  virtual EventType getEventType() const noexcept override {                   \
-    return GetStaticType();                                                    \
-  }                                                                            \
-  virtual const char* getName() const noexcept override { return #type; }
+  static EventType GetStaticType() { return EventType::type; }                 \
+  virtual EventType getEventType() const override { return GetStaticType(); }  \
+  virtual const char* getName() const override { return #type; }
 
 #define EVENT_CLASS_CATEGORY(category)                                         \
-  virtual int getCategoryFlags() const noexcept override { return category; }
+  virtual int getCategoryFlags() const override { return category; }
 
 class Event {
   public:
     virtual ~Event() = default;
     bool isHandled{}; // cannnot be returned by a method
 
-    virtual EventType getEventType() const noexcept = 0;
-    virtual const char* getName() const noexcept = 0;
-    virtual int getCategoryFlags() const noexcept = 0;
+    virtual EventType getEventType() const = 0;
+    virtual const char* getName() const = 0;
+    virtual int getCategoryFlags() const = 0;
 
-    bool isInCategory(EventCategory category) const noexcept {
+    bool isInCategory(EventCategory category) const {
       return getCategoryFlags() & category;
     }
 };

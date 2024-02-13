@@ -50,18 +50,16 @@ class Application {
       return m_states_manager;
     }
 
-    void close() noexcept { m_running = false; }
-    void minimize(bool minimize) noexcept { m_minimized = minimize; }
-    void togglePauseGame(bool pause) noexcept;
-    void setRestoreGamePaused(bool restore) noexcept {
-      m_restoreGamePaused = restore;
-    }
-    void debug(bool debugging) noexcept { m_debugging = debugging; }
+    void close() { m_running = false; }
+    void minimize(bool minimize) { m_minimized = minimize; }
+    void togglePauseGame(bool pause);
+    void setRestoreGamePaused(bool restore) { m_restoreGamePaused = restore; }
+    void debug(bool debugging) { m_debugging = debugging; }
 
-    bool isPaused() const noexcept { return m_minimized; }
-    bool isGamePaused() const noexcept { return m_gamePaused; }
-    bool isRestoreGamePaused() const noexcept { return m_restoreGamePaused; }
-    bool isDebugging() const noexcept { return m_debugging; }
+    bool isPaused() const { return m_minimized; }
+    bool isGamePaused() const { return m_gamePaused; }
+    bool isRestoreGamePaused() const { return m_restoreGamePaused; }
+    bool isDebugging() const { return m_debugging; }
 
     static Application& Get() { return *s_instance; }
 

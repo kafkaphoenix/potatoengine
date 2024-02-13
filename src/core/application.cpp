@@ -37,7 +37,7 @@ void Application::onEvent(events::Event& e) {
   m_states_manager->getCurrentState()->onEvent(e);
 }
 
-void Application::togglePauseGame(bool pause) noexcept {
+void Application::togglePauseGame(bool pause) {
   if (pause and not m_gamePaused) {
     m_gamePaused = true;
   } else if (not pause and m_gamePaused) {

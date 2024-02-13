@@ -20,8 +20,8 @@ class State {
     virtual void onImguiUpdate() {}
     virtual void onEvent(events::Event&) {}
 
-    std::string_view getName() const noexcept { return m_name; }
-    const std::unique_ptr<LayersManager>& getLayersManager() const noexcept {
+    std::string_view getName() const { return m_name; }
+    const std::unique_ptr<LayersManager>& getLayersManager() const {
       return m_layersManager;
     }
     void clearLayers() { m_layersManager->clear(); }

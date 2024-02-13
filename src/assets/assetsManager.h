@@ -14,7 +14,8 @@ class AssetsManager {
       auto& asset_map = m_assets[type.data()];
       ENGINE_ASSERT(not asset_map.contains(id.data()),
                     "Asset {} already exists for type {}!", id, type);
-      asset_map.emplace(id, std::make_shared<Type>(std::forward<Args>(args)...));
+      asset_map.emplace(id,
+                        std::make_shared<Type>(std::forward<Args>(args)...));
       m_dirty = true;
     }
 
@@ -25,8 +26,7 @@ class AssetsManager {
       return asset_map.contains(id.data());
     }
 
-    template <typename Type>
-    std::shared_ptr<Type> get(std::string_view id) {
+    template <typename Type> std::shared_ptr<Type> get(std::string_view id) {
       std::string_view type = typeid(Type).name();
       type = type.substr(type.find_last_of(':') + 1);
       ENGINE_ASSERT(contains<Type>(id), "Asset {} not found for type {}!", id,
@@ -48,10 +48,11 @@ class AssetsManager {
 
       m_dirty = true;
       ENGINE_TRACE("Reloaded asset {}", id);
-      return std::static_pointer_cast<Type>(maybeAsset); // I know the type is correct
+      return std::static_pointer_cast<Type>(
+        maybeAsset); // I know the type is correct
     }
 
-    void clear() noexcept {
+    void clear() {
       m_assets.clear();
       m_metrics.clear();
       m_dirty = false;
@@ -61,8 +62,9 @@ class AssetsManager {
       return std::make_unique<assets::AssetsManager>();
     }
 
-    const std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<Asset>>>&
-    getAssets() const noexcept {
+    const std::unordered_map<
+      std::string, std::unordered_map<std::string, std::shared_ptr<Asset>>>&
+    getAssets() const {
       return m_assets;
     }
 
@@ -81,7 +83,8 @@ class AssetsManager {
     }
 
   private:
-    std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<Asset>>>
+    std::unordered_map<std::string,
+                       std::unordered_map<std::string, std::shared_ptr<Asset>>>
       m_assets;
     std::map<std::string, std::string, NumericComparator> m_metrics;
     bool m_dirty{};

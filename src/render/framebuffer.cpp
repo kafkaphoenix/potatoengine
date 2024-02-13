@@ -47,15 +47,16 @@ FBO::~FBO() {
 }
 
 void FBO::attachTexture() {
-  m_colorTexture = assets::Texture::Create(m_width, m_height, GL_RGBA8, assets::Texture::WRAP);
+  m_colorTexture =
+    assets::Texture::Create(m_width, m_height, GL_RGBA8, assets::Texture::WRAP);
   glNamedFramebufferTexture(m_id, GL_COLOR_ATTACHMENT0, m_colorTexture->getID(),
                             0);
 }
 
 void FBO::attachDepthTexture() {
   // slower than renderbuffer but can be sampled in shaders
-  m_depthTexture = assets::Texture::Create(m_width, m_height, GL_DEPTH_COMPONENT24,
-                                   assets::Texture::DONT_WRAP);
+  m_depthTexture = assets::Texture::Create(
+    m_width, m_height, GL_DEPTH_COMPONENT24, assets::Texture::DONT_WRAP);
   glNamedFramebufferTexture(m_id, GL_DEPTH_ATTACHMENT, m_depthTexture->getID(),
                             0);
 }
@@ -99,7 +100,7 @@ uint32_t FBO::getBufferID() const {
   }
 }
 
-std::string_view FBO::getBufferType() const noexcept {
+std::string_view FBO::getBufferType() const {
   if (m_depthBufferType == DEPTH_TEXTURE) {
     return "Depth Texture";
   } else if (m_depthBufferType == DEPTH_RENDERBUFFER) {
@@ -159,7 +160,8 @@ void FBO::unbind() {
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     render_manager->onWindowResize(mode->width, mode->height);
   } else {
-    render_manager->onWindowResize(settings_manager->windowWidth, settings_manager->windowHeight);
+    render_manager->onWindowResize(settings_manager->windowWidth,
+                                   settings_manager->windowHeight);
   }
 }
 

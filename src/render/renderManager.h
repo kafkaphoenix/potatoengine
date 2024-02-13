@@ -16,7 +16,7 @@ class RenderManager {
   public:
     void init() const;
     void shutdown();
-    void  reorder() { m_shouldReorder = true; }
+    void reorder() { m_shouldReorder = true; }
     bool shouldReorder() const { return m_shouldReorder; }
 
     void onWindowResize(uint32_t w, uint32_t h) const;
@@ -32,11 +32,11 @@ class RenderManager {
                         uint32_t height, uint32_t bufferType);
     void deleteFramebuffer(std::string_view framebuffer);
     const std::unordered_map<std::string, std::unique_ptr<ShaderProgram>>&
-    getShaderPrograms() const noexcept {
+    getShaderPrograms() const {
       return m_shaderPrograms;
     }
     const std::unordered_map<std::string, std::unique_ptr<FBO>>&
-    getFramebuffers() const noexcept {
+    getFramebuffers() const {
       return m_framebuffers;
     }
     const std::unique_ptr<ShaderProgram>&
