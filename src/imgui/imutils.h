@@ -4,7 +4,8 @@
 
 #include "pch.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
+
 inline void helpMark(std::string_view helpText) {
   ImGui::TextDisabled("(?)");
   if (ImGui::IsItemHovered()) {

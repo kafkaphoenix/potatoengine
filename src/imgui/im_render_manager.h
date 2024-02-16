@@ -5,10 +5,10 @@
 #include "core/settingsManager.h"
 #include "pch.h"
 #include "render/renderManager.h"
-#include "ui/imutils.h"
+#include "imgui/imutils.h"
 #include "utils/mapJsonSerializer.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 std::string selectedRenderManagerTabKey;
 std::string selectedRenderManagerTabType;

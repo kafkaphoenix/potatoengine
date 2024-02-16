@@ -4,9 +4,9 @@
 
 #include "core/logManager.h"
 #include "pch.h"
-#include "ui/imguiLogSink.h"
+#include "imgui/imguiLogSink.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 bool show_tool_logger = false;
 

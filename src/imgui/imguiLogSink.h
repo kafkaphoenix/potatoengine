@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace potatoengine::ui {
+namespace potatoengine {
 class ImGuiLogSink : public spdlog::sinks::base_sink<std::mutex> {
   public:
     void Draw(bool* show_tool_logger);

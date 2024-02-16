@@ -8,9 +8,9 @@
 #include "core/settingsManager.h"
 #include "pch.h"
 #include "render/renderManager.h"
-#include "ui/imutils.h"
+#include "imgui/imutils.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 std::string selectedSettingsManagerTabKey;
 

@@ -6,13 +6,13 @@
 #include "pch.h"
 #include "scene/sceneManager.h"
 #include "core/settingsManager.h"
-#include "ui/imutils.h"
+#include "imgui/imutils.h"
 #include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
 
 using namespace entt::literals;
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 std::string selectedSceneManagerTabKey;
 char scene_objects_text_filter[128]{}; // TODO: move to class

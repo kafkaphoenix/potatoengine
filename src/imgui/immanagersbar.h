@@ -8,13 +8,13 @@
 #include "pch.h"
 #include "render/renderManager.h"
 #include "scene/sceneManager.h"
-#include "ui/im_assets_manager.h"
-#include "ui/im_render_manager.h"
-#include "ui/im_scene_manager.h"
-#include "ui/im_settings_manager.h"
-#include "ui/im_states_manager.h"
+#include "imgui/im_assets_manager.h"
+#include "imgui/im_render_manager.h"
+#include "imgui/im_scene_manager.h"
+#include "imgui/im_settings_manager.h"
+#include "imgui/im_states_manager.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 inline void
 drawManagersBar(const std::unique_ptr<assets::AssetsManager>& assets_manager,

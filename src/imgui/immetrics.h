@@ -6,9 +6,9 @@
 #include "pch.h"
 #include "render/renderManager.h"
 #include "scene/sceneManager.h"
-#include "ui/imutils.h"
+#include "imgui/imutils.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 bool show_tool_metrics = false;
 

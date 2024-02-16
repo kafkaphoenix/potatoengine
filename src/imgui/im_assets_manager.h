@@ -8,9 +8,9 @@
 #include "assets/texture.h"
 #include "core/settingsManager.h"
 #include "pch.h"
-#include "ui/imutils.h"
+#include "imgui/imutils.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 std::string selectedAssetManagerTabKey;
 std::string selectedAssetTabType;

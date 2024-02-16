@@ -5,7 +5,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #pragma warning(pop)
 
-#include "ui/imguiLogSink.h"
+#include "imgui/imguiLogSink.h"
 
 namespace potatoengine {
 
@@ -14,7 +14,7 @@ void LogManager::Init() {
   logSinks.reserve(2);
   logSinks.emplace_back(
     std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-  logSinks.emplace_back(std::make_shared<ui::ImGuiLogSink>());
+  logSinks.emplace_back(std::make_shared<ImGuiLogSink>());
 
   logSinks[0]->set_pattern("%^[%T] %n: %v%$");
 

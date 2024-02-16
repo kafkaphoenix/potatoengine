@@ -5,11 +5,11 @@
 #include "core/settingsManager.h"
 #include "core/statesManager.h"
 #include "pch.h"
-#include "ui/imutils.h"
+#include "imgui/imutils.h"
 #include "utils/mapJsonSerializer.h"
 #include "utils/numericComparator.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 char states_text_filter[128]{}; // TODO: move to class
 bool filterStates{};

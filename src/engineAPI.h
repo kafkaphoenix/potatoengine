@@ -14,10 +14,6 @@ namespace engine = potatoengine;
 #include "core/settingsManager.h"
 #include "core/state.h"
 #include "core/time.h"
-#include "ui/imguiLogSink.h"
-
-// ui
-#include "ui/imguiAPI.h"
 
 // scene
 #include "scene/components/camera/cActiveCamera.h"

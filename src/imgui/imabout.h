@@ -2,9 +2,9 @@
 
 #include <imgui.h>
 
-#include "ui/imutils.h"
+#include "imgui/imutils.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 bool show_tool_about = false;
 

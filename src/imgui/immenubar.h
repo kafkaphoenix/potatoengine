@@ -7,11 +7,11 @@
 #include "pch.h"
 #include "render/renderManager.h"
 #include "scene/sceneManager.h"
-#include "ui/imabout.h"
-#include "ui/imlogger.h"
-#include "ui/immetrics.h"
+#include "imgui/imabout.h"
+#include "imgui/imlogger.h"
+#include "imgui/immetrics.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 inline void
 drawMenuBar(const std::unique_ptr<assets::AssetsManager>& assets_manager,

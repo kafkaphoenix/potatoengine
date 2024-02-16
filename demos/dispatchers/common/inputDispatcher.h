@@ -125,14 +125,23 @@ inline bool onKeyPressed(engine::events::KeyPressedEvent& e) {
   if (e.getKeyCode() == engine::Key::F3) {
     if (isDebugging) {
       app.debug(false);
-      app.togglePauseGame(false);
       windows_manager->restoreCursor();
       windows_manager->toggleCameraPositionUpdate(true);
       windows_manager->setLastMousePosition(engine::Input::GetMouseX(),
                                             engine::Input::GetMouseY());
+      if (engine::Application::Get().isRestoreGamePaused()) {
+        engine::Application::Get().togglePauseGame(true);
+        engine::Application::Get().setRestoreGamePaused(false);
+      } else {
+        engine::Application::Get().togglePauseGame(false);
+      }
     } else {
       app.debug(true);
-      app.togglePauseGame(true);
+      if (engine::Application::Get().isGamePaused()) {
+        engine::Application::Get().setRestoreGamePaused(true);
+      } else {
+        engine::Application::Get().togglePauseGame(true);
+      }
       glfwSetCursor(windows_manager->getNativeWindow(), nullptr);
       windows_manager->setCursorMode(engine::CursorMode::Normal, false);
       windows_manager->toggleCameraPositionUpdate(false);

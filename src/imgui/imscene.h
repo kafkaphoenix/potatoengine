@@ -5,7 +5,7 @@
 #include "core/application.h"
 #include "pch.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 inline void renderScene(uint32_t fboTextureID, std::string_view title,
                         glm::vec2 size, glm::vec2 position, bool fitToWindow) {
   const ImGuiViewport* main_viewport = ImGui::GetMainViewport();

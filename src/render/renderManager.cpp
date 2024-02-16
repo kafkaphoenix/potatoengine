@@ -2,7 +2,7 @@
 
 #include "assets/texture.h"
 #include "render/renderAPI.h"
-#include "ui/imscene.h"
+#include "imgui/imscene.h"
 
 namespace potatoengine {
 
@@ -73,7 +73,7 @@ void RenderManager::renderInsideImGui(const std::shared_ptr<VAO>& vao,
                                  glm::vec2 size, glm::vec2 position,
                                  bool fitToWindow) {
   auto& fbo_ = m_framebuffers.at(fbo.data());
-  ui::renderScene(fbo_->getColorTexture()->getID(), title, size, position,
+  renderScene(fbo_->getColorTexture()->getID(), title, size, position,
                   fitToWindow);
 
   m_drawCalls++;

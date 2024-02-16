@@ -1,8 +1,7 @@
 #include "core/application.h"
 
 #include "core/time.h"
-#include "ui/imdebugger.h"
-#include "ui/imguiAPI.h"
+#include "imgui/imguiLayer.h"
 
 namespace potatoengine {
 
@@ -21,16 +20,15 @@ Application::Application(std::unique_ptr<SettingsManager>&& s, CLArgs&& args)
 
   m_render_manager = RenderManager::Create();
   m_render_manager->init();
-  ui::ImGuiAPI::Init(m_windows_manager->getNativeWindow(),
-                     m_settings_manager->openglMajorVersion,
-                     m_settings_manager->openglMinorVersion);
   m_scene_manager = SceneManager::Create();
+  m_imgui_layer = std::make_unique<ImGuiLayer>();
+  m_imgui_layer->onAttach();
 }
 
 Application::~Application() {
   ENGINE_WARN("Deleting application");
   m_render_manager->shutdown();
-  ui::ImGuiAPI::Shutdown();
+  m_imgui_layer->onDetach();
 }
 
 void Application::onEvent(events::Event& e) {
@@ -55,17 +53,14 @@ void Application::run() {
     if (not m_minimized) [[likely]] {
       while (m_accumulator > ts) {
         // to be able to render inside an imgui window
-        ui::ImGuiAPI::NewFrame();
+        m_imgui_layer->begin();
         const auto& current_state = m_states_manager->getCurrentState();
         current_state->onUpdate(ts);
         m_scene_manager->onUpdate(ts);
 
-        if (m_debugging) {
-          ui::drawDebugger(m_settings_manager, m_assets_manager,
-                           m_render_manager, m_scene_manager, m_states_manager);
-        }
+        m_imgui_layer->onImguiUpdate();
         current_state->onImguiUpdate();
-        ui::ImGuiAPI::Render();
+        m_imgui_layer->end();
 
         m_accumulator -= ts;
         if (m_accumulator < 0) {

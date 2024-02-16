@@ -100,8 +100,8 @@ void GameState::onDetach() {
   const auto& asset_manager = app.getAssetsManager();
 
   APP_INFO("Saving settings...");
-  engine::serializers::save_settings(
-    settings_manager, engine::get_default_roaming_path("Demos"));
+  engine::serializers::save_settings(settings_manager,
+                                     engine::get_default_roaming_path("Demos"));
 
   // TODO rethink these 3 methods
   if (settings_manager->activeScene not_eq "Flappy Bird") {

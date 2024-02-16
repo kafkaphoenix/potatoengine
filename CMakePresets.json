@@ -25,14 +25,18 @@
         },
         {
             "name": "release-MSVC",
-            "inherits": ["defaults"],
+            "inherits": [
+                "defaults"
+            ],
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
             "name": "debug-MSVC",
-            "inherits": ["defaults"],
+            "inherits": [
+                "defaults"
+            ],
             "cacheVariables": {
                 "ENABLE_DEBUG": "ON",
                 "ENABLE_CPPCHECK": "ON",
@@ -41,7 +45,9 @@
         },
         {
             "name": "release-clang",
-            "inherits": ["defaults"],
+            "inherits": [
+                "defaults"
+            ],
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/Llvm/x64/bin/clang-cl.exe",
                 "CMAKE_C_COMPILER": "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/Llvm/x64/bin/clang-cl.exe",
@@ -50,7 +56,9 @@
         },
         {
             "name": "debug-clang",
-            "inherits": ["defaults"],
+            "inherits": [
+                "defaults"
+            ],
             "cacheVariables": {
                 "ENABLE_DEBUG": "ON",
                 "ENABLE_CPPCHECK": "ON",

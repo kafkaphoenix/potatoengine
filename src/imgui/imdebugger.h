@@ -9,10 +9,10 @@
 #include "pch.h"
 #include "render/renderManager.h"
 #include "scene/sceneManager.h"
-#include "ui/immanagersbar.h"
-#include "ui/immenubar.h"
+#include "imgui/immanagersbar.h"
+#include "imgui/immenubar.h"
 
-namespace potatoengine::ui {
+namespace potatoengine {
 
 inline void
 drawDebugger(const std::unique_ptr<SettingsManager>& settings_manager,

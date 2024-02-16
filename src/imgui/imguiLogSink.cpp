@@ -1,7 +1,7 @@
-#include "ui/imguiLogSink.h"
+#include "imgui/imguiLogSink.h"
 
 extern template class spdlog::sinks::base_sink<std::mutex>;
-namespace potatoengine::ui {
+namespace potatoengine {
 void ImGuiLogSink::Clear() {
   std::unique_lock<std::shared_timed_mutex> lock(m_recordsMutex);
   m_records.clear();

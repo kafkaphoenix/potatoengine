@@ -1,7 +1,7 @@
 #pragma once
 
 #include "assets/assetsManager.h"
-#include "core/WindowsManager.h"
+#include "core/windowsManager.h"
 #include "core/settingsManager.h"
 #include "core/state.h"
 #include "core/statesManager.h"
@@ -9,6 +9,7 @@
 #include "pch.h"
 #include "render/renderManager.h"
 #include "scene/sceneManager.h"
+#include "imgui/imguiLayer.h"
 
 int main(int argc, char** argv);
 
@@ -70,6 +71,7 @@ class Application {
     std::unique_ptr<SettingsManager> m_settings_manager;
     std::unique_ptr<StatesManager> m_states_manager;
     std::unique_ptr<WindowsManager> m_windows_manager;
+    std::unique_ptr<ImGuiLayer> m_imgui_layer;
 
   private:
     void run();
