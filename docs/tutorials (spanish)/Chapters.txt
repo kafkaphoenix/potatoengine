@@ -1,0 +1,28 @@
+Debugger Videos
+
+1. Inspector
+2. Metrics and Logger
+
+Engine Videos
+
+1. Engine Initialization, Entrypoint, Logger and Application
+2. Settings Manager: Loading and Saving
+3. States Manager and Layers Manager
+4. Windows Manager
+5. Render Manager: Shaders Programs and Framebuffers
+6. ECS, Scene Manager, Scene Factory and Entity Factory
+7. Assets Manager: Interface and Predefined Assets
+8. Engine Workflow, Game Loop
+
+Use Case - Flappy Bird Videos
+
+1. Setting up the environment: Cloning repository, App File and Folder Structure
+2. Prefab and Scene files
+3. Example Menu State: Menu Layers
+4. Example Game State: Game Layers and Overlays
+5. Example Game State: Systems
+
+Extra:
+
+1. Flappy Bird Demo
+2. Other Demos

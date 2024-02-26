@@ -1,6 +1,6 @@
 # potatoengine
 
-C++ OpenGL engine for 3d and 2d game development
+Final project: C++ OpenGL engine for 3d and 2d game development.
 
 ## Engine Features
 
