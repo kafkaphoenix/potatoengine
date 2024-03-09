@@ -1,2 +1,26 @@
+# CMake
 build/
-.vscode
+
+# latex
+*.log
+*.aux
+*.synctex.gz
+*.toc
+*.tex.bak
+*.fdb_latexmk
+*.fls
+*.out
+*.blg
+*.bbl
+*.lof
+*.glo
+*.ist
+*.acn
+*.lol
+*.glsdefs
+*.xdy
+*.lot
+*.acr
+*.alg
+*.glg
+*.gls

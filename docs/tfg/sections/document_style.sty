@@ -1,0 +1,109 @@
+\renewcommand{\familydefault}{\sfdefault} % Sans Serif default
+\usepackage[latin1, utf8]{inputenc} % tildes
+\usepackage[spanish, es-tabla]{babel} % español
+\usepackage[dvipsnames]{xcolor} % more colours
+\usepackage{subfig} % subfigures
+\usepackage{pdfpages} % include pdfs
+
+\author{Javier Aguilera Puerta}
+\title{Motor de juegos 3D/2D en C++ y OpenGL}
+
+% Glossary
+\usepackage[style=long,toc,acronym]{glossaries}
+\loadglsentries{sections/acronyms}
+\makeglossaries
+
+% Images
+\usepackage{graphicx}
+\graphicspath{{img/}}
+
+% Page settings
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{setspace}
+\linespread{1.5}
+\setlength{\parindent}{1cm} % indent
+
+% Index
+\usepackage{makeidx}
+
+% Hyperref
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	urlcolor = {blue},
+	linkcolor = {blue},
+	citecolor = {blue},
+	menucolor = {blue},
+	linkbordercolor = {white},
+	linktoc=all,     % set to all if you want both sections and subsections linked
+	linktocpage,     % Add this if you want links in ToC just in the numbers
+	pdfauthor={Javier Aguilera Puerta},
+	pdftitle={Motor de juegos 3D/2D en C++ y OpenGL},
+	pdfsubject={},
+	pdfkeywords={TFG videojuegos 3D 2D C++ OpenGL GLFW ECS},
+	pdfproducer={Latex with hyperref},
+}
+
+% Bibliography
+\bibliographystyle{bibliography/IEEE_bibliographic_style}
+
+% Code style
+\def\inline{\lstinline[basicstyle=\ttfamily,keywordstyle={}]}
+
+\definecolor{myGray}{RGB}{240,240,240}
+\definecolor{myGreen}{rgb}{0.466,0.674,0.188}
+\definecolor{myPurple}{rgb}{0.627,0.125,0.941}
+\definecolor{myOrange}{rgb}{0.8,0.6,0.4}
+\definecolor{myBrown}{rgb}{0.6,0.4,0.2}
+\definecolor{myBlue}{rgb}{0.2,0.4,0.6}
+\usepackage{listings}
+
+\lstdefinelanguage{Cpp}{
+	comment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	commentstyle={\color{myGreen}\ttfamily},
+	identifierstyle={\color{myBlue}},
+	keywordstyle={\bfseries\color{myPurple}},
+	ndkeywordstyle={\color{myOrange}},
+	sensitive=true,
+	morestring=[b]',
+	morestring=[b]",
+	stringstyle={\color{myBrown}\ttfamily},
+	backgroundcolor = {\color{myGray}},
+}
+	
+\lstset{
+	basicstyle=\scriptsize\sffamily\color{black},
+	frame=single,
+	numbers=left,
+	numbersep=10pt,
+	numberstyle={\tiny\color{gray}},
+	showspaces=false,
+	showstringspaces=false,
+	tabsize=2,
+	language=Cpp,
+	extendedchars=true,
+	captionpos=b, % Posición de la leyenda
+}
+
+\renewcommand{\lstlistingname}{Código} % Cambia nombre por defecto de lst					
+\renewcommand{\lstlistlistingname}{Índice de \lstlistingname s}		
+
+% chapters formatx
+\usepackage{etoolbox}% http://ctan.org/pkg/etoolbox
+\makeatletter
+% --- Patch \chapter
+\patchcmd{\@makechapterhead}{50\p@}{\chapheadtopskip}{}{}% Space from top of page to CHAPTER X
+\patchcmd{\@makechapterhead}{20\p@}{\chapheadsep}{}{}% Space between CHAPTER X and CHAPTER TITLE
+\patchcmd{\@makechapterhead}{40\p@}{\chapheadbelowskip}{}{}% Space between CHAPTER TITLE and text
+% --- Patch \chapter*
+\patchcmd{\@makeschapterhead}{50\p@}{\chapheadtopskip}{}{}% Space from top of page to CHAPTER TITLE
+\patchcmd{\@makeschapterhead}{40\p@}{\chapheadbelowskip}{}{}% Space between CHAPTER TITLE and text
+\makeatother
+% Set new lengths
+\newlength{\chapheadtopskip}\setlength{\chapheadtopskip}{0pt}
+\newlength{\chapheadsep}\setlength{\chapheadsep}{10pt}
+\newlength{\chapheadbelowskip}\setlength{\chapheadbelowskip}{15pt}
+
+% Commands
+\newcommand*\emptyPage{\newpage\null\thispagestyle{empty}\newpage}

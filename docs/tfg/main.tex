@@ -1,0 +1,35 @@
+\documentclass[12pt,twoside]{report}
+\usepackage{sections/document_style}
+
+\begin{document}
+	\includepdf[noautoscale=true, width=\paperwidth]{sections/cover.pdf}
+
+	\pagenumbering{roman}
+	\input{sections/post_cover}
+	\newpage
+	\input{sections/summary.tex}
+	\tableofcontents
+	\listoffigures
+	\emptyPage
+    \listoftables
+	\emptyPage
+	\lstlistoflistings % list of code
+	\emptyPage
+
+	\pagenumbering{arabic}
+	\input{sections/intro}
+	\input{sections/analysis}
+	\input{sections/design}
+	\input{sections/prototype.tex}
+	\input{sections/validation.tex}
+	\input{sections/conclusions.tex}
+
+	\input{sections/glossary}
+	\input{sections/bibliography}
+
+	\input{sections/anex1}
+	\pagenumbering{roman}
+
+	\includepdf[noautoscale=true, width=\paperwidth]{sections/backcover.pdf}
+\end{document}
+
