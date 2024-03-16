@@ -1,3 +1,86 @@
 \chapter*{3. Diseño del Motor}\addcontentsline{toc}{chapter}{3. Diseño del Motor}\label{cap:design}
 
-TODO
+En el análisis hablamos sobre qué era un motor de juegos pasemos ahora a hablar de los diferentes componentes en detalle
+así como decisiones de diseño
+% primero es necesario un trabajo previo para entender en qué consiste 
+% y qué componentes lo forman, para luego profundizar en las diferentes formas en las que podemos implementar los componentes y qué ventajas
+% poseen con respecto a otras. Por ejemplo usar \gls{oo} o \gls{ecs} para la escena. Empezamos por lo tanto definiendo qué es un motor de juegos.
+% TODO quizas añadir algo aqui maybe talk about part of the engine: graphics/render, physics, etc https://www.haroldserrano.com/blog/how-do-i-build-a-game-engine
+
+% structure of parts maybe https://lisyarus.github.io/blog/programming/2023/09/15/so-you-want-to-make-a-game-engine.html#programming
+
+% intro AND PATTERNS (methodology is not pattern is trello prototype agile blabla)
+
+% In my C++ amateur-ish game engine i'm using ECS, Game Loop, Update Method, Singleton, Observer (for Event-Listener system), State, Flyweight (for the Resource Managment classes) and Object Pool (this one is great). Maybe Factory 
+% too when i create a real game with that, but i'm not a big fan of it. Hope it helps in any way.
+
+% patterns
+% flyweight: https://learnopengl.com/Advanced-OpenGL/Instancing https://gameprogrammingpatterns.com/flyweight.html por que pasamos de draw triangels a los otros
+% commander: eventque
+% Encapsulate a request as an object, thereby letting users parameterize clients with different requests, queue or log requests, and support undoable operations.
+% Commands are an object-oriented replacement for callbacks.
+% Some code (the input handler or AI) produces commands and places them in the stream. Other code (the dispatcher or actor itself) consumes commands and invokes them. By sticking that queue in the middle, we’ve decoupled the producer on one end from the consumer on the other.
+% observer example http://gamesarchitecture.com/watch-out-youre-being-observed/
+% api: es un adapter like . interface to an object o facade interface to a subsystem
+% https://www.haroldserrano.com/blog/design-patterns-in-game-engine-development
+
+
+% la pattern de centralized control qeu usa aplicacion o renderer api/command aqui http://gamesarchitecture.com/read-it-like-a-book-centralized-control-part-i/ y repasar que el centralized control se esta haciendo bein probablemente definir en el naming o al menos para el tfg quien es quien application es un controller / manager como renderer o es tmb un observer o eso es window etc explicar inversion control con singleton etc http://gamesarchitecture.com/read-it-like-a-book-what-to-do-when-centralized-control-does-not-work-part-ii/
+
+% usar strategy http://gamesarchitecture.com/painless-way-of-programming-game-modes-and-skills-strategy-pattern/ para delegar cosas en classes y evitar asi singletons usar depdency injection
+
+
+% Application and state are template patterrn
+
+% Asset manager is factory pattern but we use variadic and template metaprogramming to avoid inheritance
+
+
+% logger es un singleton al uso escondido detras de una macro
+
+% application es observer y service locator http://gameprogrammingpatterns.com/service-locator.html con dependency injenctions
+% window, renderer, etc son classes virtuales con sus referencias staticas o punteros scope siendo llamados por create dependiendo de 
+% la platform definido por prepocessor macro al igual que log puede cambiarse a modo debug por macro (no lo puse) 
+% podria quitar el singleton del logger y poner las classes wrapper log en su lugar estaria bien asi los logs no contaminan el codigo
+% la cosa es que no tengo interfaces asi qeu la propia clase devuelve su instancia raro deberia cambiarlo de alguna forma no quiero interfaces realmente pero si delegar la inicializacion a application y acceder al renderer y eso de forma estatica
+
+% Creational patterns ensure that your syste mis written in terms of interfaces, not implementations. Dessign patten book pag 18
+
+
+% application es una clase observer tiene on event, tmb es una clase que hace delegacion (composicion
+
+% el proyecto usa inheritance / eventos 
+% composicion ECS
+% MVC windows 
+% virtual/abstract etc repsar el libro de patrones por el inicio habal de todo eso
+% tmb usa macros, y parameterized types (generics/templates) c++
+
+% repasar app porque es observer pero luego usa event dispatcher mirar los return false
+
+% TODO
+
+% - events and link porque descaoplar eventos
+% - ecs 
+% - managers
+% - cmake https://edw.is/using-cmake/
+
+% states
+
+% https://gameprogrammingpatterns.com/state.html
+
+% renderer
+
+% opengl talk?
+
+% GameStateMachine. Menus, SplashScreen, Overworld, Dungeon, MiniGame etc. Each in it's own class. Switch statements are ugly.
+
+% Kernel Loader. To load/unload resources required by the various states. Similar to Final Fantasy 7 (You can read about it here) http://q-gears.sourceforge.net/gears.pdf
+
+% Event Pub/Sub. Often a part of Entity Component Systems for communication between components or entities. Can be used all over the show. From animations spawning sound effects and particle effects, to player input (Although it's more common to poll in games) to notifying of level changes or game state machine changes.
+
+% Repository Pattern. RPGs use lots of data and need a way to save / load. Similar to accessing a database, except I use the file system and binary (I started with JSON but moved away from it as it was too slow on mobile).
+
+% API Bridge. For scripting language / game engine communication.
+
+% https://austinmorlan.com/posts/entity_component_system/ puedo poner esto como ejemplo de que descarte hacerlo y usar una libreria y mencionar tmb ahi entt
+
+\emptyPage

@@ -7,7 +7,7 @@
 	\pagenumbering{roman}
 	\input{sections/post_cover}
 	\newpage
-	\input{sections/summary.tex}
+	\input{sections/abstract.tex}
 	\tableofcontents
 	\listoffigures
 	\emptyPage
@@ -27,8 +27,9 @@
 	\input{sections/glossary}
 	\input{sections/bibliography}
 
-	\input{sections/anex1}
+	\emptyPage
 	\pagenumbering{roman}
+	\input{sections/annex1}
 
 	\includepdf[noautoscale=true, width=\paperwidth]{sections/backcover.pdf}
 \end{document}

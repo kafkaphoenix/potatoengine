@@ -1,3 +1,38 @@
 \chapter*{6. Conclusiones y Líneas Futuras}\addcontentsline{toc}{chapter}{6. Conclusiones y Líneas Futuras}\label{cap:conclusions}
 
-TODO Conclusiones del trabajo y lineas futuras mejoras.
+A lo largo de los capítulos, se han explicado las bases para crear un motor de juegos desde cero, así como las decisiones
+de diseño tomadas. No sólo siendo una alternativa real y gratuita, sino también código abierto permitiendo así a los usuarios
+expandirlo según sus necesidades.
+
+La solución planteada abstrae la complejidad de los diversos componentes de un motor de juegos, además de ofrecer un 
+entorno completo acompañado de herramientas para analizar errores, logs y métricas.
+
+El proyecto ha logrado por tanto los objetivos planteados, sirviendo su función de creación de videojuegos, pero también
+acompañado por diagramas y vídeos didácticos, así como ejemplos de caso de uso, permitiendo una entrada al mundo de
+creación de videojuegos en sólo unas pocas líneas de código.
+
+La demostración del juego de plataformas en \gls{2d-es} sirve como una plantilla para saber dónde empezar y entender todas las 
+funcionalidades que ofrece el motor.
+
+Como líneas futuras para el proyecto, el motor podría ser expandido para incluir las siguientes mejoras:
+
+\begin{itemize}
+	\item \textbf{Importar el proyecto como librería auto-instalable}: La forma de trabajar con el motor actualmente
+	requiere descargarlo como parte del proyecto que los usuarios quieran hacer para construir el ejecutable, al exportar
+    el motor como librería podría ser añadido automáticamente a la hora de generar el ejecutable del proyecto del usuario,
+    reduciendo el número de ficheros aunque esto también limitaría la opción de modificar el motor si fuera necesario.
+    \item \textbf{Más plantillas}: Se podría añadir otra plantilla demostrando un juego de tipo \gls{3d-es}. También
+    podría expandirse la actual introduciendo \gls{ia} de enemigos, más niveles o menú de opciones.
+    \item \textbf{Editor}: Una nueva herramienta que permitiría a los usuarios crear el juego de forma visual e interactiva,
+    en lugar de forma programática.
+    \item \textbf{Mejorar herramienta de Análisis}: Una utilidad para consultar el rendimiento de la aplicación (Profiler)
+    permitiría a los usuarios encontrar los cuellos de botella en sus aplicaciones, facilitando la optimización de código
+    y el uso eficiente de la memoria, la CPU y la GPU.
+    \item \textbf{Lenguaje de Scripting}: En la actualidad, los principales motores comerciales permiten usar lenguajes 
+    de programación para scripting, siendo los más populares Lua y Python. Estos lenguajes de programación no requieren
+    de compilación al ser interpretados permitiendo de una forma sencilla iterar sobre el prototipo, además suelen
+    ser lenguajes más accesibles para los usuarios.
+    \item \textbf{Serialización}: Actualmente no es posible guardar un juego, sería una mejora, ya que
+    los usuarios podrían guardar el estado de la escena y sus entidades.
+
+\end{itemize}

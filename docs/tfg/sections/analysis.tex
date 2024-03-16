@@ -1,11 +1,73 @@
 \chapter*{2. Análisis del trabajo relacionado}\addcontentsline{toc}{chapter}{2. Análisis del trabajo relacionado}\label{cap:analysis}
 
-TODO quizas añadir algo aqui
+Antes de poder hablar sobre el desarrollo de un motor de juegos, se debe entender qué es un motor y analizar qué ofrecen los principales
+motores que se vieron en la \figurename~\ref{engine_distribution}. 
 
-\section*{2.1. Estudio del arte}\addcontentsline{toc}{section}{2.1. Estudio del arte}\label{sec:art}
+\section*{2.1. ¿Qué es un motor de juegos?}\addcontentsline{toc}{section}{2.1. ¿Qué es un motor de juegos?}\label{sec:game-engine}
 
-TODO
+Un motor de juegos se compone de diferentes piezas, pero se pueden ver las principales en la \figurename~\ref{engine_components}.
 
-\section*{2.2. Tecnologías a utilizar}\addcontentsline{toc}{section}{2.2. Tecnologías a utilizar}\label{sec:technologies}
+\begin{figure}[h!]
+    \centering
+    \smartdiagram[constellation diagram]{Motor, Motor Matemático, Motor Gráfico, Motor de Físicas, Motor de Entidades}
+    \caption{Componentes de un motor}
+    \label{engine_components}
+\end{figure}
 
-TODO
+Lo primero que se necesita para poder crear un juego es crear una ventana donde se pueda \textit{visualizar la escena}, 
+de esto se encargará el \textbf{motor gráfico}. Esta escena tendrá elementos que se llamarán \textit{entidades} como puede ser el jugador,
+los árboles o los enemigos, de esto se encargará el \textbf{motor de entidades}. Seguidamente esas entidades \textit{reaccionarán al
+entorno y entre ellas} a través del \textbf{motor de físicas}. Y por último estos motores necesitarán hacer uso del \textbf{motor matemático}
+para realizar las diferentes \textit{operaciones algebraicas} que ello requiere.
+
+\newpage
+
+\section*{2.2. Conclusiones del análisis y tecnologías empleadas}\addcontentsline{toc}{section}{2.2. Conclusiones del análisis y tecnologías empleadas}\label{sec:technologies}
+
+Se pueden observar en la \tablename~\ref{tab:game-engines-characteristics} las conclusiones de analizar y comparar las tres opciones más populares de motores en la actualidad Unity\cite{unity}, Unreal\cite{unreal} y Game Maker\cite{gamemaker} \footnote{Fuente: \textit{https://www.pubnub.com/blog/comparing-game-engines-unity-unreal-corona-gamemaker}}, 
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{@{}|l|
+    >{\columncolor[HTML]{DCFF99}}c |
+    >{\columncolor[HTML]{DCFF99}}c |
+    >{\columncolor[HTML]{DCFF99}}c |@{}}
+    \toprule
+     & \multicolumn{1}{l|}{\cellcolor[HTML]{FFFFC7}Unity} & \multicolumn{1}{l|}{\cellcolor[HTML]{FFFFC7}Unreal} & \multicolumn{1}{r|}{\cellcolor[HTML]{FFFFC7}Game Maker} \\ \midrule
+    \cellcolor[HTML]{FFFFC7}Multi-plataforma         & Sí & Sí & Sí                         \\ \midrule
+    \cellcolor[HTML]{FFFFC7}Interfaz Interactiva     & Sí & Sí & Sí                         \\ \midrule
+    \cellcolor[HTML]{FFFFC7}Documentación            & Sí & Sí & Sí                         \\ \midrule
+    \cellcolor[HTML]{FFFFC7}Plantillas               & Sí & Sí & Sí                         \\ \midrule
+    \cellcolor[HTML]{FFFFC7}Juegos 2D                & Sí & Sí & Sí                         \\ \midrule
+    \cellcolor[HTML]{FFFFC7}Juegos 3D                & Sí & Sí & \cellcolor[HTML]{FD6864}No \\ \midrule
+    \cellcolor[HTML]{FFFFC7}Herramientas de Análisis & Sí & Sí & Sí                         \\ \bottomrule
+    \end{tabular}
+    \caption{Principales características de los motores analizados}
+    \label{tab:game-engines-characteristics}
+\end{table}
+
+Reuniendo toda la información previa, se tiene una idea más clara de lo que esperaría un usuario de un motor:
+\begin{itemize}
+    \item Simple de usar.
+    \item Extensa Documentación.
+    \item Plantillas para una idea inicial del uso del motor.
+    \item Herramientas de análisis para mejorar el rendimiento, ver logs e inspeccionar elementos.
+    \item Opción de exportar a diferentes plataformas.
+    \item Opción de crear juegos tanto en \gls{2d-es} como en \gls{3d-es}.
+\end{itemize}
+
+En consecuencia, este proyecto se ha desarrollado usando el lenguaje \textit{C++}, estándar en el desarrollo de
+videojuegos por su eficiencia, junto a cmake\cite{cmake} que permite la compilación multiplataforma del proyecto.
+Además las siguientes librerías se han usado para cubrir las necesidades del motor:
+\begin{itemize}
+    \item GLFW\cite{glfw} y GLAD\cite{glad}: Librerías para creación de ventanas y gráficos de alto rendimiento usando OpenGL\cite{opengl}.
+    \item EnTT\cite{entt}: Librería de entidades.
+    \item GLM\cite{glm}: Librería de matemáticas.
+    \item ImGui\cite{imgui}: Librería para crear la interfaz y menús de la herramienta de análisis.
+    \item nlohmann\_json\cite{nlohmann_json}: Carga de plantillas de tipo JSON, para definir escenas y entidades.
+    \item stb\cite{stb}: Carga de imágenes.
+    \item Assimp\cite{assimp}: Carga de modelos.
+    \item spdlog\cite{spdlog}: Logs de la aplicación.
+\end{itemize}
+
+\emptyPage

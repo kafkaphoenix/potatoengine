@@ -24,3 +24,16 @@ build/
 *.alg
 *.glg
 *.gls
+
+# latex svg
+svg-inkscape
+*svg-raw.pdf
+*svg-tex.pdf
+*svg-tex.pdf_tex
+
+# latex-wordcount
+._wordcount_selection.tex
+
+# ltex grammar/spell checker
+ltex.dictionary.es.txt
+ltex.disabledRules.es.txt
