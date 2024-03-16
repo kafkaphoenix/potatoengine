@@ -4,6 +4,13 @@
 \usepackage[dvipsnames]{xcolor} % more colours
 \usepackage{subfig} % subfigures
 \usepackage{pdfpages} % include pdfs
+\usepackage{enumitem} % enums
+\usepackage{libraries/pie_charts} % pie charts
+\usepackage{smartdiagram} % circular diagrams
+\smartdiagramset{
+    text width=2.5cm,
+	satellite text width=2.5cm,
+}
 
 \author{Javier Aguilera Puerta}
 \title{Motor de juegos 3D/2D en C++ y OpenGL}
@@ -15,7 +22,16 @@
 
 % Images
 \usepackage{graphicx}
-\graphicspath{{img/}}
+\graphicspath{{./img/}{./diagrams/}}
+
+% % SVG
+% \usepackage{svg}
+% \setsvg{inkscapeexe={"C:/Program Files/Inkscape/bin/inkscape.exe"}}
+% \svgpath{{./diagrams/}}
+
+% Tables
+\usepackage{booktabs}
+\usepackage[table,xcdraw]{xcolor}
 
 % Page settings
 \usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
@@ -26,8 +42,8 @@
 % Index
 \usepackage{makeidx}
 
-% Hyperref
-\usepackage{hyperref}
+% Links
+\usepackage{hyperref} % links working when clicking on them
 \hypersetup{
 	colorlinks=true,
 	urlcolor = {blue},
@@ -43,6 +59,7 @@
 	pdfkeywords={TFG videojuegos 3D 2D C++ OpenGL GLFW ECS},
 	pdfproducer={Latex with hyperref},
 }
+\usepackage{footnotebackref} % footnotes keeps this order!
 
 % Bibliography
 \bibliographystyle{bibliography/IEEE_bibliographic_style}
