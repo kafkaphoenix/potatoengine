@@ -1,86 +1,241 @@
 \chapter*{3. Diseño del Motor}\addcontentsline{toc}{chapter}{3. Diseño del Motor}\label{cap:design}
 
-En el análisis hablamos sobre qué era un motor de juegos pasemos ahora a hablar de los diferentes componentes en detalle
-así como decisiones de diseño
-% primero es necesario un trabajo previo para entender en qué consiste 
-% y qué componentes lo forman, para luego profundizar en las diferentes formas en las que podemos implementar los componentes y qué ventajas
-% poseen con respecto a otras. Por ejemplo usar \gls{oo} o \gls{ecs} para la escena. Empezamos por lo tanto definiendo qué es un motor de juegos.
-% TODO quizas añadir algo aqui maybe talk about part of the engine: graphics/render, physics, etc https://www.haroldserrano.com/blog/how-do-i-build-a-game-engine
+En previos capítulos se ha analizado a grandes rasgos qué es un motor de 
+juegos\footnote{Fuente: \url{https://www.haroldserrano.com/blog/how-do-i-build-a-game-engine}}
+y los mínimos requisitos que debería poseer, a continuación se mostrará en detalle el diseño de cada
+componente, así como las decisiones tomadas con sus ventajas y desventajas.
 
-% structure of parts maybe https://lisyarus.github.io/blog/programming/2023/09/15/so-you-want-to-make-a-game-engine.html#programming
+El diseño del motor tiene el objetivo de ser modular, por lo cual el usuario pueda decidir qué partes del mismo usar, 
+pero también cuáles ampliar o reemplazar. También se quiere evitar añadir librerías que no aporten al motor, 
+queriendo que cada librería siempre ofrezca la mejor solución posible para un problema, o si no implementándose desde cero.
+En definitiva, se desea sobre todo la flexibilidad del motor en todo momento.
 
-% intro AND PATTERNS (methodology is not pattern is trello prototype agile blabla)
+Para el diseño se han tomado como referencia otros motores existentes, cursos, blogs y libros\cite{hazel}\cite{master-course}\cite{engine-book}\cite{game-patterns}. Una lista
+exhaustiva puede encontrarse en la bibliografía página \pageref{cap:bibliography}.
 
-% In my C++ amateur-ish game engine i'm using ECS, Game Loop, Update Method, Singleton, Observer (for Event-Listener system), State, Flyweight (for the Resource Managment classes) and Object Pool (this one is great). Maybe Factory 
-% too when i create a real game with that, but i'm not a big fan of it. Hope it helps in any way.
+\section*{3.1. Entrypoint}\addcontentsline{toc}{section}{3.1. Entrypoint}\label{sec:entrypoint}
+La clase aplicación será el punto de entrada o \textit{entrypoint} al motor. El usuario podrá definir, en su clase de inicio, 
+la configuración del motor e invocará los métodos de esta clase para la creación del motor. 
 
-% patterns
-% flyweight: https://learnopengl.com/Advanced-OpenGL/Instancing https://gameprogrammingpatterns.com/flyweight.html por que pasamos de draw triangels a los otros
-% commander: eventque
-% Encapsulate a request as an object, thereby letting users parameterize clients with different requests, queue or log requests, and support undoable operations.
-% Commands are an object-oriented replacement for callbacks.
-% Some code (the input handler or AI) produces commands and places them in the stream. Other code (the dispatcher or actor itself) consumes commands and invokes them. By sticking that queue in the middle, we’ve decoupled the producer on one end from the consumer on the other.
-% observer example http://gamesarchitecture.com/watch-out-youre-being-observed/
-% api: es un adapter like . interface to an object o facade interface to a subsystem
-% https://www.haroldserrano.com/blog/design-patterns-in-game-engine-development
+Esta creación implicará la inicialización de cada módulo y sistema del motor, así como los logs y la carga inicial
+de recursos o \textit{assets}. 
 
+Por último, el motor entrará en el denominado \textit{bucle del juego} hasta su finalización a través de un evento
+de cierre de la aplicación. El \textit{bucle del juego} es un patrón de diseño\cite{game-loop-pattern} que consiste
+en un bucle \textit{while}, dentro de este bucle se procesa si el usuario ha realizado algún input de teclado o ratón,
+resolución de eventos, dibujar o \textit{renderizar} la escena en pantalla y actualizar el estado del juego.
+Puede verse en el siguiente código \ref{lst:game-loop} un ejemplo de un bucle del juego.
 
-% la pattern de centralized control qeu usa aplicacion o renderer api/command aqui http://gamesarchitecture.com/read-it-like-a-book-centralized-control-part-i/ y repasar que el centralized control se esta haciendo bein probablemente definir en el naming o al menos para el tfg quien es quien application es un controller / manager como renderer o es tmb un observer o eso es window etc explicar inversion control con singleton etc http://gamesarchitecture.com/read-it-like-a-book-what-to-do-when-centralized-control-does-not-work-part-ii/
+\lstinputlisting[caption={Bucle del juego}, label={lst:game-loop}, language=C++]{code/game_loop.cpp}
 
-% usar strategy http://gamesarchitecture.com/painless-way-of-programming-game-modes-and-skills-strategy-pattern/ para delegar cosas en classes y evitar asi singletons usar depdency injection
+\section*{3.2. Managers}\addcontentsline{toc}{section}{3.2. Managers}\label{sec:managers}
 
+El acceso a las diferentes partes del motor se ofrecerá a través de \textit{managers}, por ejemplo desde
+la aplicación se podrá llamar al \textit{manager de escena} para crear una entidad sin preocuparse por nada
+de lo que ocurre por debajo. Esta implementación de \textit{managers} sigue el patrón de diseño \textit{Service Locator}\cite{service-locator-pattern}.
 
-% Application and state are template patterrn
+El motor contará con siete \textit{managers}:
+\begin{itemize}
+    \item Logger Manager: Configuración de logs.
+    \item Settings Manager: Configuración general.
+    \item States Manager: Estado de la aplicación.
+    \item Windows Manager: Ventana de la aplicación y eventos.
+    \item Render Manager: Dibujo o renderizado de la escena usando el motor gráfico.
+    \item Scene Manager: Controla el motor de entidades y la escena.
+    \item Assets Manager: Toda operación relacionada con \textit{assets} o recursos.
+\end{itemize}
 
-% Asset manager is factory pattern but we use variadic and template metaprogramming to avoid inheritance
+\section*{3.3. Motor Matemático}\addcontentsline{toc}{section}{3.3. Motor Matemático}\label{sec:math_engine}
 
+El motor matemático es el encargado de realizar todas las operaciones algebraicas necesarias, esto implica operaciones con
+vectores, matrices y quaterniones, los cuales se emplean en:
+\begin{itemize}
+    \item El motor gráfico para cálculos de la cámara del jugador y dibujar la escena.
+    \item El motor de físicas para colisiones entre objetos, gravedad y movimientos.
+    \item El motor de entidades para componentes y sistemas que requieran operaciones algebraicas como puede ser el componente cámara.
+\end{itemize}
+Para la implementación se puede optar por crear las clases necesarias como un módulo o simplemente usar la librería
+\textit{glm}\cite{glm}, la cual está diseñada para ser inter-operable y eficiente con \textit{OpenGL}\cite{opengl} especialmente en el campo gráfico por lo cual
+encuentra gran uso dentro del diseño de motores de juegos.
 
-% logger es un singleton al uso escondido detras de una macro
+\section*{3.4. Motor de Físicas}\addcontentsline{toc}{section}{3.4. Motor de Físicas}\label{sec:physics_engine}
 
-% application es observer y service locator http://gameprogrammingpatterns.com/service-locator.html con dependency injenctions
-% window, renderer, etc son classes virtuales con sus referencias staticas o punteros scope siendo llamados por create dependiendo de 
-% la platform definido por prepocessor macro al igual que log puede cambiarse a modo debug por macro (no lo puse) 
-% podria quitar el singleton del logger y poner las classes wrapper log en su lugar estaria bien asi los logs no contaminan el codigo
-% la cosa es que no tengo interfaces asi qeu la propia clase devuelve su instancia raro deberia cambiarlo de alguna forma no quiero interfaces realmente pero si delegar la inicializacion a application y acceder al renderer y eso de forma estatica
+Para el motor de físicas hay una gran variedad de librerías disponibles, entre ellas se pueden destacar las siguientes:
+\begin{itemize}
+    \item edyn\cite{edyn}: Desarrollado usando el paradigma \glsentryfull{ecs}.
+    \item JoltPhysics\cite{JoltPhysics}: Multi hilo y concurrente se usa tanto para aplicaciones como juegos de \gls{rv}.
+    \item bullet\cite{bullet}: Pensado para ejecutarse en la \glsentryfull{gpu}.
+    \item PhysX\cite{PhysX}: Emula físicas complejas realizado por NVIDIA\cite{NVIDIA}.
+    \item box2D\cite{Box2D}: Uso restringido a juegos \gls{2d-es}.
+\end{itemize}
+La librería \textit{edyn} presenta la ventaja de usar el mismo paradigma y librería que se desea usar en el motor \textit{EnTT}\cite{entt}.
+Por otro lado, \textit{JoltPhysics} ha mostrado una creciente popularidad tras su uso en un juego famoso \textit{Horizon Forbidden West}\cite{horizon}. Mientras
+que \textit{bullet} y \textit{box2D} solían ser las librerías más usadas para \gls{3d-es} y \gls{2d-es} respectivamente, por lo que ofrecen buena documentación
+y comunidad detrás. Por último, \textit{PhysX} es una librería más profesional pero a la vez compleja y con copyright. Estas librerías
+son sólo un ejemplo de la multitud de opciones disponibles de código abierto, pero en general tienen similares funcionalidades
+y rendimiento.
 
-% Creational patterns ensure that your syste mis written in terms of interfaces, not implementations. Dessign patten book pag 18
+Otra opción sería crear una librería propia para la que hay grandes recursos como la trilogía de libros
+\textit{Game Physics in One Weekend}\cite{game-physics-in-one-weekend} o el blog\cite{designing-physics-engine}
+cuyos objetivos son desarrollar un motor de físicas de manera progresiva y didáctica.
 
+Pese a todas estas opciones, al final la decisión tomada es dejarlo de cara al usuario, ya que no hay una solución suficientemente buena
+para desechar las demás y el motor ofrece la flexibilidad de añadir módulos al mismo, por tanto en el capítulo validación página \pageref{cap:validation} se verán físicas en la demo, pero implementaciones de sistemas
+puntuales como puede ser gravedad o colisiones entre objetos.
 
-% application es una clase observer tiene on event, tmb es una clase que hace delegacion (composicion
+\section*{3.5. Motor Gráfico}\addcontentsline{toc}{section}{3.5. Motor Gráfico}\label{sec:graphics_engine}
 
-% el proyecto usa inheritance / eventos 
-% composicion ECS
-% MVC windows 
-% virtual/abstract etc repsar el libro de patrones por el inicio habal de todo eso
-% tmb usa macros, y parameterized types (generics/templates) c++
+El motor gráfico o de renderizado es una de las partes más importantes de un motor de juegos, ya que representa la parte
+que el jugador visualiza. Para mostrar gráficos se necesita una API gráfica, la cual permite interactuar a alto nivel
+con la \gls{gpu}. Inicialmente un consorcio bajo el nombre de \textit{Khronos}\cite{khronos}, que agrupa más de 170 empresas entre ellos creadores de
+tarjetas gráficas, diseñadores de sistemas y compañías de tecnología general como \textit{Mozilla Firefox} y \textit{Google}, diseñaron la primera versión de
+\textit{OpenGL}\cite{opengl} una API gráfica basada en la especificación previamente acordada en 1992, y cada sucesiva versión a su vez se ha basado
+en las nuevas extensiones acordadas por el comité, que cada empresa de tarjetas gráficas puede o no implementar\footnote{Fuente: \url{https://en.wikipedia.org/wiki/OpenGL}}. 
+\textit{OpenGL} por lo tanto ha sido de facto un estándar en la industria para móviles, ordenadores y otros dispositivos hasta 2017 cuando fue deprecado en favor de \textit{Vulkan}\cite{vulkan}.
+Pero al mismo tiempo \textit{Microsoft} decidió crear su propio estándar con \textit{DirectX}\cite{direct11} y posteriormente en 2014 \textit{Apple} anunció el suyo propio \textit{Metal}\cite{metal} aduciendo un
+mayor rendimiento con sus sistemas operativos\footnote{Fuente: \url{https://solhsa.com/oldernews2023.html\#TALE-OF-TWO-GRAPHICS-APIS}}.
 
-% repasar app porque es observer pero luego usa event dispatcher mirar los return false
+Dada esta situación fragmentada, se optará por el estándar abierto de \textit{OpenGL} por ser multiplataforma y presentar una gran
+cantidad de documentación y recursos para su aprendizaje\cite{learn-opengl}\cite{guide-to-modern-opengl}. \textit{Vulkan} pese a ser
+su sucesor es mucho más complejo de usar, ya que se orienta a un nivel más bajo y con más control sobre la tarjeta gráfica\footnote{Fuente: \url{https://alain.xyz/blog/comparison-of-modern-graphics-apis}},
+para un caso básico de renderizar o dibujar un triángulo en pantalla el mismo código ocupa diez veces más\footnote{Fuente: \url{https://solhsa.com/temp/hellotriangle_ogl_dx.png}}.
 
-% TODO
+A su vez, para usar \textit{OpenGL} se necesita un contexto que viene determinado por código específico de la plataforma, así como
+diversas configuraciones, por este motivo se usará la librería \textit{GLFW}\cite{glfw}, que ofrece una API para creación de ventanas,
+contextos y eventos de teclado, pantalla y ratón. Se ha optado por \textit{GLFW} ante su simplicidad, pero cabe mencionar \textit{SDL2}\cite{sdl2}\cite{learn-sdl}
+ampliamente usada en la industria de los videojuegos añadiendo funcionalidades extra como carga de imágenes y sonidos\footnote{Fuente: \url{https://www.khronos.org/opengl/wiki/Related_toolkits_and_APIs}}.
 
-% - events and link porque descaoplar eventos
-% - ecs 
-% - managers
-% - cmake https://edw.is/using-cmake/
+Por último, \textit{OpenGL} usa el lenguaje \gls{glsl}, parecido a \textit{C}, para comunicarse con la \gls{gpu}. Esta lógica se define en ficheros denominados \textit{shaders}\cite{shaders}.
 
-% states
+\section*{3.6. Motor de Entidades}\addcontentsline{toc}{section}{3.6. Motor de Entidades}\label{sec:entities_engine}
 
-% https://gameprogrammingpatterns.com/state.html
+En un motor de juegos tradicional, el motor de entidades no es un motor independiente, ya que forma parte de la implementación de las clases del juego
+para un paradigma de arquitectura \glsentryfull{oo}. Sin embargo, para este motor se ha decidido usar el paradigma de arquitectura de \glsentryfull{ecs} por las ventajas y mejoras en rendimiento que supone,
+las cuales vienen detalladas en el anexo I \textit{Arquitectura Entidad Componente Sistema}, donde se comparan ambos paradigmas.
 
-% renderer
+Para diseñar este motor de entidades se usará la librería \textit{EnTT}\cite{entt}, la cual ofrece gran rendimiento
+a la par que es fácil de usar y con una gran documentación\cite{entt-crash-course}. También es posible unirse a su comunidad, en Discord, donde el autor en persona responde a cualquier duda
+o pregunta. Por ejemplo, esta librería se ha usado recientemente en \textit{Minecraft}\cite{minecraft} para su versión de Windows y móvil
+demostrando su gran versatilidad.
 
-% opengl talk?
+Además, se usará la librería para carga de plantillas JSON \textit{nlohmann\_json}\cite{nlohmann_json}, la cual permitirá
+definir las escenas compuestas por entidades y \textit{assets} o recursos; así como las entidades que usarán los diferentes
+componentes, este uso se verá en más detalle en los capítulos prototipo página \pageref{cap:prototype} y validación página \pageref{cap:validation}.
 
-% GameStateMachine. Menus, SplashScreen, Overworld, Dungeon, MiniGame etc. Each in it's own class. Switch statements are ugly.
+El patrón de diseño \textit{Adapter o Wrapper}\cite{adapter-pattern} será el que permita definir un contrato entre las plantillas JSON
+(escenas, entidades y \textit{assets}) y el resto de la lógica del motor, como puede ser el motor de entidades o la carga de \textit{assets} o recursos.
 
-% Kernel Loader. To load/unload resources required by the various states. Similar to Final Fantasy 7 (You can read about it here) http://q-gears.sourceforge.net/gears.pdf
+Los sistemas se definirán siguiendo la interfaz \textit{system} código \ref{lst:system} con
+los métodos que el usuario podrá definir al implementarlos: la prioridad del sistema con respecto a los 
+otros, así como su inicialización y actualización.
+\lstinputlisting[caption={Interfaz System}, label={lst:system}, language=C++]{code/system.cpp}
 
-% Event Pub/Sub. Often a part of Entity Component Systems for communication between components or entities. Can be used all over the show. From animations spawning sound effects and particle effects, to player input (Although it's more common to poll in games) to notifying of level changes or game state machine changes.
+\section*{3.7. Máquina de Estados}\addcontentsline{toc}{section}{3.7. Máquina de Estados}\label{sec:states-machine}
 
-% Repository Pattern. RPGs use lots of data and need a way to save / load. Similar to accessing a database, except I use the file system and binary (I started with JSON but moved away from it as it was too slow on mobile).
+Una máquina de estado, aplicado a un motor de juegos, consiste en una serie de estados finitos
+como pueden ser el menú, la pantalla de carga o el nivel del juego. Sólo un estado puede estar 
+activo a la vez, y se puede cambiar entre ellos a través de eventos o actualizaciones de la
+lógica\footnote{Fuente: \url{https://www.itemis.com/en/products/itemis-create/documentation/user-guide/overview_what_are_state_machines}}.
+Este concepto de cambiar de estados, o modos del juego, en tiempo de ejecución forma parte del patrón de diseño \textit{Strategy}\cite{strategy-pattern}.
 
-% API Bridge. For scripting language / game engine communication.
+La máquina de estados se diseñará haciendo uso del patrón de diseño \textit{State}\cite{state-pattern},
+definiendo un estado del juego que cambiará dependiendo de su estado interno, este estado interno seguirá el patrón de 
+diseño \textit{Template}\cite{template-pattern}, permitiendo al usuario definir los estados que necesite y recibir en ellos
+las actualizaciones de lógica y eventos, ya que la aplicación se encargará dentro del \textit{bucle del juego} de reunir esos datos
+y mandarlos al estado actual.
 
-% https://austinmorlan.com/posts/entity_component_system/ puedo poner esto como ejemplo de que descarte hacerlo y usar una libreria y mencionar tmb ahi entt
+En un motor de juegos una máquina de estados es esencial, ya que permite separar capas lógicas, así como liberar
+recursos no necesarios. El estado a su vez incluirá una segunda máquina de estados, pero esta vez llamados
+\textit{layers} o capas, los cuales permitirán al usuario refinar la lógica dentro del propio estado. Por ejemplo,
+en el estado menú se pueden distinguir dos capas, la capa de botones para interactuar (botón de inicio, cargar o cerrar el juego)
+y la capa visual (con el título y otros elementos visuales del menú). También permite optimizar a la hora de buscar un elemento,
+por ejemplo al calcular la colisión entre el jugador y los objetos de un nivel, gracias a los \textit{layers} se puede filtrar entre ellas evitando
+iterar inútilmente.
 
-\emptyPage
+A continuación, se muestran la interfaces \textit{state} código \ref{lst:state} y \textit{layer} 
+código \ref{lst:layer} con los métodos que el usuario podrá definir al implementarlos, siendo los tres primeros
+relacionados con el flujo de inicio, salida y actualización, y los dos últimos flujo para la herramienta \textit{debugger}
+(dónde el usuario puede expandir dicha herramienta con lo que necesite) y eventos del motor o la aplicación a los que
+el usuario pueda reaccionar en su código.
+\lstinputlisting[caption={Interfaz State}, label={lst:state}, language=C++]{code/state.cpp}
+\lstinputlisting[caption={Interfaz Layer}, label={lst:layer}, language=C++]{code/layer.cpp}
+
+\section*{3.8. Assets}\addcontentsline{toc}{section}{3.8. Assets}\label{sec:assets}
+
+Los \textit{assets} son aquellos recursos que el motor puede usar en un juego, ya sea en forma de archivos de imágenes, sonidos o las plantillas de escena.
+Se desean tres objetivos:
+\begin{itemize}
+    \item Ofrecer \textit{assets} de uso general o necesarios para el motor.
+    \item Cargar esos \textit{assets} de forma eficiente.
+    \item Ofrecer al usuario la posibilidad de añadir nuevos \textit{assets} sin tener que modificar el código del motor.
+\end{itemize}
+Para el primer punto se ofrecerán los \textit{assets} de tipo general:
+\begin{itemize}
+    \item Textura: Toda imagen 2D, usando la librería \textit{stb}\cite{stb}.
+    \item Modelo: Toda imagen 3D, usando la librería \textit{Assimp}\cite{assimp}.
+\end{itemize}
+Y los \textit{assets} requeridos por el motor:
+\begin{itemize}
+    \item Shader: Archivo \gls{glsl} usados en el motor gráfico.
+    \item Prefab: Archivo JSON para definir las entidades y sus componentes usados en el motor de entidades.
+    \item Escena: Archivo JSON para definir los \textit{assets} usados en ella.
+\end{itemize}
+Para el segundo punto se creará una clase \textit{asset manager} para gestionar los \textit{assets}, funcionará
+como una caché cargándolos al inicio de la aplicación, previamente definidos en el archivo escena, para su uso posterior evitando nuevos tiempos de carga
+o cargar dos veces el mismo recurso. Esta clase sigue el patrón de diseño \textit{Flyweight o Caché}\cite{flyweight-pattern}.
+
+Por último, para el tercer punto se usará el patrón de diseño \textit{Template}\cite{template-pattern}, donde se definirá una interfaz o abstracción de tipo \textit{asset}
+que será implementada por cada recurso: textura, \textit{shader}, etc. Cualquier \textit{asset} definido por el usuario tendrá que implementar esta interfaz, se pueden tomar como referencia los \textit{assets} por defectos definidos en el motor.
+\lstinputlisting[caption={Interfaz Asset}, label={lst:asset}, language=C++]{code/asset.cpp}
+
+\section*{3.9. Configuración}\addcontentsline{toc}{section}{3.9. Configuración}\label{sec:settings}
+
+El motor permitirá su configuración a través de una serie de parámetros definidos en un archivo JSON, como puede ser
+la configuración de la ventana de la aplicación: tamaño, resolución, etc. O la configuración de los logs: fichero de salida,
+nivel de visibilidad, etc. También permitiendo al usuario definir más parámetros de configuración como requiera. Esta carga
+y guardado del archivo de configuración se hará usando la librería \textit{nlohmann\_json}\cite{nlohmann_json}.
+
+\section*{3.10. Logging}\addcontentsline{toc}{section}{3.10. Logging}\label{sec:logging}
+
+El motor ofrecerá un sistema de logs para dar visibilidad sobre el flujo del motor, así como mostrar cualquier error
+o problema que pueda ocurrir en su ejecución y expondrá los métodos al usuario para su propio uso. Se usará la librería \textit{spdlog}\cite{spdlog}
+por su eficiencia, su opción para definir diferentes salidas para los logs como consola o fichero
+y sus opciones para definir diferentes tipos de logs según sea la necesidad: info, debug, error, etc. 
+
+\section*{3.11. Eventos}\addcontentsline{toc}{section}{3.11. Eventos}\label{sec:events_layer}
+
+Un sistema de eventos permite a una aplicación desacoplar código que no tiene relación entre sí,
+evitando de esta manera añadir complejidad extra y que un sistema conozca de otro rompiendo las capas de dominio cuando
+no es necesario. 
+
+Ejemplos de eventos en un motor de juegos pueden ser los eventos de teclado y ratón del usuario, o eventos 
+que pueden ocurrir en la lógica del juego, como el sistema de colisiones registrando que el usuario
+colecciona una moneda y lanzando un evento que el sistema de puntos usará para incrementar la puntuación del usuario,
+evitando de esta manera en el sistema de colisiones esa lógica no relacionada.
+
+El sistema de eventos apropiado en este caso es el de tipo \gls{pub-sub}\cite{event-system}. Por esa razón se definirá 
+una cola de eventos a donde todos los eventos de la aplicación se publicarán. Para recibir los eventos
+se usará el patrón de diseño \textit{Observer}\cite{observer-pattern}, por el cual dada la cola de eventos, se definirán
+funciones \textit{dispatcher} o \textit{callback} para cada evento al que se quiera subscribir y aplicar la lógica deseada, una vez aplicada el evento
+se confirmará como tratado y se borrará.
+
+\section*{3.12. Compilación}\addcontentsline{toc}{section}{3.12. Compilación}\label{sec:compiler}
+
+Este proyecto usa como lenguaje de programación \textit{C++}, por tanto se usará para la compilación del código y sus dependencias la herramienta
+CMake\cite{cmake}. Esta herramienta multiplataforma permite compilar de forma rápida y se ha convertido
+en el de-facto estándar para \textit{C++}. \textit{CMake} pose un pseudo lenguaje para escribir sus archivos, con el cual
+se puede crear el binario del proyecto con las dependencias o librerías que requiera.
+Ejemplos de como usar \textit{CMake} pueden encontrarse en los siguiente links\cite{using-cmake}\cite{cmake-tutorial}.
+
+\section*{3.13. Debugger}\addcontentsline{toc}{section}{3.13. Debugger}\label{sec:debugger}
+
+Para ayudar en el desarrollo de juegos usando el motor, se ofrecerá al usuario una herramienta de
+análisis o debugging. Esta herramienta se abrirá como un menú durante la ejecución de la aplicación y permitirá las siguientes opciones:
+\begin{itemize}
+    \item Consultar estado del motor y configuración de la aplicación.
+    \item Ver estado del juego: \textit{assets} cargados, escena creada, máquina de estado, etc.
+    \item Métricas: RAM y CPU en uso, rendimiento, entidades creadas, etc. 
+    \item Consola de logs con opciones de filtrado.
+\end{itemize}
+Además el usuario podrá expandir o modificar la herramienta según sus necesidades. Para desarrollar esta herramienta
+se usará la librería \textit{ImGui}\cite{imgui} que permite la creación de interfaces y menús de forma sencilla y compacta.

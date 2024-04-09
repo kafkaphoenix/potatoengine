@@ -1,0 +1,21 @@
+{
+    "assets": {
+        "shaders": {
+            "example": {
+                "vexample": "assets/shaders/example.vert",
+                "fexample": "assets/shaders/example.frag"
+            }
+        },
+        "models": {
+            "player": "assets/models/player/player.obj"
+        },
+        "prefabs": {
+            "example_prefab": {
+                "filepath": "assets/prefabs/example_prefab.json",
+                "targeted_prototypes": [
+                    "player"
+                ]
+            }
+        }
+    }
+}

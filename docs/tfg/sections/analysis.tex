@@ -18,13 +18,13 @@ Lo primero que se necesita para poder crear un juego es crear una ventana donde 
 de esto se encargará el \textbf{motor gráfico}. Esta escena tendrá elementos que se llamarán \textit{entidades} como puede ser el jugador,
 los árboles o los enemigos, de esto se encargará el \textbf{motor de entidades}. Seguidamente esas entidades \textit{reaccionarán al
 entorno y entre ellas} a través del \textbf{motor de físicas}. Y por último estos motores necesitarán hacer uso del \textbf{motor matemático}
-para realizar las diferentes \textit{operaciones algebraicas} que ello requiere.
+para realizar las diferentes \textit{operaciones algebraicas} que requieran.
 
 \newpage
 
 \section*{2.2. Conclusiones del análisis y tecnologías empleadas}\addcontentsline{toc}{section}{2.2. Conclusiones del análisis y tecnologías empleadas}\label{sec:technologies}
 
-Se pueden observar en la \tablename~\ref{tab:game-engines-characteristics} las conclusiones de analizar y comparar las tres opciones más populares de motores en la actualidad Unity\cite{unity}, Unreal\cite{unreal} y Game Maker\cite{gamemaker} \footnote{Fuente: \textit{https://www.pubnub.com/blog/comparing-game-engines-unity-unreal-corona-gamemaker}}, 
+Se pueden observar en la \tablename~\ref{tab:game-engines-characteristics} las conclusiones de analizar y comparar las tres opciones más populares de motores en la actualidad Unity\cite{unity}, Unreal\cite{unreal} y Game Maker\cite{gamemaker} \footnote{Fuente: \url{https://www.pubnub.com/blog/comparing-game-engines-unity-unreal-corona-gamemaker}}, 
 
 \begin{table}[htbp]
     \centering
@@ -40,7 +40,7 @@ Se pueden observar en la \tablename~\ref{tab:game-engines-characteristics} las c
     \cellcolor[HTML]{FFFFC7}Plantillas               & Sí & Sí & Sí                         \\ \midrule
     \cellcolor[HTML]{FFFFC7}Juegos 2D                & Sí & Sí & Sí                         \\ \midrule
     \cellcolor[HTML]{FFFFC7}Juegos 3D                & Sí & Sí & \cellcolor[HTML]{FD6864}No \\ \midrule
-    \cellcolor[HTML]{FFFFC7}Herramientas de Análisis & Sí & Sí & Sí                         \\ \bottomrule
+    \cellcolor[HTML]{FFFFC7}Herramientas de Análisis o Debugger & Sí & Sí & Sí                         \\ \bottomrule
     \end{tabular}
     \caption{Principales características de los motores analizados}
     \label{tab:game-engines-characteristics}
@@ -50,23 +50,22 @@ Reuniendo toda la información previa, se tiene una idea más clara de lo que es
 \begin{itemize}
     \item Simple de usar.
     \item Extensa Documentación.
-    \item Plantillas para una idea inicial del uso del motor.
-    \item Herramientas de análisis para mejorar el rendimiento, ver logs e inspeccionar elementos.
+    \item Plantillas para obtener una idea inicial del uso del motor.
+    \item Herramientas de análisis o \textit{debugger} para mejorar el rendimiento, ver logs e inspeccionar elementos.
     \item Opción de exportar a diferentes plataformas.
     \item Opción de crear juegos tanto en \gls{2d-es} como en \gls{3d-es}.
 \end{itemize}
-
 En consecuencia, este proyecto se ha desarrollado usando el lenguaje \textit{C++}, estándar en el desarrollo de
-videojuegos por su eficiencia, junto a cmake\cite{cmake} que permite la compilación multiplataforma del proyecto.
+videojuegos por su eficiencia, junto a \textit{CMake}\cite{cmake} que permite la compilación multiplataforma del proyecto.
 Además las siguientes librerías se han usado para cubrir las necesidades del motor:
 \begin{itemize}
-    \item GLFW\cite{glfw} y GLAD\cite{glad}: Librerías para creación de ventanas y gráficos de alto rendimiento usando OpenGL\cite{opengl}.
+    \item GLFW\cite{glfw} y GLAD\cite{glad}: Librerías para creación de ventanas y gráficos de alto rendimiento usando \textit{OpenGL}\cite{opengl}.
     \item EnTT\cite{entt}: Librería de entidades.
     \item GLM\cite{glm}: Librería de matemáticas.
-    \item ImGui\cite{imgui}: Librería para crear la interfaz y menús de la herramienta de análisis.
+    \item ImGui\cite{imgui}: Librería para crear la interfaz y menús de la herramienta de análisis o \textit{debugger}.
     \item nlohmann\_json\cite{nlohmann_json}: Carga de plantillas de tipo JSON, para definir escenas y entidades.
     \item stb\cite{stb}: Carga de imágenes.
-    \item Assimp\cite{assimp}: Carga de modelos.
+    \item Assimp\cite{assimp}: Carga de modelos \gls{3d-es}.
     \item spdlog\cite{spdlog}: Logs de la aplicación.
 \end{itemize}
 

@@ -1,0 +1,20 @@
+{
+    "creature": {
+        "ctags": ["transform"]
+    },
+    "player": {
+        "inherits": ["creature"],
+        "ctags": ["activeCamera", "activeInput", "camera"],
+        "components": {
+            "body": "player",
+            "input": {
+                "mode": "3D",
+                "translationSpeed": 40,
+                "verticalSpeed": 50
+            },
+            "rigidBody": {
+                "isKinematic": true
+            }
+        }
+    }
+}

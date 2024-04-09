@@ -1,6 +1,13 @@
 # potatoengine
 
-Final project: C++ OpenGL engine for 3d and 2d game development.
+Bachelor’s Final Project: C++ OpenGL engine for 3d and 2d game development
+
+This Bachelor’s Final Project (BFP) serves a dual purpose, firstly to offer a free and open
+source game engine, that allows the users to create two dimensions (2D) or three dimensions
+(3D) games, abstracting them of all the complexity behind it; secondly, from a didactive
+perspective explaining to the users about game development using the game engine for it.
+
+Final Project article in latex, powerpoint, diagrams and video tutorials (in Spanish) can be found in the folder `docs`.
 
 ## Engine Features
 
@@ -11,6 +18,8 @@ Final project: C++ OpenGL engine for 3d and 2d game development.
 - Assets manager: Caching and hot reloading of prefabs, shaders, textures, models and scenes
 - States manager: State machine
 - Settings manager: Persist your settings
+- Logger manager: 3 exits file, console and debugger
+- Backtrace logs when the application crash
 - Debugger (Logger, Metrics, Dynamic settings, assets/entities/scene/states inspector)
 - Event-driven (Mouse/Keyboard/Window/Application)
 - Loading scenes and entity prototypes from json
@@ -69,5 +78,3 @@ $ .\Debug\potatoengine.exe
 - [assimp](https://github.com/assimp/assimp): model loading
 - [spdlog](https://github.com/gabime/spdlog): structured logging
 - [FastNoiseLite](https://github.com/Auburn/FastNoiseLite): noise generation
-- [freetype](https://github.com/freetype/freetype): font rendering
-- [RmlUi](https://github.com/mikke89/RmlUi): ui framework
