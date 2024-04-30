@@ -12,16 +12,16 @@ herramienta de dependencias y compilación de binarios en \textit{C++}.
 
 \subsection*{4.1.1. Entrypoint}\addcontentsline{toc}{section}{4.1.1. Entrypoint}\label{sec:workflow_init_entrypoint}
 El entrypoint es el archivo \textit{main} del motor código \ref{lst:entrypoint} donde se inicializa el gestor de logs
-y se crea la aplicación dado los argumentos de entrada, como se puede ver al inicio del fichero la inicialización de la app es de forma externa, se espera
+y se crea la aplicación dado los argumentos de entrada, como se puede ver al inicio del fichero la inicialización de la aplicación es de forma externa, se espera
 que el usuario cree su archivo aplicación inicial y defina el método \textit{CreateApp} pasando la configuración que sea
 necesaria. Por último después de la ejecución de la aplicación se libera memoria y se hace control de errores tanto del motor
 como de la aplicación del usuario.
 
 \lstinputlisting[caption={Entrypoint}, label={lst:entrypoint}, language=C++]{code/entrypoint.cpp}
-Se puede ver un ejemplo de un archivo app inicial de usuario a continuación código \ref{lst:demo_app}, donde
+Se puede ver un ejemplo de un archivo aplicación de usuario a continuación código \ref{lst:demo_app}, donde
 el usuario procede en el método \textit{CreateApp} a cargar su configuración y puede añadir toda la lógica que necesite
 en ese método o en su implementación de la clase \textit{Application}, así como insertar el estado inicial del juego.
-\lstinputlisting[caption={Demostración archivo app de usuario}, label={lst:demo_app}, language=C++]{code/demo_app.cpp}
+\lstinputlisting[caption={Demostración archivo aplicación de usuario}, label={lst:demo_app}, language=C++]{code/demo_app.cpp}
 
 \subsection*{4.1.2. Logs}\addcontentsline{toc}{section}{4.1.2. Logs}\label{sec:workflow_init_logger}
 
@@ -120,7 +120,7 @@ entre ellos los más comunes para modelos \gls{3d-es} como:
 Un \textit{asset} \textit{shader} representa los archivos en lenguaje \gls{glsl} que se usan para conectar el motor gráfico
 con la tarjeta gráfica \gls{gpu}, se compone de dos ficheros el archivo \textit{vertex} \textit{.vert} y el 
 archivo \textit{fragment} \textit{.frag}. Se recomienda al usuario el siguiente tutorial\cite{shaders-getting-started} para aprender sobre programación gráfica
-y \textit{shaders}\cite{shaders}, pero a grandes rasgos, como se puede ver en los siguientes ejemplos, el archivo \textit{vertex} código \ref{lst:vertex-shader} recibe
+y \textit{shaders}\cite{shaders-getting-started}, pero a grandes rasgos, como se puede ver en los siguientes ejemplos, el archivo \textit{vertex} código \ref{lst:vertex-shader} recibe
 parámetros del motor para calcular lo que se visualiza en la pantalla. Mientras que
 el archivo \textit{fragment} código \ref{lst:fragment-shader} se suele emplear para efectos gráficos, en este ejemplo se calcula el color y la
 transparencia de los objetos en pantalla.
@@ -196,7 +196,7 @@ Principalmente se ofrecen tres métodos:
     \item Creación del framebuffer, usado para efectos gráficos.
     \item Dibujo de la escena en la ventana.
 \end{itemize}
-El \textit{render} usa el código definido en los \textit{asset shaders}\cite{shaders}, a través del programa gráfico,
+El \textit{render} usa el código definido en los \textit{asset shaders}\cite{shaders-getting-started}, a través del programa gráfico,
 para llamar cada iteración del bucle del juego a la tarjeta gráfica, con los datos de las 
 entidades en pantalla, para así crear la escena que el usuario visualizará.
 

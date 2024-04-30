@@ -1,9 +1,8 @@
 \chapter*{3. Diseño del Motor}\addcontentsline{toc}{chapter}{3. Diseño del Motor}\label{cap:design}
 
 En previos capítulos se ha analizado a grandes rasgos qué es un motor de 
-juegos\footnote{Fuente: \url{https://www.haroldserrano.com/blog/how-do-i-build-a-game-engine}}
-y los mínimos requisitos que debería poseer, a continuación se mostrará en detalle el diseño de cada
-componente, así como las decisiones tomadas con sus ventajas y desventajas.
+juegos y los mínimos requisitos que debería poseer, a continuación se mostrará en detalle el
+diseño de cada componente, así como las decisiones tomadas con sus ventajas y desventajas.
 
 El diseño del motor tiene el objetivo de ser modular, por lo cual el usuario pueda decidir qué partes del mismo usar, 
 pero también cuáles ampliar o reemplazar. También se quiere evitar añadir librerías que no aporten al motor, 
@@ -90,22 +89,22 @@ que el jugador visualiza. Para mostrar gráficos se necesita una API gráfica, l
 con la \gls{gpu}. Inicialmente un consorcio bajo el nombre de \textit{Khronos}\cite{khronos}, que agrupa más de 170 empresas entre ellos creadores de
 tarjetas gráficas, diseñadores de sistemas y compañías de tecnología general como \textit{Mozilla Firefox} y \textit{Google}, diseñaron la primera versión de
 \textit{OpenGL}\cite{opengl} una API gráfica basada en la especificación previamente acordada en 1992, y cada sucesiva versión a su vez se ha basado
-en las nuevas extensiones acordadas por el comité, que cada empresa de tarjetas gráficas puede o no implementar\footnote{Fuente: \url{https://en.wikipedia.org/wiki/OpenGL}}. 
+en las nuevas extensiones acordadas por el comité, que cada empresa de tarjetas gráficas puede o no implementar\cite{opengl-wiki}. 
 \textit{OpenGL} por lo tanto ha sido de facto un estándar en la industria para móviles, ordenadores y otros dispositivos hasta 2017 cuando fue deprecado en favor de \textit{Vulkan}\cite{vulkan}.
 Pero al mismo tiempo \textit{Microsoft} decidió crear su propio estándar con \textit{DirectX}\cite{direct11} y posteriormente en 2014 \textit{Apple} anunció el suyo propio \textit{Metal}\cite{metal} aduciendo un
-mayor rendimiento con sus sistemas operativos\footnote{Fuente: \url{https://solhsa.com/oldernews2023.html\#TALE-OF-TWO-GRAPHICS-APIS}}.
+mayor rendimiento con sus sistemas operativos\cite{apis-tale}.
 
 Dada esta situación fragmentada, se optará por el estándar abierto de \textit{OpenGL} por ser multiplataforma y presentar una gran
 cantidad de documentación y recursos para su aprendizaje\cite{learn-opengl}\cite{guide-to-modern-opengl}. \textit{Vulkan} pese a ser
-su sucesor es mucho más complejo de usar, ya que se orienta a un nivel más bajo y con más control sobre la tarjeta gráfica\footnote{Fuente: \url{https://alain.xyz/blog/comparison-of-modern-graphics-apis}},
-para un caso básico de renderizar o dibujar un triángulo en pantalla el mismo código ocupa diez veces más\footnote{Fuente: \url{https://solhsa.com/temp/hellotriangle_ogl_dx.png}}.
+su sucesor es mucho más complejo de usar, ya que se orienta a un nivel más bajo y con más control sobre la tarjeta gráfica\cite{comparing-graphics-apis},
+para un caso básico de renderizar o dibujar un triángulo en pantalla el mismo código ocupa diez veces más\cite{hello-triangle}.
 
 A su vez, para usar \textit{OpenGL} se necesita un contexto que viene determinado por código específico de la plataforma, así como
 diversas configuraciones, por este motivo se usará la librería \textit{GLFW}\cite{glfw}, que ofrece una API para creación de ventanas,
 contextos y eventos de teclado, pantalla y ratón. Se ha optado por \textit{GLFW} ante su simplicidad, pero cabe mencionar \textit{SDL2}\cite{sdl2}\cite{learn-sdl}
-ampliamente usada en la industria de los videojuegos añadiendo funcionalidades extra como carga de imágenes y sonidos\footnote{Fuente: \url{https://www.khronos.org/opengl/wiki/Related_toolkits_and_APIs}}.
+ampliamente usada en la industria de los videojuegos añadiendo funcionalidades extra como carga de imágenes y sonidos\cite{opengl-toolkits}.
 
-Por último, \textit{OpenGL} usa el lenguaje \gls{glsl}, parecido a \textit{C}, para comunicarse con la \gls{gpu}. Esta lógica se define en ficheros denominados \textit{shaders}\cite{shaders}.
+Por último, \textit{OpenGL} usa el lenguaje \gls{glsl}, parecido a \textit{C}, para comunicarse con la \gls{gpu}. Esta lógica se define en ficheros denominados \textit{shaders}\cite{shaders-getting-started}.
 
 \section*{3.6. Motor de Entidades}\addcontentsline{toc}{section}{3.6. Motor de Entidades}\label{sec:entities_engine}
 
@@ -135,7 +134,7 @@ otros, así como su inicialización y actualización.
 Una máquina de estado, aplicado a un motor de juegos, consiste en una serie de estados finitos
 como pueden ser el menú, la pantalla de carga o el nivel del juego. Sólo un estado puede estar 
 activo a la vez, y se puede cambiar entre ellos a través de eventos o actualizaciones de la
-lógica\footnote{Fuente: \url{https://www.itemis.com/en/products/itemis-create/documentation/user-guide/overview_what_are_state_machines}}.
+lógica\cite{what-state-machine}.
 Este concepto de cambiar de estados, o modos del juego, en tiempo de ejecución forma parte del patrón de diseño \textit{Strategy}\cite{strategy-pattern}.
 
 La máquina de estados se diseñará haciendo uso del patrón de diseño \textit{State}\cite{state-pattern},
