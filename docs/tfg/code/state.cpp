@@ -12,7 +12,6 @@ class State {
     virtual void onEvent(events::Event&) {}
 
     std::string_view getName() const { return m_name; }
-
   protected:
     std::string m_name;
     std::unique_ptr<LayersManager> m_layersManager;

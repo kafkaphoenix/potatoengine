@@ -1,13 +1,17 @@
-\chapter*{6. Conclusiones y Líneas Futuras}\addcontentsline{toc}{chapter}{6. Conclusiones y Líneas Futuras}\label{cap:conclusions}
+\chapter*{7. Conclusiones y Líneas Futuras}\addcontentsline{toc}{chapter}{7. Conclusiones y Líneas Futuras}\label{cap:conclusions}
 
-A lo largo de los capítulos, se han explicado las bases para crear un motor de juegos desde cero, así como las decisiones
-de diseño tomadas. No sólo siendo una alternativa real y gratuita, sino también de código abierto permitiendo así a los usuarios
-expandirlo según sus necesidades.
+A lo largo de los capítulos, se han explicado las bases para crear un motor de juegos desde cero, así como
+las decisiones de diseño tomadas. No sólo siendo una alternativa real y gratuita, sino también de código
+abierto usando para ello Github, donde se puede consultar el código\cite{project-repository}, permitiendo así a los 
+usuarios expandirlo según sus necesidades.
 
 La solución planteada abstrae la complejidad de los diversos componentes de un motor de juegos, además de ofrecer un 
 entorno completo acompañado de herramientas para analizar errores, logs y métricas.
 
-El proyecto ha logrado por tanto los objetivos planteados, sirviendo su función de herramienta para la creación de videojuegos, pero también
+El motor se completa con una detallada documentación, en formato vídeo, en la que se explica cómo usarlo, y también
+desarrollando los casos de usos, todo esto acompañado por diagramas. Esta documentación se encuentra en el repositorio de Github\cite{documentation}.
+
+El proyecto ha logrado por tanto los objetivos planteados, sirviendo su función de herramienta totalmente funcional para la creación de videojuegos, pero también
 acompañado por diagramas y vídeos didácticos, así como ejemplos de casos de uso, permitiendo una entrada al mundo de
 la creación de videojuegos en sólo unas pocas líneas de código.
 
@@ -21,20 +25,8 @@ Como líneas futuras para el proyecto, el motor podría ser expandido para inclu
 	requiere descargarlo como parte del proyecto que los usuarios quieran hacer para construir el ejecutable, al exportar
     el motor como librería podría ser añadido automáticamente a la hora de generar el ejecutable del proyecto del usuario,
     reduciendo el número de ficheros, aunque esto también limitaría la opción de modificar el motor si fuera necesario.
-    \item \textbf{Más plantillas}: Se podría añadir otra plantilla demostrando un juego de tipo \gls{3d-es}. También
-    podría expandirse la actual introduciendo \gls{ia} de enemigos, más niveles o menú de opciones.
-    \item \textbf{Editor}: Una nueva herramienta que permitiría a los usuarios crear el juego de forma visual e interactiva,
-    en lugar de forma programática.
-    \item \textbf{Mejorar herramienta Debugger}: Una herramienta para analizar el rendimiento de la aplicación (Profiler)
-    permitiría a los usuarios encontrar los cuellos de botella en sus aplicaciones, facilitando la optimización de código
-    y el uso eficiente de la memoria, la CPU y la \gls{gpu}.
-    \item \textbf{Lenguaje de Scripting}: En la actualidad, los principales motores comerciales permiten usar lenguajes 
-    de programación para scripting, siendo los más populares Lua y Python. Estos lenguajes de programación no requieren
-    de compilación al ser interpretados permitiendo de una forma sencilla iterar sobre el prototipo, además suelen
-    ser lenguajes más accesibles para los usuarios.
-    \item \textbf{Serialización}: Actualmente no es posible guardar un juego, sería una mejora, ya que
-    los usuarios podrían guardar el estado de la escena y sus entidades.
     \item \textbf{Soporte para más APIs gráficas}: Ampliar las opciones disponibles para los usuarios añadiendo soporte
     para \textit{Metal}\cite{metal} y \textit{DirectX}\cite{direct11}. Así como ofrecer \textit{Vulkan}\cite{vulkan}, ya que \textit{OpenGL} fue deprecado en 2017 en 
     favor suyo y ofrece nuevas tecnologías, optimizaciones y facilidades de testeo.
+    \item \textbf{Curso formación juegos 3D}: Crear un curso de formación para la creación de juegos en 3D usando el motor, ofreciendo una plantilla de demostración.
 \end{itemize}

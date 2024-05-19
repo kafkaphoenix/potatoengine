@@ -17,10 +17,12 @@ que el usuario cree su archivo aplicación inicial y defina el método \textit{C
 necesaria. Por último después de la ejecución de la aplicación se libera memoria y se hace control de errores tanto del motor
 como de la aplicación del usuario.
 
+\newpage
 \lstinputlisting[caption={Entrypoint}, label={lst:entrypoint}, language=C++]{code/entrypoint.cpp}
 Se puede ver un ejemplo de un archivo aplicación de usuario a continuación código \ref{lst:demo_app}, donde
 el usuario procede en el método \textit{CreateApp} a cargar su configuración y puede añadir toda la lógica que necesite
 en ese método o en su implementación de la clase \textit{Application}, así como insertar el estado inicial del juego.
+\newpage
 \lstinputlisting[caption={Demostración archivo aplicación de usuario}, label={lst:demo_app}, language=C++]{code/demo_app.cpp}
 
 \subsection*{4.1.2. Logs}\addcontentsline{toc}{section}{4.1.2. Logs}\label{sec:workflow_init_logger}
@@ -125,6 +127,7 @@ parámetros del motor para calcular lo que se visualiza en la pantalla. Mientras
 el archivo \textit{fragment} código \ref{lst:fragment-shader} se suele emplear para efectos gráficos, en este ejemplo se calcula el color y la
 transparencia de los objetos en pantalla.
 \lstinputlisting[caption={Vertex Shader}, label={lst:vertex-shader}, language=C++]{code/example.vert}
+\newpage
 \lstinputlisting[caption={Fragment Shader}, label={lst:fragment-shader}, language=C++]{code/example.frag}
 
 \subsubsection*{4.2.3.4. Prefab}\addcontentsline{toc}{subsection}{4.2.3.4. Prefab}\label{sec:workflow_managers_assets_prefab}
@@ -151,7 +154,7 @@ En el código \ref{lst:example-scene} se muestra un ejemplo:
 El \textit{windows manager} ofrece métodos relacionados con la ventana: desde cambiar la posición, maximizar, minimizar,
 cambiar el icono del cursor, pantalla completa, cambiar resolución, etc. Los eventos de ventana y teclado
 se redireccionan automáticamente a la aplicación. También ofrece un método para lanzar eventos manualmente.
-
+\newpage
 Todos los eventos se mandan luego desde la aplicación a la máquina de estados, donde el usuario puede
 tratarlos. Hay varios tipos de eventos:
 \begin{itemize}
@@ -299,6 +302,7 @@ permite ver los elementos que componen la escena: Prefabs, Sistemas, Prototipos 
     \label{scene_inspector}
 \end{figure}
 
+\newpage
 El panel \textit{render manager} \figurename~\ref{render_inspector} 
 muestra información sobre elementos relacionados con el motor gráfico.
 
@@ -359,5 +363,3 @@ con las siguientes opciones:
     \caption{Herramienta Logger}
     \label{logger_tool}
 \end{figure}
-
-\emptyPage

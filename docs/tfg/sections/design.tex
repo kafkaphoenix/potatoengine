@@ -23,8 +23,9 @@ Por último, el motor entrará en el denominado \textit{bucle del juego} hasta s
 de cierre de la aplicación. El \textit{bucle del juego} es un patrón de diseño\cite{game-loop-pattern} que consiste
 en un bucle \textit{while}, dentro de este bucle se procesa si el usuario ha realizado algún input de teclado o ratón,
 resolución de eventos, dibujar o \textit{renderizar} la escena en pantalla y actualizar el estado del juego.
-Puede verse en el siguiente código \ref{lst:game-loop} un ejemplo de un bucle del juego.
+Puede verse en el código \ref{lst:game-loop} un ejemplo de un bucle del juego.
 
+\newpage
 \lstinputlisting[caption={Bucle del juego}, label={lst:game-loop}, language=C++]{code/game_loop.cpp}
 
 \section*{3.2. Managers}\addcontentsline{toc}{section}{3.2. Managers}\label{sec:managers}
@@ -127,6 +128,7 @@ El patrón de diseño \textit{Adapter o Wrapper}\cite{adapter-pattern} será el 
 Los sistemas se definirán siguiendo la interfaz \textit{system} código \ref{lst:system} con
 los métodos que el usuario podrá definir al implementarlos: la prioridad del sistema con respecto a los 
 otros, así como su inicialización y actualización.
+\newpage
 \lstinputlisting[caption={Interfaz System}, label={lst:system}, language=C++]{code/system.cpp}
 
 \section*{3.7. Máquina de Estados}\addcontentsline{toc}{section}{3.7. Máquina de Estados}\label{sec:states-machine}
@@ -185,6 +187,7 @@ o cargar dos veces el mismo recurso. Esta clase sigue el patrón de diseño \tex
 
 Por último, para el tercer punto se usará el patrón de diseño \textit{Template}\cite{template-pattern}, donde se definirá una interfaz o abstracción de tipo \textit{asset}
 que será implementada por cada recurso: textura, \textit{shader}, etc. Cualquier \textit{asset} definido por el usuario tendrá que implementar esta interfaz, se pueden tomar como referencia los \textit{assets} por defectos definidos en el motor.
+\newpage
 \lstinputlisting[caption={Interfaz Asset}, label={lst:asset}, language=C++]{code/asset.cpp}
 
 \section*{3.9. Configuración}\addcontentsline{toc}{section}{3.9. Configuración}\label{sec:settings}
